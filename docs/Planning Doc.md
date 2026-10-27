@@ -126,13 +126,14 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 
 ### Step 1 — PS2 build target
 
-- [ ] `build/build_ps2.py` (or a `--ps2` mode for `build.py`): ee-gcc + ps2sdk, `-DMGS_PORT`, output
-      ELF; does not touch the matching ninja file
+- [x] `build/build_ps2.py` (compile) and `build/link_ps2.py` (link, ELF and DVD image in `obj_ps2/`): ee-gcc +
+      ps2sdk, `-DMGS_PORT`; does not touch the matching ninja file
 - [x] Header shim: `port/include` shims MGS's `inline_n.h`/`inline_x.h` onto the HAL's GTE (stock PSY-Q 4.4
       headers otherwise)
-- [x] Compile the main executable (219 files) cleanly: `build/build_ps2.py`; dialect fixes under `MGS_PORT`
+- [x] Compile the main executable (168 files; 219 counted the VR and dev-only files by mistake) cleanly: `build/build_ps2.py`; dialect fixes under `MGS_PORT`
       logged in `Running Walkthrough.md`
-- [ ] Link with overlays stubbed out; boot to `main()` in PCSX2
+- [x] Link with overlays stubbed out; boot to `main()` in PCSX2: `mts` and the game task start, the display
+      comes up; `memcard_init` then waits on the stubbed libcard (24 generated stubs, listed by the link)
 
 ### Step 2 — Fixed addresses / shiftability
 

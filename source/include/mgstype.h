@@ -142,7 +142,13 @@ typedef int             BOOL;
 #define STATIC          /* fake keyword for documentation */
 #endif
 
+#ifndef MGS_PORT
 #define SECTION(x)      __attribute__((section(x)))
+#else
+/* The PS2 build keeps no PS1 section layout; uninitialized ones become common symbols (-fcommon),
+ * as several files define the same variable. */
+#define SECTION(x)
+#endif
 #define BSS_SECTION     SECTION(".bss")
 #define SBSS_SECTION    SECTION(".sbss")
 

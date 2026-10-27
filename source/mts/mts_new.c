@@ -9,6 +9,13 @@
 #include "mts_new.h"
 #include "../libsio/isio.h"
 
+#ifndef MGS_PORT
+#define MTS_SYSTEM_TOT ((struct ToT *)0x100) /* the kernel's Table of Tables, at a fixed address */
+#else
+extern struct ToT *Port_PsxToT(void); /* the HAL's thread layer keeps the PS1 kernel's tables */
+#define MTS_SYSTEM_TOT Port_PsxToT()
+#endif
+
 int printf(/* const char *format, ... */);
 int fprintf(/* int stream, const char *format, ... */);
 int cprintf(/* const char *format, ... */);
@@ -179,7 +186,7 @@ static inline void mts_TransferExecutionWithinInterrupt( int task )
     {
         // See Run-Time Library Overview 4.4, chapter 2
         // "System Table Information, Example 1"
-        t = (struct ToT *)0x100;            /* get ToT from the fixed kernel address */
+        t = MTS_SYSTEM_TOT;            /* get ToT from the fixed kernel address */
         h = (struct TCBH *)((t + 1)->head); /* get current TCB from the ToT */
 
         h->entry = mts_tasks_800C0C30[ mts_active_task_800C0DB0 ].tcb;
@@ -193,7 +200,7 @@ static inline struct TCB *mts_GetTcbEntry( char tcb_id )
 
     // See Run-Time Library Overview 4.4, chapter 2
     // "System Table Information, Example 2"
-    t = (struct ToT *)0x100;               /* get ToT from the fixed kernel address */
+    t = MTS_SYSTEM_TOT;               /* get ToT from the fixed kernel address */
     tcb_0 = (struct TCB *)((t + 2)->head); /* get TCB array from the ToT */
 
     return &tcb_0[tcb_id];
@@ -1427,7 +1434,7 @@ int fprintf()
     /* dummy function */
 }
 
-#ifndef DEV_EXE
+#if !defined(DEV_EXE) && !defined(MGS_PORT) // the port prints through the PS2's C library
 // int printf(const char *format, ...);
 int printf()
 {

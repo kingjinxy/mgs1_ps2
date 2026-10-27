@@ -2360,3 +2360,550 @@ Under `MGS_PORT`, `SetSpadStack`/`ResetSpadStack` become no-ops, so the code kee
 
 - tool `Bash`: Start the MGS walkthrough and update the plan
 
+## Claude
+
+The `build_ps2.py` item stays open until the script also links an ELF. I'll update the conversation archive and check what's pending in each repo:
+
+- tool `Bash`: Update the archive and list pending changes
+
+- tool `PushNotification`: 
+
+## Claude
+
+The whole main executable now compiles for the EE: 219 of 219 C files, with the matching PS1 build still exact (80 OK, plus the VR executable). Nothing is committed yet.
+
+**Build script:** [build_ps2.py](build/build_ps2.py) reads the main executable's file list from the linker command file. It compiles with ps2dev's GCC into `obj_ps2/`, so the matching build's `obj/` is untouched. It uses the flags SH1 settled on for decompiled PS1 code, and turns Japanese strings into EUC-JP the same way the PS1 build does.
+
+**GTE macros:** MGS writes its GTE code as raw COP2 inline assembly, which the EE can't run. I moved SH1's macro translator into the HAL and taught it the `cop2` form MGS's headers use. Its output for SH1 is unchanged. Two small shim headers in a new `port/include/` folder apply the translated macros on top of MGS's own headers, so no game header was edited for this. One catch: MGS includes those headers more than once, and the first version of the shim let the second inclusion put the assembly back. Fixed.
+
+**Game source fixes,** all behind `MGS_PORT` so the PS1 build is unchanged:
+- a token-pasting macro old compilers accepted (`mts_assert`)
+- a `break 1030` debug trap the EE assembler can't encode
+- two casts used as assignment targets
+- a static definition after an `extern` declaration
+- strings the game writes into, which are now writable arrays
+- `radar.c`'s two private GTE macros
+- the scratchpad stack switch in `psxdefs.h`, now a no-op: on the EE that address isn't the scratchpad, and moving the stack there was only a speed trick
+
+Each fix is listed in the new [Running Walkthrough.md](docs/Running%20Walkthrough.md).
+
+**Next, linking:** get MGS's `main()` running in PCSX2, with the overlays stubbed out. This needs:
+- an MGS settings file for the HAL,
+- MGS's `main` wired in as the game entry point,
+- a way round the HAL's dependence on SH1's `common.h`, which the Split Plan already lists as a to-do,
+- the PS1 memory addresses the game uses directly; Step 2 handles those properly, but booting may need some of them sooner.
+
+Should I commit before starting on the link? Pending are the MGS changes, the generator move in the HAL, and SH1's wrapper script.
+
+## User
+
+Commit and then wait for the go ahead to start linking
+
+- tool `Bash`: Commit all three repos
+
+## Claude
+
+I committed all three repos, and each working tree is clean:
+
+| Repo | Commit |
+|---|---|
+| HAL | `2b109c4`: GTE macro generator moved here, with support for Nugget's `cop2` form |
+| SH1 | `a4c15789d`: its `gen_gte_inline.py` now calls the HAL's generator |
+| MGS | `d0cc3ed20`: main executable compiles for the EE |
+
+I'll wait for your go-ahead before starting on the link.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>Bash, Edit, PushNotification, Read, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Port the Metal Gear Solid Integral PS1 decomp (`/home/alex/Documents/mgs1_ps2`, branch `ps2-port`) to the PS2, following `docs/Planning Doc.md`.
+   - Share the HAL (the PSY-Q compatibility layer) from the SH1 port in a sibling repo, `~/Documents/psx-to-ps2-HAL`. It will become a GitHub repo later.
+   - Record SH1-affecting changes in the SH1 repo as well, since SH1 work happens in a different Claude conversation.
+   - Commit only when asked. The user has asked for each commit so far.
+   - Decision B: libcd is not emulated further. MGS's `cdbios.c` internals and its movie streaming (`St*`, `CdRead2`) will be replaced under `MGS_PORT` with DVD/HAL block reads. libcd is interim and will be replaced by DVD access functions later.
+   - PocketStation support is planned but low priority: look on GitHub first, otherwise write a custom low-level SIO2 implementation (noted in the plan).
+   - The user will provide the MGS Integral .bin/.cue pairs later. Disc work waits for them.
+   - Latest request: "Commit and then wait for the go ahead to start linking."
+
+2. Key Technical Concepts:
+   - The HAL: weak `HalGame_*` hooks, `hal_game_config.h` per game, `port/` include prefix, `SH_PORT` switches (renames deferred).
+   - PS1 threads on EE kernel threads (`thread_ps2.c`):
+     - `ChangeTh` sleeps with interrupts on, because the EE kernel doesn't keep `EIE` per thread.
+     - `s_InFlight` / `s_InFlightFrom` protect the window between waking the target and sleeping.
+     - `Port_ThreadIsrSwitch` (interrupt) and `Port_ThreadSwitchCheck` (thread, `DI`) share `switch_check(int inInterrupt)`.
+   - The SPU interrupt as MGS's sound clock (98.44 Hz). Path: IOP `sceSdSetSpu2IntrHandler` clears ATTR bit 6 and sends `isceSifSendCmd` 0x10 → EE `SifAddCmdHandler` → delivery thread at priority 20 → game callback, `Port_SpuFlush`, then the thread switch check.
+   - libpress: psyz's `DecDCTvlc` (MPL, vendored) plus `strdec.c`'s MDEC (`StrDec_Macroblock`). `DecDCTout` may come before `DecDCTin`; out callbacks run on a delivery thread.
+   - Bit-exact checking with an R3000 interpreter (`tools/libgte_test/mips.c`): delay slots, load delays, COP2 through the HAL's `gte.c`. It runs the game's own code from `obj/_mgsi.exe` and the overlay `.bin` files, using the linker maps.
+   - EE build of MGS:
+     - ps2dev GCC with `-fexec-charset=EUC-JP` and SH1's flags for decompiled code.
+     - `port/include` shims use `#include_next`.
+     - Translated GTE macro headers come from the HAL's `tools/gen_gte_inline.py`.
+   - Matching build check, run from `build/`: `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py` (80 OK) and with `--variant=vr_exe`.
+   - SH1 regression check:
+     - Build with `SH1_FPS=60 SH1_NO_RECOMP=1 python3 tools/port/port_link.py`, then `make_iso.sh`.
+     - Run 150 s with `pcsx2_run.py --seconds 150 --stall 15`.
+     - Compare `libgpu:` status lines against the baseline log in the scratchpad (`baseline.long.log`).
+     - Expect 50 TLB-miss lines; they are pre-existing.
+
+3. Files and Code Sections:
+   - **HAL repo (latest commit `2b109c4`)**
+     - `src/ps2/thread_ps2.c`:
+       - `OpenTh`/`ChangeTh`/`CloseTh`/`SetConf`, `Port_PsxToT()`, critical sections via `DI`/`EI`, `GetGp`/`GetSp`.
+       - Debug helpers `Port_ThreadDeferred`/`Port_ThreadEeTid`/`Port_ThreadDebugRunning`; test hook `Port_ThreadTestWindow` under `HAL_THREAD_TEST`.
+     - `src/ps2/libetc_ps2.c`: calls `Port_ThreadIsrSwitch()` after the VSync callback.
+     - `src/libgte_rot.c`:
+       - `rsin`, `rcos`, `RotMatrix`, `RotMatrixYXZ`, `RotMatrixX/Y/Z`.
+       - `RotMatrixZYX`, `RotMatrixZYX_gte`, `RotMatrixYXZ_gte`, `RotMatrix_gte`.
+       - `MulRotMatrix0`, `ReadRotMatrix` (returns void).
+     - `src/libgte_sincos.c`: generated by `tools/gen_sincos.py` (round(4096·sin/cos)).
+     - `src/libgpu_prim.c`: `GetTPage`, `SetSemiTrans`, `SetPolyGT4`, `SetSprt`, `MargePrim` (stores the tag with `*(u32*)p1 = 0`), `SetDefDrawEnv`.
+     - `src/libgpu_port.c`: `LoadImage2`, `MoveImage`, `DrawSyncCallback` (returns `u_long`; called at the end of `DrawOTag`), `SetGraphDebug`, `BreakDraw`.
+     - `src/libapi_misc.c`:
+       - PS1 `rand`/`srand`.
+       - No-ops for `SetMem`, `StopCallback`, `_96_init`, `_96_remove`, `ChangeClearPAD`, `StopPAD`, `SysEnqIntRP`, `SysDeqIntRP`, `ChangeClearRCnt`.
+       - `LoadExec` prints and halts; `PClseek` returns -1.
+     - `src/libspu_port.c`:
+       - `SpuSetIRQ`/`SpuSetIRQAddr`/`SpuSetIRQCallback`, `attr_bits()`, noise/pitch-LFO voices, `SpuSetReverbDepth`, `SpuGetAllKeysStatus`, `SpuReserveReverbWorkArea`.
+       - The libspu allocator from psyz: `SpuInitMalloc`/`SpuMalloc`/`SpuFree`/`gc`.
+     - `src/ps2/spu_ps2.c`: status field `irqs`, `irq_init`, `irq_cmd`, `irq_thread`, `Port_SpuIrqCallback`, `Port_SpuIrqCount`, `Port_SpuIopIrqCount`.
+     - `iop/sh1spu/main.c`: `spu2_intr`, send-failure count. Plus its `imports.lst` and `irx_imports.h`.
+     - `src/ps2/libpress_ps2.c`; `src/ps2/psyz_vlc.c` with `src/ps2/psyz/{LICENSE, shim.h, README.md}`; `src/ps2/strdec.c/h` gains `StrDec_Macroblock`.
+     - `src/gte.c`: opcodes 0x00 → RTPS and 0x1A → DCPL; IR0 saturates and is flagged when `mac0 > 0x1000000`.
+     - `tools/`: `thread_test`, `spu_irq_test`, `libpress_test`, `libgte_test` (`check.c`, `check_vlc.c`, `mips.c`, `image_load.h`, `extract.py`, per-overlay images, `make run_all`), `mdec_test` (`check_mdec`, `--dump`), `psyz_tests`, `gen_sincos.py`, `gen_gte_inline.py` (args `src=dst`, supports `cop2`).
+     - `docs/Walkthrough.md`, `docs/Split Plan.md`, `README.md`.
+   - **SH1 repo (branch `hal-split`, latest commit `a4c15789d`)**
+     - `src/port/hal_game.c`, `include/hal_game_config.h`, `include/port/prof_game.h`, `src/port/sentinel_gte.c`.
+     - `tools/port/port_link.py` (`$SH1_HAL`), `ee_compile_check.sh`, the test Makefiles.
+     - `tools/port/gen_gte_inline.py` is now a wrapper around the HAL's generator.
+     - `CLAUDE.md`, `Planning Doc.md`, and `Running Walkthrough.md` entries.
+   - **MGS repo (latest commit `d0cc3ed20`)**
+     - `build/build_ps2.py`:
+       - Parses `linker_command_file.txt` up to `section .rdata`: 219 C files.
+       - Include order: `port/include`, HAL `include`, `source`, `source/include`, `../psyq_sdk/psyq_4.4/include`.
+       - Flags: `-O2 -G0 -std=gnu89 -nostdinc -fno-strict-aliasing -fno-toplevel-reorder -mno-check-zero-division -fno-delete-null-pointer-checks -fno-isolate-erroneous-paths-dereference -fno-aggressive-loop-optimizations -fexec-charset=EUC-JP`, `-Wno-error=...`, `-D_LANGUAGE_C -DLANGUAGE_C -DMGS_PORT -DINTEGRAL`.
+       - Output in `obj_ps2/` (gitignored).
+     - `port/include/inline_n.h` and `inline_x.h`: `#include_next` the game's header, `#undef` the generated header's guard, then include it.
+     - `port/include/gte_from_inline_n.h` (243 macros), `gte_from_inline_x.h` (10), `gte_from_radar.h` (2).
+     - Source fixes under `MGS_PORT`:
+       - `mts/mts_new.h`: takes the existing C99 branch.
+       - `mts/mask.c`: `break 1030` left out.
+       - `menu/radioanim.c`: `OFFSET_TO_PTR2` uses `*(int*)&`.
+       - `takabe/thing.c`: `*(int *)&find |= ...`.
+       - `libfs/cdstage.c`: the `extern`s before the `static` definitions left out.
+       - `enemy/action.c`: writable string arrays.
+       - `menu/radar.c`: includes `gte_from_radar.h`.
+       - `include/psxdefs.h`: `SetSpadStack`/`ResetSpadStack` are no-ops.
+     - `docs/Running Walkthrough.md` (new), `docs/Planning Doc.md` (Step 0 ticks, decision B, PocketStation note, Step 1 ticks), `.gitignore` (`obj_ps2/`), `Claude Conversation.md`.
+
+4. Errors and fixes:
+   - **The cleanup broke the new HAL repo:** `find -empty -delete` removed empty folders inside the new HAL repo's `.git`. I re-initialised it; there were no commits yet.
+   - **Tools coupled to SH1:** moving SH1's tools turned out to be premature, since most are tied to SH1. I restored them and moved only code.
+   - **`EIE` inherited across threads:** sleeping with interrupts off left the next thread with interrupts off. `ChangeTh` now does `EI` before sleeping and restores the caller's critical-section state on wake-up.
+   - **Deadlock in deferred switches:** waiting for the target to be seen in RUN state deadlocked when the target was mostly waiting. The check is now whether the `ChangeTh` caller is in `THS_WAIT`.
+   - **Interpreter executed the delay slot twice:** a branch not taken continued at its delay slot. The default target is now `next + 4`. I also modelled load delay slots.
+   - **Host 64-bit `u_long`:** this broke the bitstream buffer and `MargePrim`. Fixed with `uint32_t`/`u32`.
+   - **`jinja2` not found:** used the venv's Python instead.
+   - **Map lines end in CRLF:** `comm` needed `tr -d '\r'` and `LC_ALL=C`.
+   - **SPU test priority:** the test's main thread ran at ps2sdk's default priority 1 and starved the delivery thread. The test now uses priority 64, as the game does.
+   - **psyz's software MDEC differed from DuckStation in 19% of pixels:** replaced by `strdec`'s reconstruction.
+   - **`gte_test` seeds 3 and 5 "failed":** a stale binary. Rebuilding for each seed made all 7 pass.
+   - **Prototype mismatches with the SDK headers:** `ReadRotMatrix` must return void and `DrawSyncCallback` return `u_long`.
+   - **The inventory missed overlays:** redone over all overlay maps.
+   - **`inline_n.h` has no include guard:** a second inclusion put the asm macros back. The shim now `#undef`s the generated header's guard each time.
+
+5. Problem Solving:
+   - Step 0 is complete on the HAL side. Moved to Step 1: the memory card BIOS file mapping and the CD replacement (decision B).
+   - Not done: psyz's tests other than libgte; `DecDCTPutEnv`; mono MDEC output.
+   - 15-bit MDEC rounding is unverified: check against DuckStation when MGS's movies play.
+   - Step 1: 219/219 files compile. Matching build 80 OK and VR OK.
+
+6. All user messages:
+   - "Alright, let's get started with the first steps in the planning doc. Where do we go from here?"
+   - "Let's do a sibling directory called "psx-to-ps2-HAL" in my Documents folder. Later it'll become a repository on GitHub."
+   - "Let's do step 1 first"
+   - "Yes, but make sure that this gets recorded in that repo as well, as this is a different Claude conversation."
+   - "Yes" (commit)
+   - "Let's start on threads. Refer to the PS2 Decomps we looked at previously for example code."
+   - "Let's try interrupting during the window if it's feasible to test"
+   - "Yes" (commit)
+   - "Proceed"
+   - "Yes" (commit and start libspu)
+   - "Commit. Keep in mind that "libcd" will be replaced by DVD access functions later, so note that."
+   - "Proceed"
+   - "Let's go with B for now, then proceed with the rest of step 0"
+   - "Yes, then move to the rest of step 0 that's doable right now. Later I'll provide the .bin/.cue pairs for MGS Integral"
+   - "Yes, and also make a note in the planning doc that PocketStation support is planned but low priority. There may not be PS2 specific libraries to interface with it, but we should be able to use low level communication with a custom implementation, if there isn't a GitHub project using it."
+   - "Let's get started on compiling the game for the EE. We won't have the disc images yet, so we'll get to that later."
+   - "Continue"
+   - "Commit and then wait for the go ahead to start linking"
+   - Standing instructions from CLAUDE.md:
+     - Notify at stopping points.
+     - Web access: GitHub only without asking.
+     - Never access tcrf.net in any way.
+     - Keep `Claude Conversation.md` up to date (concatenate all session `.jsonl` files and run `archive_conversation.py`).
+     - Matching build must pass after every port change.
+     - No `pkill -f` on a pattern in the command's own command line.
+     - PCSX2 uses the software renderer.
+     - A PCSX2 stall counts as a crash.
+     - Never dismiss TLB Miss lines.
+     - DuckStation is the reference.
+     - No upstream contributions.
+
+7. Pending Tasks:
+   - Wait for the user's go-ahead before starting the link: MGS `main()` running in PCSX2 with overlays stubbed. That work needs:
+     - an MGS `hal_game_config.h`,
+     - an entry point (`Game_PsxMain`),
+     - a way round the HAL's dependence on SH1's `common.h`,
+     - and possibly some of the fixed PS1 addresses early (Step 2).
+   - Later:
+     - the CD replacement (decision B) once the .bin/.cue files arrive,
+     - the memory card mapping in Step 1,
+     - the `SH_PORT` → `HAL_*` renames,
+     - moving the remaining generic tools,
+     - a HAL types header,
+     - PocketStation support (low priority).
+
+8. Current Work:
+   I had just committed all three repos as asked ("Commit and then wait for the go ahead to start linking"):
+   - HAL `2b109c4` "Move the GTE macro generator here; support Nugget's cop2 form"
+   - SH1 `a4c15789d` "Port: gen_gte_inline.py calls the HAL's generator"
+   - MGS `d0cc3ed20` "Port: main executable compiles for the EE (build/build_ps2.py)"
+   
+   All working trees are clean.
+
+9. Optional Next Step:
+   None until the user gives the go-ahead. The user said: "Commit and then wait for the go ahead to start linking". Once they approve, start linking: an ELF with overlays stubbed that boots to MGS `main()` in PCSX2.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/a70287cb-6517-4aad-be48-35c9a4cc3ddc.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Start linking
+
+## Claude
+
+I'll start by checking how SH1's link works and what the planning doc says about this step.
+
+- tool `Bash`: Survey plan and HAL layout
+
+- tool `Bash`: Read step 1 and SH1's link script
+
+## Claude
+
+Next I'll check what the HAL's generic sources include from SH1, and how `port_main.c` starts the game.
+
+- tool `Bash`: Inspect HAL includes and entry
+
+- tool `Bash`: Compare common.h and hal config
+
+- tool `Bash`: Find SH1 common.h and linkfile
+
+- tool `Bash`: Read SH1 types/psx_mem/port headers
+
+- tool `Bash`: Find game-specific names HAL uses
+
+## Claude
+
+I'll check whether the main executable has any non-C objects (asm data, libraries) in its link list before writing the link script.
+
+- tool `Bash`: List non-C entries in main exe link
+
+- tool `Bash`: Show the conditional blocks
+
+## Claude
+
+I need to render the jinja template properly instead of stripping tags. Next I'll check how `build.py` renders it and which defines each variant uses.
+
+- tool `Bash`: See how build.py renders the template
+
+- tool `Bash`: Read build.py variant setup
+
+## Claude
+
+The matching build already writes the rendered template to `obj/linker_command_file.txt`, and that build has to run anyway. I'll check that the file exists and has the right object list.
+
+- tool `Bash`: Check rendered link list
+
+## Claude
+
+The rendered list has 168 objects. The earlier 219 also included the 50 dev-only files and the VR `sna_init`. I'll switch `build_ps2.py` to read the rendered file.
+
+- tool `Bash`: Read rendered link list; recompile
+
+## Claude
+
+That gives 167, not 168: `libhzd\navigate.obj` has no closing quote in the template. I'll make the closing quote optional in the regex.
+
+- tool `Bash`: Fix regex and recompile
+
+## Claude
+
+All 168 compile. Now a first trial: merge the game objects alone and list what's undefined and what's defined twice.
+
+- tool `Bash`: Merge game objects, list undefined
+
+## Claude
+
+These are tentative definitions in several files, such as `int GM_StageName;`. The PS1's GCC merged them as common symbols, but GCC 10 and later default to `-fno-common`. I'll add `-fcommon`.
+
+- tool `Bash`: Add -fcommon and relink
+
+- tool `Bash`: Find the duplicate definitions
+
+- tool `Bash`: Find SECTION macro
+
+- tool `Bash`: Read SECTION context
+
+- tool `Bash`: Count SECTION uses by name
+
+- tool `Bash`: Disable SECTION under port; relink
+
+- tool `Bash`: Check port dir and _bss_orgend usage
+
+- tool `Bash`: Read _bss_orgend uses
+
+- tool `Bash`: Read rest of linkfile; HAL SH_PORT uses
+
+## Claude
+
+I'll now write the files. `port/hal/` holds what the HAL's generic sources include from the game. It goes only on their include path.
+
+- tool `Bash`: Check memcard/cd config needs
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/port/hal/hal_game_config.h
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/port/hal/common.h
+
+- tool `Bash`: Copy linkfile, add _bss_orgend
+
+## Claude
+
+Next is the link script itself. It's modelled on SH1's `port_link.py`, without the overlay merging and debug switches.
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/build/link_ps2.py
+
+- tool `Bash`: Run the first link
+
+- tool `Bash`: See prof_game.h requirement
+
+## Claude
+
+The HAL requires a `port/prof_game.h` for game probes. MGS has none yet, so I'll add an empty one.
+
+- tool `Bash`: Add prof_game.h; relink
+
+- tool `Bash`: Check long size and psyq/ uses
+
+## Claude
+
+`long` is 32-bit here (EABI-32), so Sony's headers keep their layouts. The script will create a `psyq` symlink in `obj_ps2/` pointing at the PSY-Q 4.4 headers.
+
+- tool `Bash`: Add psyq include link; relink
+
+## Claude
+
+The error filter mistook the function name `CDBIOS_Error` for an error message. I'll check the log for real errors.
+
+- tool `Bash`: Inspect the link log
+
+- tool `Bash`: Fix error filter; relink
+
+## Claude
+
+It links: `obj_ps2/mgs.elf`, with 24 stubs (libcd, libcard, the BIOS card file calls and three libpad init calls). Next I'll boot it in PCSX2 with SH1's run script. First I'll check what it takes.
+
+- tool `Bash`: Check the PCSX2 run script
+
+## Claude
+
+It boots ELFs directly. I'll give it a 30-second run.
+
+- tool `Bash`: Boot mgs.elf in PCSX2 for 30 s
+
+## Claude
+
+It starts the HAL, then hangs before the game's `main`. Something is opening `host:/sh1_ps2.iso`, an SH1 leftover, so I'll look for that first.
+
+- tool `Bash`: Find sh1_ps2.iso reference
+
+- tool `Bash`: Read crash_ps2 iso code and heartbeat rule
+
+- tool `Bash`: Find heartbeat and game main
+
+- tool `Bash`: Read MGS main and heartbeat docs
+
+- tool `Bash`: Read mts_boot_task
+
+## Claude
+
+Even the HAL's own message after `Crash_Install` is missing, so the log thread isn't getting its output out. I'll check whether `log_ps2.c` has a direct mode for debugging.
+
+- tool `Bash`: Read log_ps2 and main thread init
+
+- tool `Bash`: Read Port_LogDirect
+
+- tool `Bash`: Add HalGame_Init; relink and boot
+
+## Claude
+
+Still nothing after the start line. I'll check that MGS's `HalGame_Init` actually replaced the weak default.
+
+- tool `Bash`: Check which HalGame_Init is linked
+
+- tool `Bash`: Check crash_ps2 includes
+
+- tool `Bash`: Add host probe setting; relink and boot
+
+## Claude
+
+Real progress: now we get TLB misses near NULL. I'll look up those PCs.
+
+- tool `Bash`: Resolve TLB miss PCs
+
+- tool `Bash`: Read mts_boot task setup
+
+## Claude
+
+`mts` reads the PS1 kernel's own tables: the Table of Tables at `0x100`, the TCB array, and the current-TCB pointer. It even writes that pointer directly. Next I'll read how it schedules.
+
+- tool `Bash`: Read mts TCB access and task switch
+
+- tool `Bash`: Read HAL thread layer API
+
+## Claude
+
+The HAL already emulates these tables, and `Port_PsxToT()` is meant to replace the fixed `0x100`. So the change in `mts_new.c` is just the table address.
+
+- tool `Bash`: Find other ToT address uses
+
+- tool `Bash`: Route ToT access through Port_PsxToT
+
+- tool `Bash`: Relink and boot
+
+## Claude
+
+Now not even mts's first `printf` comes out, so it's stuck before that, in `SetConf` or `ResetCallback`. I'll read both HAL implementations.
+
+- tool `Bash`: Read SetConf and ResetCallback
+
+## Claude
+
+The HAL side looks fine. I'll add temporary trace lines in MGS's `main` and `mts_boot`. They're only for this debugging.
+
+- tool `Bash`: Trace mts_boot entry
+
+## Claude
+
+Not even the first trace line. So it hangs before `mts_boot`, between `Crash_Install`'s message and the game's `main`. I'll read the rest of `Crash_Install`.
+
+- tool `Bash`: Read Crash_Install
+
+- tool `Bash`: Read Port_AgentInit
+
+- tool `Bash`: Read Port_ModuleLoadInit
+
+- tool `Bash`: Find Port_ModuleLoadInit definition
+
+## Claude
+
+Nothing here looks wrong, so I'll add temporary trace lines in `Port_AgentInit` too.
+
+- tool `Bash`: Trace Port_AgentInit
+
+- tool `Bash`: Read SH1 make_iso.sh
+
+## Claude
+
+I'll make an MGS disc image the same way. `mkiso.py` looks generic, so I'll check it for anything SH1-specific.
+
+- tool `Bash`: Check mkiso.py for SH1 specifics
+
+## Claude
+
+It's generic. I'll copy it into the HAL's `tools/` and have `link_ps2.py` also write `obj_ps2/mgs_ps2.iso`.
+
+- tool `Bash`: Build ISO and boot it
+
+## Claude
+
+It hangs the same way from the disc, so the boot method isn't the cause. Next I'll check the built IRX against SH1's.
+
+- tool `Bash`: Compare IRX outputs
+
+## Claude
+
+The IRX files are byte-for-byte the same size as SH1's. So the cause is on the EE side. I'll check the ELF's memory layout and what the agent thread does at priority 2.
+
+- tool `Bash`: Check ELF size and agent thread
+
+## Claude
+
+The BSS is 4.7 MB, which is fine. One more SH1 difference: the link wraps `SifLoadModule`. I'll check where the wrapper is defined.
+
+- tool `Bash`: Find SifLoadModule wrapper
+
+- tool `Bash`: Read SifLoadModule wrapper
+
+## Claude
+
+The HAL code matches SH1's. Maybe a game symbol is replacing one that ps2sdk relies on: anything `game.o` defines wins over the library's. I'll list names defined in both.
+
+- tool `Bash`: Find game symbols shadowing ps2sdk
+
+## Claude
+
+The game defines `printf`, `fprintf`, `getchar`, `random` and `sio_puts` itself. So the HAL's and ps2sdk's `printf` calls go into MGS's own implementation. I'll look at those.
+
+- tool `Bash`: Find game definitions of printf etc
+
+- tool `Bash`: Read game's printf, getchar, random
+
+- tool `Bash`: Rename clashing symbols; relink and boot
+
+- tool `Bash`: Remove debug traces; review diffs
+
+## Claude
+
+I'll rebuild without the debug switch, boot once more, and run the matching builds alongside.
+
+- tool `Bash`: Normal boot run and matching builds
+
+## Claude
+
+Both matching builds pass (80 OK, and VR OK). The HAL change keeps SH1's probe string as the default, so SH1's behaviour shouldn't change. I'll still check that SH1 links.
+
+- tool `Bash`: Check SH1 still links with HAL change
+
+## Claude
+
+SH1 still links. Now the docs: I'll add a Running Walkthrough entry and update the plan.
+
+- tool `Bash`: Read walkthrough endings for style
+
+- tool `Bash`: Write walkthrough entry and tick plan
+
+## Claude
+
+I'll add a matching entry to the HAL's walkthrough.
+
+- tool `Bash`: Append HAL walkthrough entry
+

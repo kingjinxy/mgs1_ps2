@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PS2 (EE) build of the main executable: compiles its C files (the objects linker_command_file.txt
+"""PS2 (EE) build of the main executable: compiles its C files (the objects obj/linker_command_file.txt
 lists before the overlay sections) with ps2dev's GCC under MGS_PORT, into obj_ps2/. Leaves the matching
 build (build.py, obj/) alone.
 
@@ -32,18 +32,22 @@ INCLUDES = [os.path.join(ROOT, "port", "include"), os.path.join(HAL, "include"),
 # than used), top-level order kept; GCC 14's new errors for old C are warnings (as in the SH1 port).
 CFLAGS = ["-O2", "-G0", "-std=gnu89", "-nostdinc", "-fno-strict-aliasing", "-fno-toplevel-reorder",
           "-mno-check-zero-division", "-fno-delete-null-pointer-checks", "-fno-isolate-erroneous-paths-dereference",
-          "-fno-aggressive-loop-optimizations", "-fexec-charset=EUC-JP",  # the PS1 build converts sources to EUC-JP
+          "-fno-aggressive-loop-optimizations", "-fcommon",  # tentative definitions in several files merge, as with the PS1's GCC
+          "-fexec-charset=EUC-JP",  # the PS1 build converts sources to EUC-JP
           "-Wno-error=implicit-function-declaration", "-Wno-error=int-conversion",
           "-Wno-error=incompatible-pointer-types", "-Wno-error=implicit-int", "-Wno-error=return-mismatch",
           "-D_LANGUAGE_C", "-DLANGUAGE_C", "-DMGS_PORT", "-DINTEGRAL"]
 
 
 def main_exe_sources():
-    """The main executable's C files, in link order, from linker_command_file.txt (a jinja2 template)."""
-    text = open(os.path.join(ROOT, "build", "linker_command_file.txt")).read()
-    text = re.sub(r"\{%.*?%\}", "", text.split("section .rdata")[0], flags=re.S)  # no overlay: drop the logic
+    """The main executable's C files, in link order, from the matching build's rendered link list
+    (obj/linker_command_file.txt: the main_exe variant, so no VR or dev objects)."""
+    path = os.path.join(ROOT, "obj", "linker_command_file.txt")
+    if not os.path.exists(path):
+        sys.exit("no %s: run the matching build (build.py) first" % path)
+    text = open(path).read().split("section .rdata")[0]
     sources = []
-    for obj in re.findall(r'include\s+"\{\{OBJ_DIR\}\}\\([^"]+)\.obj"', text):
+    for obj in re.findall(r'include\s+"\.\./obj\\([^"\s]+)\.obj', text):  # one line lacks its closing quote
         path = os.path.join("source", obj.replace("\\", "/") + ".c")
         if not os.path.exists(os.path.join(ROOT, path)):
             sys.exit("no source for %s" % obj)

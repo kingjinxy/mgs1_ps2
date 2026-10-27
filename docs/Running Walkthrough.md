@@ -42,3 +42,58 @@ generated header's guard first: otherwise a second inclusion put the asm version
 
 Result: 219 of 219 compile. Warnings left: 1118 `-Wbuiltin-declaration-mismatch` (PSY-Q's prototypes of C library
 functions), one `-Woverflow` (PSY-Q's `termPrim` storing 0xFFFFFFFF in a 24-bit field, intended).
+
+## Step 1: linked; boots to MGS's main() in PCSX2 (2026-10-27)
+
+`build/link_ps2.py` compiles the game (`build_ps2.py`), the HAL's sources and MGS's side of it (`port/src/`), and
+the HAL's IOP modules (embedded with `bin2c`), links them against ps2sdk into `obj_ps2/mgs.elf`, and puts that on
+a DVD image, `obj_ps2/mgs_ps2.iso` (the HAL's `tools/mkiso.py`, copied from the SH1 port). Overlays aren't linked.
+
+**The file list was wrong before.** `build_ps2.py` stripped the jinja tags from `linker_command_file.txt`, which
+kept *both* branches of every `{% if %}`: the 219 files included the VR `sna_init` and 50 dev-only files. It now
+reads the matching build's rendered `obj/linker_command_file.txt` (main_exe variant): 168 files. One line there
+has no closing quote (`libhzd\navigate.obj`): the pattern allows that.
+
+Game objects linked together:
+- **Duplicate definitions** of variables defined in several files (`GM_StageName`, `GM_CurrentPadData`, ...):
+  common symbols to the PS1's GCC. `-fcommon`, and `SECTION(x)` is empty under `MGS_PORT` (`mgstype.h`): a
+  variable with a section attribute can't be common.
+- 156 undefined names, all PSY-Q or C library, plus `_bss_orgend` (the PS1 executable's end of BSS, where
+  `mts_get_bss_tail` points): for now the ELF's end of BSS (`port/linkfile`). Where the PS1's heaps go is Step 2.
+- The game's `main` becomes `Game_PsxMain` (the HAL's `main` calls it).
+
+The HAL's generic sources include `common.h` (SH1's types and PS1 memory macros) and `<psyq/...>`: MGS gives them
+`port/hal/common.h`, `port/hal/hal_game_config.h`, an empty `port/hal/port/prof_game.h`, and `obj_ps2/hal_inc/psyq`
+(a link to the PSY-Q 4.4 headers), on their include path only. `long` is 32 bits on the EE (EABI), so PSY-Q's
+structures keep their layout. Left out: the HAL's `libcd_ps2.c` (SH1's disc; decision B), `psx_card.c` and
+`memcard_ps2.c` (the card mapping isn't done). The 24 names nothing defines yet get generated stubs that log
+their first three calls (`obj_ps2/hal_stubs.c`): libcd, libcard and the BIOS card file calls, and `PadInitDirect`,
+`PadStartCom`, `PadStopCom`.
+
+Getting it to run:
+1. **The zero page was mapped in PCSX2.** The crash reporter tells PCSX2 from hardware by looking for
+   `host:sh1_ps2.iso`; MGS has none, so it mapped addresses 0-0x1FFF to a page of zeros as on hardware, and
+   PCSX2's "TLB Miss" lines for NULL reads would have gone. The probe file is now a setting,
+   `HAL_GAME_HOST_PROBE` (HAL `crash_ps2.c`; SH1's file is the default): `mgs.elf` here.
+2. **TLB misses in `mts_boot` and `mts_VSyncCallback`** (loads at 0x108/0x110): `mts` reads the PS1 kernel's
+   Table of Tables at 0x100 (each thread's TCB, to set its SR; the current-TCB entry, which `mts` rewrites from
+   the vertical blank interrupt to switch tasks). Under `MGS_PORT` both go through `Port_PsxToT()`, the HAL thread
+   layer's copy of those tables, which already handles the interrupt switch.
+3. **A hang in `SifExecModuleBuffer` (the HAL loading `sh1agent.irx`).** The game defines `fprintf`, `getchar`,
+   `random` and `sio_puts`, which ps2sdk and newlib also have; the game's definitions won the link, so library
+   code called them. `link_ps2.py` now finds every name the game and the linked libraries both define and renames
+   the game's (`MGS_<name>`, its own calls follow). The retail build's `printf` is an empty function (only the dev
+   executable prints): left out under `MGS_PORT`, so the game's messages reach the console. (Until then only the
+   HAL's plain-string prints came out: GCC turns those into `puts`.)
+4. MGS prints its boot steps without newlines (`mem:`, `pad:`, ...): `HalGame_Init` (`port/src/hal_game.c`)
+   makes stdout unbuffered, as the PS1's printf is. `MGS_LOG_DIRECT=1` sends console output straight through
+   instead of via the HAL's log thread (which the vertical blank handler wakes): for debugging early hangs.
+   Booting the ELF from `host:` or from the disc image made no difference to the hang in item 3; the image is
+   kept, as SH1 tests run that way.
+
+Now (PCSX2, from `mgs_ps2.iso`): the HAL starts, `mts` prints its banner (`Multi Task Scheduler for PSX ver2.02`)
+and starts its system task and the game task, `Main` calls `ResetGraph` and friends, the display comes up
+(320x240p), and `memcard_init` waits for card events that the stubbed libcard never sends. No TLB misses. Next:
+the memory card mapping (Step 1), then the pad, then the CD replacement once the disc images are here.
+
+Matching build: 80 OK, and the VR executable. SH1 links unchanged (9 stubs).

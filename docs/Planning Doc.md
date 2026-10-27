@@ -76,10 +76,15 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 - [ ] Later HAL cleanups (not blocking MGS): `SH_PORT_*`/`sh1*` renames, generic tools, general disc map
 - [ ] Fill the gaps MGS needs that the SH1 layer lacks, borrowing from psyz
       (`github.com/Xeeynamo/psyz`, decompiled PSY-Q in `decomp/src`; check its licence before copying):
-  - [ ] libspu: `SpuMalloc`, `SpuSetIRQ`/`IRQAddr`/`IRQCallback`, `SpuSetNoiseVoice`,
-        `SpuSetPitchLFOVoice`, `SpuSetReverbDepth`, `SpuGetAllKeysStatus`
+  - [x] libspu: `SpuMalloc`, `SpuSetIRQ`/`IRQAddr`/`IRQCallback`, `SpuSetNoiseVoice`,
+        `SpuSetPitchLFOVoice`, `SpuSetReverbDepth`, `SpuGetAllKeysStatus`. The SPU interrupt is MGS's sound
+        clock (voice 23 looping a silent block, 98.44 Hz): delivered IOP → SIF command → EE thread, with the
+        PS1 thread switch `mts_isend` asks for (`tools/spu_irq_test`, PCSX2)
   - [ ] libcd: `CdReadyCallback`/`CdSyncCallback`/`CdReadCallback`, `CdGetSector`, `CdRead2`,
         `CdReady`, `CdFlush`, and the `St*` streaming ring
+        **Interim only:** libcd emulation will later be replaced by DVD access functions (reading the
+        game's files from the PS2 disc directly, not PS1 sectors). Keep it thin: just enough for
+        `libfs/cdbios.c` to run, no investment in exact PS1 drive timing
   - [ ] libpress: `DecDCTin`/`out`/`outSync`/`outCallback`/`Reset` (psyz has no `DecDCTvlc2`/
         `DecDCTvlcBuild`: write those)
   - [x] libgpu: `MoveImage`, `LoadImage2`, `DrawSyncCallback`, `GetTPage`, `SetSemiTrans`, `SetGraphDebug`

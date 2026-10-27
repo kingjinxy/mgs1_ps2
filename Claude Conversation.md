@@ -2049,3 +2049,131 @@ Each overlay-only function was tested and matches over 20,000 cases. Building SH
 
 - tool `Bash`: Rebuild SH1 and rerun the 150 s comparison
 
+## Claude
+
+SH1 is unchanged: same status lines and TLB-miss lines, and its link is down to 9 HAL stubs. I'll record everything:
+
+- tool `Bash`: Record the libpress and overlay work in all three repos
+
+- tool `Bash`: Update the archive and confirm test data is ignored
+
+- tool `PushNotification`: 
+
+## Claude
+
+Option B is recorded, and the HAL side of the rest of Step 0 is done. Everything new matches its original or reference, except one detail flagged below. Nothing is committed yet.
+
+**libpress (movie and image decoding):**
+- **VLC decoding:** uses psyz's decoder (MPL 2.0, vendored with its licence). It gives the same output as MGS's own `DecDCTvlc2`, run in my interpreter from the overlay that contains it, and matches psyz's PSY-Q 4.7 fixtures.
+- **MDEC stage:** I tried psyz's software MDEC first, but it differed from DuckStation in 19% of pixels on real movie frames. I built it from SH1's `strdec.c` instead, which was already bit-exact with DuckStation. All 12,860 frames of SH1's movies come out identical through the new path.
+- **Sequencing:** a PS2 test in PCSX2 runs MGS's movie pattern and the camera overlay's synchronous pattern. Both match.
+- **Not verified yet:** MGS's movies use 15-bit colour output, and its rounding has no hardware reference. I've recorded it as something to check against DuckStation once MGS's movies play.
+
+**My first inventory missed the overlays.** It only read the main executable's map, but libpress, for one, exists only in overlays. Redone across all overlay maps, it found 8 more functions. I added them, and each matches its original over 20,000 tests: `MulRotMatrix0`, `RotMatrixZYX`, `RotMatrix_gte`, `SetPolyGT4`, `SetSprt`, `MargePrim`, `SetDefDrawEnv` and `BreakDraw`.
+
+**Bugs in my own test tooling:**
+- **Delay slot run twice:** the interpreter executed the delay slot twice whenever a branch was *not* taken. The earlier libgte functions happened to tolerate it, and all still pass after the fix.
+- **Load delay slots:** the interpreter didn't model them. It does now.
+- **Host-only false differences:** two came from `u_long` being 8 bytes on the 64-bit host. One was in the test harness. The other was in `MargePrim`'s tag store, now written as an explicit 32-bit store; the PS2 build was already correct.
+
+**Still open in Step 0:**
+- **Memory card file calls:** they need the MGS-side mapping, as SH1 has. That's game code, so I've moved it to Step 1 alongside decision B's CD replacement.
+- **PocketStation code in the `rank` overlay:** deferred.
+- **psyz's own test suite on the EE:** not done. Most of what it would cover is now tested more directly against MGS's own code.
+
+SH1 is still unchanged in PCSX2. Everything is recorded in the HAL's [Walkthrough.md](../psx-to-ps2-HAL/docs/Walkthrough.md), MGS's [Planning Doc.md](docs/Planning%20Doc.md) and SH1's walkthrough.
+
+Should I commit the three repos?
+
+## User
+
+Yes, then move to the rest of step 0 that’s doable right now. Later I’ll provide the .bin/.cue pairs for MGS Integral
+
+- tool `Bash`: Commit all three repos
+
+- tool `Bash`: Survey psyz's tests
+
+- tool `Bash`: Read the psyz test runner and libgte API used
+
+## Claude
+
+The tests use these through psyz's API names. I'll map `Psyz_Gte*` onto the HAL's `Gte_*` with a small shim, compile the tests against the PSY-Q headers, and run them on the EE in PCSX2. Building it:
+
+- tool `Bash`: Build psyz's libgte tests against the HAL for the EE
+
+- tool `Bash`: Rebuild and list errors and missing symbols
+
+- tool `Bash`: Use the HAL's GTE macros and rebuild
+
+- tool `Bash`: See where the GTE command macros live
+
+## Claude
+
+The command macros are in the HAL's `gte_from_inline_no_dmpsx.h`. Including it after the first header:
+
+- tool `Bash`: Add the command macros and list what's still missing
+
+## Claude
+
+The command macros still resolve to the untranslatable versions, so the include order isn't taking effect. Checking whether the PSY-Q headers already pull in one of these files under `SH_PORT`:
+
+- tool `Bash`: Find which headers include the GTE macro files
+
+- tool `Bash`: Use SH1's GTE macro headers and rebuild
+
+## Claude
+
+No change, but that's because `make` didn't rebuild the test object: it doesn't know about the shim header. Rebuilding from clean:
+
+- tool `Bash`: Rebuild the tests from clean
+
+- tool `Bash`: Add test-only stubs, build, and run in PCSX2
+
+## Claude
+
+It runs, but crashes early with a store to address 0 at `pc=0x114acc`. Finding where that is:
+
+- tool `Bash`: Locate the crashing store
+
+## Claude
+
+The crash is my own `gte_readflg` shim: it treats its argument as a pointer, and GCC turned the resulting null store into a trap. Checking how the test calls it:
+
+- tool `Bash`: Check how the test uses gte_readflg
+
+## Claude
+
+`gte_readflg` takes a variable, not a pointer (it's PSY-Q's register-read form). Fixing the shim:
+
+- tool `Bash`: Fix the shim and rerun the tests
+
+## Claude
+
+210 tests pass and 15 fail. Listing the failures to separate the expected ones (functions not in the HAL) from real problems:
+
+- tool `Bash`: List the failing tests
+
+- tool `Bash`: Show the three real failures and their tests
+
+- tool `Bash`: Find the GTE dispatch and IR0 saturation code
+
+- tool `Bash`: Read the IR0 sites and the dispatch cases
+
+- tool `Bash`: Fix IR0 flagging and add the opcode aliases
+
+## Claude
+
+Two more places may compute IR0 their own way: the fast paths and the batched RTPS. Checking all users of the flag:
+
+- tool `Bash`: Find every IR0 write in gte.c
+
+## Claude
+
+Only those two. Rerunning psyz's tests, SH1's `gte_test` (checked against real PS1 results), and the libgte test images:
+
+- tool `Bash`: Rerun psyz tests, SH1's GTE test and libgte images
+
+- tool `Bash`: Run SH1's GTE test for every seed with a rebuild each
+
+- tool `Bash`: Add the PocketStation stubs; rebuild and recheck SH1
+

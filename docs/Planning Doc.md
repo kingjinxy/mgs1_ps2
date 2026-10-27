@@ -108,14 +108,21 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
         `ChangeClearPAD`, `PClseek`, `LoadExec` (soft reset: stops for now)
   - [ ] BIOS file calls for the memory card (`open`/`read`/... → `Port_Bu*` on the game side, as SH1):
         game code, so in Step 1 with the port build
-  - [ ] `rank`'s PocketStation code (`mcx`): `SysEnqIntRP`/`SysDeqIntRP`, `ChangeClearRCnt`, `FlushCache`
+  - [x] `rank`'s PocketStation code (`mcx`): `SysEnqIntRP`/`SysDeqIntRP`, `ChangeClearRCnt` as no-ops.
+        Its `FlushCache(void)` clashes with ps2sdk's `FlushCache(int)`: rename the call when recompiling `rank`
+  - [ ] **PocketStation support: planned, low priority** (the stubs above only stand in until then). The PS2
+        may have no library for it; check GitHub for a project that talks to a PocketStation from the PS2
+        first, else write a custom implementation on low-level memory card port communication (SIO2)
   Full inventory (from `obj/asm.map`): `../psx-to-ps2-HAL/docs/Walkthrough.md`
 - [x] **Threads for `mts`.** HAL `src/ps2/thread_ps2.c`: one EE thread per PS1 TCB, `ChangeTh` and
       VSync-interrupt switches, critical sections (`../psx-to-ps2-HAL/docs/Walkthrough.md`). Passes
       `tools/thread_test` in PCSX2. When `mts` is compiled: `(struct ToT *)0x100` → `Port_PsxToT()` under
       `MGS_PORT`. Still to try on a real PS2
-- [ ] Reuse psyz's tests (`psyz/tests`: libgte checked on a real PS1, libcd, libspu, mdec, VLC) with
-      its `ztest` framework on the EE; use `psyz/psxgen` to make reference images for the GS backend
+- [x] psyz's libgte tests on the EE (`../psx-to-ps2-HAL/tools/psyz_tests`): 213 pass; the 12 failures are
+      four libgte functions no game here uses. They found three software-GTE differences from the hardware
+      (opcodes 0x00/0x1A, IR0 saturation flag), fixed. psyz's other tests need its platform layer: not run
+      (MGS's uses of those libraries are tested against the game's own code instead). Still possible later:
+      `psyz/psxgen` reference images for the GS backend
 
 ### Step 1 — PS2 build target
 

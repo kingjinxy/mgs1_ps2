@@ -68,10 +68,12 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 
 ### Step 0 — Share the HAL  *(do first)*
 
-- [ ] Move the SH1 HAL into a location both repos can use (git submodule or sibling directory)
-- [ ] Audit it for SH1 assumptions: `psx_mem.h` buffer addresses, SH1 file indices, `Fs_*` hooks,
-      overlay dispatch. Move each one behind a per-game hook
-- [ ] SH1 port still builds and runs after the move (regression check)
+- [x] Move the SH1 HAL into `../psx-to-ps2-HAL` (sibling directory, own git repo; GitHub later).
+      File-by-file sort, hooks and what's left: `../psx-to-ps2-HAL/docs/Split Plan.md`. SH1 branch `hal-split`
+- [x] Audit it for SH1 assumptions and move each behind a per-game hook (`HalGame_*`, weak defaults) or a
+      setting (`hal_game_config.h`)
+- [x] SH1 port still builds and runs after the move (same link; PCSX2 logs identical; GTE tests pass)
+- [ ] Later HAL cleanups (not blocking MGS): `SH_PORT_*`/`sh1*` renames, generic tools, general disc map
 - [ ] Fill the gaps MGS needs that the SH1 layer lacks, borrowing from psyz
       (`github.com/Xeeynamo/psyz`, decompiled PSY-Q in `decomp/src`; check its licence before copying):
   - [ ] libspu: `SpuMalloc`, `SpuSetIRQ`/`IRQAddr`/`IRQCallback`, `SpuSetNoiseVoice`,

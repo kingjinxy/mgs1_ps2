@@ -588,3 +588,366 @@ Add the “not in the doc yet items” to the planning doc. Then, commit our ini
 
 - tool `Bash`: Index memory and check remotes and branches
 
+## Claude
+
+Before committing I'll refresh the conversation log, as `CLAUDE.md` says. Since we're on `master`, I'll commit on a new branch rather than directly to it.
+
+- tool `Bash`: Refresh log, branch, and commit the initial docs
+
+## Claude
+
+I've updated the planning doc and committed everything as `6d2fffa03` "Initial setup for the PS2 port".
+
+**Planning doc changes:**
+- **Decisions:** target the Integral discs (`SLPM_862.47`/`.48`) first and keep the PS1 limits for now. The open questions section is now empty.
+- **Ground rule:** no upstream contributions, because the port uses AI-written code. Upstream decomp work only flows *in*, and the matching build stays as a regression check.
+- **Matching build:** the working command, verified today.
+- **Step 0:**
+  - which pieces to borrow from psyz, library by library, noting what psyz lacks so you'd write it yourself
+  - thread support for `mts`
+  - reusing psyz's tests and `psxgen`
+- **New Step 3b:** recompile the unfinished overlay functions with the SH1 recompiler, rebuilding the missing relocation info first. Pilot on `s11g` or `s03d`, and decompile by hand only where that fails.
+- **Side tools:** the optional PC debug build on psyz.
+
+**The commit** contains `CLAUDE.md`, the refreshed `Claude Conversation.md`, `docs/Planning Doc.md` and `tools/port/archive_conversation.py`. Because the repo was on `master`, I made the commit on a new branch, **`ps2-port`**. If you'd rather work directly on `master`, it's a fast-forward: `git checkout master && git merge ps2-port`. Nothing is pushed. `origin` is your own `kingjinxy/mgs1_ps2`, so push when you're ready.
+
+I also saved the "no upstream contributions" rule to memory so later sessions won't open PRs or push to `mgs_reversing`.
+
+## User
+
+<command-name>/clear</command-name>
+            <command-message>clear</command-message>
+            <command-args></command-args>
+
+## User
+
+Alright, let’s get started with the first steps in the planning doc. Where do we go from here?
+
+- tool `Bash`: Read the planning doc
+
+- tool `Bash`: Inspect SH1 port layout for HAL location
+
+- tool `Bash`: List SH1 port HAL directories
+
+## Claude
+
+We're at Step 0, item 1: move the SH1 HAL somewhere both repos can share it. Here's the situation.
+
+**Where the HAL lives now.** In the SH1 repo it is spread across three folders: `src/port/` (66 files, about 760K, plus the `iop/` and `ps2/` subfolders), `include/port/`, and `tools/port/`. Some of it is shared PSY-Q work: `libgpu_port.c`, `libgte_port.c`, `gte.c`, `libspu_port.c`, `libapi_port.c` and `psx_card.c`. Some of it is SH1-only: `demo_rec.c`, `demo_menu.c`, `overlay.c` and `port_data.c`. `psx_mem.c` and `port_main.c` mix the two.
+
+**Proposed order of work:**
+1. **Choose where the shared code goes** (see below).
+2. **Sort the files** into shared HAL and SH1 game code, file by file. Where a file mixes both (buffer addresses in `psx_mem`, `Fs_*` hooks, overlay dispatch), replace the SH1 part with a per-game hook. I'd write this up as a short table in `docs/` before moving anything.
+3. **Do the move in the SH1 repo**, then rebuild SH1 and boot it in PCSX2 as the regression check.
+4. **Only then start on the MGS side:** fill the missing libspu/libcd/libpress functions, and add thread support for `mts`. I'd do threads early, because MGS can't run without them and the SH1 layer has nothing for them.
+
+**One thing I need from you: where should the shared HAL live?**
+- **Sibling directory, e.g. `../psx-hal` as its own git repo (my recommendation).** Both builds point at it by a relative path. Editing it from either port is simple, and there's no submodule bookkeeping while the code is changing every day.
+- **Git submodule in each repo.** Each port pins an exact HAL version, which is cleaner later on. But every HAL change during this heavy refactor needs a commit and a bump in both repos.
+
+We could also start with the sibling directory and switch to a submodule once the HAL settles. Tell me which you prefer and I'll start the sorting in step 2. That step only reads the code, so it doesn't touch the SH1 repo.
+
+## User
+
+Let’s do a sibling directory called “psx-to-ps2-HAL” in my Documents folder. Later it’ll become a repository on GitHub.
+
+- tool `Bash`: Scan SH1 port files for game-specific symbols
+
+## Claude
+
+Now the ps2/ backend and the SH1 references in the files that look shared but aren't clean.
+
+- tool `Bash`: Scan PS2 backend and SH1 references
+
+## Claude
+
+I have enough for a first sort. I'll create the new repo and put the sorting table in it.
+
+- tool `Bash`: Create and initialise the HAL repo
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/docs/Split Plan.md
+
+- tool `Bash`: Record the HAL location in the planning doc
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+I've set up `~/Documents/psx-to-ps2-HAL` as a new git repo on branch `main`. Nothing has been moved yet, and the SH1 repo is untouched.
+
+**What's in it:** one file, [Split Plan.md](../psx-to-ps2-HAL/docs/Split%20Plan.md). It sorts every file in SH1's `src/port`, `include/port`, `src/port/ps2`, `src/port/iop` and `tools/port` into one of three groups:
+- **HAL:** moves to the new repo as is. This includes `libapi`, `libgs`, `libgte`, the GS backend, `strdec`, the recompiler and the test tools.
+- **HAL + hook:** moves, but its SH1-specific part goes behind a per-game hook first. For example:
+  - `libgpu_port.c` reads `g_GameWork`/`g_SysWork` for frame capture.
+  - `gte.c` has fast paths for SH1's point light.
+  - `libcd_ps2.c` and `memcard_ps2.c` contain the `SILENT` disc and save names.
+  - `psx_mem.c` holds the buffer addresses.
+- **Game:** stays in SH1. This covers the demo and replay code, the overlay table, `libkmath` (which is SH1's own library, not PSY-Q), and the capture and warp tools.
+
+From that sort, the plan needs these hooks: a per-game config header, a per-frame game hook, a crash-dump hook, and renaming the `SH1_*` switches to `HAL_*`.
+
+This sort is a first pass from scanning for game symbols. I haven't read the mixed files in full yet, so the hook list may change.
+
+I also updated the Step 0 entry in [Planning Doc.md](docs/Planning%20Doc.md) to point at the new location. That change isn't committed.
+
+**Next steps:**
+1. Read the "HAL + hook" files and confirm the hooks.
+2. Move the files into the new repo and point the SH1 build at `../psx-to-ps2-HAL`.
+3. Run the SH1 regression check: build it, boot it in PCSX2, and compare frames against a build from before the move.
+
+Step 2 changes the SH1 repo, so I'll wait for your go-ahead before starting it. Should I do that work on a new branch in the SH1 repo?
+
+## User
+
+Let’s do step 1 first
+
+- tool `Bash`: Read small mixed files and game includes
+
+## Claude
+
+`libpad_psx.c` turns out to be clean (the SH1 names are only in comments). Now the larger files.
+
+- tool `Bash`: Read game-specific parts of libgpu_port.c
+
+- tool `Bash`: Check libgpu sys.o data and list gte.c functions
+
+- tool `Bash`: Find game references in remaining mixed files
+
+- tool `Bash`: Check crash dump, save names, disc map, switches
+
+## Claude
+
+I've read everything I need. Updating the split plan with the confirmed hooks:
+
+- tool `Bash`: Update split plan with confirmed hooks
+
+## Claude
+
+Step 1 is done. I read the mixed files and recorded the confirmed hooks in [Split Plan.md](../psx-to-ps2-HAL/docs/Split%20Plan.md). The SH1 repo is unchanged; nothing in it was edited.
+
+**Smaller job than the first pass suggested.** Several files I'd marked as needing hooks only mention SH1 in comments, so they move as they are: `psx_mem.c`, `libpad_psx.c`/`pad_ps2.c`/`input_ps2.c`, `prof.c`/`prof_fn.c`, and `log`/`debug_ps2.c`. `crash_ps2.c` needs one small fix: it hard-codes the RAM size as `0x200000`, which should become `PSX_RAM_SIZE`.
+
+**`gte.c` mostly stays as is.** Its batch fast paths were written for SH1 call sites but are generic GTE code. Only the sentinel check at lines 1140–1187 reads SH1 memory, and that moves to SH1's `sentinel_ps2.c`.
+
+**The real game-specific parts:**
+- **`libgpu_port.c`:** five places read SH1 game state (frame capture, the status line and load watchdog, the screen-read context, and the Debug Options resolution setting). Each becomes a `HalGame_*` hook function. The HAL supplies empty defaults, so a game that doesn't need a hook can just leave it out.
+- **`libcd_ps2.c`:** the mapping from PS1 sectors to DVD sectors is hard-wired to SH1's two disc files, `SILENT.` and `HILL.`. That becomes a table each game supplies. MGS will need this anyway, since it reads its own data files by sector.
+- **`memcard_ps2.c` and `psx_card.c`:** the save folder, icon, title and PS1 save file name move into a per-game config header, `hal_game.h`.
+- **`prof.h`:** some of its probe names are SH1 functions. The HAL keeps the generic probes and leaves a range of names for each game to fill.
+- **`port_main.c`:** the startup banner and the overlay snapshot become the game's `HalGame_Init()`.
+- **IRX modules:** `sh1spu`'s interface is already generic. It and `sh1agent` only need renaming, to `halspu` and `halagent`.
+
+**Switch names:** about 30 `SH_PORT_*`/`SH1_*` build switches get renamed to `HAL_*`. The SH1 Makefile would map its old names onto the new ones, so your existing scripts and notes keep working.
+
+Step 2 is the actual move, and it changes the SH1 repo. I'd do it on a new SH1 branch, `hal-split`, unless you'd rather work somewhere else. Shall I go ahead?
+
+## User
+
+Yes, but make sure that this gets recorded in that repo as well, as this is a different Claude conversation.
+
+- tool `Bash`: Read SH1 CLAUDE.md and port build setup
+
+## Claude
+
+SH1 is on branch `upstream-sync`, not its main branch. Checking how that relates before I branch:
+
+- tool `Bash`: Check SH1 branches and port_link layout
+
+- tool `Bash`: Branch hal-split and build baseline port ELF
+
+## Claude
+
+Baseline linked. Saving it for comparison:
+
+- tool `Bash`: Save baseline and find port path references
+
+- tool `Bash`: Read libgpu header, gte sentinel, prof enum
+
+- tool `Bash`: Find LP name table and memcard config sites
+
+- tool `Bash`: Read LP names, ps2 compile flags, libcd disc setup
+
+- tool `Bash`: List local includes of HAL files
+
+## Claude
+
+Only PSY-Q headers and `common.h` types, apart from `libgpu_port.c`, which is fine. Next: does HAL code call into SH1-side files (capture, replay, warp, sentinel, demo)?
+
+- tool `Bash`: Find HAL→game cross references
+
+- tool `Bash`: Inspect HAL→game call sites
+
+## Claude
+
+All of these can become weak no-op defaults in the HAL. SH1 keeps its real versions, so its behaviour doesn't change, and MGS links without them. Doing the move now:
+
+- tool `Bash`: Move HAL files from SH1 into the HAL repo
+
+## Claude
+
+The copy picked up untracked build leftovers (`.o` files, `__pycache__`). I'll remove from the HAL copy everything that git didn't track in SH1:
+
+- tool `Bash`: Drop untracked artifacts from the HAL copy
+
+## Claude
+
+The leftover folders in SH1 contain only build output, so I'm leaving them alone. I'll commit the untouched copy to the HAL repo first, so the hook changes that follow show up as their own diff.
+
+- tool `Bash`: Commit the pristine HAL import
+
+## Claude
+
+My cleanup command deleted the empty folders inside the new repo's `.git` as well, which broke it. The repo had no commits yet, so nothing was lost. I'll re-initialise it:
+
+- tool `Bash`: Reinitialise the HAL repo and commit the import
+
+## Claude
+
+Import committed. Now the hooks. First, `libgpu_port.c`:
+
+- tool `Bash`: Replace SH1 state reads in libgpu_port.c with hooks
+
+## Claude
+
+Now the SH1 side, which takes over that logic unchanged:
+
+- tool `Write`: /home/alex/Documents/silent-hill-1-ps2-port/src/port/hal_game.c
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/include/port/hal_game.h
+
+- tool `Bash`: Check capture/sentinel signatures and RAM size
+
+- tool `Bash`: Check sentinel guards in HAL files
+
+## Claude
+
+The sentinel calls are already behind `SH_PORT_SENTINEL`, so the HAL only needs declarations. I'll move the GTE-side sentinel into an SH1 file:
+
+- tool `Bash`: Move the GTE sentinel into an SH1 file
+
+## Claude
+
+The new SH1 file is missing its opening `#ifdef SH_PORT_SENTINEL`. Fixing that, then doing `port_main.c`, crash, card and CD:
+
+- tool `Bash`: Replace SH1 names with config macros
+
+- tool `Bash`: Include the game config in ps2 files
+
+- tool `Bash`: Check includes and psx_card.c top
+
+- tool `Bash`: Include the game config in psx_card.c
+
+## Claude
+
+Now the SH1 config header, then the profiler probe names:
+
+- tool `Write`: /home/alex/Documents/silent-hill-1-ps2-port/include/hal_game_config.h
+
+- tool `Bash`: Split liteprof probes into HAL and game X-macro lists
+
+- tool `Bash`: Split liteprof probes (fixed)
+
+## Claude
+
+Now the weak defaults, so a game links without defining any of these:
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/src/hal_weak.c
+
+## Claude
+
+Next, the SH1 build has to find the moved files. First I'll check what in SH1 still points at the old paths, and what the moved tools expect:
+
+- tool `Bash`: Find references to moved tools and paths
+
+## Claude
+
+The `gdb/` folder and the test tools need a closer look. Several SH1 scripts import from `gdb/`:
+
+- tool `Bash`: List tool subfolders and SH1-coupled tools
+
+- tool `Bash`: Restore tools in SH1 and drop them from the HAL
+
+## Claude
+
+Now the IOP Makefiles. They write into SH1's `build/` by a relative path, so I'll make the output folder a variable that `port_link.py` sets:
+
+- tool `Bash`: Read IOP Makefiles
+
+- tool `Bash`: Point the SH1 build at the HAL repo
+
+## Claude
+
+Adding the HAL include path to the recompiled objects as well, then building:
+
+- tool `Bash`: Build SH1 against the split HAL
+
+## Claude
+
+It builds and links. Comparing against the baseline:
+
+- tool `Bash`: Compare link log, sizes and symbols with baseline
+
+## Claude
+
+Same text size and the same symbols, apart from the new hooks. But `.bss` is 2112 bytes smaller, and I want to know why before accepting it:
+
+- tool `Bash`: Compare symbol sizes and section layout
+
+- tool `Bash`: Read pcsx2_run.py usage
+
+- tool `Bash`: Read compare_frames.py options
+
+- tool `Bash`: Build ISOs for baseline and split builds
+
+- tool `Bash`: Run both builds in PCSX2 for 90 seconds
+
+- tool `Bash`: Compare the two PCSX2 run logs
+
+## Claude
+
+The status lines match exactly. The plain diff is noisy because every line starts with a timestamp, so I'll strip those and look at the error-like lines too:
+
+- tool `Bash`: Diff logs without timestamps; list error lines
+
+- tool `Bash`: Check IRX rebuild and HAL tree cleanliness
+
+- tool `Bash`: Find old HAL paths in SH1 test tools
+
+- tool `Bash`: Read ROOT definitions in test Makefiles
+
+- tool `Bash`: Point SH1 test harnesses at the HAL
+
+## Claude
+
+Paths resolve. I'll run the native GTE test as a quick check that `gte.c` still builds and passes from its new home:
+
+- tool `Bash`: Build the native GTE checker
+
+- tool `Bash`: Run GTE checker against PS1 results
+
+- tool `Bash`: Summarise GTE checker results per seed
+
+## Claude
+
+Seeds 1–6 all fail because this binary was built with seed 0's inputs, which `make` defaults to. I'll rebuild for one more seed to confirm:
+
+- tool `Bash`: Run GTE checker for seed 3
+
+- tool `Bash`: Read SH1 planning doc outline and walkthrough tail
+
+## Claude
+
+Writing the SH1 walkthrough entry and updating SH1's CLAUDE.md and Planning Doc:
+
+- tool `Bash`: Record the HAL split in SH1's docs
+
+- tool `Bash`: Update sentinel location in SH1 CLAUDE.md
+
+## Claude
+
+Now the HAL repo's own README and Split Plan, and this repo's planning doc:
+
+- tool `Bash`: Write HAL README, update split plan and MGS plan
+

@@ -80,19 +80,34 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
         `SpuSetPitchLFOVoice`, `SpuSetReverbDepth`, `SpuGetAllKeysStatus`. The SPU interrupt is MGS's sound
         clock (voice 23 looping a silent block, 98.44 Hz): delivered IOP → SIF command → EE thread, with the
         PS1 thread switch `mts_isend` asks for (`tools/spu_irq_test`, PCSX2)
+  - [x] libcd: **not emulated further** (decided 2026-10-27). MGS's `libfs/cdbios.c` streams with
+        `CdlReadN` + a per-sector ready callback + `CdGetSector`; the HAL's libcd only has SH1's
+        `CdRead` path. Instead, under `MGS_PORT`, `cdbios.c`'s internals (`CDBIOS_Reset`, `ReadRequest`,
+        `ReadSync`, `ForceStop`, `TaskState`) are replaced by block reads through the HAL calling the same
+        per-sector callback: written in Step 1, the first piece of the DVD access layer that replaces
+        libcd later. Disc layout to start with: one PS1 disc image file on the DVD (PS1 sector → offset)
+  - [x] libspu: `SpuMalloc`, `SpuSetIRQ`/`IRQAddr`/`IRQCallback`, `SpuSetNoiseVoice`,
+        `SpuSetPitchLFOVoice`, `SpuSetReverbDepth`, `SpuGetAllKeysStatus`. The SPU interrupt is MGS's sound
+        clock (voice 23 looping a silent block, 98.44 Hz): delivered IOP → SIF command → EE thread, with the
+        PS1 thread switch `mts_isend` asks for (`tools/spu_irq_test`, PCSX2)
   - [ ] libcd: `CdReadyCallback`/`CdSyncCallback`/`CdReadCallback`, `CdGetSector`, `CdRead2`,
         `CdReady`, `CdFlush`, and the `St*` streaming ring
         **Interim only:** libcd emulation will later be replaced by DVD access functions (reading the
         game's files from the PS2 disc directly, not PS1 sectors). Keep it thin: just enough for
         `libfs/cdbios.c` to run, no investment in exact PS1 drive timing
-  - [ ] libpress: `DecDCTin`/`out`/`outSync`/`outCallback`/`Reset` (psyz has no `DecDCTvlc2`/
-        `DecDCTvlcBuild`: write those)
+  - [x] libpress: `DecDCTin`/`out`/`outSync`/`outCallback`/`Reset`, `DecDCTvlc2`/`DecDCTvlcBuild` (psyz's
+        VLC, strdec's MDEC; checked against the game's DecDCTvlc2 and SH1's movies). 15-bit rounding
+        unverified: check against DuckStation when MGS's movies play. The `St*` ring / `CdRead2` feeding
+        them: MGS side (decision B)
+  - [x] Overlays' library functions (inventory redone over all overlay maps): `MulRotMatrix0`,
+        `RotMatrixZYX`, `RotMatrix_gte`, `SetPolyGT4`, `SetSprt`, `MargePrim`, `SetDefDrawEnv`, `BreakDraw`
   - [x] libgpu: `MoveImage`, `LoadImage2`, `DrawSyncCallback`, `GetTPage`, `SetSemiTrans`, `SetGraphDebug`
   - [x] libgte: `rsin`/`rcos`, `RotMatrix`, `RotMatrixYXZ`, `RotMatrixX/Y/Z`, the `*_gte` variants,
         `ReadRotMatrix`: bit-exact against MGS's linked code (`tools/libgte_test`)
   - [x] Misc: `SetMem`, `SetConf`, `GetGp`/`GetSp`, `rand`/`srand` (PS1's), `StopCallback`, `StopPAD`,
         `ChangeClearPAD`, `PClseek`, `LoadExec` (soft reset: stops for now)
-  - [ ] BIOS file calls for the memory card (`open`/`read`/... → `Port_Bu*` on the game side, as SH1)
+  - [ ] BIOS file calls for the memory card (`open`/`read`/... → `Port_Bu*` on the game side, as SH1):
+        game code, so in Step 1 with the port build
   - [ ] `rank`'s PocketStation code (`mcx`): `SysEnqIntRP`/`SysDeqIntRP`, `ChangeClearRCnt`, `FlushCache`
   Full inventory (from `obj/asm.map`): `../psx-to-ps2-HAL/docs/Walkthrough.md`
 - [x] **Threads for `mts`.** HAL `src/ps2/thread_ps2.c`: one EE thread per PS1 TCB, `ChangeTh` and

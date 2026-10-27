@@ -1736,3 +1736,316 @@ Both runs pass, and the interrupt-context send works with no failures. Before th
 
 - tool `Bash`: Rebuild SH1 and rerun its 150 s comparison
 
+## Claude
+
+SH1 is unchanged (identical status lines, same 50 TLB-miss lines). Recording the libspu work:
+
+- tool `Bash`: Record the libspu work and update the archive
+
+- tool `PushNotification`: 
+
+## Claude
+
+libspu is done. The SPU interrupt, which is MGS's sound clock, now works end to end in PCSX2, including the task switch it triggers. Nothing is committed yet.
+
+**Why it mattered:** MGS loops a silent block on voice 23 with the SPU interrupt address inside it, giving an interrupt about every 10 ms (98.44 Hz). Each interrupt streams the next part of the music and wakes the sound task through `mts_isend`. If the interrupt doesn't arrive at the PS1's rate, the music tempo is wrong.
+
+**How it's delivered:**
+1. The SPU2 raises core 0's interrupt.
+2. The IOP module acknowledges it, the same way the PS1 hardware requires, and sends a SIF command to the EE.
+3. On the EE, a high-priority thread runs the game's callback.
+4. That thread immediately sends the register writes the callback made: the next interrupt address and the re-arm.
+5. It then makes the PS1 task switch that `mts_isend` asked for.
+
+**Also added:**
+- **Sound RAM allocator:** `SpuMalloc`, from psyz's decompiled C (MIT).
+- **Smaller functions:** noise and pitch-modulation voices, reverb depth, and all-keys status.
+- **ATTR register:** every write now keeps the reverb and interrupt bits.
+
+**Test result:** [spu_irq_test](../psx-to-ps2-HAL/tools/spu_irq_test/test_ps1.c) runs MGS's own sound start-up sequence, passing in PCSX2 both times:
+- The four sound RAM allocations got exactly the PS1's addresses.
+- It measured 492 interrupts in 300 VSyncs (5.0045 s). The PS1 rate predicts 492.6.
+- Every interrupt reached the EE, and the waiting task ran after each one.
+
+**Bug found along the way:** at first, interrupts seemed to stop after the first one. The cause was the test program itself: its main thread starts at ps2sdk's default priority of 1, which starved the delivery thread. In the game, the HAL already lowers the main thread to 64, as it now does in the test too. The test's priority mistake had made it look like sending a SIF command from the IOP's interrupt handler was broken. It isn't, so the final code still sends from the interrupt handler.
+
+SH1 is unaffected: same status lines in a 150-second PCSX2 run. The details are in the HAL's [Walkthrough.md](../psx-to-ps2-HAL/docs/Walkthrough.md), and the libspu item in [Planning Doc.md](docs/Planning%20Doc.md) is ticked.
+
+Should I commit this and move on to libcd? libcd is the last of the missing functions MGS needs early: the callbacks and sector access for `libfs/cdbios.c`.
+
+## User
+
+Commit. Keep in mind that “libcd” will be replaced by DVD access functions later, so note that.
+
+## Claude
+
+I'll add that note in both places before committing: MGS's Planning Doc and the HAL's walkthrough.
+
+- tool `Bash`: Note libcd as interim, then commit both repos
+
+## Claude
+
+I committed libspu in both repos: HAL `29e221e` and MGS `3a9bc5c2a`. Both working trees are clean.
+
+I also recorded your libcd decision in two places:
+- **MGS [Planning Doc.md](docs/Planning%20Doc.md):** under the libcd item, a note that libcd emulation is interim and will be replaced by DVD access functions that read the game's files from the PS2 disc directly, not PS1 sectors. It also says to keep libcd thin, just enough for `libfs/cdbios.c` to run, without exact PS1 drive timing.
+- **HAL [Walkthrough.md](../psx-to-ps2-HAL/docs/Walkthrough.md):** the same note on its list of missing functions.
+
+With that in mind, the libcd step should be small: the five missing functions (`CdFlush`, `CdGetSector`, `CdReady`, `CdReadyCallback`, `CdSyncCallback`), implemented only as far as `cdbios.c` needs them.
+
+## User
+
+Proceed
+
+- tool `Bash`: List CD calls in cdbios.c
+
+## Claude
+
+MGS's `cdbios.c` uses the low-level PS1 pattern: start `CdlReadN`, then a ready callback fires per sector and copies data with `CdGetSector`. Reading the whole file to see exactly what it depends on:
+
+- tool `Bash`: Read cdbios.c
+
+## Claude
+
+Before writing anything, I'll check what the HAL's libcd already does. SH1 read the disc differently, so this decides how much new machinery MGS's pattern would need:
+
+- tool `Bash`: Read the HAL libcd layer's scope
+
+## Claude
+
+I'll stop here and ask you, because this changes the plan.
+
+**What MGS's CD code needs.** `cdbios.c` uses the PS1's lowest-level read mode. It starts `CdlReadN`, then a ready callback fires for every sector from the drive's interrupt. The callback pulls the header and data out with `CdGetSector`, checks the sector number, and copies the data into place. It also has a retry and reset loop for drive errors.
+
+**What the HAL has.** The HAL's libcd (written for SH1) only does the higher-level `CdRead` path: start a multi-sector read, then poll until it's done. It has nothing that delivers sectors one at a time through a callback. It also maps PS1 sectors to the DVD using SH1's two disc files. So those "five missing functions" are really a new sector-streaming engine plus a new disc mapping, and both would be thrown away when DVD access replaces libcd.
+
+**The two options:**
+- **A. Emulate `CdlReadN` in the HAL.** A thread would deliver each sector through the ready callback, with `CdGetSector` copying from a buffer. MGS's `cdbios.c` would run unchanged, but this is exactly the throwaway work you want to avoid.
+- **B. Replace `cdbios.c`'s internals in MGS under `MGS_PORT` (my recommendation).** The rest of `libfs` only uses its small interface: `CDBIOS_Reset`, `ReadRequest`, `ReadSync`, `ForceStop` and `TaskState`. A port version can satisfy those by reading through the HAL directly, block by block, and calling the same per-sector callback. That needs no new libcd functions, and it is effectively the first piece of the DVD access layer you're planning anyway.
+
+Either way, the reads need to know how MGS's data will sit on the PS2 disc. The simplest arrangement is one PS1 disc image file on the DVD, so a PS1 sector becomes an offset in that file. That could change later; it doesn't block B.
+
+Do you want B? If so, I'd write it when the MGS port build exists (Step 1), since it's MGS code rather than HAL code. I'd mark the libcd item in Step 0 as replaced by this decision. That leaves Step 0 with the memory card file mapping and the psyz tests.
+
+## User
+
+Let’s go with B for now, then proceed with the rest of step 0
+
+## Claude
+
+I'll record decision B in the plan first, then check the remaining Step 0 items against MGS's code.
+
+- tool `Bash`: Record decision B; check MGS's movie library use
+
+- tool `Bash`: See how MGS uses libpress and St*
+
+- tool `Bash`: Survey psyz's libpress and tests
+
+- tool `Bash`: Compare psyz mdec/vlc with SH1's strdec
+
+- tool `Bash`: Read psyz VLC/MDEC tests
+
+- tool `Bash`: Locate psyz test files
+
+- tool `Bash`: Read the psyz VLC/MDEC tests
+
+- tool `Bash`: Find psyz's libpress implementation
+
+- tool `Bash`: Read the rest of libpress.c and mdec/vlc includes
+
+- tool `Bash`: Check mdec.c/vlc.c dependencies on psyz
+
+- tool `Bash`: Find psyz headers
+
+## Claude
+
+I forgot to `cd` into psyz before using relative paths. Redoing:
+
+- tool `Bash`: Check mdec.c/vlc.c dependencies on psyz
+
+## Claude
+
+The dependencies are small. Checking exactly which names `mdec.c` takes from `internal.h` and `vlc.c` from `psyz.h`:
+
+- tool `Bash`: List what mdec.c and vlc.c use from psyz headers
+
+- tool `Bash`: Read psyz vlc.c's decode and the SDK prototypes
+
+- tool `Bash`: Read psyz mdec.c's state and API
+
+- tool `Bash`: Read MGS's MDEC out callback
+
+- tool `Bash`: Vendor psyz's MDEC and VLC files with their licence
+
+## Claude
+
+Now the libpress layer on top:
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/libpress_ps2.c
+
+- tool `Bash`: Read the VLC fixture format
+
+## Claude
+
+The fixtures cover all three bitstream versions, escape codes and long blocks. I'll add a VLC check next to the libgte test, reusing its interpreter and extractor:
+
+- tool `Bash`: Build and run the VLC check against MGS's code
+
+## Claude
+
+MGS's linker map has no `DecDCTvlcBuild` symbol under that name. Checking what libpress names it does list:
+
+- tool `Bash`: List libpress symbols in MGS's map
+
+## Claude
+
+libpress isn't in the main executable at all, so it must be linked into an overlay. Searching the overlay maps:
+
+- tool `Bash`: Find which overlay links libpress
+
+- tool `Bash`: Inspect the d18a overlay binary and map
+
+- tool `Bash`: Load the overlay and run the VLC check
+
+## Claude
+
+The interpreter's runaway guard stopped `DecDCTvlcBuild`: it fills a 34,816-entry table, which takes more than the 100,000-instruction limit. Raising the limit:
+
+- tool `Bash`: Raise the step limit and rerun the VLC check
+
+## Claude
+
+An unknown instruction at `800D9B0C`. It's either an opcode I haven't implemented or a sign the interpreter went off the rails. Disassembling around it:
+
+- tool `Bash`: Disassemble DecDCTvlc2 around the failure
+
+- tool `Bash`: Check what DecDCTvlcBuild writes
+
+- tool `Bash`: Build and run the debug check
+
+- tool `Bash`: Model load delay slots and rerun both checks
+
+## Claude
+
+No change: it still writes about 170 KB. So I'll stop guessing and read `DecDCTvlcBuild`'s code to see what it actually writes:
+
+- tool `Bash`: Disassemble DecDCTvlcBuild
+
+- tool `Bash`: Decompress the VLC table independently in Python
+
+- tool `Bash`: Find the first byte where the interpreter's table differs
+
+## Claude
+
+The interpreter's very first output byte is already wrong: 00 where the Python version has 02. Before tracing the interpreter, I'll check how the stream starts:
+
+- tool `Bash`: Show the start of the compressed table
+
+## Claude
+
+The stream starts with an 8-byte literal (`07` then `02 00 01 00 …`), so the first output byte should be 02. I'll trace the interpreter's first instructions:
+
+- tool `Bash`: Trace the interpreter through DecDCTvlcBuild's start
+
+- tool `Bash`: Fix not-taken branches and rerun everything
+
+- tool `Bash`: Use 32-bit words for the bitstream and rerun
+
+- tool `Bash`: Inspect the fixture's expected layout
+
+- tool `Bash`: Compare against the fixtures as psyz does and rerun
+
+- tool `Bash`: Look for SH1 movie data and the STR dump tool
+
+## Claude
+
+SH1's disc data is local (`rom/USA/HILL.`), and `strdump.c` already assembles frames from it. I need a movie's starting sector:
+
+- tool `Bash`: Find an SH1 movie sector for testing
+
+- tool `Bash`: Compare psyz VLC+MDEC with strdec on real frames
+
+- tool `Bash`: Read strdec's dequantisation, IDCT and colour code
+
+- tool `Bash`: Read psyz's 15-bit pixel conversion
+
+- tool `Bash`: Add a macroblock decoder for MDEC input to strdec
+
+## Claude
+
+Now switching `libpress_ps2.c` from psyz's MDEC to this decoder, and dropping the psyz MDEC files, which are no longer used:
+
+- tool `Bash`: Switch libpress to strdec's MDEC and rerun the frame check
+
+- tool `Bash`: Build SH1 with libpress and list its libpress calls
+
+## Claude
+
+SH1's original movie player (`stream.c`) calls libpress, so I need to check whether the port still runs it or bypasses it:
+
+- tool `Bash`: Check whether SH1's port bypasses stream.c's libpress path
+
+## Claude
+
+Under `SH_PORT`, SH1 plays movies through its own `Port_Movie*` path, so `stream.c`'s libpress calls are linked but not used. I'll confirm with the 150-second PCSX2 comparison:
+
+- tool `Bash`: Rerun SH1's 150 s comparison
+
+- tool `Bash`: Add a frame dump option and extract test data
+
+## Claude
+
+Now the PS2 side of the test, following MGS's `movie.c` sequence:
+
+- tool `Bash`: Build and run the libpress sequencing test in PCSX2
+
+- tool `Bash`: Collect PSY-Q names linked anywhere in MGS
+
+## Claude
+
+471 PSY-Q names are linked somewhere across MGS's executable and overlays. Keeping the ones MGS's code names, minus what the HAL now defines:
+
+- tool `Bash`: Compute the full missing list across overlays
+
+- tool `Bash`: Locate the new libgpu/libgte functions
+
+## Claude
+
+Each one comes from a different overlay. I'll check what psyz has in C, then disassemble the rest from their overlays:
+
+- tool `Bash`: Check psyz for the new functions
+
+- tool `Bash`: Read MargePrim and SetDefDrawEnv
+
+- tool `Bash`: Add the new libgpu functions
+
+## Claude
+
+Now disassembling the three libgte functions from their overlays:
+
+- tool `Bash`: Disassemble MulRotMatrix0, RotMatrixZYX, RotMatrix_gte
+
+## Claude
+
+All three are in the same style as before. Transcribing them:
+
+- tool `Bash`: Add MulRotMatrix0, RotMatrixZYX, RotMatrix_gte
+
+- tool `Bash`: Extend the test to all overlays and run it
+
+- tool `Bash`: Disassemble the original MargePrim
+
+- tool `Bash`: Use a 32-bit store in MargePrim and rerun all images
+
+## Claude
+
+All eight images pass. My filter hid the per-function lines, so I'll confirm the overlay-only functions were actually tested rather than skipped:
+
+- tool `Bash`: Show the overlay-only functions' results
+
+## Claude
+
+Each overlay-only function was tested and matches over 20,000 cases. Building SH1 with all this, then one more 150-second comparison:
+
+- tool `Bash`: Rebuild SH1 and rerun the 150 s comparison
+

@@ -7,7 +7,9 @@
 void SetExMask()
 {
     // unknown psyq-specific debug function ?
+#ifndef MGS_PORT // the EE assembler has no single-operand break code above 1023; a debug trap anyway
     __asm__("break 1030");
+#endif
 }
 
 void *mts_get_bss_tail(void)

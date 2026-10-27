@@ -128,9 +128,10 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 
 - [ ] `build/build_ps2.py` (or a `--ps2` mode for `build.py`): ee-gcc + ps2sdk, `-DMGS_PORT`, output
       ELF; does not touch the matching ninja file
-- [ ] Header shim so `source/include` resolves PSY-Q headers to the HAL's
-- [ ] Compile `main`, `libgv`, `libdg`, `libgcl`, `libfs`, `libhzd` cleanly; log compiler-dialect
-      fixes (old-GCC-isms written to match `cc1psx`) in the walkthrough
+- [x] Header shim: `port/include` shims MGS's `inline_n.h`/`inline_x.h` onto the HAL's GTE (stock PSY-Q 4.4
+      headers otherwise)
+- [x] Compile the main executable (219 files) cleanly: `build/build_ps2.py`; dialect fixes under `MGS_PORT`
+      logged in `Running Walkthrough.md`
 - [ ] Link with overlays stubbed out; boot to `main()` in PCSX2
 
 ### Step 2 — Fixed addresses / shiftability

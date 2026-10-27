@@ -201,7 +201,11 @@ int THING_Hzd_800C4820(HZD_SEG *find, int count, HZD_SEG *segs)
 
 int THING_Hzd_800C4848(HZD_FLR *find, int count, HZD_FLR *flrs)
 {
+#ifdef MGS_PORT // casts as lvalues are an old GCC extension
+    *(int *)&find |= 0x80000000;
+#else
     (int)find |= 0x80000000;
+#endif
 
     for (; count > 0; count--, flrs++)
     {

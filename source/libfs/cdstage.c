@@ -127,8 +127,10 @@ typedef struct {
     int           remaining;
 } FS_STAGE_INFO;
 
+#ifndef MGS_PORT // the PS2 build's GCC rejects a static definition after these
 extern FS_STAGE_INFO *fs_stage_info;
 extern int gLoaderStartTime_800B528C;
+#endif
 extern int gOverlayBinSize_800B5290;
 extern int FS_ResidentCacheDirty;
 

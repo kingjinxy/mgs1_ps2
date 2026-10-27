@@ -18,6 +18,7 @@
 obj/
 obj_vr/
 obj_dev/
+obj_ps2/
 
 # Build
 build/dump.asm

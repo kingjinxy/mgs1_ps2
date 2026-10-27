@@ -1701,11 +1701,18 @@ SVECTOR s00a_dword_800C33DC = { -1024, 0,   0 };
 SVECTOR s00a_dword_800C33E4 = { 0,     0, 100 };
 SVECTOR s00a_dword_800C33EC = { -1024, 0,   0 };
 
+#ifdef MGS_PORT // the code below writes digits into these strings: writable copies, not shared literals
+static char s00a_str_ration[] = "RATION";
+static char s00a_str_socom[] = "SOCOM/BULLET * 12";
+static char s00a_str_famas[] = "FA-MAS/BULLET * 25";
+char *s00a_off_800C33F4[3] = { s00a_str_ration, s00a_str_socom, s00a_str_famas };
+#else
 const char *s00a_off_800C33F4[3] = {
     "RATION",
     "SOCOM/BULLET * 12",
     "FA-MAS/BULLET * 25"
 };
+#endif
 
 void ENE_PutSound( WatcherWork* work );
 void ENE_PutBreath( WatcherWork *work, int arg1 );

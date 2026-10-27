@@ -28,6 +28,12 @@ typedef long (*openevent_cb_t)();
 /* scratch pad address 0x1f800000 - 0x1f800400 */
 #define SPAD_STACK_ADDR 0x1f8003fc
 
+#ifdef MGS_PORT
+/* PS2 build: the stack stays where it is (the PS1's scratchpad isn't at this address on the EE, and moving the
+ * stack there was only for speed). */
+#define SetSpadStack(addr) { (void)(addr); }
+#define ResetSpadStack()   { }
+#else
 #define SetSpadStack(addr) { \
     __asm__ volatile ("move $8,%0"     ::"r"(addr):"$8","memory"); \
     __asm__ volatile ("sw $29,0($8)"   ::         :"$8","memory"); \
@@ -39,6 +45,7 @@ typedef long (*openevent_cb_t)();
     __asm__ volatile ("addiu $29,$29,4":::"$29","memory"); \
     __asm__ volatile ("lw $29,0($29)"  :::"$29","memory"); \
 }
+#endif
 
 #define GetStackAddr(addr) { \
     __asm__ volatile ("move $8,%0"     ::"r"(addr):"$8","memory"); \

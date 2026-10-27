@@ -69,7 +69,7 @@ extern void *mts_get_bss_tail(void);
 // "mts_new.c" should really be __FILE__ but we get the full path using the
 // decomp's build system. mts.lib was originally built using a local Makefile.
 
-#if __STDC_VERSION__ >= 199901L // C99
+#if __STDC_VERSION__ >= 199901L || defined(MGS_PORT) // C99 (and the PS2 build's GCC, which rejects ##args)
 #define mts_assert( cond, line, ... )                               \
         if ( !( cond ) )                                            \
         {                                                           \

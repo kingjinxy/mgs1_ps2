@@ -192,6 +192,9 @@ void draw_radar_frame(MenuWork *menuMan, u_long *ot)
         :                                                       \
         : "r"( r0 ) )
 // clang-format on
+#ifdef MGS_PORT
+#include "gte_from_radar.h" /* these two on the HAL's software GTE (port/include) */
+#endif
 
 void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
 {

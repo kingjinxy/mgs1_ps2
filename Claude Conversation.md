@@ -2177,3 +2177,186 @@ Only those two. Rerunning psyz's tests, SH1's `gte_test` (checked against real P
 
 - tool `Bash`: Add the PocketStation stubs; rebuild and recheck SH1
 
+## Claude
+
+SH1 is unchanged. Recording these last items:
+
+- tool `Bash`: Record the tests, GTE fixes and stubs
+
+- tool `PushNotification`: 
+
+## Claude
+
+The earlier batch is committed: HAL `77a9a59`, SH1 `29412fbeb`, MGS `e5e0f4581`. I've also done the rest of Step 0 that was possible without the game discs. That second part is not committed yet.
+
+**psyz's libgte tests:** these are about 3,000 lines of checks with expected values from a real PS1. I run them on the EE in PCSX2 against the HAL's libgte and software GTE. The tests come from a psyz checkout and aren't copied in, because their licence isn't stated.
+- **First run:** 210 passed and 15 failed. 12 of the failures are four functions neither game uses (`NormalClip`, `SetFogNear`, `SetFogNearFar`, `SetMulMatrix`).
+- **Three real differences from the hardware, now fixed in `gte.c`:**
+  - opcodes `0x00` and `0x1A` act as RTPS and DCPL on the hardware; the HAL ignored them.
+  - when the depth-cue value saturates, the hardware also flags it even if only a fraction is above the limit; the HAL missed that case.
+- **After the fixes:** 213 pass, and only those four unused functions fail. SH1's existing GTE test against real PS1 results still matches for all 7 seeds (19,040 results), and so do all the libgte comparison images.
+
+**PocketStation stubs:** the `rank` overlay's PocketStation calls are now no-ops. One catch: its `FlushCache` clashes with the PS2 kernel function of the same name, so that call needs renaming when `rank`'s assembly is recompiled. That's recorded in the plan.
+
+**Not done:** psyz's other test files (libgpu, libspu, libcd, events, video) depend on psyz's own platform layer, so I didn't run them. What MGS uses from those libraries is already tested against the game's own code instead.
+
+SH1 is unchanged in PCSX2. Everything is recorded in the HAL's [Walkthrough.md](../psx-to-ps2-HAL/docs/Walkthrough.md) and MGS's [Planning Doc.md](docs/Planning%20Doc.md).
+
+That completes the HAL side of Step 0. Two items remain, both MGS game code that needs Step 1's port build:
+- the memory card file mapping,
+- the CD/DVD reading replacement (option B).
+
+The disc layout will be clearer once you provide the MGS Integral `.bin`/`.cue` files.
+
+Should I commit this last batch in the HAL and MGS repos?
+
+## User
+
+Yes, and also make a note in the planning doc that PocketStation support is planned but low priority. There may not be PS2 specific libraries to interface with it, but we should be able to use low level communication with a custom implementation, if there isn’t a GitHub project using it.
+
+- tool `Bash`: Add the PocketStation note and commit both repos
+
+## Claude
+
+I committed both repos: HAL `c0c478d` and MGS `9b657dcde`. Both working trees are clean.
+
+In MGS's [Planning Doc.md](docs/Planning%20Doc.md), right under the PocketStation stubs item, there's a new open item: PocketStation support is planned but low priority, and the current no-op stubs only stand in until then. It says to first look on GitHub for an existing project that talks to a PocketStation from a PS2. If there isn't one, the fallback is a custom implementation using low-level communication on the memory card port (SIO2).
+
+The HAL side of Step 0 is done. The next work is Step 1, the MGS port build: compiling the game for the EE, plus the MGS-side CD/DVD reading and memory card mapping. For the disc reading, I'll wait for your MGS Integral `.bin`/`.cue` files.
+
+## User
+
+Let’s get started on compiling the game for the EE. We won’t have the disc images yet, so we’ll get to that later.
+
+## Claude
+
+I'll start by learning how `build.py` decides which sources make up the main executable, which include paths and defines it uses, and how overlays are separated.
+
+- tool `Bash`: Survey build.py's structure
+
+- tool `Bash`: Read gen_build_target and the linker command file
+
+- tool `Bash`: Compare SH1's PSY-Q headers with what MGS includes
+
+- tool `Bash`: Read the linker command file preprocessor
+
+- tool `Bash`: List the main executable's objects by source type
+
+- tool `Bash`: List main-exe objects using the build venv
+
+- tool `Bash`: Check the source encoding conversion step
+
+- tool `Bash`: Read convjp.py
+
+- tool `Bash`: Test EUC-JP conversion and MGS's GTE headers
+
+- tool `Bash`: Compare MGS's GTE macro headers with SH1's
+
+- tool `Bash`: Read SH1's GTE macro generator
+
+- tool `Bash`: Read the generator's main()
+
+- tool `Bash`: Move the GTE macro generator to the HAL
+
+## Claude
+
+The regenerated HAL headers show as modified. I'll check that only the comment line changed:
+
+- tool `Bash`: Check the regenerated headers' differences
+
+## Claude
+
+Only the comment line changed, so the moved generator reproduces SH1's output exactly. Now generating MGS's two headers and the shims:
+
+- tool `Bash`: Generate MGS's translated GTE macro headers
+
+- tool `Bash`: Find how the generator handles .word
+
+- tool `Bash`: Read the .word case
+
+- tool `Bash`: Add cop2 support and regenerate MGS's headers
+
+- tool `Bash`: Write the GTE header shims
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/build/build_ps2.py
+
+- tool `Bash`: Run the first EE compile of the main executable
+
+## Claude
+
+You've hit your session limit · resets 12:20pm (America/Chicago)
+
+## User
+
+Continue
+
+## Claude
+
+208 of the 219 main-executable files already compile. I'll add `obj_ps2/` to `.gitignore`, then look at the 11 failures:
+
+- tool `Bash`: Show the first errors of each failing file
+
+- tool `Bash`: Show the errors of files without 'error' lines
+
+- tool `Bash`: Find GTE inline asm outside the shimmed headers
+
+- tool `Bash`: Find headers with inline asm used by trans.c and level.c
+
+## Claude
+
+`trans.c` and `level.c` include `inline_n.h`, which the shim should cover, so the remaining asm likely comes from `psxdefs.h`, the third header with inline asm. Checking it:
+
+- tool `Bash`: Read psxdefs.h's macros
+
+## Claude
+
+`psxdefs.h` only has stack-switching asm (moving the stack into the scratchpad), not GTE code. I'll preprocess `trans.c` and look for the GTE asm in the expanded output:
+
+- tool `Bash`: Trace where trans.c's GTE asm comes from
+
+- tool `Bash`: Re-apply the translation on every inclusion and rebuild
+
+- tool `Bash`: Read the code behind the remaining failures
+
+- tool `Bash`: Read action.c's table, radar.c's macros and cdstage.c
+
+## Claude
+
+These are all small. One more look: `mts_assert` has two variants in `mts_new.h`, and I want to see both before changing it:
+
+- tool `Bash`: Read the full mts_assert definition
+
+## Claude
+
+The header already has a C99 variant that modern compilers accept, so the port can just take that branch. Applying all seven fixes, each behind `MGS_PORT`:
+
+- tool `Bash`: Apply the MGS_PORT fixes and rebuild
+
+## Claude
+
+All 219 main-executable files compile for the EE. I changed game sources, so the project rule applies: the matching PS1 build must still produce the exact hashes. Running it:
+
+- tool `Bash`: Run the matching PS1 build
+
+## Claude
+
+All 80 outputs still match. I'll also check the VR executable variant, which compiles the same sources:
+
+- tool `Bash`: Run the VR variant matching build
+
+## Claude
+
+The VR variant matches too. Before linking, I'll check the one `-Woverflow` warning, since overflow in decompiled constants can hide a real behaviour difference:
+
+- tool `Bash`: Inspect the overflow and deprecated warnings
+
+- tool `Bash`: Read the scratchpad stack macros and their users
+
+## Claude
+
+Under `MGS_PORT`, `SetSpadStack`/`ResetSpadStack` become no-ops, so the code keeps running on its normal stack. `GetStackAddr` only stores the stack pointer, which is valid on the EE as is:
+
+- tool `Bash`: Make the scratchpad stack a no-op on the EE
+
+- tool `Bash`: Start the MGS walkthrough and update the plan
+

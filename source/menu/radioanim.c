@@ -5,7 +5,11 @@
 #include "mts/mts.h"
 #include "mts/taskid.h"
 
+#ifdef MGS_PORT // casts as lvalues are an old GCC extension
+#define OFFSET_TO_PTR2(ptr, offset) (*(int *)&(offset) = (int)(ptr) + (int)(offset))
+#else
 #define OFFSET_TO_PTR2(ptr, offset) ((int)(offset) = (int)(ptr) + (int)(offset))
+#endif
 
 menu_0x14 SECTION(".bss") stru_800BDA48[ 2 ];
 

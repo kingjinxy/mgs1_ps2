@@ -128,3 +128,35 @@ loading can be tried once the game runs that far (the disc).
 
 Matching build: 80 OK, and the VR executable. SH1: links (9 stubs); 150 s in PCSX2 into its demo loop, card found
 and its image loaded, no TLB misses.
+
+## Step 1: the pad (2026-10-27)
+
+MGS's pad code (`mts/mts_pad.c`) uses `PadInitDirect`/`PadStartCom`: the PS1 BIOS writes each pad's data into the
+game's two receive buffers every vertical blank, and the game's vertical blank callback (`do_control`, through
+`mts_VSyncCallback`) reads them, checks the pad state and sets up the DualShock's actuators (`PadInfoAct`,
+`PadSetActAlign`). SH1 never calls these (its `Joy_Init` opens the PS2 pads itself), so they were stubs.
+
+HAL (`ps2/libpad_psx.c`, `ps2/pad_ps2.c`):
+- `PadInitDirect` keeps the two buffers, `PadStartCom` opens the ports and has every poll copy the pads' 8-byte
+  records into them (`Port_PadSetDirect`), `PadStopCom` (the soft reset) stops the copies.
+- **First run crashed** (jump to `0x657A696C`, ASCII "lize", right after the first pad poll). The HAL runs the
+  game's vertical blank callback in the interrupt; MGS's calls `VSync(-1)` there, and VSync polls the pads
+  (libpad, IOP calls, printf). Until then the ports were never open, so the poll returned at once. Bigger task
+  stacks (tried first: the system task's is 512 bytes) didn't help. New HAL setting `HAL_GAME_PAD_THREAD`
+  (set for MGS): the vertical blank interrupt wakes a thread that polls (priority 2, above the game's), VSync
+  doesn't poll, and the calls the callback makes answer from the last poll (state, actuator info) or are left
+  for the next one (`PadSetActAlign`, `PadSetMainMode`). The actuator info is read once per plugged-in pad:
+  each `padInfoAct` is a pad command, and reading them at every state change kept port 1 alternating between
+  "executing" and "stable" every frame.
+- `PadGetState` mapped the PS2's states to the wrong PS1 values: a command in progress gave 2
+  (`PadStateFindCTP1`, a pad without DualShock functions) and a pad without them gave 6. MGS then marked a
+  DualShock as digital. Now: FINDCTP1 → 2, EXECCMD → 5, STABLE → 6 (`libpad.h`'s values).
+- `mts_new.c` under `MGS_PORT`: every task runs on a 32 KB stack of the port's (`mts_port_stacks`); the PS1's
+  0.5–2 KB stacks are left in place with their cookies. Kept although it wasn't the crash: EE frames are
+  larger than the PS1's, and the system task now runs HAL code.
+
+Now (PCSX2): port 1 goes stable, the actuator alignment is sent, no TLB misses; the game waits on the stubbed
+libcd as before. Buttons can be checked once the game gets past the disc. Stubs left: the libcd functions.
+
+Matching build: 80 OK, and the VR executable. SH1: links (9 stubs); 150 s in PCSX2 through its attract demos, pad
+stable, no TLB misses.

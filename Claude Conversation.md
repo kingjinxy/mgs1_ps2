@@ -3042,3 +3042,307 @@ The baseline logs are in a different, shorter format, so I'll look at how they w
 
 - tool `Bash`: Find memory card plan item
 
+- tool `Bash`: Docs, plan tick, conversation archive
+
+- tool `PushNotification`: 
+
+## Claude
+
+I committed the boot-to-`main()` work (HAL `e918488`, MGS `d2c647168`), and the memory card now works at boot in PCSX2. With a fresh card in port 1, the game finds it as a new card, as the PS1 does at boot, and loads its empty image. Port 2 correctly reports no card. The game then moves on to `pad:`, `gv:` and `fs:`, and stops at the stubbed libcd, which waits on the disc work. Saving and loading are untested, because the game needs the disc to get far enough. The memory card changes aren't committed yet.
+
+**What changed:**
+- **Card file calls:** under `MGS_PORT`, `memcard.c` sends `open`, `read`, `write`, `lseek`, `close`, `firstfile`, `nextfile`, `erase` and `format` to the HAL's `Port_Bu*` functions, as SH1 does. The HAL's card files (`psx_card.c` and `memcard_ps2.c`) are now linked, which cuts the stubs from 24 to 11.
+- **Settings in `hal_game_config.h`:** product code `BISLPM-86247` (the game's own card name), PS2 save folder `BISLPM-86247MGS`, and a save title with a "PS1 saves" second line.
+  - The title's line break was hard-coded to SH1's 11 characters, so it's now a HAL setting (16 for MGS).
+- **Save icon:** MGS keeps its icons as raw palette and pixel data. `HalGame_Init` packs Snake's icon into the TIM format the HAL expects.
+- **The hang in `memcard_init`:** the HAL only delivers a card query's result when the game calls `TestEvent`, which SH1 does every frame. MGS never calls it; it waits for the event callbacks in its scheduler's vblank waits.
+  - A new HAL setting, `HAL_GAME_CARD_INFO_WAIT`, makes `_card_info` finish the PS2 query on the spot and deliver the event at once.
+  - MGS only checks the card at boot and on the data screen, so the wait doesn't cost frames.
+- **Test cards:** `MGS_MC_FORMAT=1` builds format a blank card in port 1, for PCSX2 runs with `--memcards`.
+
+**Checks:**
+- Matching build: 80 OK, and the VR executable matches.
+- SH1 links with its usual 9 stubs and ran 150 s in PCSX2: its card was found and loaded, it reached its demo loop, and there were no TLB misses.
+- I couldn't compare that run line by line: the saved baseline logs come from shorter runs in a different log format.
+
+I updated the Planning Doc, both walkthroughs and `Claude Conversation.md`. The pad (`PadInitDirect`, `PadStartCom`, `PadStopCom`) is the next thing I can do without the disc images. Should I commit and move on to it?
+
+## User
+
+Commit and wait
+
+- tool `Bash`: Commit HAL and MGS
+
+## Claude
+
+I committed both repos: the HAL as `deedc98` and MGS as `5dd436010`. Both working trees are clean. I'll wait for your go-ahead before starting the next step.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>Bash, Edit, PushNotification, Read, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Port the Metal Gear Solid Integral PS1 decomp (`/home/alex/Documents/mgs1_ps2`, branch `ps2-port`) to the PS2, following `docs/Planning Doc.md`.
+   - The PSY-Q compatibility layer (HAL) is shared in the sibling repo `~/Documents/psx-to-ps2-HAL`. Changes that affect SH1 must be recorded in the SH1 repo too.
+   - Commit only when asked.
+   - Decision B: libcd will be replaced with DVD/HAL block reads. The disc images (.bin/.cue) come later.
+   - PocketStation support is low priority.
+   - This session:
+     - "Start linking": done.
+     - "Commit and then proceed with the memory card": done.
+     - "Commit and wait": committed.
+     - The compact instructions add: "And move on to the pad functions".
+
+2. Key Technical Concepts:
+   - **`build/link_ps2.py`** produces `obj_ps2/mgs.elf` and `obj_ps2/mgs_ps2.iso`. Steps:
+     - compiles the game via `build_ps2.py`;
+     - compiles HAL `src/*.c` with `HAL_CFLAGS` (`-I port/hal`, `-I obj_ps2/hal_inc` with a `psyq` symlink to the PSY-Q 4.4 includes, `-DSH_PORT -DMGS_PORT`);
+     - compiles HAL `src/ps2/*.c` and `port/src/*.c` with the ps2sdk flags;
+     - builds the IOP modules `sh1agent`, `sh1spu` and `freesd` and embeds them with `bin2c`;
+     - runs `ld -r` to make `game.o`, renaming `main` to `Game_PsxMain` and renaming every name both the game and the linked libraries define to `MGS_<name>` (currently `fprintf`, `getchar`, `random`, `sio_puts`);
+     - generates `hal_stubs.c` for undefined names;
+     - writes the ISO with the HAL's `tools/mkiso.py`.
+   - Environment switches: `MGS_LOG_DIRECT=1`, `MGS_MC_FORMAT=1` (passes `-DSH_PORT_MC_FORMAT` to the PS2 side).
+   - **`build_ps2.py`**:
+     - reads the rendered `obj/linker_command_file.txt`, so the matching build must run first: 168 files;
+     - the regex allows a missing closing quote;
+     - adds `-fcommon`.
+   - `SECTION(x)` is empty under `MGS_PORT` (`mgstype.h`).
+   - `mts` reaches the PS1 kernel tables through `MTS_SYSTEM_TOT` = `Port_PsxToT()` under `MGS_PORT`.
+   - The retail empty `printf` is left out under `MGS_PORT`.
+   - `HAL_GAME_HOST_PROBE` setting in `crash_ps2.c`: SH1's default is `sh1_ps2.iso`, MGS uses `mgs.elf`.
+   - `HAL_GAME_PS2_SAVE_TITLE_BREAK` setting (default 11; MGS 16).
+   - `HAL_GAME_CARD_INFO_WAIT`: `_card_info` calls the new `PortMc_InfoWait(slot)` (`finish`/`start`/`finish`), then `Port_CardPoll()`. MGS sets it because it waits on event callbacks in `mts_wait_vbl` loops and never calls `TestEvent`.
+   - Run in PCSX2 with `python3 ../silent-hill-1-ps2-port/tools/port/pcsx2_run.py obj_ps2/mgs_ps2.iso --seconds 25 --stall 12 [--memcards <empty dir>]`.
+   - Matching build, run from `build/`: `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py`, expecting 80 OK; also run with `--variant=vr_exe`.
+   - SH1 check:
+     - Run `SH1_FPS=60 SH1_NO_RECOMP=1 python3 tools/port/port_link.py`, then `tools/port/make_iso.sh`, then `pcsx2_run.py build/port/sh1_ps2.iso --seconds 150 --stall 15`.
+     - It currently gives 9 stubs. The run reached the demo loop with no TLB misses; the old baseline logs aren't comparable.
+
+3. Files and Code Sections:
+   - **MGS repo:**
+     - `build/build_ps2.py`, `build/link_ps2.py` (new).
+     - `port/hal/common.h`: SH1-style types and the `PSX_RAM_ADDR`/`PSX_SCRATCH` macros.
+     - `port/hal/hal_game_config.h` defines:
+       - `HAL_GAME_NAME "MGS"`, `PSX_RAM_SIZE`, `HOST_PROBE "mgs.elf"`;
+       - `PS1_PRODUCT "BISLPM-86247"`, `PS2_SAVE_DIR "BISLPM-86247MGS"`, `ICON_FILE "MGS.ICO"`;
+       - `SAVE_TITLE "METAL GEAR SOLIDPS1 saves"`, `TITLE_BREAK 16`;
+       - `SAVE_ICON g_MgsSaveIconTim`, `CARD_INFO_WAIT 1`.
+     - `port/hal/port/prof_game.h` (empty).
+     - `port/linkfile`: a copy of SH1's, with `_bss_orgend = .;` after `_end_bss`.
+     - `port/src/hal_game.c`: `HalGame_Init` calls `setvbuf(stdout, NULL, _IONBF, 0)`, then `save_icon_build()`, which builds a 48-word TIM from `clutsAndIcons_8009E774[0]`. Under `MGS_LOG_DIRECT` it also calls `Port_LogDirect()`.
+     - `source/include/mgstype.h` (`SECTION`).
+     - `source/mts/mts_new.c` (`MTS_SYSTEM_TOT`, `printf` guard).
+     - `source/memcard/memcard.c`: under `MGS_PORT`, `#define`s map `open`, `close`, `lseek`, `read`, `write`, `firstfile`, `nextfile`, `erase` and `format` to `Port_Bu*`.
+     - Docs: `docs/Planning Doc.md` and `docs/Running Walkthrough.md` (entries for the link and the memory card), plus `Claude Conversation.md`.
+   - **HAL repo:**
+     - `src/ps2/crash_ps2.c` (`HOST_PROBE`).
+     - `tools/mkiso.py` (copied from SH1).
+     - `src/ps2/memcard_ps2.c` (`TITLE_BREAK`, `PortMc_InfoWait`).
+     - `src/psx_card.c` (`#ifdef HAL_GAME_CARD_INFO_WAIT` in `_card_info`).
+     - `docs/Walkthrough.md`.
+
+4. Errors and fixes:
+   - **Tag stripping:** stripping the jinja tags included both branches, giving 219 files. Fixed by reading the rendered list (168 files).
+   - **Duplicate definitions:** fixed with `-fcommon` and an empty `SECTION` under `MGS_PORT`.
+   - **Missing headers:** `prof_game.h` and `psyq/` headers were missing; I supplied both.
+   - **False error report:** the link-error filter matched `CDBIOS_Error`. Fixed the filter.
+   - **Zero page mapped in PCSX2:** the probe file name is now a game setting.
+   - **TLB misses at `0x100`:** fixed with `Port_PsxToT`.
+   - **Hang in `SifExecModuleBuffer`:**
+     - Cause: game symbols shadowed library ones.
+     - Fix: rename the clashes in `game.o`.
+     - Booting from the ISO didn't matter, but the ISO is kept.
+   - **Card events never delivered:**
+     - A thread-based fix failed, because `s_MainThread` is the first caller, which is the game task.
+     - Fixed with the `HAL_GAME_CARD_INFO_WAIT` setting.
+
+5. Problem Solving:
+   - The boot reaches `memcard_init`, which now succeeds: port 1's card is found as new, port 2 reports no card.
+   - The game then prints `pad:` (the stubs `PadInitDirect` and `PadStartCom` are hit), `gv:` and `fs:`, then loops on the libcd stubs (`CdInit`/`CdControl`/`CdReset`...), which need the disc.
+   - Stubs left (11): `CdControl CdFlush CdGetSector CdInit CdReadyCallback CdReset CdSyncCallback PadInitDirect PadStartCom PadStopCom Port_CdHill`.
+   - Saving and loading are untested until the game runs further.
+
+6. All user messages:
+   - "Start linking"
+   - "Commit and then proceed with the memory card"
+   - "Commit and wait"
+   - (Compact instruction) "And move on to the pad functions"
+   - Standing rules from CLAUDE.md:
+     - Notify at stopping points.
+     - Web access: GitHub only without asking.
+     - Never access tcrf.net in any way.
+     - Keep `Claude Conversation.md` updated (concatenate all `.jsonl` files with `ls -tr`, run `archive_conversation.py`, check that no lines were removed).
+     - The matching build must pass after every port change.
+     - No `pkill -f` on a pattern in the command's own command line.
+     - PCSX2 uses the software renderer; a stall is a crash; never dismiss TLB Miss lines.
+     - DuckStation is the reference.
+     - No upstream contributions.
+
+7. Pending Tasks:
+   - Pad functions: `PadInitDirect`, `PadStartCom`, `PadStopCom`.
+     - The HAL has `src/ps2/libpad_psx.c` and `pad_ps2.c`; check what they provide and how MGS uses libpad (`mts_init_controller`).
+   - Later:
+     - CD replacement (decision B) when the disc images arrive.
+     - Test saving and loading.
+     - Step 2: fixed addresses, including where the PS1 heaps go relative to `_bss_orgend`.
+     - HAL cleanups.
+
+8. Current Work:
+   I committed HAL `deedc98` ("Memory card: save title line break and blocking card queries as game settings") and MGS `5dd436010` ("Port: memory card through the HAL's PS1 card images"). All working trees are clean.
+
+9. Optional Next Step:
+   Per the instruction "And move on to the pad functions", implement the pad functions:
+   - Read how MGS calls libpad (`mts_init_controller` and its pad callback in `mts`) and what the HAL's `libpad_psx.c` and `pad_ps2.c` provide.
+   - Add `PadInitDirect`, `PadStartCom` and `PadStopCom` (HAL side if generic), relink, and boot in PCSX2.
+   - Run the matching build and the SH1 check, update the docs, and don't commit until asked.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/a70287cb-6517-4aad-be48-35c9a4cc3ddc.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args>And move on to the pad functions</command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Move on to the pad functions
+
+- tool `Bash`: Find MGS libpad calls and HAL pad files
+
+- tool `Bash`: Read HAL pad code and MGS call sites
+
+- tool `Bash`: Read SH1 joy.c and MGS mts_pad.c
+
+- tool `Bash`: Check poll order, buffer layout, pad.h
+
+- tool `Bash`: Add PadInitDirect/PadStartCom/PadStopCom to HAL
+
+## Claude
+
+Added `PadInitDirect`/`PadStartCom`/`PadStopCom` to the HAL (each poll copies pad data into the game's buffers). Now relinking and booting.
+
+- tool `Bash`: Relink and run in PCSX2
+
+- tool `Bash`: Find where the run log is saved
+
+- tool `Bash`: Run again saving log, inspect around misses
+
+- tool `Bash`: Run with direct logging
+
+- tool `Bash`: Read do_control and buffer struct
+
+- tool `Bash`: Compare run without the pad change
+
+## Claude
+
+Found it: the crash only happens with the pad change. My guess is the pad poll (which calls printf) runs from VSync inside an MTS task, whose stack is small. Checking the stack sizes.
+
+- tool `Bash`: Find MTS task stack sizes
+
+- tool `Bash`: Locate stack declarations and VSync callers
+
+- tool `Bash`: List all task stacks
+
+## Claude
+
+Most task stacks are 0.5–2 KB, which is too small for EE code plus HAL calls. A central fix would be to give every MTS task a port-owned large stack in `mts_CreateTask`. Reading it first.
+
+- tool `Bash`: Read mts_CreateTask
+
+- tool `Bash`: Read mts_new.c header and CreateTask
+
+- tool `Bash`: Give MTS tasks port-owned 32 KB stacks
+
+- tool `Bash`: Check stack-check users
+
+## Claude
+
+Only a debug readout uses the stack check, so it's harmless. Rebuilding and running with direct logging.
+
+- tool `Bash`: Relink and run with big task stacks
+
+## Claude
+
+Same crash, so it isn't the stack. Checking whether `VSync(-1)` gets called from the vertical-blank interrupt handler, where calling printf or libpad isn't allowed.
+
+- tool `Bash`: Check VSync(-1) call context
+
+- tool `Bash`: Read how the HAL runs the VSync callback
+
+- tool `Bash`: Read pad info/act functions
+
+- tool `Bash`: Check includes, config conventions, MGS pad calls
+
+- tool `Bash`: Read hal_game.h settings doc
+
+- tool `Bash`: See how PS2 files take game settings
+
+## Claude
+
+Now the code changes in `pad_ps2.c`, `pad.h`, `libpad_psx.c` and `libetc_ps2.c`.
+
+- tool `Bash`: Add HAL_GAME_PAD_THREAD pad polling thread
+
+- tool `Bash`: Enable setting, relink, run
+
+## Claude
+
+The thread code went in after `Port_PadInit`, which uses it. Moving it above.
+
+- tool `Bash`: Fix order, relink, run
+
+- tool `Bash`: Instrument pad commands and run
+
+- tool `Bash`: Read actuator info once per connection
+
+- tool `Bash`: Relink and run
+
+- tool `Bash`: Check SH1 libkpad state usage and PS1 constants
+
+- tool `Bash`: Read SH1 PadGetState users
+
+## Claude
+
+SH1's handlers were written against the real PS1 values, so the correct mapping (ExecCmd 5, FindCTP1 2) is what both games expect. I'll fix it and confirm SH1 with its run.
+
+- tool `Bash`: Fix PadGetState mapping, rerun
+
+## Claude
+
+Alignment is sent now and the state settles at stable. Next: removing the debug prints, then the matching builds and the SH1 check.
+
+- tool `Bash`: Remove debug, relink, run matching builds
+
+- tool `Bash`: Check vr_exe build result lines
+
+## Claude
+
+Both matching builds pass (80 OK for main, 2 OK for vr_exe). Running the SH1 check now, since the HAL's pad state mapping changed.
+
+- tool `Bash`: SH1 build and 150 s PCSX2 run
+
+- tool `Bash`: Check SH1 run reached demo loop
+
+## Claude
+
+SH1 is fine: it runs through the attract demos with 0 TLB misses and 9 stubs, as before. Updating the docs now.
+
+- tool `Bash`: Find doc sections to update
+
+- tool `Bash`: Read MGS doc sections
+
+- tool `Bash`: Update MGS and HAL docs
+

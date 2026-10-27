@@ -377,9 +377,21 @@ int mts_wait_vbl( long count )
  * @param stackend   A pointer to the end of the stack memory allocated for the task.
  * @param entrypoint A pointer to the function that represents the task's entry point.
  */
+#ifdef MGS_PORT
+/* The PS1 tasks' stacks (0.5 to 2 KB) are too small for the EE's larger stack frames and the HAL's calls
+ * (VSync polls the pads and can print from the system task): every task runs on one of these instead.
+ * The game's own stacks stay, with their cookies (mts_set_stack_check), unused. */
+#define MTS_PORT_STACK_SIZE (32 * 1024)
+static unsigned long long mts_port_stacks[ MTS_NR_TASK ][ MTS_PORT_STACK_SIZE / 8 ];
+#endif
+
 static inline void mts_CreateTask( int tasknr, void *stackend, void *entrypoint )
 {
     MTS_TASK *task;
+
+#ifdef MGS_PORT
+    stackend = STACK_BOTTOM( mts_port_stacks[ tasknr ] );
+#endif
 
     SwEnterCriticalSection();
 

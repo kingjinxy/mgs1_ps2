@@ -183,7 +183,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 
 - [ ] `libfs` sector reads via the HAL (disc 1 first; disc swap later)
 - [ ] `memcard/` saves via the HAL memory card layer
-- [ ] Pad incl. vibration/DualShock analog
+- [~] Pad incl. vibration/DualShock analog: PadInitDirect buffers, polling thread, actuator setup (Step 1); buttons and vibration untested until the game runs past the disc
 
 ### Step 7 — Sound
 

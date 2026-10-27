@@ -23,6 +23,10 @@
  * TestEvent: _card_info answers at once. */
 #define HAL_GAME_CARD_INFO_WAIT 1
 
+/* mts_pad.c reads the pads from the vertical blank callback, which the HAL runs in the interrupt: a thread
+ * polls them instead of VSync (ps2/pad_ps2.c). */
+#define HAL_GAME_PAD_THREAD 1
+
 /* Not set yet: the disc (decision B in docs/Planning Doc.md replaces the HAL's libcd_ps2.c);
  * build/link_ps2.py leaves that file out until then. */
 

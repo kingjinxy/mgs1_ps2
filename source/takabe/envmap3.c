@@ -30,6 +30,10 @@ MATRIX envmap3_scale = {{{63, 0, 0}, {0, 63, 0}, {0, 0, 63}}, {0, 0, 0}};
         "mfc2   %1, $10;"                                       \
         "mfc2   %2, $11"                                        \
         : "=r"(x), "=r"(y), "=r"(z))
+
+#ifdef MGS_PORT
+#include "gte_from_envmap3.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
 // clang-format on
 
 void Envmap3_800C9F14(DG_MDL *mdl)

@@ -22,6 +22,10 @@ typedef struct _Work
 
 #define gte_pop_color(r0) __asm__ volatile ("mfc2   %0, $9;" : "=r"(r0))
 
+#ifdef MGS_PORT
+#include "gte_from_sub_efct.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
+
 void SubEfct_800CC798(DG_MDL *model)
 {
     int      base;

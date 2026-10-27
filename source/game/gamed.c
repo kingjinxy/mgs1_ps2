@@ -713,6 +713,12 @@ static int GM_LoadInitBin(void *buf, int id)
 #ifdef DEV_EXE
     return 1; // the overlay is embedded in the executable in dev variant
 #endif
+#ifdef MGS_PORT
+    // the overlays are linked into the executable (game/chara.c)
+    extern void Port_SetStage(int id);
+    Port_SetStage(id);
+    return 1;
+#endif
 
     if (((u_char *)StageCharacterEntries + gOverlayBinSize_800B5290) > GV_ResidentMemoryBottom)
     {

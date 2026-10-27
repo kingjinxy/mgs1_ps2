@@ -21,9 +21,46 @@ void GM_InitChara(void)
 #endif
 }
 
+#ifdef MGS_PORT
+#include <stdio.h>
+
+/* PS2 port: the overlays are linked in (build/overlays_ps2.py), so the stage's CHARA table is the linked
+ * one of that stage, not the copy of its binary at StageCharacterEntries (which still receives the read:
+ * libfs/cdstage.c). Port_Stages: generated, by stage name. */
+extern struct
+{
+    const char *name;
+    CHARA      *charas;
+} Port_Stages[];
+
+static CHARA  port_no_charas[1];
+static CHARA *port_stage_charas = port_no_charas;
+
+/* The overlay loader (GM_LoadInitBin): id's low 16 bits are the stage name's GV_StrCode. */
+void Port_SetStage(int id)
+{
+    int i;
+
+    for (i = 0; Port_Stages[i].name; i++)
+    {
+        if ((GV_StrCode(Port_Stages[i].name) & 0xFFFF) == (id & 0xFFFF))
+        {
+            printf("port: stage %s\n", Port_Stages[i].name);
+            port_stage_charas = Port_Stages[i].charas;
+            return;
+        }
+    }
+
+    printf("port: stage binary %X is not linked in\n", id);
+    port_stage_charas = port_no_charas;
+}
+#endif
+
 void GM_ResetChara(void)
 {
-#ifndef DEV_EXE
+#ifdef MGS_PORT
+    port_stage_charas = port_no_charas;
+#elif !defined(DEV_EXE)
     CHARA *chara;
 
     chara = (CHARA *)StageCharacterEntries;
@@ -51,7 +88,11 @@ void *GM_GetCharaID(int chara_id)
         {
             // chara_id wasn't found in the main binary's built-ins,
             // so now we'll search the stage overlay's chara table.
+#ifdef MGS_PORT
+            chara = port_stage_charas;
+#else
             chara = (CHARA *)StageCharacterEntries;
+#endif
         }
 
         for (; chara->func != NULL; chara++)

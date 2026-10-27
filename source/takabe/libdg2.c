@@ -203,6 +203,11 @@ typedef struct _SCRATCHPAD_UNK
         :                                                       \
         : "r"( r0 )                                             \
         : "memory" )
+
+#ifdef MGS_PORT
+#undef _PORT_GTE_FROM_LIBDG2_C /* again after each group of macros: they are used before the next one */
+#include "gte_from_libdg2.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
 // clang-format on
 
 void s12c_800D4B2C(SCRATCHPAD_UNK *scratch, P_TAG *buffer, int p)
@@ -1025,6 +1030,11 @@ void s12c_800D5B00(DG_CHANL *chanl, int idx)
         "lwc2   $5, 20( %0 )"                                   \
         :                                                       \
         : "r"( r0 ) )
+
+#ifdef MGS_PORT
+#undef _PORT_GTE_FROM_LIBDG2_C /* again after each group of macros: they are used before the next one */
+#include "gte_from_libdg2.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
 // clang-format on
 
 // DG_Trans_Chanl_helper_simple_8001DF48
@@ -1460,6 +1470,11 @@ void FogTransChanl_800D63B0(DG_CHANL *chanl, int idx)
         "mtc2   %0, $6;"                                        \
         :                                                       \
         : "r"( r0 ) )
+
+#ifdef MGS_PORT
+#undef _PORT_GTE_FROM_LIBDG2_C /* again after each group of macros: they are used before the next one */
+#include "gte_from_libdg2.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
 // clang-format on
 
 void s12c_800D6588(DG_OBJ *pDGObj, int idx)
@@ -1545,6 +1560,11 @@ void s12c_800D6588(DG_OBJ *pDGObj, int idx)
         :                                                       \
         : "r"( vec )                                            \
         : "memory" )
+
+#ifdef MGS_PORT
+#undef _PORT_GTE_FROM_LIBDG2_C /* again after each group of macros: they are used before the next one */
+#include "gte_from_libdg2.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
 // clang-format on
 
 void s12c_800D6698(DG_MDL *mdl)

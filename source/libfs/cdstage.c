@@ -175,6 +175,14 @@ static int SetupNextFile( DATACNF_TAG *tag, CDBIOS_TASK *task )
         case 'b': // *.bin
             /* set the overlay's load address */
             task->buffer = StageCharacterEntries;
+        #ifdef MGS_PORT
+            // the overlays are linked in: switch to this one's CHARA table (game/chara.c); the binary is
+            // still read into the arena's overlay area, unused
+            {
+                extern void Port_SetStage(int id);
+                Port_SetStage(tag->id);
+            }
+        #endif
         #ifdef DEV_EXE
             task->buffer = NULL; // no overlay in the dev variant
         #endif

@@ -4199,3 +4199,249 @@ The only Step 2 item left is the shift test, which needs Step 3. Should I commit
 
 Commit and then start step 3
 
+- tool `Bash`: Archive conversation and commit Step 2
+
+## Claude
+
+Committed as `fd4d9648a`. Step 3 next; first the plan's section and how SH1 linked its overlays:
+
+- tool `Bash`: Read Step 3 plan
+
+## Claude
+
+The first task is understanding how overlays are loaded and entered. The loader is in `gamed.c`, around the `memcpy` into `StageCharacterEntries`:
+
+- tool `Bash`: Read overlay loader and chara lookup
+
+- tool `Bash`: Read a stage table and overlay build rules
+
+- tool `Bash`: Read overlay part of linker command file
+
+- tool `Bash`: Read overlay object lists
+
+## User
+
+[Request interrupted by user]
+
+## User
+
+I am interested in taking more or less the same route as the SH1 port, which builds the overlays into the executable (because we have much more RAM than the PS1). If we actually need more RAM later, we can turn them back into overlays.
+
+- tool `Bash`: Read SH1's overlay approach notes
+
+- tool `Bash`: Find SH1 overlay docs
+
+- tool `Bash`: Read SH1 static linking section
+
+- tool `Bash`: Read overlay list in build.py
+
+- tool `Bash`: Write and run overlay survey
+
+## Claude
+
+The survey shows 0 stubs everywhere, but the plan says ~747 remain, so my stub regex must be off. Checking how the stubs are written:
+
+- tool `Bash`: Find INCLUDE_ASM style
+
+- tool `Bash`: Fix stub regex, list problem overlays
+
+- tool `Bash`: Show literals in clean overlays
+
+- tool `Bash`: Read build_ps2.py compile code
+
+## Claude
+
+`safechk` exists only as assembly (`asm/safechk.s`), and `title`/`change` both use it. Checking what it is:
+
+- tool `Bash`: Inspect safechk.s
+
+- tool `Bash`: Read safety.c and safechk exports
+
+- tool `Bash`: Check loader id and StageCharacterEntries uses
+
+- tool `Bash`: Read cdstage overlay read and GV_LoadInit
+
+- tool `Bash`: Read link_ps2.py middle section
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/build/overlays_ps2.py
+
+## Claude
+
+Next: the survey regex should start at 0x80010000 so flag bits like `0x80000000` don't count, and `link_ps2.py` needs to call the new module:
+
+- tool `Bash`: Fix literal regex, hook overlays into link
+
+## Claude
+
+Now the game side: `Port_SetStage` and the lookup in [chara.c](source/game/chara.c), and the loader hook in [gamed.c](source/game/gamed.c):
+
+- tool `Bash`: Add port stage hook to chara.c and gamed.c
+
+## Claude
+
+`chara.c` also needs `<stdio.h>` for the port branch. I'll add the copy-protection and drive-status stand-ins to [port/src/cdbios_ps2.c](port/src/cdbios_ps2.c):
+
+- tool `Bash`: Add CD stand-ins, run the PS2 link
+
+## Claude
+
+Four overlay sources fail to compile for the EE. Their errors:
+
+- tool `Bash`: Show overlay compile errors
+
+- tool `Bash`: Show tail of compile logs
+
+## Claude
+
+These four use GTE instructions (`mtc2`/`mfc2`) through something the port's GTE translation doesn't cover. Finding where the raw asm comes from:
+
+- tool `Bash`: Find GTE asm sources in failing files
+
+## Claude
+
+Each file defines its own local GTE macros in inline asm. The main executable had the same case in `radar.c`, and the HAL's generator produced `gte_from_radar.h` for it. Checking how that's wired up:
+
+- tool `Bash`: Check how radar.c's GTE macros are ported
+
+## Claude
+
+I'll do the same for these four: generate a translation header per file, and include it under `MGS_PORT` after the file's own macros.
+
+- tool `Bash`: Generate GTE translation headers
+
+## Claude
+
+All 32 macros translated. Now the includes, placed right after the last local macro in each file:
+
+- tool `Bash`: Include translations, rerun PS2 link
+
+## Claude
+
+`libdg2.c` still fails: it defines GTE macros in several places, some after code that already uses earlier ones. Checking the layout:
+
+- tool `Bash`: Map macro definitions vs functions in libdg2.c
+
+- tool `Bash`: Include libdg2 translation after each group, relink
+
+- tool `Bash`: Add CdIntToPos, relink, boot 120s
+
+## Claude
+
+My `CdIntToPos` didn't compile, so this run used the previous ELF (overlays linked in, no `CdIntToPos`). The compile error first:
+
+- tool `Bash`: Show cdbios_ps2.c compile error
+
+- tool `Bash`: Fix undef; check when the bin loader runs
+
+- tool `Bash`: Find where overlay loader is invoked
+
+- tool `Bash`: Read cdstage loader dispatch
+
+## Claude
+
+For the `'s'` region, `cdstage.c` reads the `.bin` straight to its load address and never calls the `'b'` loader. That's the hook point that matters, so `Port_SetStage` goes there as well:
+
+- tool `Bash`: Hook stage switch in cdstage, rebuild, boot
+
+## Claude
+
+The title overlay's own code runs now: `port: stage title`, then its memory-card check ("this memcard is OK"). Next comes a run of NULL reads at one PC:
+
+- tool `Bash`: Resolve overlay crash PC
+
+## Claude
+
+It goes title → `opening` and starts a stream, so stage switching works. The NULL reads are in `title_open_800D1CB4` (in `onoda/open/open.c`):
+
+- tool `Bash`: Read title_open_800D1CB4
+
+## Claude
+
+`card1 = *memcard_files(port)` copies a whole `MEMCARD` from a NULL pointer. Checking when `memcard_files` returns NULL:
+
+- tool `Bash`: Read memcard_files and the card2 copy
+
+- tool `Bash`: Find all memcard_files copies
+
+## Claude
+
+There are four of these in `open.c`. One macro covers them: in the matching build it stays `*memcard_files(port)`, and in the port it yields an empty card for NULL.
+
+- tool `Bash`: Guard NULL memcard_files in open.c, match build
+
+- tool `Bash`: Rebuild, boot, follow opening stage
+
+## Claude
+
+That's the first run with no crash and no TLB misses: two minutes in the `opening` stage, and the run ended on the time limit. To see how much it's drawing, the renderer's stats at the end:
+
+- tool `Bash`: Check draw stats and screenshot option
+
+## Claude
+
+It's drawing about 1,400 primitives per frame, so the opening sequence's 3D scene is rendering. A screenshot would show it; checking how the HAL's frame dump works:
+
+- tool `Bash`: Find frame dump mechanism
+
+- tool `Bash`: Build with frame dumps, run, convert to PNG
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/b1c516bc-0c11-49af-806e-efb24bae050b/scratchpad/frame_0120.png
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/b1c516bc-0c11-49af-806e-efb24bae050b/scratchpad/frame_0600.png
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/b1c516bc-0c11-49af-806e-efb24bae050b/scratchpad/frame_2400.png
+
+## Claude
+
+The PS2 build plays MGS's opening: the Konami logo, the "Alaska - Bering Sea" caption, and the 3D submarine scene. I'll send you the frames, then update the plan.
+
+- tool `ToolSearch`: 
+
+- tool `SendUserFile`: 
+
+- tool `Bash`: Record Step 3 progress in plan
+
+## Claude
+
+Last, both matching builds again, since several game sources changed:
+
+- tool `Bash`: Run both matching builds
+
+- tool `PushNotification`: 
+
+## Claude
+
+The overlays are now built into the executable, the way SH1 did it, and the PS2 build plays the start of the game in PCSX2. It shows the Konami logo, runs the title stage's memory card check, then plays the opening with its 3D scene. A 120-second run had no crash and no TLB misses. I sent you three frames. Step 2 was committed as `fd4d9648a`; the Step 3 work is not committed yet.
+
+**How it works**
+- **Linking:** a new script, [build/overlays_ps2.py](build/overlays_ps2.py), compiles each overlay's sources like the main executable and merges them into one object per overlay. All of an overlay's symbols are made private except its character table, which gets renamed per stage. Objects that many overlays share (the `enemy/*` and `takabe/*` code) end up as a separate copy, with separate data, in each overlay, as on the PS1.
+- **Size:** 59 overlays linked with no symbol clashes, and the ELF is about 8 MB. If RAM gets tight later, they can go back to being loaded from disc.
+- **Switching stages:** when the game reads a stage's overlay file, it now switches to that stage's built-in character table instead of running the copied binary. The file is still read into the overlay area but is unused.
+- **Which overlays are in:** only overlays with no unfinished assembly stubs and no hard-coded addresses of their own code. [tools/port/overlay_survey.py](tools/port/overlay_survey.py) does the check, and the link prints what was left out.
+
+**Other fixes along the way**
+- Four overlay files had their own inline GTE assembly macros. I translated them with the HAL's generator into `port/include/gte_from_*.h`.
+- Sony's copy-protection check (`SafetyCheck`) now always passes. The game's direct drive commands report a closed drive.
+- The title's memory card check copied from a NULL pointer when the card is new; it now treats that as an empty card.
+- `MGS_DUMP_FRAMES=1 python3 build/link_ps2.py` builds with frame dumps to `obj_ps2/`.
+
+Both matching builds still pass (80 OK, plus the VR executable). The plan is updated.
+
+**Left out (20 overlays):**
+- **Unfinished assembly stubs:** brf, camera, d18a/d18ar, s03d, s07b, s08b/s08br, s11d, s11g, s15c, s19b/s19br.
+- **Hard-coded addresses of their own code or data:** s05a, s07a, s11a, s11e, s11i.
+- **A source file missing:** rank, s14e.
+
+**Still to do in Step 3:**
+- Reset an overlay's data when its stage loads a second time.
+- Fix `elevator.c` and `thing.c`, which test or set the top bit of pointers. That bit is always set on the PS1 but never on the PS2.
+- Make a first playable path, dock (`s00a`) → heliport (`s01a`); both are linked in.
+- Movie streaming (`CdRead2` and the `St*` functions) is still stubbed.
+
+Shall I commit this?
+
+## User
+
+Add to the todo list: reduce memory usage of overlays by deduplicating data.
+Commit the changes
+

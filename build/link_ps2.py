@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_ps2  # noqa: E402
+import overlays_ps2  # noqa: E402
 
 ROOT, HAL, PSYQ, OUT = build_ps2.ROOT, build_ps2.HAL, build_ps2.PSYQ, build_ps2.OUT
 PS2DEV = build_ps2.PS2DEV
@@ -59,6 +60,8 @@ def compile_hal():
     # and each PS1 card image written is copied to host:cardN.mcd (ps2/memcard_ps2.c), for PCSX2 runs with
     # pcsx2_run.py --memcards.
     test = ["-DSH_PORT_MC_FORMAT"] if os.environ.get("MGS_MC_FORMAT") else []
+    # MGS_DUMP_FRAMES=1: some frames written to host:frame_<n>.ppm (ps2/display_ps2.c DUMP_FRAMES).
+    test += ["-DSH_PORT_DUMP_FRAMES"] if os.environ.get("MGS_DUMP_FRAMES") else []
     for sub, flags in (("src", HAL_CFLAGS), ("src/ps2", PS2_CFLAGS + test)):
         for name in sorted(os.listdir(os.path.join(HAL, sub))):
             rel = sub + "/" + name
@@ -146,7 +149,8 @@ def main():
     if clashes:
         print("renamed in the game (also in the PS2 libraries): " + " ".join(clashes))
 
-    objs = [combined, *compile_hal(), *compile_port(), *build_irx()]
+    overlays = overlays_ps2.build(run, OBJCOPY, LD, CC, renames[1:])
+    objs = [combined, *overlays, *compile_hal(), *compile_port(), *build_irx()]
     elf = os.path.join(OUT, "mgs.elf")
     r = final_link(elf, objs)
     open(os.path.join(OUT, "link.log"), "w").write(r.stderr)

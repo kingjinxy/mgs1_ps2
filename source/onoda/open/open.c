@@ -16,6 +16,29 @@
 #include "game/game.h"
 #include "menu/menuman.h"
 
+#ifdef MGS_PORT
+#include <string.h>
+
+// memcard_files() is NULL when the card's last operation wasn't a read (a new card): the PS1 copied
+// whatever was at address 0. Here that's a card with no files.
+static MEMCARD port_memcard_files(int port)
+{
+    MEMCARD *card;
+    MEMCARD  empty;
+
+    card = memcard_files(port);
+    if (card)
+    {
+        return *card;
+    }
+    memset(&empty, 0, sizeof(empty));
+    return empty;
+}
+#define MEMCARD_FILES(port) port_memcard_files(port)
+#else
+#define MEMCARD_FILES(port) (*memcard_files(port))
+#endif
+
 typedef struct _Unknown
 {
     SPRT  sprt[2];
@@ -877,7 +900,7 @@ static void title_open_800C5D30(Work *work)
     {
         printf("this memcard is OK\n");
 
-        card1 = *memcard_files(0);
+        card1 = MEMCARD_FILES(0);
         printf("free = %d\n", card1.free_blocks);
 
         if (card1.free_blocks == 0)
@@ -918,7 +941,7 @@ static void title_open_800C5D30(Work *work)
     {
         printf("this memcard is OK\n");
 
-        card2 = *memcard_files(1);
+        card2 = MEMCARD_FILES(1);
         printf("free = %d\n", card2.free_blocks);
 
         if (card2.free_blocks == 0)
@@ -7529,7 +7552,7 @@ void title_open_800D1CB4(Work *work)
     {
         printf("this memcard is OK\n");
 
-        card1 = *memcard_files(0);
+        card1 = MEMCARD_FILES(0);
 
         for (i = 0; i < card1.file_count; i++)
         {
@@ -7618,7 +7641,7 @@ void title_open_800D1CB4(Work *work)
     {
         printf("this memcard is OK\n");
 
-        card2 = *memcard_files(1);
+        card2 = MEMCARD_FILES(1);
 
         for (i = 0; i < card2.file_count; i++)
         {

@@ -163,13 +163,36 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 
 ### Step 3 — Static linking of overlays
 
-- [ ] Find how stage overlays are loaded and entered (`libfs` + stage loader in `game/`) and add one
-      port hook: skip the read, reset that overlay's `.data`/`.bss`, and activate it via a dispatch
-      table
-- [ ] Namespace per-stage symbols that clash across overlays
-- [ ] Choose a first playable path that avoids stub-heavy overlays (e.g. dock → heliport)
-- [ ] Policy for remaining `INCLUDE_ASM`: an overlay is excluded from the port link until it has no
-      stubs; track the list here
+- [x] Static link (2026-10-27, `build/overlays_ps2.py`, as SH1): each overlay's objects (from
+      `obj/linker_command_file_<ovl>_lhs.txt`) compiled like the main executable, `ld -r`-merged, every
+      symbol made local except its CHARA table (`_StageCharacterEntries_<ovl>`). Shared objects (`enemy/*`,
+      `takabe/*` in dozens of overlays) are a separate copy with separate data in each, as on the PS1. 59
+      overlays link with no clashes; ELF ~8 MB. If RAM runs short later, they can go back to being loaded
+- [x] Hook: `libfs/cdstage.c` (the `.bin` tag of a stage read) and `GM_LoadInitBin` call
+      `Port_SetStage(id)` (`game/chara.c`): the stage's linked CHARA table by `GV_StrCode(name)`. The
+      binary is still read into the arena's overlay area, unused. `GM_ResetChara` switches to an empty table
+- [ ] Reset an overlay's `.data`/`.bss` when its stage loads again (SH1 needed it for a map loaded twice)
+- [x] Policy: an overlay is linked in once it has no `INCLUDE_ASM` and no literal addresses of its own
+      code/data (`tools/port/overlay_survey.py`); the link prints the rest. Left out now (20): brf, camera,
+      d18a/d18ar, s03d, s07b, s08b/s08br, s11d, s11g, s15c, s19b/s19br (stubs); s05a, s07a, s11a, s11e,
+      s11i (literal addresses: `NEWCHARA` tables, string/function pointer tables); rank, s14e (an
+      object's source missing). Not in the matching build at all: s10a, s11b, s11h, s15a, s17a-s19a and
+      some `r` variants
+- [ ] First playable path: dock (s00a) → heliport (s01a) are both linked in
+- [ ] Reduce the overlays' memory use by deduplicating: each overlay now has its own copy of every shared
+      object's code and data (`enemy/*`, `takabe/*` in dozens of overlays). Share identical code (and
+      read-only data) between overlays, keeping only the writable data per overlay
+- Overlay GTE: `searchli.c`, `envmap3.c`, `libdg2.c`, `sub_efct.c` define their own GTE asm macros:
+  translated by the HAL's `gen_gte_inline.py` (`port/include/gte_from_*.h`, included under `MGS_PORT`;
+  `libdg2.c` after each of its four macro groups)
+- Copy protection: `safechk.obj`'s `SafetyCheck` passes (`port/src/cdbios_ps2.c`), and
+  `CdControl`/`CdControlB` report a closed drive
+- To fix: `takabe/elevator.c`, `thing.c` test or set bit 31 of pointers (kseg0 on the PS1; EE pointers
+  don't have it)
+- PCSX2 now (2026-10-27): Konami logo → title (memory card check) → `opening`: the opening runs with its
+  3D scene (~1400 prims a frame), 120 s with no crash and no TLB misses (frame dumps:
+  `MGS_DUMP_FRAMES=1 build/link_ps2.py`). New stubs: movie streaming (`CdRead2`, `St*`, `CdReady`)
+  and `select`'s host files (`PCcreat`/`PCwrite`)
 
 ### Step 3b — Unfinished overlay functions
 

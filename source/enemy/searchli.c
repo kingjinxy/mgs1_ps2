@@ -510,6 +510,10 @@ void Searchli_800D7D40(Work *work)
         :                                                       \
         : "r"( r0 )                                             \
         : "$12", "$13", "$14", "memory" )
+
+#ifdef MGS_PORT
+#include "gte_from_searchli.h" /* the macros above on the HAL's software GTE (port/include) */
+#endif
 // clang-format on
 
 void Searchli_800D7DBC(SVECTOR *in, SVECTOR *out, int count)

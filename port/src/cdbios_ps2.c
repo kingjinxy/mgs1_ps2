@@ -101,6 +101,7 @@ const unsigned char* MgsCd_Sector(int i)
 /* PSY-Q libcd: the game's own CdInit calls (main.c, gamed.c) find the disc file; CdReset is called by
  * cdbios's error path only on the PS1 build. */
 #undef CdInit
+#undef CdIntToPos
 int CdInit(void)
 {
     return MgsCd_Init();
@@ -110,4 +111,43 @@ int CdReset(int mode)
 {
     (void)mode;
     return MgsCd_Init();
+}
+
+/* safechk.obj's copy protection check (called by onoda/change/safety.c in the title and change
+ * overlays): the disc always passes. */
+int SafetyCheck(int minute, int second, int sector)
+{
+    (void)minute;
+    (void)second;
+    (void)sector;
+    return 0;
+}
+
+/* Drive commands the game sends outside cdbios (safety.c, the disc change screens): done at once, with a
+ * status of "motor on, shell closed" (CdlStatStandby). */
+/* PSY-Q CdlLOC: minute, second, sector (BCD), track. */
+unsigned char* CdIntToPos(int i, unsigned char* p)
+{
+    i += PS1_PREGAP;
+    p[0] = (unsigned char)(i / 4500 / 10 << 4 | i / 4500 % 10);
+    p[1] = (unsigned char)(i / 75 % 60 / 10 << 4 | i / 75 % 60 % 10);
+    p[2] = (unsigned char)(i % 75 / 10 << 4 | i % 75 % 10);
+    p[3] = 0;
+    return p;
+}
+
+int CdControl(unsigned char com, unsigned char* param, unsigned char* result)
+{
+    (void)com;
+    (void)param;
+    if (result)
+    {
+        result[0] = 0x02;
+    }
+    return 1;
+}
+
+int CdControlB(unsigned char com, unsigned char* param, unsigned char* result)
+{
+    return CdControl(com, param, result);
 }

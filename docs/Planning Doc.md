@@ -82,11 +82,14 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
         `CdReady`, `CdFlush`, and the `St*` streaming ring
   - [ ] libpress: `DecDCTin`/`out`/`outSync`/`outCallback`/`Reset` (psyz has no `DecDCTvlc2`/
         `DecDCTvlcBuild`: write those)
-  - [ ] libgpu: `MoveImage`, `DrawSyncCallback`, `SetDefDrawEnv`, `GetTPage`, prim macros;
-        not in psyz: `LoadImage2`
-  - [ ] libgte: `rsin`/`rcos`, `RotMatrix*`, `ReadRotMatrix` if the SH1 layer lacks them;
-        not in psyz: `MulRotMatrix0`, the `*_gte` variants
-  - [ ] Misc, not in psyz: `PadInitDirect`, `PadStopCom`, `SetMem`, `SetConf`, `GetGp`/`GetSp`
+  - [x] libgpu: `MoveImage`, `LoadImage2`, `DrawSyncCallback`, `GetTPage`, `SetSemiTrans`, `SetGraphDebug`
+  - [x] libgte: `rsin`/`rcos`, `RotMatrix`, `RotMatrixYXZ`, `RotMatrixX/Y/Z`, the `*_gte` variants,
+        `ReadRotMatrix`: bit-exact against MGS's linked code (`tools/libgte_test`)
+  - [x] Misc: `SetMem`, `SetConf`, `GetGp`/`GetSp`, `rand`/`srand` (PS1's), `StopCallback`, `StopPAD`,
+        `ChangeClearPAD`, `PClseek`, `LoadExec` (soft reset: stops for now)
+  - [ ] BIOS file calls for the memory card (`open`/`read`/... → `Port_Bu*` on the game side, as SH1)
+  - [ ] `rank`'s PocketStation code (`mcx`): `SysEnqIntRP`/`SysDeqIntRP`, `ChangeClearRCnt`, `FlushCache`
+  Full inventory (from `obj/asm.map`): `../psx-to-ps2-HAL/docs/Walkthrough.md`
 - [x] **Threads for `mts`.** HAL `src/ps2/thread_ps2.c`: one EE thread per PS1 TCB, `ChangeTh` and
       VSync-interrupt switches, critical sections (`../psx-to-ps2-HAL/docs/Walkthrough.md`). Passes
       `tools/thread_test` in PCSX2. When `mts` is compiled: `(struct ToT *)0x100` → `Port_PsxToT()` under

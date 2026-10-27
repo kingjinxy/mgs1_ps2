@@ -1236,3 +1236,289 @@ Nothing is committed yet. Should I commit the thread work in the HAL, SH1 and MG
 
 Yes
 
+- tool `Bash`: Commit thread work in all three repos
+
+## Claude
+
+I committed the thread work in all three repos, and each one has a clean working tree now. Nothing was pushed.
+
+| Repo | Branch | Commit |
+|---|---|---|
+| `psx-to-ps2-HAL` | `main` | `126e65b` PS1 BIOS threads and critical sections on EE kernel threads |
+| `silent-hill-1-ps2-port` | `hal-split` | `dfb22660e` Docs: HAL threads make EnterCriticalSection real |
+| `mgs1_ps2` | `ps2-port` | `ac741ecc4` Docs: Step 0 threads for mts done in the HAL (includes the updated conversation archive) |
+
+Step 0 still has two items left:
+- **Library gaps:** add the libspu, libcd, libpress, libgpu and libgte functions MGS uses that the HAL lacks, mostly borrowed from psyz. psyz is on GitHub; its licence needs checking first.
+- **psyz tests:** run its library tests on the EE.
+
+## User
+
+Proceed
+
+## Claude
+
+I'll start with psyz's licence, since that decides whether we can copy its code at all.
+
+- tool `Bash`: Check psyz licence and layout
+
+- tool `Bash`: Read psyz licence files
+
+- tool `Bash`: Look for linker maps in the MGS build
+
+- tool `Bash`: Find main exe map and library linkage
+
+- tool `Bash`: See how PSY-Q libraries are linked and map format
+
+## Claude
+
+The map lists every symbol but doesn't say which library each comes from. The PSY-Q libraries are linked after the game's objects, so I'll find where they start in `.text`:
+
+- tool `Bash`: Sample high text symbols to find library start
+
+- tool `Bash`: Find the boundary near the first library symbol
+
+- tool `Bash`: Compute library functions MGS needs vs HAL
+
+## Claude
+
+Both sets came out empty, which means the comparison itself is broken: `sort` and `comm` were using different collation orders. Redoing it with `LC_ALL=C`:
+
+- tool `Bash`: Redo the comparison with C collation
+
+## Claude
+
+`needed` is still empty, so I'll look at the input files themselves:
+
+- tool `Bash`: Inspect symbol list files
+
+## Claude
+
+Windows line endings (`\r`) in the map file. Stripping them:
+
+- tool `Bash`: Compute needed and missing library functions
+
+- tool `Bash`: Inspect the asm stub format
+
+- tool `Bash`: Find library calls from asm stubs
+
+## Claude
+
+The asm stubs add four more: `ChangeClearRCnt`, `FlushCache`, `SysDeqIntRP` and `SysEnqIntRP`. Now I'll sort the full gap list by library and see which ones psyz has:
+
+- tool `Bash`: List psyz library directories
+
+## Claude
+
+psyz has decompiled sources for every library we need. Downloading the repo snapshot from GitHub to search it:
+
+- tool `Bash`: Download psyz source snapshot
+
+- tool `Bash`: Locate each missing function in psyz decomp
+
+- tool `Bash`: Show where each special function is used
+
+- tool `Bash`: Find who calls the asm-only kernel functions
+
+- tool `Bash`: Check HAL libgte coverage and DrawSync use
+
+- tool `Bash`: Read MGS EndFrame and HAL DrawSync
+
+- tool `Bash`: Read SH1's lib_test harness
+
+- tool `Bash`: Check SH1's extracted library objects
+
+- tool `Bash`: Read LoadExec, SetMem and PClseek call sites
+
+- tool `Bash`: Read psyz rand, rsin/rcos, GetTPage, SetSemiTrans
+
+- tool `Bash`: Find the sine table used by rsin/rcos
+
+- tool `Bash`: Inspect psyz sine table and MGS executable
+
+- tool `Bash`: Find the built main executable
+
+- tool `Bash`: Find how the exe is produced
+
+## Claude
+
+I'll check psyz's sine table against the one linked into MGS's own executable:
+
+- tool `Bash`: Compare psyz rsin_tbl with MGS's linked table
+
+- tool `Bash`: Disassemble the RotMatrix family from MGS's exe
+
+- tool `Bash`: Debug the objdump invocation
+
+## Claude
+
+The disassembly works; my line filter just didn't match the 8-digit addresses. Fixing the filter:
+
+- tool `Bash`: Disassemble and print the RotMatrix family
+
+- tool `Bash`: Print the remaining RotMatrix disassembly
+
+- tool `Bash`: Read the HAL's GTE register API
+
+## Claude
+
+I'll transcribe all eight functions instruction by instruction. First I need `rcossin_tbl` from psyz, checked against MGS's linked copy:
+
+- tool `Bash`: Find rcossin_tbl in psyz
+
+## Claude
+
+psyz's copy of that table is in an MPL-licensed file. I'd rather not copy it if a formula reproduces it, so I'll test whether `round(4096·sin)` gives Sony's exact values:
+
+- tool `Bash`: Test whether a formula reproduces rcossin_tbl
+
+- tool `Bash`: Read libgte_port.c header and a sample function
+
+## Claude
+
+The existing file mirrors each library function's register moves and commands in the original order, so I'll write the new ones the same way. First the table generator and the generated table:
+
+- tool `Bash`: Generate the libgte sine/cosine table
+
+## Claude
+
+Now the functions themselves, transcribed from the disassembly above:
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/src/libgte_rot.c
+
+## Claude
+
+I'll fix one unverified object-name comment, then compile through the SH1 build. That checks the new code against the SH1 HAL's PSY-Q headers and catches any duplicate symbols:
+
+- tool `Bash`: Compile the new libgte code in the SH1 build
+
+- tool `Bash`: Check ReadRotMatrix prototypes in both SDK headers
+
+## Claude
+
+The header declares `ReadRotMatrix` as returning `void`, which matches the original (it never sets a return value). Fixing:
+
+- tool `Bash`: Fix ReadRotMatrix and rebuild
+
+- tool `Bash`: Check for the unicorn emulator
+
+- tool `Bash`: Set up the libgte test: extractor and Makefile
+
+## Claude
+
+Now the interpreter and the test harness:
+
+- tool `Bash`: Write the R3000 interpreter
+
+## Claude
+
+Now the harness. For each function it runs both versions from an identical GTE state and identical inputs, then compares the memory outputs, return values, and every GTE register afterwards:
+
+- tool `Bash`: Write and build the libgte test harness
+
+- tool `Bash`: Build the test as 32-bit
+
+- tool `Bash`: Build 64-bit with explicit PS1 sizes and run
+
+- tool `Bash`: Show the build errors
+
+## Claude
+
+SH1's `common.h` emits MIPS assembler directives that the host assembler rejects. Finding which header does that:
+
+- tool `Bash`: Find the asm directives in SH1 common.h
+
+- tool `Bash`: Read SH1's include_asm.h guard
+
+## Claude
+
+`-DSKIP_ASM` switches that off:
+
+- tool `Bash`: Build with SKIP_ASM and run the libgte test
+
+- tool `Bash`: Draw each test angle once and rerun
+
+## Claude
+
+All ten functions now match Sony's code on 20,000 tests each. Before trusting a pass, I'll deliberately break one line of `RotMatrix` to confirm the harness catches it:
+
+- tool `Bash`: Mutation check: break RotMatrix, confirm detection, restore
+
+- tool `Edit`: /home/alex/Documents/psx-to-ps2-HAL/src/libgte_rot.c
+
+- tool `Bash`: Rebuild without the warning and rerun
+
+- tool `Read`: /home/alex/Documents/psx-to-ps2-HAL/src/libgte_rot.c
+
+- tool `Edit`: /home/alex/Documents/psx-to-ps2-HAL/src/libgte_rot.c
+
+- tool `Bash`: Rebuild without the warning and rerun
+
+- tool `Bash`: Read HAL LoadImage/StoreImage and libapi tail
+
+## Claude
+
+Adding the libgpu functions to `libgpu_port.c`:
+
+- tool `Bash`: Read StoreImage2 and the getTPage macro
+
+- tool `Bash`: Add LoadImage2, MoveImage, DrawSyncCallback and more
+
+## Claude
+
+Now the libapi functions and the PS1 `rand`:
+
+- tool `Bash`: Read libapi_port.c header
+
+- tool `Bash`: Check SH1 use of the functions being added
+
+## Claude
+
+SH1 calls `MoveImage` in its save/load screen, but `MoveImage` wasn't in my list of HAL-defined symbols. Something else must provide it in SH1, so I'll check before my version collides with it:
+
+- tool `Bash`: Find SH1's existing MoveImage
+
+- tool `Bash`: Check how the baseline SH1 ELF resolved MoveImage
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/src/libapi_misc.c
+
+## Claude
+
+I'll add `GetTPage`, `SetSemiTrans` and `rand`/`srand` to the bit-exact test, comparing them with MGS's linked copies as well:
+
+- tool `Bash`: Add GetTPage, SetSemiTrans and rand to the test
+
+## Claude
+
+`GetTPage` and `SetSemiTrans` live in `libgpu_port.c`, which needs the whole GS backend and can't link on the host. Since they're pure functions, I'll move them into their own small file:
+
+- tool `Bash`: Move the pure prim helpers to their own file and test
+
+- tool `Bash`: Include libgte.h first and rerun
+
+## Claude
+
+All 13 match MGS's linked code. Rebuilding SH1 to check that the new files compile there and don't collide with anything, such as newlib's `rand`:
+
+- tool `Bash`: Rebuild SH1 with the new HAL files
+
+- tool `Bash`: Check DrawSyncCallback prototypes
+
+## Claude
+
+The SDK header declares `DrawSyncCallback` as returning `u_long`. Matching it:
+
+- tool `Bash`: Fix the prototype and rebuild SH1
+
+## Claude
+
+SH1 builds again. `libgpu_port.c` changed, so I'll repeat SH1's PCSX2 comparison before recording anything:
+
+- tool `Bash`: Rerun SH1's 150 s PCSX2 comparison
+
+## Claude
+
+SH1 is unchanged: identical status lines and the same 50 TLB-miss lines. I'll record this batch, with the full gap inventory so the remaining work is clear:
+
+- tool `Bash`: Record the inventory and first batch
+

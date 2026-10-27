@@ -1,0 +1,164 @@
+# Planning Doc — Metal Gear Solid Integral (PS1) → PS2 Port
+
+Living plan for the port. Check items off as they land; record *how* each change was made in a
+`Running Walkthrough.md` alongside this file. Modelled on the Silent Hill port
+(`../silent-hill-1-ps2-port/Planning Doc.md`), whose PSY-Q compatibility layer this port reuses.
+
+## Strategy
+
+Recompile the decompiled C for the PS2 Emotion Engine with ps2sdk, and replace Sony's PSY-Q
+libraries with the PS1 compatibility layer (HAL) already built for the SH1 port. Game code stays as
+close to the decomp as possible.
+
+Ground rules:
+
+- **The matching PS1 build must keep matching.** Port changes go behind `MGS_PORT` (or behave
+  identically on PS1), and `python build.py` must still produce the expected SHA256 for
+  `SLPM_862.47`/`.48`/`.49` and every overlay after each change. This keeps upstream merges cheap and
+  gives a free regression test.
+- **One HAL, two games.** The HAL lives in one shared place; game-specific behaviour (file systems,
+  buffer addresses, overlay tables) stays in each game's tree. Anything SH1-specific found in the HAL
+  gets pulled out, not forked.
+- **32-bit pointers are an asset.** The EE uses 32-bit pointers, so struct layouts, GCL script data
+  and loaded-file relocation stay valid as-is.
+- **Prefer bit-exact over fast.** Use the SH1 software GTE first; vector-unit work only after
+  profiling.
+- **No upstream contributions for now.** This port uses AI-written code, so nothing is sent to
+  `mgs_reversing`. Upstream decomp work is merged *in*; matching is kept for that and as a check.
+
+## Decisions
+
+- **Target the Integral discs first** (`SLPM_862.47`/`.48`). The VR disc (`.49`) comes later.
+- **Keep the PS1 limits for now** (memory, VRAM, frame budget). Raising any of them is a later,
+  separate decision.
+
+## Reference material
+
+`/home/alex/Documents/psyq_docs` holds the PSY-Q 4.1 English Technical Reference PDFs: the HAL
+API reference is `DEVREFS/LIBREF41.PDF` and `LIBOVR41.PDF`, and data formats (TIM, TMD, VAB, STR)
+are in `FILE41.PDF`. Sources: `/media/sf_VirtualBox_Shared_Folder/ps1_sdks`. MGS links against
+4.4, so check 4.4 behaviour against `psx/441chg.txt` in `Runtime Library 4.4.7z` where it matters.
+
+## Matching build
+
+From `build/` (Wine here is 64-bit only, so a `wine` shim runs the PSY-Q tools through wibo):
+
+```
+PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py
+```
+
+Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_exe`) matches too.
+
+## Current state of the codebase (as of 2026-10-27)
+
+- Main executables (`SLPM_862.47`/`.48`/`.49`) are 100% decompiled.
+- Overlays: 19 directories under `source/overlays`, ~747 `INCLUDE_ASM` stubs left in total, heavily
+  concentrated: `s07b` 157, `s08b` 122, `s14e` 111, `rank` 97, `d18a` 59, `s19b` 50, `brf` 43,
+  `s11d` 37, `s15c` 26, `s03d` 21, `camera` 16, `s11g` 8.
+- Build: `build/build.py` generates ninja rules for the original PSY-Q 4.4 toolchain
+  (`cc1psx.exe`/`aspsx.exe`/`asmpsx.exe` under wine/wibo). There is no GCC/splat Makefile as in SH1.
+- PS1-specific code outside overlays: `gte_*` in 30 files, `0x1F80…` scratchpad literals in 8,
+  `0x80xxxxxx` literals in 156. The last group has not yet been sorted into real fixed addresses and
+  harmless constants such as colours or flags.
+- Subsystems of interest: `libdg` (renderer: OT, prims, GTE transforms), `libgv` (core/actors),
+  `libgcl` (script interpreter), `libfs` (CD/file loading), `libhzd` (collision), `memcard`,
+  `sound` (custom `sd_*` driver), `libsio`.
+
+## Steps
+
+### Step 0 — Share the HAL  *(do first)*
+
+- [ ] Move the SH1 HAL into a location both repos can use (git submodule or sibling directory)
+- [ ] Audit it for SH1 assumptions: `psx_mem.h` buffer addresses, SH1 file indices, `Fs_*` hooks,
+      overlay dispatch. Move each one behind a per-game hook
+- [ ] SH1 port still builds and runs after the move (regression check)
+- [ ] Fill the gaps MGS needs that the SH1 layer lacks, borrowing from psyz
+      (`github.com/Xeeynamo/psyz`, decompiled PSY-Q in `decomp/src`; check its licence before copying):
+  - [ ] libspu: `SpuMalloc`, `SpuSetIRQ`/`IRQAddr`/`IRQCallback`, `SpuSetNoiseVoice`,
+        `SpuSetPitchLFOVoice`, `SpuSetReverbDepth`, `SpuGetAllKeysStatus`
+  - [ ] libcd: `CdReadyCallback`/`CdSyncCallback`/`CdReadCallback`, `CdGetSector`, `CdRead2`,
+        `CdReady`, `CdFlush`, and the `St*` streaming ring
+  - [ ] libpress: `DecDCTin`/`out`/`outSync`/`outCallback`/`Reset` (psyz has no `DecDCTvlc2`/
+        `DecDCTvlcBuild`: write those)
+  - [ ] libgpu: `MoveImage`, `DrawSyncCallback`, `SetDefDrawEnv`, `GetTPage`, prim macros;
+        not in psyz: `LoadImage2`
+  - [ ] libgte: `rsin`/`rcos`, `RotMatrix*`, `ReadRotMatrix` if the SH1 layer lacks them;
+        not in psyz: `MulRotMatrix0`, the `*_gte` variants
+  - [ ] Misc, not in psyz: `PadInitDirect`, `PadStopCom`, `SetMem`, `SetConf`, `GetGp`/`GetSp`
+- [ ] **Threads for `mts`.** MGS's task system runs on BIOS threads (`OpenTh`, `ChangeTh`,
+      `CloseTh`) and critical sections. Neither the SH1 layer nor psyz has them: map onto ps2sdk
+      threads or a small EE context switch
+- [ ] Reuse psyz's tests (`psyz/tests`: libgte checked on a real PS1, libcd, libspu, mdec, VLC) with
+      its `ztest` framework on the EE; use `psyz/psxgen` to make reference images for the GS backend
+
+### Step 1 — PS2 build target
+
+- [ ] `build/build_ps2.py` (or a `--ps2` mode for `build.py`): ee-gcc + ps2sdk, `-DMGS_PORT`, output
+      ELF; does not touch the matching ninja file
+- [ ] Header shim so `source/include` resolves PSY-Q headers to the HAL's
+- [ ] Compile `main`, `libgv`, `libdg`, `libgcl`, `libfs`, `libhzd` cleanly; log compiler-dialect
+      fixes (old-GCC-isms written to match `cc1psx`) in the walkthrough
+- [ ] Link with overlays stubbed out; boot to `main()` in PCSX2
+
+### Step 2 — Fixed addresses / shiftability
+
+- [ ] Triage the 156 files with `0x80xxxxxx` literals: real addresses vs constants
+- [ ] Single abstraction for fixed addresses (`PSX_RAM_ADDR`/`PSX_SCRATCH` as in SH1's `psx_mem.h`)
+- [ ] Route the 8 scratchpad users through `PSX_SCRATCH`
+- [ ] Port `find_fixed_addresses.py` and run it as a regression check
+- [ ] Matching build still passes (all hashes)
+- [ ] Shift test: pad an overlay and boot into its stage on PS1/emulator
+
+### Step 3 — Static linking of overlays
+
+- [ ] Find how stage overlays are loaded and entered (`libfs` + stage loader in `game/`) and add one
+      port hook: skip the read, reset that overlay's `.data`/`.bss`, and activate it via a dispatch
+      table
+- [ ] Namespace per-stage symbols that clash across overlays
+- [ ] Choose a first playable path that avoids stub-heavy overlays (e.g. dock → heliport)
+- [ ] Policy for remaining `INCLUDE_ASM`: an overlay is excluded from the port link until it has no
+      stubs; track the list here
+
+### Step 3b — Unfinished overlay functions
+
+About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 21k, `s07b` 14k,
+`rank` 12k, `s08b` 11k). Upstream is closing them steadily; don't decompile them all by hand first.
+
+- [ ] Recompile the stubs with the SH1 recompiler (`../silent-hill-1-ps2-port/tools/port/recomp.py`,
+      MIPS → C keeping delay slots, HI/LO and GTE). MGS's stub `.s` files are raw `dw` words with
+      absolute addresses, so first rebuild relocations from the overlay's symbol addresses
+- [ ] Pilot on one small overlay (`s11g` or `s03d`)
+- [ ] Decompile by hand (non-matching C is enough) only where the recompiler fails or the port must
+      change the code
+
+### Step 4 — Software GTE
+
+- [ ] Reuse the SH1 software GTE; check that the `gte_*` macros in the 30 MGS files map onto it
+- [ ] Spot-compare transformed vertices against PS1 captures (pcsx-redux scripts in
+      `build/pcsx-redux_scripts`)
+
+### Step 5 — Graphics (libgpu → GS)
+
+- [ ] `libdg` OT/prim submission through the HAL GS backend
+- [ ] Check MGS-specific prim use: semi-transparency modes, texture windows, offscreen VRAM tricks
+      (codec/radio screen, thermal and night-vision goggles, menu overlays)
+
+### Step 6 — Pad, CD, memory card
+
+- [ ] `libfs` sector reads via the HAL (disc 1 first; disc swap later)
+- [ ] `memcard/` saves via the HAL memory card layer
+- [ ] Pad incl. vibration/DualShock analog
+
+### Step 7 — Sound
+
+- [ ] Run the `sd_*` driver against the HAL's SPU-on-SPU2 layer
+- [ ] XA (codec voice) and STR/MDEC movies via the SH1 implementations
+
+## Side tools (optional)
+
+- [ ] PC debug build on psyz's SDL backend: debug game-code bugs (32-bit assumptions, NULL reads,
+      fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
+
+## Open questions
+
+(none yet)

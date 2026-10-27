@@ -87,9 +87,10 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
   - [ ] libgte: `rsin`/`rcos`, `RotMatrix*`, `ReadRotMatrix` if the SH1 layer lacks them;
         not in psyz: `MulRotMatrix0`, the `*_gte` variants
   - [ ] Misc, not in psyz: `PadInitDirect`, `PadStopCom`, `SetMem`, `SetConf`, `GetGp`/`GetSp`
-- [ ] **Threads for `mts`.** MGS's task system runs on BIOS threads (`OpenTh`, `ChangeTh`,
-      `CloseTh`) and critical sections. Neither the SH1 layer nor psyz has them: map onto ps2sdk
-      threads or a small EE context switch
+- [x] **Threads for `mts`.** HAL `src/ps2/thread_ps2.c`: one EE thread per PS1 TCB, `ChangeTh` and
+      VSync-interrupt switches, critical sections (`../psx-to-ps2-HAL/docs/Walkthrough.md`). Passes
+      `tools/thread_test` in PCSX2. When `mts` is compiled: `(struct ToT *)0x100` → `Port_PsxToT()` under
+      `MGS_PORT`. Still to try on a real PS2
 - [ ] Reuse psyz's tests (`psyz/tests`: libgte checked on a real PS1, libcd, libspu, mdec, VLC) with
       its `ztest` framework on the EE; use `psyz/psxgen` to make reference images for the GS backend
 

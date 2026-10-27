@@ -951,3 +951,288 @@ Now the HAL repo's own README and Split Plan, and this repo's planning doc:
 
 - tool `Bash`: Write HAL README, update split plan and MGS plan
 
+## Claude
+
+The docs are done. This is a milestone, so the project rules say to update the conversation archive:
+
+- tool `Bash`: Update the conversation archive
+
+- tool `Bash`: Summarise working tree state in both repos
+
+- tool `PushNotification`: 
+
+## Claude
+
+The HAL is now in its own repo at `~/Documents/psx-to-ps2-HAL`, and the SH1 port builds against it. In PCSX2 the port behaves the same as before the move. Apart from one commit in the new HAL repo (see the end), nothing is committed.
+
+**What moved:** the PS1 library code (`src/`), the PS2 backend (`src/ps2/`), the port headers (`include/port/`) and the two IRX modules. Game code didn't need any changes, because the `port/` include prefix stayed the same. Everything specific to SH1 now lives on the SH1 side:
+- **`src/port/hal_game.c`** (new) holds the hook functions. That's the frame capture, the status line and load watchdog, and the Debug Options display mode, all of which used to be in `libgpu_port.c`.
+- **`include/hal_game_config.h`** (new) holds the settings: disc file names, memory card names, the save icon and the RAM size.
+- **`include/port/prof_game.h`** (new) holds SH1's profiler probes. One visible difference: the light-profiler report now prints the HAL's probes first.
+- **Weak defaults:** the HAL has empty versions of every hook, so a game only defines the ones it uses.
+
+**Checks:**
+- **Build:** all 274 files compile, and it links with the same 15 HAL stubs as before. Every symbol is the same size except the functions I edited.
+- **PCSX2:** I ran the old and new builds for 90 seconds each. The logs match line for line, apart from code addresses and timing counters.
+- **GTE:** the GTE test still matches the PS1 results exactly (seeds 0 and 3).
+- **TLB misses:** both builds log the same TLB-miss lines on scratchpad addresses during startup. They aren't new, but they're still worth tracking down on their own.
+
+**Changes from the plan:**
+- **Tools stay in SH1 for now.** Most of them name SH1's ELF, disc files or game state, so moving them needs its own pass.
+- **Renames deferred:** `SH_PORT_*` → `HAL_*` and `sh1agent`/`sh1spu` → `halagent`/`halspu` will come in a later pass.
+- **Disc layout:** the disc reader takes SH1's two file names from settings for now. A general disc table can wait until we know how MGS's disc will be laid out.
+
+**Where it's recorded:**
+- **SH1:** a new walkthrough entry ("The HAL moves to its own repository"), a note in SH1's `CLAUDE.md` saying the HAL is a separate repo and SH1 specifics must stay out of it, and a pointer at the top of its Planning Doc.
+- **HAL repo:** a README and [Split Plan.md](../psx-to-ps2-HAL/docs/Split%20Plan.md), including what's left to do.
+- **This repo:** the Step 0 items in [Planning Doc.md](docs/Planning%20Doc.md) are ticked, and `Claude Conversation.md` is updated.
+
+**Not yet committed:**
+- **SH1:** everything is on the new branch `hal-split`, which I branched from `upstream-sync`.
+- **HAL repo:** I committed the untouched import as its first commit, so the hook changes show up as their own diff. Everything after that is uncommitted.
+
+Do you want me to commit in all three repos?
+
+## User
+
+Yes
+
+- tool `Bash`: Commit in HAL, SH1 and MGS repos
+
+## Claude
+
+I committed in all three repos, and each one has a clean working tree now. Nothing was pushed.
+
+| Repo | Branch | Commit |
+|---|---|---|
+| `psx-to-ps2-HAL` | `main` | `ae9c67c` Move SH1 specifics behind per-game hooks and settings (after the import commit) |
+| `silent-hill-1-ps2-port` | `hal-split` | `d018f3af6` Port: build the HAL from ../psx-to-ps2-HAL |
+| `mgs1_ps2` | `ps2-port` | `80cc357b9` Docs: Step 0 HAL split done |
+
+SH1's `upstream-sync` branch is unchanged. When you're happy with `hal-split`, it still needs merging there.
+
+Step 0 still has these items left:
+- **Library gaps:** fill in the libspu, libcd, libpress, libgpu and libgte functions MGS uses that the HAL lacks, mostly by borrowing from psyz. Its licence needs checking before copying, and psyz is on GitHub, so I can fetch it without asking.
+- **Threads:** MGS's task system runs on BIOS threads, and neither the HAL nor psyz has them.
+- **psyz tests:** reuse its library tests on the EE.
+
+I'd start with threads, since MGS can't run without them.
+
+## User
+
+Let’s start on threads. Refer to the PS2 Decomps we looked at previously for example code.
+
+## Claude
+
+I'll start with the earlier notes on PS2 decomps and how MGS's `mts` uses threads.
+
+- tool `Bash`: Search PS2 decomps notes for thread material
+
+## Claude
+
+ICO-decomp's one decompiled file is its `ios` thread system, which is the example the notes point to. It's on GitHub, so I can fetch it. First, how MGS uses threads:
+
+- tool `Bash`: List thread/kernel calls in MGS source
+
+- tool `Bash`: Outline mts_new.c thread usage
+
+- tool `Bash`: Read mts task switching and VSync callback
+
+## Claude
+
+Now how the SH1 HAL runs `VSyncCallback` and critical sections today, because the thread design has to fit around that:
+
+- tool `Bash`: Read HAL VSync and critical section code
+
+- tool `Bash`: Find HAL critical section implementation and vblank handler
+
+- tool `Bash`: Read SwEnterCriticalSection and mts_boot
+
+- tool `Bash`: Locate SwEnterCriticalSection definition
+
+- tool `Bash`: Find SwEnterCriticalSection outside C files
+
+- tool `Bash`: Search asm and build config for SwEnterCriticalSection
+
+- tool `Bash`: Find include paths in build.py
+
+- tool `Bash`: Read SDK critical section and TCB definitions
+
+## Claude
+
+`SwEnterCriticalSection` is a library function, not inline asm, so the HAL can implement it. Now the ICO example you pointed me to. Fetching its decompiled thread system from GitHub:
+
+- tool `Bash`: List ICO-decomp C sources on GitHub
+
+- tool `Bash`: List ICO-decomp C sources via GitHub API
+
+- tool `Bash`: Fetch and read ICO's thread.c
+
+- tool `Bash`: Read PS1 TCB structures and thread prototypes
+
+- tool `Bash`: Find TCB struct definitions in SDK headers
+
+- tool `Bash`: Search everywhere for TCBH
+
+- tool `Bash`: Locate kernel struct header
+
+- tool `Bash`: Read kernel.h TCB definitions
+
+- tool `Bash`: Inspect kernel.h encoding and TCB lines
+
+## Claude
+
+Still on threads: I've read MGS's `mts` and ICO's thread code. Now I'm checking the PS1 kernel struct layout before writing the HAL thread code.
+
+- tool `Bash`: Print PS1 ToT/TCB struct definitions
+
+- tool `Bash`: Check EE type sizes
+
+## Claude
+
+On the EE, `long` and pointers are both 32-bit, so the PS1 struct layouts carry over unchanged. Checking the ps2sdk calls I plan to use:
+
+- tool `Bash`: Check ps2sdk thread API declarations
+
+- tool `Bash`: Check DIntr/EIntr and wakeup notes
+
+## Claude
+
+Writing the HAL's PS1 thread layer:
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/thread_ps2.c
+
+## Claude
+
+Now the hook in the VSync handler, then a standalone test program:
+
+- tool `Bash`: Call the thread switch check from the VSync handler
+
+- tool `Bash`: Write and build the thread test ELF
+
+## Claude
+
+It builds cleanly. Running it in PCSX2:
+
+- tool `Bash`: Run the thread test in PCSX2
+
+## Claude
+
+The test hangs right after the first switch to task B. I'll add progress prints to find where it stops:
+
+- tool `Bash`: Add progress prints and rerun the test
+
+## Claude
+
+`DI`/`EI` work, VSync interrupts arrive, and both tasks start, but no switch back to B happens after that. I'll count the interrupt switches and have task A report them:
+
+- tool `Bash`: Instrument interrupt switches and rerun
+
+## Claude
+
+Interrupt switches work for three rounds, then everything stops. I'll add a high-priority monitor thread that prints both tasks' kernel states once a second:
+
+- tool `Bash`: Add a monitor thread and rerun
+
+- tool `Bash`: Fix declaration and rerun with monitor
+
+- tool `Bash`: Print Status register from task A
+
+- tool `Bash`: Never sleep with interrupts off; retry deferred switches
+
+- tool `Bash`: Stress test with frequent waits and 200 switches
+
+- tool `Bash`: Gate interrupt switches on the ChangeTh caller sleeping
+
+- tool `Bash`: Count switches that hit a waiting thread; run twice
+
+- tool `Bash`: Cover switches from a running thread too
+
+- tool `Bash`: Find SH1 callers of the new functions
+
+- tool `Bash`: Read SH1 critical section uses
+
+- tool `Bash`: Rebuild SH1 with threads and compare the PCSX2 run
+
+- tool `Bash`: Compare the end of both runs
+
+- tool `Bash`: Show the last lines of both runs
+
+- tool `Bash`: Run both builds for 150 s and compare
+
+- tool `Bash`: Record the thread work in both repos
+
+## Claude
+
+This change also affects SH1 (its critical sections now really disable interrupts), so I'll add a short note to SH1's walkthrough too:
+
+- tool `Bash`: Note the change in SH1 and update the archive
+
+- tool `PushNotification`: 
+
+## Claude
+
+PS1 threads now work in PCSX2, using the scheduling pattern MGS's `mts` relies on. I used ICO's `ios/thread.c` as the reference. The code is in the HAL's new file [thread_ps2.c](../psx-to-ps2-HAL/src/ps2/thread_ps2.c), and nothing is committed yet.
+
+**How it works:** each PS1 thread is one EE kernel thread, and all of them run at the same priority. Only the thread `mts` has chosen is runnable; the others are parked. A task switch happens one of two ways:
+- **`ChangeTh`:** wakes the target thread, then the caller goes to sleep.
+- **From the VSync interrupt:** `mts` rewrites the PS1 kernel table's "current thread" entry. After the game's VSync callback returns, the HAL compares that entry with the running thread and makes the switch, as the PS1 does when an interrupt returns.
+
+The HAL keeps a copy of the PS1 kernel's thread tables for `mts` to read and write. When we get to compiling `mts_new.c`, its reads of the fixed address `0x100` need to go through `Port_PsxToT()` instead.
+
+**Bugs the test found and that are now fixed:**
+- **Interrupts staying off:** the EE kernel doesn't keep interrupts on or off per thread. The first version switched threads with interrupts disabled, as the PS1 does, so the next thread inherited "off" and VSync interrupts stopped after three switches. The fix is to switch with interrupts on and restore each thread's own critical-section state when it wakes.
+- **Deadlock:** turning interrupts back on opens a short window during a switch. My first guard for it deadlocked when a task spent most of its time blocked on a semaphore. The guard now waits only until the thread calling `ChangeTh` is asleep.
+
+**Results:**
+- **Test program:** [thread_test](../psx-to-ps2-HAL/tools/thread_test/thread_test.c) passed both runs in PCSX2. 200 waits each resumed on the exact VSync. Of the 200 interrupt switches, 132 caught the other task while it was waiting and 68 while it was running.
+- **SH1:** `EnterCriticalSection`/`ExitCriticalSection` used to be do-nothing stubs and now really disable interrupts. SH1 behaves the same in a 150-second PCSX2 run.
+
+**Not yet tested:**
+- **Interrupt during the window:** the case where a VSync interrupt arrives exactly inside a `ChangeTh` switch hasn't been forced by the test. It is handled by reasoning only.
+- **Real PS2:** none of this has run on the console. PCSX2 runs the real BIOS kernel, so a console run is a confirmation, not new information.
+
+The work is written up in the HAL's new [Walkthrough.md](../psx-to-ps2-HAL/docs/Walkthrough.md), with a short note in SH1's walkthrough. The threads item in [Planning Doc.md](docs/Planning%20Doc.md) is ticked.
+
+Should I commit now? Or would you like to run `thread_test.elf` on your PS2 first? It's a small standalone ELF, so you can boot it from uLaunchELF.
+
+## User
+
+Let’s try interrupting during the window if it’s feasible to test
+
+## Claude
+
+Yes, it's feasible. I'll add a test-only hook inside `ChangeTh`'s window (compiled only into the test build). The test uses it to spin until a VSync interrupt arrives, and that interrupt asks for a switch at exactly that moment. The expected behaviour: the handler defers the switch, and it happens on the next VSync.
+
+- tool `Bash`: Force interrupts inside ChangeTh's window and test
+
+## Claude
+
+The anchor text in the test file was wrong (`tcb_of` returns `struct TCB*`, not `long`). The HAL and Makefile edits went through. Redoing the test-file part:
+
+- tool `Bash`: Add the window test and run it twice
+
+- tool `Bash`: Record the window test in the HAL walkthrough
+
+## Claude
+
+The window case is now tested and works in PCSX2, and every thread test passed.
+
+**How the test works:** I added a test-only hook in `ChangeTh`, right between waking the target and going to sleep. It is compiled only into the test build (`-DHAL_THREAD_TEST`), so SH1 and MGS builds don't get it. On every fifth wait, task B spins in that hook until a VSync interrupt arrives. The test's interrupt handler then asks to switch straight back to B, which is the unsafe case.
+
+**Result, in both PCSX2 runs:**
+- All 40 switches requested inside the window were deferred, according to the HAL's own count.
+- Each one happened on the very next VSync.
+- The other 160 interrupt switches still landed on the exact VSync, and the test passed.
+
+I added this to the HAL's [Walkthrough.md](../psx-to-ps2-HAL/docs/Walkthrough.md). The open items there are now:
+- Only the VSync handler applies switches. MGS's other interrupt callbacks don't switch tasks, so that's fine for `mts`.
+- Nothing has run on a real PS2 yet.
+- `mts_new.c` must read the thread tables through `Port_PsxToT()`, not the fixed address `0x100`, once we compile it.
+
+Nothing is committed yet. Should I commit the thread work in the HAL, SH1 and MGS repos?
+
+## User
+
+Yes
+

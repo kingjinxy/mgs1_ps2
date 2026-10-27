@@ -216,7 +216,12 @@ static int ReadCdDirectory(char *buffer, FS_FILE_INFO *finfo)
                 size_ptr = &dir_record[10];
                 size = read_lsb_ulong(size_ptr);
 
+#ifdef MGS_PORT
+                /* found is NULL for the executable: the PS1 read address 4 here */
+                printf("FILE %s : top %d size %d set %d\n", name_buf, top, size, found ? found->pos : 0);
+#else
                 printf("FILE %s : top %d size %d set %d\n", name_buf, top, size, found->pos);
+#endif
             }
         }
 

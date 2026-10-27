@@ -186,9 +186,35 @@ def make_iso(elf):
     open(cnf, "w", newline="").write("BOOT2 = cdrom0:\\%s;1\r\nVER = 1.00\r\nVMODE = NTSC\r\n" % title)
     iso = os.path.join(OUT, "mgs_ps2.iso")
     run([sys.executable, os.path.join(HAL, "tools", "mkiso.py"), iso + ".tmp", "MGSPS2",
-         "SYSTEM.CNF;1=" + cnf, "%s;1=%s" % (title, elf)])
+         "SYSTEM.CNF;1=" + cnf, "%s;1=%s" % (title, elf)] + ps1_discs())
     os.replace(iso + ".tmp", iso)
     print("disc image: " + iso)
+
+
+# The PS1 discs (Integral; not in git): CHDs from ps1-original/ (any subfolder), extracted once to raw
+# 2352-byte sectors in obj_ps2/ps1/. Each is one file on the DVD: PS1 sector n at byte n * 2352. Discs 1
+# and 2 only; the VR disc comes later.
+PS1_DISCS = (("DISC1.BIN", "(Disc 1).chd"), ("DISC2.BIN", "(Disc 2).chd"))
+
+
+def ps1_discs():
+    chds = [os.path.join(d, f) for d, _, fs in os.walk(os.path.join(ROOT, "ps1-original")) for f in fs]
+    os.makedirs(os.path.join(OUT, "ps1"), exist_ok=True)
+    entries = []
+    for name, suffix in PS1_DISCS:
+        chd = [c for c in chds if c.endswith(suffix)]
+        if not chd:
+            print("no %s in ps1-original/: %s left off the disc image" % (suffix, name))
+            continue
+        bin_ = os.path.join(OUT, "ps1", name)
+        if not os.path.exists(bin_) or os.path.getmtime(bin_) < os.path.getmtime(chd[0]):
+            print("extracting " + os.path.basename(chd[0]))
+            run(["chdman", "extractcd", "-f", "-i", chd[0], "-o", bin_[:-4] + ".cue", "-ob", bin_ + ".tmp"])
+            os.replace(bin_ + ".tmp", bin_)
+        if os.path.getsize(bin_) % 2352:
+            sys.exit(bin_ + ": not raw 2352-byte sectors")
+        entries.append("%s;1=%s" % (name, bin_))
+    return entries
 
 
 if __name__ == "__main__":

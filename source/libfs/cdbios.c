@@ -35,6 +35,184 @@ static inline void int_to_loc( int pos, CdlLOC *loc )
     loc->minute = itob(seconds / 60);
 }
 
+#ifdef MGS_PORT
+/* PS2 port: the sectors come from the PS1 disc image on the DVD (port/src/cdbios_ps2.c), not libcd.
+ * The task reads chunks of sectors and hands each to the request as CDBIOS_ReadyCallback does. On the
+ * PS1 that callback ran in an interrupt: here each sector is a critical section instead. */
+#include <libapi.h>
+
+#define CDBIOS_CHUNK 16 /* sectors per read: at one read per vertical blank, ~6x the PS1 drive */
+
+extern int                  MgsCd_Init(void);
+extern int                  MgsCd_Start(int sector, int count);
+extern int                  MgsCd_Poll(void);
+extern const unsigned char *MgsCd_Sector(int i);
+
+int CDBIOS_Reset(void)
+{
+    int retries;
+
+    CDBIOS_TaskStart();
+
+    for (retries = 4; retries >= 0; retries--)
+    {
+        if (MgsCd_Init())
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static void CDBIOS_Stop(void)
+{
+    cdbios_next_state = CDBIOS_STATE_IDLE;
+}
+
+/* One sector for the request (raw: sync, header, subheader, data); 0 once the request has ended. */
+static int CDBIOS_Deliver(const unsigned char *raw)
+{
+    int          callback_status;
+    unsigned int size;
+    CDBIOS_TASK *task;
+
+    task = &cdbios_task;
+
+    if (loc_to_int((CdlLOC *)(raw + 12)) != task->sector)
+    {
+        printf("CDFS: sector %d has header %d\n", task->sector, loc_to_int((CdlLOC *)(raw + 12)));
+    }
+
+    size = 0x200;
+
+    if (task->remaining <= 512u)
+    {
+        size = task->remaining;
+    }
+
+    if (task->buffer)
+    {
+        memcpy(task->buffer, raw + 24, size * 4);
+    }
+
+    task->remaining -= size;
+    task->buffer_size = size;
+
+    if (task->callback)
+    {
+        callback_status = task->callback(&cdbios_task);
+
+        if (callback_status == 0)
+        {
+            CDBIOS_Stop();
+        }
+        else if (callback_status == 2)
+        {
+            size = 0;
+        }
+    }
+
+    if (task->buffer)
+    {
+        task->buffer = (int *)task->buffer + size;
+    }
+
+    task->sector++;
+    task->sectors_delivered++;
+    task->ticks = 0;
+
+    if (task->remaining <= 0)
+    {
+        CDBIOS_Stop();
+    }
+
+    return cdbios_next_state < 0 && !cdbios_start_flag && !cdbios_stop_flag;
+}
+
+static void CDBIOS_Main(void)
+{
+    CDBIOS_TASK *task;
+
+    int chunk_sector; /* the read in flight: its first sector */
+    int chunk_count;  /* and its sectors (0: none) */
+    int status;
+    int more;
+    int i;
+
+    mts_set_vsync_task();
+
+    task = &cdbios_task;
+
+    chunk_sector = 0;
+    chunk_count = 0;
+
+    while (1)
+    {
+        if (cdbios_stop_flag != 0)
+        {
+            cdbios_stop_flag = 0;
+            CDBIOS_Stop();
+        }
+
+        if (cdbios_next_state >= 0)
+        {
+            task->state = cdbios_next_state;
+            cdbios_next_state = CDBIOS_STATE_INVALID;
+        }
+
+        if (cdbios_start_flag != 0)
+        {
+            task->state = CDBIOS_STATE_START;
+            cdbios_start_flag = 0;
+            cdbios_stop_flag = 0;
+            cdbios_next_state = CDBIOS_STATE_INVALID;
+        }
+
+        if (task->state == CDBIOS_STATE_START)
+        {
+            task->state = CDBIOS_STATE_READ;
+        }
+
+        if (chunk_count > 0)
+        {
+            status = MgsCd_Poll();
+
+            if (status == 0 && task->state == CDBIOS_STATE_READ)
+            {
+                /* A request started since this read began may want other sectors than these. */
+                more = 1;
+
+                for (i = task->sector - chunk_sector; more && i >= 0 && i < chunk_count; i++)
+                {
+                    SwEnterCriticalSection();
+                    more = CDBIOS_Deliver(MgsCd_Sector(i));
+                    SwExitCriticalSection();
+                }
+            }
+
+            if (status <= 0)
+            {
+                chunk_count = 0; /* after a drive error, read the same sectors again */
+            }
+        }
+
+        if (chunk_count == 0 && task->state == CDBIOS_STATE_READ && cdbios_next_state < 0)
+        {
+            chunk_sector = task->sector;
+            chunk_count = MgsCd_Start(chunk_sector, CDBIOS_CHUNK);
+
+            if (chunk_count == 0)
+            {
+                printf("CDFS: read of sector %d failed\n", chunk_sector);
+                CDBIOS_Stop();
+            }
+        }
+
+        mts_wait_vbl(1);
+    }
+}
+#else
 int CDBIOS_Reset(void)
 {
     int           retries;
@@ -324,6 +502,8 @@ static void CDBIOS_Main(void)
         mts_wait_vbl(1);
     }
 }
+
+#endif // MGS_PORT
 
 void CDBIOS_TaskStart(void)
 {

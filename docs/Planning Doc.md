@@ -181,7 +181,14 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 
 ### Step 6 — Pad, CD, memory card
 
-- [ ] `libfs` sector reads via the HAL (disc 1 first; disc swap later)
+- [~] `libfs` sector reads (disc 1 first; disc swap later). Done: `cdbios.c`'s task under `MGS_PORT` reads
+      chunks of 16 sectors from `DISC1.BIN` (raw 2352-byte sectors, extracted from `ps1-original/*.chd`
+      by `build/link_ps2.py`) through `port/src/cdbios_ps2.c` and hands each to the request's callback in
+      a critical section. In PCSX2 the ISO9660 lookup finds every file at its right sector and STAGE.DIR's
+      table is read. Still to do: disc swap (`DISC2.BIN` is on the image already), `CdControl`/`CdRead2`
+      for movies and XA (`Port_CdHill` stub), `change`/`open`'s drive checks
+      Found on the way: the game needs `-funsigned-char` (as PSY-Q's `ccpsx`; `build_ps2.py`), or byte
+      reads through `char` sign-extend (the directory's file sizes came out negative)
 - [ ] `memcard/` saves via the HAL memory card layer
 - [~] Pad incl. vibration/DualShock analog: PadInitDirect buffers, polling thread, actuator setup (Step 1); buttons and vibration untested until the game runs past the disc
 

@@ -33,6 +33,7 @@ INCLUDES = [os.path.join(ROOT, "port", "include"), os.path.join(HAL, "include"),
 CFLAGS = ["-O2", "-G0", "-std=gnu89", "-nostdinc", "-fno-strict-aliasing", "-fno-toplevel-reorder",
           "-mno-check-zero-division", "-fno-delete-null-pointer-checks", "-fno-isolate-erroneous-paths-dereference",
           "-fno-aggressive-loop-optimizations", "-fcommon",  # tentative definitions in several files merge, as with the PS1's GCC
+          "-funsigned-char",  # as PSY-Q's ccpsx: the decompiled code reads bytes through plain char
           "-fexec-charset=EUC-JP",  # the PS1 build converts sources to EUC-JP
           "-Wno-error=implicit-function-declaration", "-Wno-error=int-conversion",
           "-Wno-error=incompatible-pointer-types", "-Wno-error=implicit-int", "-Wno-error=return-mismatch",

@@ -3346,3 +3346,643 @@ SH1 is fine: it runs through the attract demos with 0 TLB misses and 9 stubs, as
 
 - tool `Bash`: Update MGS and HAL docs
 
+## Claude
+
+Last step: updating `Claude Conversation.md`.
+
+- tool `Bash`: Archive conversation, check no removed lines
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+The pad is working as far as the game currently gets: port 1 goes stable and the DualShock vibration setup is sent. Buttons and vibration in actual play can't be tested until the game gets past the disc. Nothing is committed.
+
+**What I added (HAL):** `PadInitDirect`, `PadStartCom` and `PadStopCom`. Each pad poll copies the 8 bytes of pad data into the two buffers MGS gives it, as the PS1 BIOS does. That removed the last three pad stubs; the 8 stubs left are all libcd.
+
+**A crash came with it.** Right after the first pad poll the game jumped to a garbage address, `0x657A696C` (the ASCII bytes "lize"). The HAL runs the game's vertical-blank callback inside the interrupt. MGS calls `VSync(-1)` from that callback, and `VSync` polls the pads, which talks to the IOP and prints; neither works inside an interrupt.
+- **Fix:** a new HAL setting, `HAL_GAME_PAD_THREAD`, which MGS turns on. The interrupt now wakes a separate thread that does the polling.
+- **Calls from inside the callback:** the pad state and vibration-motor info come from the last poll. Setting the motor layout or the analog mode waits for the next poll.
+- **Motor info is read once per plugged-in pad:** each read is itself a pad command, and re-reading it on every state change kept port 1 flipping between "busy" and "ready" every frame.
+
+**HAL bug fixed: `PadGetState` returned the wrong PS1 state numbers.** A pad busy with a command came back as "pad without DualShock functions", so MGS treated a DualShock as a plain digital pad. It now returns the values from PSY-Q's `libpad.h` (2, 5 and 6). This also changes what SH1 sees, which is why I re-ran the SH1 check.
+
+**Task stacks:** in `source/mts/mts_new.c`, under `MGS_PORT`, every game task now runs on a 32 KB stack instead of the original 0.5–2 KB ones. This turned out not to be the cause of the crash, but I kept it. The system task's stack is only 512 bytes, PS2-compiled code uses bigger stack frames than the PS1 build, and the system task now runs HAL code. Say if you'd rather I revert it.
+
+**Checks:**
+- The matching build gives 80 OK, and the VR executable build matches too.
+- A PCSX2 run of MGS shows no TLB misses.
+- SH1 still links with 9 stubs and ran 150 seconds through its attract demos, with the pad stable and no TLB misses.
+
+The docs are updated: the Running Walkthrough, the Planning Doc (pad item marked partly done), the HAL's `docs/Walkthrough.md` and `Claude Conversation.md`.
+
+The HAL changes are in `src/ps2/libpad_psx.c`, `src/ps2/pad_ps2.c`, `src/ps2/libetc_ps2.c` and `include/port/pad.h`. On the MGS side, the new setting is in `port/hal/hal_game_config.h`.
+
+## User
+
+Commit the changes
+
+- tool `Bash`: Commit HAL and MGS changes
+
+## Claude
+
+I committed the pad work in both repos, and both working trees are clean:
+- **HAL:** `f8178a8`, "Pad: PadInitDirect buffers, polling thread for interrupt-time pad reads, PS1 PadGetState values"
+- **MGS:** `b296aa623`, "Port: pad through the HAL (PadInitDirect, HAL_GAME_PAD_THREAD); 32 KB task stacks"
+
+The SH1 repo has no new commit, since nothing there changed. The pad fix does change what SH1 gets from the shared HAL, and its PCSX2 check still passed. I haven't added a note about it on the SH1 side; I can if you want one.
+
+## User
+
+Add a note about that
+
+- tool `Bash`: Find where SH1 notes HAL changes
+
+- tool `Bash`: Locate SH1 walkthrough and HAL notes
+
+- tool `Bash`: Read SH1 note conventions
+
+- tool `Bash`: Add and commit SH1 note
+
+## Claude
+
+I added the note to SH1's `Running Walkthrough.md` and committed it as `604e3c17f`.
+
+It says that `PadGetState` now returns the PS1's values (2 for a pad without DualShock functions, 5 for a command in progress) and gives the old values. It also says the new polling thread is off for SH1, so `VSync` still polls the pads there, and records the PCSX2 check that passed. It ends by saying the change hasn't been tried on real hardware or with a digital pad yet.
+
+## User
+
+<command-name>/clear</command-name>
+            <command-message>clear</command-message>
+            <command-args></command-args>
+
+## User
+
+Let’s talk for a moment about the viability of 60 FPS in gameplay and cutscenes for MGS1. Silent Hill was relatively simple because it supports delta time internally, but I don’t think MGS1 does. Look over the code to confirm this. I’ve also heard that the cutscenes run at an “unlocked” frame rate, and I wonder if they can be adjusted to 60 FPS more easily.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls source 2>/dev/null | head -30; grep -rn "GV_PassageTime\|gv_passage\|VSync(" source --include=*.c | grep -v "^.*//" | head 
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 1,90p source/libgv/gvd.c; grep -rln "GV_PassageTime" source | wc -l; grep -rn "GV_PassageTime" source | wc -l; sed -n 2
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 90,140p source/libdg/dgd.c; grep -rn "GV_PassageTime" source | grep -v gvd.c; grep -rn "DG_FrameRate\|FrameRate" source
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 40,85p source/libdg/dgd.c; sed -n 150,200p source/kojo/demothrd.c; grep -n "^[a-zA-Z].*(" source/kojo/demothrd.c source
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; wc -l source/kojo/demoexec.c; grep -n "^[a-zA-Z].*(\|case 0x\|case DEMO\|GM_ActMotion\|GM_ActObject\|DG_SetPos\|anim\|motion" 
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 2111,2198p source/kojo/demoexec.c
+
+## Claude
+
+I've confirmed your suspicion about gameplay. The cutscene rumour is partly right: they aren't unlocked, they're locked to the clock. That actually makes them the easier 60 FPS target.
+
+## Gameplay: fixed step, no delta time
+
+- **The loop paces itself to vblanks.** [dgd.c:62](source/libdg/dgd.c#L62) calls `mts_wait_vbl(DG_FrameRate)`, and `DG_FrameRate` defaults to 2, so 30 FPS on NTSC. Each wake-up runs one fixed step of every actor.
+- **Delta time exists but almost nothing uses it.** `GV_PassageTime` (ticks since the last frame) is set in [gvd.c:43](source/libgv/gvd.c#L43), but only 7 files read it: the fade, telop subtitles, life-up, ambient sound, vibration, and the play-time counter in [gamed.c:373](source/game/gamed.c#L43). Everything else is per-frame: Snake's and the enemies' movement, animations (`GM_ActMotion` steps one keyframe per call), AI timers, projectiles, effects and camera smoothing.
+- **Some code assumes two buffers flipping each frame.** `GV_Clock ^= 1` picks which packet buffer gets drawn, and lights use `GV_Time & 1`. That still works at 60 FPS, but it ties drawing to logic steps.
+- **The engine already changes the rate.** [wt_area.c:191](source/takabe/wt_area.c#L191) drops to 20 FPS (`DG_FrameRate = 3`) and the ending switches to 60 (`= 1`, [ending2.c:1047](source/takabe/ending2.c#L1047)). Running the whole game at `DG_FrameRate = 1` just makes everything twice as fast, as with a PS1 overclock.
+
+So real 60 FPS gameplay leaves two choices:
+1. **Make every actor use delta time.** That means hundreds of actors and their animation code, and it would almost certainly change game feel and AI timing. I don't think it's realistic.
+2. **Keep logic at 30 Hz and render at 60 with interpolation.** Each object would keep its previous and current transforms (`control.mov/rot`, `object.rots`, camera), and every other vblank would draw a frame lerped between them. This fits the engine, because transforms go through a few chokepoints (`GM_ActControl`, `GM_ActObject`, `DG_SetPos2`, the camera actor). The hard parts:
+   - **Particles and primitives:** effects and `DG_PRIM` users write screen or world vertices straight into packet buffers. Those wouldn't interpolate and would update at 30 Hz unless handled one by one.
+   - **Skeletal animation:** joint rotations would need to blend using the shortest angle path.
+   - **Teleports:** camera cuts and warped objects need a "don't interpolate this frame" flag, or you get one frame of smear.
+   - **Cost:** the GS and VU would be transforming and drawing twice as often. That should fit on a PS2, but it's not free.
+
+## Cutscenes: wall-clock timed, baked at 30 FPS
+
+[demothrd.c](source/kojo/demothrd.c) (`ActFile` and `ActStream`) computes the demo frame as `(VSync(-1) - start_time) / 2`, which is elapsed vblanks at 30 Hz. If rendering falls behind, it skips ahead in the stream to stay in sync with the audio. That's probably where the "unlocked" idea comes from: playback follows real time, not the render loop. The data itself is a fixed 30 FPS.
+
+`ShowScene` ([demoexec.c:2111](source/kojo/demoexec.c#L2111)) also shows that each demo frame holds baked absolute values for every model: position, rotation and all the joint rotations (`adjust->rots`). Nothing about the poses is simulated. That makes them the best interpolation target in the game:
+- At 60 FPS, compute the frame number with fractional precision (`elapsed / 2.0`).
+- Read records N and N+1 from the stream and lerp positions and joint angles.
+- This is a contained change in `demothrd.c` and `demoexec.c`, with no changes to the cutscene data.
+
+What would still be awkward:
+- **Streamed demos:** the reader is forward-only (`FS_StreamGetData` / `FS_StreamClear`). You'd have to keep one record of lookahead before freeing the previous one, which is doable.
+- **Effects spawned by demos:** smoke, sparks and the M1 tank or Hind helpers (`ShowEffect`, `demothrd_m1e1_*`) are ordinary per-frame actors. They'd stay at 30 Hz unless they get the same interpolation as gameplay.
+- **Script-driven scenes:** many story beats aren't demo files at all but GCL scripts moving live actors. Those count as gameplay for this purpose.
+- **Cuts:** a jump between consecutive records has to be detected, for example by a threshold on the camera delta, so the lerp doesn't cross a cut.
+- **The camera:** I didn't check whether demo frames carry the camera as an `adjust` record or a separate one. Either way, it has to be interpolated the same way.
+
+## Recommendation
+
+Do demo-file interpolation first. It's contained, low-risk, and the most visible gain. If that works, it builds the infrastructure gameplay would need anyway: previous and current transforms plus a mid-frame draw pass. Gameplay with the full 30 Hz logic and 60 Hz render interpolation could follow. I'd skip the delta-time conversion.
+
+## User
+
+What if we don’t do delta time for gameplay and instead rework it to use 60 Hz updates? This would probably requiring halving or doubling a bunch of values
+
+## Claude
+
+It's possible, but I'd still choose interpolation over a 60 Hz rework. Doubling or halving values covers the simple cases, but a lot of the code doesn't scale linearly. Here is what each kind of value needs at 60 Hz:
+
+| Pattern | Example | 60 Hz change |
+|---|---|---|
+| Velocity per frame | `pos += speed` | halve `speed` |
+| Acceleration or gravity | `vel += g; pos += vel` | `g / 4`, and halve the starting velocities |
+| Frame-count timers | `if (++t > 90)` | double the limits |
+| Smoothing/damping | `x += (target - x) / 4` | not linear: the factor becomes `1 - sqrt(1 - k)`, so 1/4 turns into about 0.134 |
+| Chance per frame | `if (rand() % 32 == 0)` | the odds must halve, or AI and effects fire twice as often |
+| Every-Nth-frame logic | `GV_Time & 1`, `% 4` | rethink each one |
+| Animation | `GM_ActMotion` steps one keyframe per call | needs sub-keyframe interpolation in the motion system |
+| Script waits | GCL waits in frames | scale them in the interpreter, or in every script |
+
+## Problems beyond the table
+
+- **Precision:** everything is PS1 fixed-point integers. A speed of 1 or 3 per frame can't be halved exactly, and the rounding drifts over time. Some values would need wider fixed-point storage, which touches structs shared with data files and scripts.
+- **Scale:** each of the hundreds of actor files (`enemy/`, `chara/`, `anime/`, `bullet/`, `weapon/`, `okajima/`, `takabe/` and so on) has its own hard-coded constants. Each one takes a human-level call: is this a velocity, a timer, a damping factor or an angle? Nothing finds them automatically.
+- **Testing:** after the change the game no longer plays the same way as on a PS1, so DuckStation can't serve as a frame-by-frame reference. The bugs would be subtle: a jump slightly short, a guard turning a bit faster, a boss pattern out of sync with its sound. Some would only show up in specific fights.
+- **The matching build:** every change needs a `#ifdef` (or similar) so the regression build still matches its hash. That would mean thousands of guarded sites.
+- **CPU:** this is the one easy part. Running the logic twice as often costs nothing that matters on the EE.
+
+## Comparison with interpolation
+
+Interpolation leaves the game logic untouched, and the hash and the DuckStation comparison still hold. All the work sits in the few transform chokepoints plus the per-effect cleanup. You'd see the same smoothness, though input still updates at 30 Hz, about 16 ms more latency than true 60 Hz. For MGS1's movement that's barely noticeable.
+
+A 60 Hz rework would only be worth it if 30 Hz input latency, or effects still updating at 30 Hz, turn out to be visibly bad after interpolation. Even then I'd convert only the subsystems that show the problem, not the whole game.
+
+## User
+
+I still think interpolation would be best for porting to a more powerful console, not the PS2. Even if lots of values are hardcoded, I think with enough debugging hooked up to the game, we can figure out what all needs to change. My thought is that we start by using the same sort of replay system that we have for Silent Hill and then force the game to output at 60 fps. The game will be running at double speed, but we can essentially iterate on code changes to get the replay working at 60 fps and all the changes working at 60 fps.
+
+- tool `Bash`: cd /home/alex/Documents; grep -ril "replay" silent-hill-1-ps2-port/docs silent-hill-1-ps2-port/*.md 2>/dev/null | head; grep -rih -m5 "replay" silent-hill-1-ps2
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; head -c 5000 replays.md; grep -i -A3 "replay" CLAUDE.md | head -30
+
+## Claude
+
+The replay approach can work, especially with one addition: converting actors one at a time. The catch is that a 60 Hz run can't match a 30 Hz recording exactly, so "the replay works" needs a looser definition than it had for Silent Hill.
+
+## Why exact sync isn't possible
+
+The SH1 replays check sync by comparing state exactly at each step (`rec step` lines). At 60 Hz that breaks for three reasons:
+
+- **Rounding:** halved integer speeds drift by a fraction of a unit per frame, so Snake ends up a few units off after a long walk even when the conversion is right.
+- **The RNG:** at 60 Hz, `rand()` is called a different number of times per 30 Hz step, so the sequence drifts immediately. Reseeding every 30 Hz step, as SH1 does, only partly helps: any actor that rolls every frame still makes twice as many rolls.
+- **Discrete decisions:** a guard that notices Snake on frame N at 30 Hz might notice him on 60 Hz tick 2N−1. After that the run follows a different but equally valid path.
+
+So the replay becomes a **tolerance check**, not a match:
+- Compare traces at every second 60 Hz tick against the 30 Hz trace.
+- Allow small position and angle errors.
+- Flag divergence in discrete state: actor counts, AI modes, health, alert phase, area loads.
+
+The first actor whose discrete state diverges is the one to look at next. Runs will still fork eventually, so short recordings that each cover one thing (a room, a boss phase) will be more useful than long play-throughs.
+
+## The addition: convert actors one at a time
+
+Run the main loop at 60 Hz, but give each actor type a "converted" flag. Unconverted actors only `Act` on even ticks, so they still effectively run at 30 Hz with their original constants. The game then plays at normal speed from day one, and the replay should stay roughly in sync while you work through the actors:
+
+1. Get the loop, camera and core libraries (`GM_ActMotion`, `GM_ActControl`, the GCL interpreter's waits) running at 60 Hz.
+2. Convert Snake first, then guards, then effects and bosses.
+3. After each conversion, the replay shows whether that actor's behaviour still matches.
+
+An actor that moves at 30 Hz next to a smooth one is visibly wrong, but each one is shippable once converted. That beats fixing a game that runs at double speed everywhere all at once.
+
+## Tooling worth building first
+
+- **Per-actor state dumps in the trace:** position, the AI mode/state field, timers, and the actor's type name. `GV_ACT` already has a name string we can use.
+- **An RNG call counter per actor:** this finds "rolls every frame" code automatically, since a converted actor that doubles its call count is suspect.
+- **A static scan for likely per-frame constants** in actor `Act` functions: `+=` against literals, `++timer` compared with a literal, and `/ N` toward a target. It won't be complete, but it gives a checklist per file.
+- **The SH1 file-timing fix carried over:** recorded load completion steps, so loads don't cause desync.
+
+## Two caveats
+
+- **PS2 cost:** both approaches render 60 frames a second, so the GS and VU load is the same. This approach also doubles the game logic. That's cheap for the EE, but it's added on top of rendering, while interpolation only adds a lerp.
+- **Prerequisites:** the 60 Hz work can't start until the port boots into gameplay and the replay system exists for MGS.
+
+If that sounds right, I'll add this to `docs/Planning Doc.md` as a later phase.
+
+## User
+
+Let’s say we did do interpolation. How do we reduce input latency, and how do we deal with camera cuts and other 1-frame effects? My fear is that with interpolation disabled on camera cuts, the frame rate briefly drops to 59 FPS
+
+## Claude
+
+## Input latency
+
+How much latency interpolation adds depends on the order of work. A naive setup draws between step N−1 and step N, which shows the past and adds a full 33 ms step. Ordering it this way avoids most of that:
+
+```
+vblank 0: show step N           ← read pad, compute step N+1 now
+vblank 1: show lerp(N, N+1, ½)  ← the result of the input is already half visible
+vblank 2: show step N+1         ← read pad, compute N+2 ...
+```
+
+- **Latency stays close to the original.** The first visible reaction to an input comes one vblank after it's read, and the full pose comes one vblank later. The original game also shows its result about one to two vblanks after the read. The cost is that step N+1 has to finish within one vblank, which is easy on the EE for 30 Hz logic.
+- **Poll the pad every vblank and pass the latest state into the next step.** Presses shorter than a step should be latched, not lost. MGS already reads the pad from its own thread, so this means making sure the HAL passes it through without adding a frame of queuing.
+- **Late camera updates for direct control:** in first-person view and when aiming, rotate the camera on the in-between frame from the newest pad input. Only the view moves, and the game state is untouched.
+- **Check the PS2 display chain:** confirm the HAL doesn't add an extra buffered frame between the GS draw and the displayed field. That frame would cost more latency than interpolation does.
+
+## Camera cuts: no drop to 59 FPS
+
+A cut never removes a frame. Something is drawn every vblank, and the only question is what that in-between frame shows. The naive fallback (showing step N for two vblanks) is still 60 frames a second, with one vblank where motion pauses. It looks like a 1/60 s hitch, not a dropped frame.
+
+Interpolation can also be turned off per object instead of for the whole frame:
+
+- **On a cut, snap only the camera.** The in-between frame uses step N+1's camera while objects still lerp between N and N+1. Motion stays smooth through the cut, and the cut just happens one vblank earlier.
+- **Teleports snap per object.** An object that warps (area change, respawn, demo repositioning) snaps; everything else keeps lerping.
+- **Detecting cuts:**
+  - The main signal is explicit hooks where the game resets the camera: camera mode changes, area loads, demo cut records, codec and menu transitions.
+  - The fallback is a heuristic that snaps when the camera's position or angle jumps past a threshold in one step. Angles use the PS1's 4096 units and need shortest-path handling, so a wrap from 4095 to 0 doesn't spin all the way round.
+
+## One-step effects (muzzle flashes, hit sparks, flashes)
+
+Use one rule: **match objects between steps by identity** (`DG_OBJS` pointer, plus a generation counter so a reused slot isn't mistaken for the same object).
+
+| Case | Step N | In-between frame | Step N+1 |
+|---|---|---|---|
+| Exists in both | shown | lerp | shown |
+| New in N+1 (spawn, muzzle flash) | – | shown at N+1's pose | shown |
+| Gone in N+1 (despawn) | shown | hidden | – |
+
+So a flash that exists for one 30 Hz step stays on screen for two vblanks, just as long as on the PS1. It appears one vblank earlier, which suits flashes.
+
+Other cases:
+- **Flicker and blinking** (`GV_Time & 1`, the damage blink): toggle only on logic steps, so they look exactly like the original.
+- **Screen-wide effects** (fades, palette effects, white-outs): lerp a fade level where it's continuous. Otherwise hold the value, as for one-step effects.
+- **Effects built in screen space** (`DG_PRIM` users writing finished vertices into the `GV_Clock` packet buffers): leave them at 30 Hz at first, and convert the visible ones (smoke, the stealth camo shimmer, lasers) later, so they store world-space positions to lerp.
+
+The in-between frame stutters only where something isn't handled. Every case above has a non-stuttering answer, and a real frame drop only happens if drawing takes longer than a vblank. That's the same risk the port has at 30 FPS today.
+
+## User
+
+Let’s continue discussing this, and update a “60 FPS update.md” file in the docs folder. Did our work to get SH1 running at 60 FPS increase CPU load in the same way that the proposed 60 fps update for MGS1 would?
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; grep -rli "60 \?fps\|60fps\|60 Hz\|delta" --include=*.md . | grep -v "Claude Conversation" | head; grep -n -i "6
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 853,960p "Running Walkthrough.md"; ls /home/alex/Documents/mgs1_ps2/docs
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "DG_RenderPipeline\|RenderPipeline" source --include=*.c | head; sed -n 100,160p source/libdg/frame.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "DG_SortChanlSystem\|DG_DrawChanlSystem" -A25 source/libdg/*.c | grep -v frame.c | head -60
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/docs/60 FPS update.md
+
+## Claude
+
+Yes, the SH1 60 FPS work increased CPU load the same way a 60 Hz logic rework for MGS1 would, by roughly doubling it. Interpolation would cost less, though not half.
+
+**SH1** went to 60 FPS by changing `g_IntervalVBlanks` from 2 to 1, so the whole frame runs every vblank: game update, GTE work and the GS translation. The first profile measured, per frame:
+- 3.15 M EE cycles for the game update, about 1.97 M of that in the software GTE;
+- 1.28 M cycles for the GS translation.
+
+The budget is about 4.9 M cycles per frame at 60 FPS. It only fit after the GTE speedup (update down to 2.42 M) and the GS translation work (about 1.2 M), as recorded in `Running Walkthrough.md` under "60 fps: option and first profile".
+
+**MGS1 with 60 Hz logic** doubles the load in the same way.
+
+**MGS1 with interpolation** costs less, because the engine draws in a separate pass. Actors only set matrices and object state. Afterwards, `DG_EndFrame` → `DG_SortChanlSystem` ([chanl.c:204](source/libdg/chanl.c#L204)) runs the `DG_ChanlUnits` pipeline (transform, divide, sort) over the whole scene. So interpolation runs:
+- actor logic at 30 Hz;
+- that pipeline and the GS translation every vblank;
+- plus a small cost to save and blend transforms.
+
+How much interpolation saves depends on how MGS's frame time splits between actor logic and the pipeline. I haven't measured that, and it can only be profiled once gameplay runs. Most of the per-frame GTE work is probably in the pipeline. In SH1 that was the biggest cost and it doubled either way, so expect the saving to be well short of half. Both options carry the same hard requirement: drawing has to fit in one vblank.
+
+I've written everything we've discussed into [docs/60 FPS update.md](docs/60%20FPS%20update.md): the timing findings, both options, latency, cuts, one-step effects, the replay-driven plan and this cost comparison.
+
+## User
+
+Is there anything we can do to reduce input latency with the interpolation?
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/60 FPS update.md
+
+## Claude
+
+Yes. On top of the step ordering already in the doc, there are four further reductions. I've added them to [docs/60 FPS update.md](docs/60%20FPS%20update.md), ordered from safest to riskiest:
+
+1. **Tighten the display chain (no visual cost).**
+   - Read the pad right before each logic step. Our pad goes through `HAL_GAME_PAD_THREAD`, and if that thread polls on its own schedule, the state can already be most of a frame old when the step starts. SH1 hit a version of this: its pad was refreshed only after a VSync wait.
+   - Make sure a finished frame flips on the next vblank with nothing queued behind it.
+   - Use progressive output (480p) where possible.
+
+   This only removes delay the port itself would add, so it's worth checking before anything else.
+
+2. **Start the step "just in time" (no visual cost).**
+   - Don't compute step N+1 straight after the flip. Measure how long a step plus the in-between draw take, then start that long (plus a margin) before the vblank it has to be ready for.
+   - The pad is read later, so the input is fresher by up to about one vblank (16 ms), depending on how much spare time the frame has.
+   - If a step overruns, fall back to the fixed schedule.
+
+   This is the biggest gain with no visual risk. Its cost is scheduling complexity.
+
+3. **Predict the player on the in-between frame.**
+   - Turn the camera, and possibly Snake's facing, from the newest stick state, for display only. The next logic step overrides it with the real result.
+   - It's reliable for the camera (first-person view, aiming).
+   - For Snake, a mismatch (he walked into a wall, or an animation locked his turn) shows as a one-vblank wobble. That needs a test before deciding.
+
+4. **Extrapolate instead of interpolating.**
+   - Show step N+1 as soon as it's computed, then extrapolate to N+1.5 on the next vblank. That saves one more vblank.
+   - Objects overshoot when they stop, turn or collide, which is exactly when the player is paying attention.
+   - It's a last resort, probably only for the camera.
+
+The step ordering plus 1 and 2 should feel as responsive as the original game, or better. Real 60 Hz responsiveness is the one thing they can't match, because logic still only reacts to input 30 times a second. Whether 3 is needed can only be judged by playing it.
+
+## User
+
+Explain 1 and 2 in more detail
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "HAL_GAME_PAD_THREAD" --include=*.[ch] . ../psx-to-ps2-HAL 2>/dev/null | head; grep -n "mts_read_pad\|GV_UpdatePadSys
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 30,130p ../psx-to-ps2-HAL/src/ps2/pad_ps2.c; grep -n "mts_read_pad\b\|^int mts_read_pad\|PadRead\|PadGetState\|PadInfo"
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "DrawOTag\|PutDispEnv" -A12 ../psx-to-ps2-HAL/src/ps2/gpu_gs.c 2>/dev/null | grep -n "^.*\(void\|Sync\|vsync\|flip\|sw
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/../psx-to-ps2-HAL/src/ps2; grep -n "^[a-zA-Z].*\(DrawOTag\|PutDispEnv\|DrawSync\)\b*(" *.c | head; grep -n "^/\*\*\|^ \*" displ
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/60 FPS update.md
+
+## Claude
+
+I need to correct my earlier answer. Looking at the code more closely, item 2 (starting the step just in time) gains nothing on the PS2. Item 1 turned out to matter more than I said. Here are both in detail; I've updated [docs/60 FPS update.md](docs/60%20FPS%20update.md) to match.
+
+## 1. The display chain
+
+### MGS shows each frame one game frame late
+
+The game keeps a PS1-style pipeline:
+
+1. **Frame F:** after the vblank wait, the game reads the pad (`GV_UpdatePadSystem`, [dgd.c:86](source/libdg/dgd.c#L86)). Actors run, then `DG_EndFrame` sorts the scene into an ordering table (the PS1's draw list).
+2. **Frame F+1:** after the next vblank wait, `DG_StartFrame` ([frame.c:108](source/libdg/frame.c#L108)) shows the other buffer with `PutDispEnv`, and only then starts `DrawOTag` of frame F's table.
+3. **Frame F+2:** frame F's picture is finally shown.
+
+So a button press needs about two game frames plus scan-out to reach the screen: around 67 ms or more at 30 FPS. On the PS1 that delay bought parallelism, because the GPU drew frame F while the CPU computed F+1.
+
+On the PS2 that parallelism is mostly gone. The HAL turns the ordering table into GS commands on the EE, so the CPU does that work either way. A port path can instead:
+- call `DrawOTag` at the end of the step, in `DG_EndFrame`;
+- wait for the GS to finish drawing (`DrawSync`);
+- show that buffer at the very next vblank.
+
+That removes a whole game frame of latency: 33 ms at 30 FPS. It doesn't depend on the 60 FPS work, so it could be done first and would improve the 30 FPS port too. The costs:
+- **Timing:** the step plus drawing has to fit before the vblank, not spread over two frames.
+- **Edge cases:** `DG_StartFrame`'s special cases must keep working: the `DG_UnDrawFrameCount` freeze (used when demos end), the disc-read-error pause, and the `DG_HikituriFlag` frame skip.
+- **Matching build:** the change sits behind a port `#ifdef`, so the regression build is unaffected.
+
+### Pad sampling is already as fresh as it can be
+
+- rom0 PADMAN on the IOP reads the pad once per vblank. The HAL relies on this, as noted in `Port_PadShutdown` in [pad_ps2.c](../psx-to-ps2-HAL/src/ps2/pad_ps2.c).
+- The HAL's poll thread (`HAL_GAME_PAD_THREAD`, priority 2) copies that data right after the interrupt.
+- The game reads it straight after its vblank wait.
+
+That should already be the freshest data available. It's worth one measurement: timestamp a pad change in the poll thread and check which step first sees it. If it shows up a vblank late, PADMAN's transfer is finishing after the interrupt, and the fix is to wait for the transfer.
+
+### Video mode
+
+480p or 240p has less TV-side lag than 480i on most sets, but that's outside the game's control.
+
+## 2. Starting the step just in time: dropped
+
+The idea was to start the logic step as late as possible before it's needed, so it reads fresher input. That only helps if the pad is sampled more often than the display flips. On the PS2 both happen once per vblank, at the same moment. So the newest sample is always the one from the vblank the step already follows, and this order is already the minimum:
+
+> vblank: read pad → step N+1 → draw the in-between frame → show it at the next vblank
+
+The real requirement is that the step plus the in-between draw fit in one vblank, about 4.9 M EE cycles. When they don't, show step N again for that vblank and log it, so the slow scenes can be found. Polling the pad faster would mean replacing PADMAN, which isn't worth it.
+
+With interpolation plus the drawing fix, a press could become partly visible at the next vblank, about 17 ms plus however long PADMAN takes to sample it. The original game takes about 67 ms.
+
+## User
+
+Update the 60 fps doc with these thoughts, and we’ll come back to it after the game is booting on PS2
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/60 FPS update.md
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/60 FPS update.md
+
+## Claude
+
+I've updated [docs/60 FPS update.md](docs/60%20FPS%20update.md) with everything we discussed:
+
+- **Timing findings:** gameplay runs a fixed step, and cutscenes are 30 FPS data timed by the clock.
+- **Option A (interpolation):** the latency analysis and the "draw the OT in the frame that built it" fix, which saves 33 ms even at 30 FPS. It also covers handling camera cuts and teleports without a frame drop, and one-step effects.
+- **Option B (60 Hz logic):** the table of value changes and the replay-driven plan that converts one actor at a time.
+- **CPU cost compared with SH1:** B doubles the load the way SH1's 60 FPS did. A doubles only the drawing pipeline and the GS translation, plus a small cost to blend transforms.
+- **Status section at the top:** resume once the game reaches gameplay on the PS2. When we come back, the first step is the drawing fix, then the pad-timing check, then profiling actor logic against the drawing pipeline.
+
+The doc records the choice between A and B as undecided. It notes that you lean toward 60 Hz logic for the PS2 and see interpolation as a better fit for stronger hardware, and that I favoured interpolation. We'll decide once the profile shows how MGS's frame time splits.
+
+I haven't committed the file.
+
+## User
+
+Weigh the pros and cons of a delta time approach
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/60 FPS update.md
+
+## Claude
+
+Delta time would technically work, but each of its advantages is also available from an option that's less work and easier to test. I've added it to [docs/60 FPS update.md](docs/60%20FPS%20update.md) as option C, "considered, not recommended".
+
+## Pros
+
+- **Any frame rate:** the game runs correctly at 60, at 30 when a scene is heavy, at 50 Hz, or above 60 on stronger hardware.
+- **No slowdown under load:** a slow frame advances the world by more time instead of slowing the game, as SH1 does.
+- **A small existing start:** `GV_PassageTime` already exists and 7 files use it.
+
+## Cons
+
+- **The same work as 60 Hz logic, and harder.** Every hard-coded value that 60 Hz logic would have to change still has to change. Each one becomes a formula instead of a new constant:
+  - smoothing becomes `1 - (1 - k)^dt`;
+  - acceleration needs `dt²` terms;
+  - chances per frame become probabilities over a time span.
+- **The feel depends on the frame rate.** Fixed-point rounding differs from frame to frame, so jump heights and walking distances drift slightly with the frame rate. MGS was tuned for one fixed step. SH1 worked well because its developers built and tuned it for delta time; here it would be added afterwards.
+- **Long frames break collision.** A big time step, such as a hitch during a load, moves objects past walls and triggers. The step has to be capped, and then the game slows under load anyway.
+- **Timing jitter.** A timer that crosses its threshold in the middle of a frame fires a little earlier or later, so AI and scripts become slightly non-deterministic.
+- **Weaker replays.** A replay only reproduces if every frame's time step is recorded, as SH1's replays do. It can't be checked at a different frame rate, so the replay plan loses its main test.
+- **More to test:** every frame rate behaves a bit differently.
+
+## Alternatives
+
+- **On the PS2:** fixed 60 Hz logic with catch-up (two steps in one vblank when a frame runs late) also prevents slowdown and stays deterministic. The catch-up needs a limit, so a heavy scene doesn't spiral by doing even more work when it's already late.
+- **On hardware with a variable display rate:** fixed logic plus interpolation handles any display rate.
+
+So delta time gives nothing that one of the other two options doesn't, and it costs the most to build and test.
+
+## User
+
+<command-name>/clear</command-name>
+            <command-message>clear</command-message>
+            <command-args></command-args>
+
+## User
+
+Not sure where I'm supposed to put these files for building this project, but I put CHDs for all 3 disks of MGS Integral here: /home/alex/Documents/mgs1_ps2/ps1-original/
+These should not be uploaded to GitHub. Now that we have these, let's try building an ISO to boot from.
+
+- tool `Bash`: Survey CHDs, build scripts, and planning doc
+
+- tool `Bash`: Check disc plan and SH1 ISO tooling
+
+- tool `Bash`: Read ISO builder and disc read code
+
+## Claude
+
+Now how does the port's cdbios read the disc, i.e. what file name/format does it expect?
+
+- tool `Bash`: Find disc access code in the port
+
+- tool `Bash`: Inspect cdbios and HAL libcd
+
+- tool `Bash`: Read HAL libcd disc layout
+
+- tool `Bash`: Read mkiso rest, check disk space
+
+- tool `Bash`: Show CHD track metadata
+
+## Claude
+
+Each disc is one MODE2_RAW track with no audio, so a flat BIN is the whole disc. Now I'll add it to the build:
+
+- tool `Bash`: Add PS1 discs to ISO build, gitignore originals
+
+- tool `Bash`: Run PS2 link and build the ISO
+
+## Claude
+
+The image is built (1.47 GB), and the BIN sizes equal frames × 2352. Next, a boot test in PCSX2:
+
+- tool `Bash`: Locate PCSX2 run script
+
+- tool `Bash`: Search for PCSX2 launch scripts
+
+- tool `Bash`: Read pcsx2_run.py usage
+
+- tool `Bash`: Boot the ISO in PCSX2 for 30 seconds
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+I built a bootable ISO with the PS1 discs on it. It boots in PCSX2 but stops when the game tries to read the disc: the code that reads from those disc files hasn't been written yet.
+
+**Where the files go:** `ps1-original/` is fine where it is. I added it to [.gitignore](.gitignore), so the CHDs won't be committed.
+
+**What the build does now:** [build/link_ps2.py](build/link_ps2.py) finds the CHDs anywhere under `ps1-original/`. On the first build (or after a CHD changes) it unpacks discs 1 and 2 with `chdman` into `obj_ps2/ps1/` as raw-sector `DISC1.BIN` and `DISC2.BIN`. It puts both on the ISO next to the ELF and `SYSTEM.CNF`. The game's PS1 disc sectors map straight to positions in those files. Each disc is a single data track, and the file sizes match the CHDs' sector counts. I left the VR disc off for now, as the plan says.
+
+The image is `obj_ps2/mgs_ps2.iso`, about 1.47 GB, so it fits a single-layer DVD.
+
+**Boot test (PCSX2, 30 s):** it boots from the ISO, starts the game's tasks and finds the pad. Then it waits forever on the stubbed CD functions (`CdControl`, `CdFlush`, `CdReset`, …). The game draws no frames, and the run was stopped as a stall. I didn't run the matching build, since I only touched the PS2 link script.
+
+**Mismatch in the plan:** [docs/Planning Doc.md](docs/Planning%20Doc.md) says the replacement for the disc-reading internals of `libfs/cdbios.c` was written in Step 1. It isn't in the code: `cdbios.c` has no `MGS_PORT` branch, and the CD functions are still among the 8 stubs. That replacement is the next step: read whole blocks from `DISC1.BIN` through the HAL and call the game's existing per-sector callback. Shall I start on it?
+
+## User
+
+Yes
+
+- tool `Bash`: Read cdbios.c and its header
+
+## Claude
+
+I'll start by checking who else calls the CD functions, and how `port/src` is compiled.
+
+- tool `Bash`: Find other CD users and port source build
+
+- tool `Bash`: Read HAL DVD read path and config
+
+## Claude
+
+Sector numbers here are absolute (they include the 150-sector pregap, see `srchfile.c`). Next I'll check how the stream callback reacts to the delivery rate:
+
+- tool `Bash`: Read stream callback
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/port/src/cdbios_ps2.c
+
+## Claude
+
+Next is the game-side branch in `cdbios.c`. First I'll check which headers give the critical-section calls:
+
+- tool `Bash`: Check includes and port defines
+
+- tool `Bash`: Check HAL critical section nesting
+
+## Claude
+
+The HAL's critical section is a plain DI/EI with no nesting, so I'll keep each one short: one per sector. Patching `cdbios.c`:
+
+- tool `Bash`: Add port branch to cdbios.c, run matching build
+
+## Claude
+
+The matching build still gives 80 OK. Linking the PS2 build and booting it:
+
+- tool `Bash`: Link, build ISO, boot 60s in PCSX2
+
+## Claude
+
+Reads are getting through now, but the directory it parsed is garbage (negative file sizes). That gives a bad sector (100) and one TLB miss. Next, `srchfile.c`:
+
+- tool `Bash`: Read srchfile.c
+
+- tool `Bash`: Check char signedness flags
+
+- tool `Bash`: Find the file table print
+
+- tool `Bash`: Read rest of srchfile.c
+
+- tool `Bash`: Check SH1 port char flags
+
+- tool `Bash`: Add -funsigned-char, rebuild, boot 90s
+
+## Claude
+
+The file table is right now (positions match the ISO). After `DISK 0` the game jumps into data and crashes. The PCs:
+
+- tool `Bash`: Resolve crash PCs to functions
+
+- tool `Bash`: Read movie.c and fscd.c
+
+- tool `Bash`: Disassemble crash site
+
+- tool `Bash`: Check how task stacks were enlarged
+
+## Claude
+
+Stacks were already enlarged, so that's not it. PCSX2 probably reports the start of a recompiled block, not the exact load. Rerunning with direct logging to see how far `FS_MovieFileInit` gets:
+
+- tool `Bash`: Rerun with direct logging
+
+## Claude
+
+`FS_CdStageFileInit` prints `80117004 80116B8C 1140` just before the crash. Checking what it does next:
+
+- tool `Bash`: Find the print and stage init code
+
+- tool `Bash`: Find fixed-address memory definitions
+
+- tool `Bash`: Read memory layout defines and plan notes
+
+- tool `Bash`: Read Step 2 of the plan
+
+- tool `Bash`: Fix NULL read, update plan, run matching builds
+
+- tool `PushNotification`: 
+
+## Claude
+
+The game reads its files from the PS1 disc image on the DVD now. In PCSX2 it finds every Integral file at the right sector and loads STAGE.DIR's stage table. It then crashes on a different problem, covered below.
+
+**What I changed:**
+- **[source/libfs/cdbios.c](source/libfs/cdbios.c)**, under `MGS_PORT`: the disc-reading task now reads 16 sectors at a time from `DISC1.BIN` and passes each one to the game's own per-sector callback, as the PS1 drive interrupt did. Each sector is handled in a short critical section. Stop requests, restarts and the stream callback's "pause" return behave as before. Loading is about 6× a PS1 drive; the stream callback stops itself when its buffer fills, so that should be safe.
+- **[port/src/cdbios_ps2.c](port/src/cdbios_ps2.c)** (new): finds `DISC1.BIN` on the DVD and does the asynchronous reads. It also provides `CdInit`/`CdReset`, so the stubbed CD functions are down from 8 to 1 (`Port_CdHill`, for movies).
+- **`-funsigned-char`** in [build/build_ps2.py](build/build_ps2.py): this was a real bug in the port that affects all game code, not just the disc. PSY-Q treats `char` as unsigned and the SH1 port already passes this flag. Without it, every byte read through a plain `char` came out sign-extended, which is why the file sizes were negative.
+- [source/libfs/srchfile.c](source/libfs/srchfile.c): fixed one NULL read, which PCSX2 reported as a TLB miss.
+- I updated the planning doc's disc-reads item to partly done.
+
+Both matching builds still pass (80 OK, plus the VR executable).
+
+**Where it stops:** the game uses fixed PS1 memory addresses for its work buffers (`MEM_ADDR` = 0x80117000, and the pack buffers below 0x801E0000). On the PS2 those addresses land on the port's own code, so reading the stage table overwrote `FS_MovieFileInit` and it jumped into data. This is Step 2 in the plan ("Fixed addresses"), which nothing has covered yet. It includes going through the 156 files with `0x80xxxxxx` values to separate real addresses from plain numbers.
+
+Not done yet:
+- Disc swap (`DISC2.BIN` is already on the image).
+- Movie and voice-audio streaming.
+- The checks in `change`/`open` that talk to the drive directly.
+
+**Your call:** I can start Step 2 with these memory areas, which are what's crashing now. That means pointing them at memory the port owns and booting again; the full 156-file triage would follow. Or would you rather take Step 2 in a different order? Nothing is committed yet.
+
+## User
+
+Commit and then proceed with step 2
+

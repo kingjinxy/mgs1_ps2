@@ -99,6 +99,14 @@ typedef struct {
 #define GCL_TAGMASK     0xf0
 #define GCL_TAG(a)      ((a) & GCL_TAGMASK)
 
+/* A value that is a proc id ($p:, 16 bits) or a script block's address (an exec option): the PS1 tells
+ * them apart by the sign, as its addresses are 0x80xxxxxx. The EE's are positive. */
+#ifdef MGS_PORT
+#define GCL_IsBlock(v)  ((unsigned int)(v) > 0xFFFF)
+#else
+#define GCL_IsBlock(v)  ((int)(v) < 0)
+#endif
+
 #define GCL_VAR_TYPE_GLOBAL 0x000000
 #define GCL_VAR_TYPE_LOCAL  0x100000
 #define GCL_VAR_TYPE_SYSTEM 0x400000

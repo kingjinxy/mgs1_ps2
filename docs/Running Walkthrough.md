@@ -260,3 +260,40 @@ Now (PCSX2): Konami logo → title (memory card check) → `opening`, whose 3D s
 `select`'s `PCcreat`/`PCwrite`.
 
 Matching build: 80 OK, and the VR executable.
+
+## Step 3: intro and new game crashes (2026-10-27)
+
+Reported: the intro went black after "Konami Computer Entertainment Presents"; waiting on the title started it but
+it crashed soon after; New Game froze on a black screen.
+
+**Intro: thread switch inside `ChangeTh`'s window (HAL).** Reproduced (hang right after `NewStream 2970`). Temporary
+prints in `libfs/stream.c` and `game/strctrl.c` showed the stream reads and the stream actor running normally. Then:
+NULL TLB misses in `mts_wait_vbl` and `assertion faled : mts_new.c line 657 : Task 1` (task 1 = `MTSID_SOUND_INT`).
+The voice stream's SPU interrupt (`sd_str.c` → `mts_isend(MTSID_SOUND_INT)`) is delivered by a HAL thread; mts
+made the sound task current, but the HAL (`thread_ps2.c switch_check`) deferred the switch to the next vertical blank
+when it came between a `ChangeTh`'s wakeup and its sleep. The `ChangeTh` target ran meanwhile, mts believing it to be
+the sound task, and called `mts_wait_vbl` with task 1's NULL `intr`. The deferral had been tested with
+`tools/thread_test` only for the timing of the switch, not for what the woken thread does in between. Now the switch
+is made at once: the target (woken, maybe not run yet) is suspended like any thread an interrupt takes the CPU from;
+if the new thread is the `ChangeTh` caller, its pending wakeup makes its `SleepThread` return at once.
+`thread_test` updated (window switches now come back on the vertical blank after asking): PASS twice. The whole intro
+(three demo streams) then plays and returns to the title.
+
+**Scripted pad input for PCSX2 runs** (`port/src/pad_script.c`): `MGS_PAD_SCRIPT="from-to:buttons,..."` at link
+time, buttons in `libgv.h` `PAD_*` bits (0800 START, 0020 Circle), vertical blanks from `mts_get_tick_count`;
+`mts_pad.c do_control` clears them from the state it reads. Failed first: `strtoul` in the parser crashed the EE
+(kernel TLB misses; `do_control` runs in the vertical blank interrupt), now parsed by hand; a poll counter didn't
+advance with time; the bits were first taken as the raw pad bytes (START 0008), which the game ignores.
+
+**New Game: proc id vs block address.** `GCL_ExecProc` got `0x7EB076` (`PROC ... NOT FOUND`, NULL+3 read in
+`GCL_ExecBlock`), from `game/delay.c`: a delayed command holds a proc id or a script block's address and tells them
+apart by the sign, as PS1 addresses are 0x80xxxxxx. Same in `game/item.c` (an item's end proc). `libgcl.h`
+`GCL_IsBlock(v)`: `v < 0` on the PS1, above 0xFFFF (proc ids are 16 bits) in the port. Other sign tests on procs
+(`script.c` `DemoCmd`, `strctrl.c`) test the `STATE_DEMO` flag ORed into an id, which is fine.
+
+**Dock NULL reads**: `sna_init.c` reads `*field_918_n_bullets` every frame, NULL with no weapon in hand;
+`script.c` `FuncCmd 's'` reads `GM_PlayerControl` before Snake exists (`s00a`'s scenario). Both read PS1 kernel RAM
+at 0 there; guarded under `MGS_PORT`.
+
+Now (PCSX2, START, START, Circle): title → `d00a` (briefing, its stream plays and renders) → `s00a`, the dock's
+codec call on screen and waiting for a button; 120 s, no TLB misses. Matching build: 80 OK, VR 2 OK.

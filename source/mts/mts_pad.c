@@ -9,6 +9,10 @@
 #include "mts_pad.h"
 #include "mts_new.h"
 
+#ifdef MGS_PORT
+extern int Port_PadScript( int port, int vblank );
+#endif
+
 /*---------------------------------------------------------------------------*/
 // TODO: these externs were originally static local to mts_pad.c
 
@@ -162,6 +166,9 @@ static void do_control( void )
                 pad_800C14E0[i].button =
                     padbuf_800C1480[i].data.digital.button_hi << 8 |
                     padbuf_800C1480[i].data.digital.button_lo;
+#ifdef MGS_PORT
+                pad_800C14E0[i].button &= ~Port_PadScript(i, mts_get_tick_count()); // test runs: scripted presses (port/src/pad_script.c)
+#endif
                 break;
             }
         }

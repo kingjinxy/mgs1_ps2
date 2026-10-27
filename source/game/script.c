@@ -990,6 +990,13 @@ static int FuncCmd(char *top)
     if (GCL_GetOption('s'))
     {
         control = GM_PlayerControl;
+#ifdef MGS_PORT
+        if (!control) // a stage's scenario asks before Snake exists (the PS1 reads its kernel RAM at 0)
+        {
+            static CONTROL no_player;
+            control = &no_player;
+        }
+#endif
         GM_PlayerPosX = control->mov.vx;
         GM_PlayerPosY = control->mov.vy;
         GM_PlayerPosZ = control->mov.vz;

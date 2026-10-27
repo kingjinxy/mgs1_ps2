@@ -4486,3 +4486,498 @@ I also saved a memory so future sessions update the walkthrough with the plannin
 In Claude.md,  updating the walkthrough and conversation should be there, if it isn't already.
 Commit the walkthrough changes
 
+## Claude
+
+The conversation archive is already in CLAUDE.md; the walkthrough isn't. Adding it next to that rule. Once CLAUDE.md has it, the memory I just saved would be a duplicate, so I'll delete it:
+
+- tool `Bash`: Add CLAUDE.md rule, drop duplicate memory, commit
+
+## Claude
+
+I committed the walkthrough as `8638dfa43`, and the working tree is clean.
+
+`CLAUDE.md` already had the rule for `Claude Conversation.md`, but not one for the walkthrough. I added one above it: append a dated section to `docs/Running Walkthrough.md` at milestones and before commits, covering how each change was made, what was tried and failed, and the state in PCSX2 afterwards. It's updated together with the planning doc's checkboxes.
+
+With that in `CLAUDE.md`, the memory I saved earlier would have been a duplicate, so I deleted it. The conversation archive is also up to date in this commit.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>Bash, PushNotification, Read, SendUserFile, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Build an ISO to boot from, using the MGS Integral CHDs in `/home/alex/Documents/mgs1_ps2/ps1-original/`. These files must never be uploaded to GitHub (`ps1-original/` is now gitignored).
+   - "Yes": write the cdbios disc-read replacement.
+   - "Commit and then proceed with step 2" (fixed addresses).
+   - "Commit and then start step 3." The user then clarified the approach: "I am interested in taking more or less the same route as the SH1 port, which builds the overlays into the executable (because we have much more RAM than the PS1). If we actually need more RAM later, we can turn them back into overlays."
+   - "Add to the todo list: reduce memory usage of overlays by deduplicating data. Commit the changes."
+   - "Are we also keeping a walkthrough for all the changes we've made?"
+   - "In Claude.md, updating the walkthrough and conversation should be there, if it isn't already. Commit the walkthrough changes."
+   - Standing constraints from CLAUDE.md and memory:
+     - Web access: GitHub only without asking; ask the user before any other site.
+     - Never access tcrf.net in any way.
+     - No upstream contributions: never PR or push to mgs_reversing.
+     - No `pkill -f` with a pattern that appears in the calling shell's own command line.
+     - Commit only when the user asks.
+     - Notify the user at stopping points.
+     - Before each commit, update `Claude Conversation.md`: concatenate all session `.jsonl` files in date order, run `tools/port/archive_conversation.py`, and check that the diff removes no lines.
+     - PCSX2 runs use the software renderer; treat a stall as a crash; never dismiss TLB misses.
+
+2. Key Technical Concepts:
+   - Matching build check, run from `build/` after every change: `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py` must give 80 OK. Add `--variant=vr_exe` for the VR executable (2 OK).
+   - PS2 link and boot test:
+     - `python3 build/link_ps2.py` builds `obj_ps2/mgs.elf` and `obj_ps2/mgs_ps2.iso`.
+     - `python3 ../silent-hill-1-ps2-port/tools/port/pcsx2_run.py obj_ps2/mgs_ps2.iso --seconds N` runs it.
+     - Environment switches for the link: `MGS_LOG_DIRECT=1` (direct logging), `MGS_DUMP_FRAMES=1` (frame dumps).
+   - PS1 sector n is at byte (n − 150) × 2352 of DISC1.BIN; the data starts 24 bytes into each sector.
+   - PSY-Q's ccpsx treats `char` as unsigned, so the port compiles with `-funsigned-char`.
+   - `PSX_ADDR(literal)` maps fixed PS1 addresses into the HAL arenas `g_PsxRam` and `g_PsxScratch`.
+   - Overlays are statically linked: `ld -r` merge per overlay, then `objcopy --keep-global-symbol`, plus a stage table looked up by `GV_StrCode`.
+   - The HAL's `gen_gte_inline.py` translates local GTE inline-asm macros into C for the software GTE.
+
+3. Files and Code Sections (all committed):
+   - **`build/link_ps2.py`**
+     - `ps1_discs()` extracts CHDs with chdman to `obj_ps2/ps1/DISC{1,2}.BIN`; `make_iso` adds them to the image.
+     - Calls `overlays_ps2.build(...)`.
+     - `MGS_DUMP_FRAMES` adds `-DSH_PORT_DUMP_FRAMES`.
+   - **`build/build_ps2.py`**: adds `-funsigned-char`.
+   - **`port/src/cdbios_ps2.c`**:
+     - Disc file access: `MgsCd_Init`, `MgsCd_Start` (16-sector chunks), `MgsCd_Poll`, `MgsCd_Sector`.
+     - `CdInit` and `CdReset`.
+     - `SafetyCheck` (always returns 0).
+     - `CdControl`/`CdControlB` set `result[0]=0x02`.
+     - `CdIntToPos`, with `#undef CdIntToPos` because libcdvd defines a macro of that name.
+   - **`source/libfs/cdbios.c`**: an `MGS_PORT` branch with the task loop and `CDBIOS_Deliver`; each sector is delivered inside a critical section.
+   - **`source/libfs/srchfile.c`**: NULL guard on `found->pos`.
+   - **`source/include/psx_mem.h`**: defines the `PSX_ADDR` macro.
+   - **`source/include/psxdefs.h`**: includes `psx_mem.h`.
+   - **`port/include/libetc.h`**: shim that redirects `getScratchAddr`.
+   - About 20 source files had their buffer and scratchpad literals wrapped in `PSX_ADDR`.
+   - **`source/mts/mask.c`**: `mts_get_bss_tail` returns `PSX_ADDR(0x800C3208)`.
+   - **`source/menu/weapon.c`**: NULL-pixel guards before `LoadImage`.
+   - **`tools/port/find_fixed_addresses.py`**: buffers vs `--symbols` split.
+   - **`tools/port/overlay_survey.py`**: per-overlay objects, stub count, literal count.
+   - **`build/overlays_ps2.py`**: links the overlays and generates `obj_ps2/ovl/stages.c`.
+   - **`source/game/chara.c`**: `Port_SetStage(int id)`, `port_stage_charas`, `GM_ResetChara` port branch.
+   - **`source/game/gamed.c`**: `GM_LoadInitBin` calls `Port_SetStage`.
+   - **`source/libfs/cdstage.c`**: the `case 'b'` hook calls `Port_SetStage(tag->id)`.
+   - **GTE translations**: `port/include/gte_from_{searchli,envmap3,libdg2,sub_efct}.h`, included under `MGS_PORT`. `libdg2.c` includes its translation after each of its four macro groups, with the guard `#undef`'d each time.
+   - **`source/onoda/open/open.c`**: `MEMCARD_FILES(port)` macro; in the port it returns an empty card for NULL.
+   - **`docs/Planning Doc.md`**: Steps 2 and 3 updated, including the dedup to-do.
+   - **`docs/Running Walkthrough.md`**: three new sections.
+   - **`CLAUDE.md`**: new rule, "Keep `docs/Running Walkthrough.md` up to date" at milestones and before commits.
+   - **`.gitignore`**: `ps1-original/`.
+
+4. Errors and fixes:
+   - Negative file sizes in the directory: added `-funsigned-char`.
+   - Stage table read into `MEM_ADDR` overwrote port code: fixed by Step 2's `PSX_ADDR`.
+   - "Resident Memory Over" on every allocation: fixed by the bss-tail change.
+   - NULL `memcpy`: traced with temporary `--wrap` builds to `LoadImage` in the menu code, then guarded.
+   - Wrapping script regex: the first version missed literals right after `(`; a second pass fixed it. `radiofacedraw.c` was wrapped by hand.
+   - Missing `psx_mem.h` include in `brf/overlay2.c`, `sd_main.c` and `mask.c`: added.
+   - `#pragma INCLUDE_ASM` regex missed stubs at first: fixed.
+   - Raw GTE asm (`mtc2`/`mfc2`) failed to compile in four overlay files: translated.
+   - `GM_LoadInitBin` is never called for stage overlays: added the hook in `cdstage.c`.
+   - `CdIntToPos` macro conflict with libcdvd: added `#undef`.
+   - Title-stage NULL copy from `memcard_files`: guarded with `MEMCARD_FILES`.
+   - Title-stage hang about 13 s in: testing without the critical section changed nothing. It was resolved by Step 3, since the title overlay's code now runs.
+
+5. Problem Solving: Current state in PCSX2 is Konami logo → title (memory card check) → opening with its 3D scene, 120 s with no crash and no TLB misses. 59 overlays are linked in and 20 are left out.
+
+6. All user messages:
+   - The CHD/ISO request.
+   - "Yes"
+   - "Commit and then proceed with step 2"
+   - "Commit and then start step 3"
+   - The SH1-route clarification (quoted in section 1).
+   - "Add to the todo list: reduce memory usage of overlays by deduplicating data. Commit the changes"
+   - "Are we also keeping a walkthrough for all the changes we've made?"
+   - "In Claude.md, updating the walkthrough and conversation should be there, if it isn't already. Commit the walkthrough changes"
+
+7. Pending Tasks: None explicitly requested. The Step 3 to-dos remain in the plan:
+   - Reset an overlay's data when its stage loads again.
+   - Deduplicate the overlays' memory use.
+   - Fix the bit-31 pointer tests in `elevator.c` and `thing.c`.
+   - Make the dock → heliport path playable.
+   - Implement the movie streaming stubs.
+
+8. Current Work: The last request was completed and committed as `8638dfa43` ("Docs: walkthrough for the disc reads, Steps 2 and 3; keep it updated (CLAUDE.md)"). It added the walkthrough rule to CLAUDE.md and committed the walkthrough and conversation archive. The duplicate memory file was deleted. The working tree is clean.
+
+9. Optional Next Step: Tell the user the commit is done. Then ask which Step 3 item to take next before starting any of them.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/b1c516bc-0c11-49af-806e-efb24bae050b.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+I'm noticing that the game seems to be relatively unstable at the moment. What's next on the list for porting?
+
+- tool `Bash`: List plan headings and open items
+
+- tool `Bash`: Show Step 3 section of the plan
+
+## Claude
+
+Step 3 isn't finished yet. These items are still open, and most of them could explain the instability you're seeing:
+
+1. **Reset an overlay's `.data`/`.bss` when its stage loads again.** On the PS1, every stage load reads a fresh copy of the overlay from disc. In the port, the linked-in overlay keeps whatever state it had from its last run. Going back to the title, or reloading a stage after dying or continuing, starts from stale counters, flags and pointers. SH1 hit this same problem with a map loaded twice. This is my top suspect, and I'd do it first.
+2. **Bit-31 pointer tests in `takabe/elevator.c` and `thing.c`.** These files test or set bit 31 of pointers, which is the kseg0 bit on the PS1. EE pointers don't have that bit, so the code takes the wrong branch or produces bad pointers. It's a small, targeted fix.
+3. **Movie streaming stubs** (`CdRead2`, `St*`, `CdReady`). Any FMV the game tries to play currently goes into stubs. It could hang or misbehave wherever a movie should play.
+4. **First playable path, dock (s00a) → heliport (s01a).** Both overlays are linked in, but nobody has played through them yet.
+5. **Deduplicate the overlays' memory use.** This is about memory, not stability. It can wait until RAM gets tight.
+
+After Step 3, the plan moves to **Step 3b**: recompiling the 20 overlays left out because they still contain `INCLUDE_ASM` stubs. Then come Steps 4–7: checking the GTE against PS1 captures, matching the graphics against DuckStation, memory card saves, and sound/XA.
+
+My recommendation is to do 1 and 2 together, since they're the most likely sources of random breakage, then run longer PCSX2 sessions that go into gameplay.
+
+What kind of instability are you seeing: a hang, a crash at a particular point, or graphical glitches? Knowing where it happens would show whether it's one of these items or something new.
+
+## User
+
+For example, booting the game and waiting for the intro cutscene to play causes a black screen after the Konami Computer Entertainment Presents screen, but skipping to the title screen and then waiting there starts the intro cutscene properly, albeit with a crash shortly after. Starting a new game also freezes on a black screen.
+
+- tool `Bash`: Show the PCSX2 run script's options
+
+- tool `Bash`: Rebuild and run the ISO for 90 seconds
+
+## Claude
+
+Reproduced: after `opening` loads, it hangs right after `NewStream 2970` / `stream init`, i.e. the disc streaming path that's stubbed (`CdRead2`/`St*`/`CdReady`). Looking at that code.
+
+- tool `Bash`: Find the stream code and its CD calls
+
+- tool `Bash`: Read the stream module
+
+## Claude
+
+The stream uses `CDBIOS_ReadRequest` with a ready callback (unbounded read, callback returns 2 to rewind the buffer). Let me check how my port branch of `cdbios.c` handles that.
+
+- tool `Bash`: Read StartRead and find the port branch
+
+- tool `Bash`: Read the port branch of cdbios
+
+- tool `Bash`: Read rest of port loop and uses of remaining
+
+- tool `Bash`: Compare original ready callback and stream sync
+
+- tool `Bash`: Read CDBIOS_ReadRequest
+
+- tool `Bash`: Look for disc read or TLB lines in the log
+
+## Claude
+
+I can reproduce it: the opening hangs right after the demo stream starts (`NewStream 2970`), before any frame. I'm adding temporary prints to the stream code to find where it gets stuck.
+
+- tool `Bash`: Instrument the stream code and rerun
+
+## Claude
+
+The disc reads for the stream work (sectors arrive), but `FS_StreamSync` is called only once, so the main loop stops right after. Looking at what consumes the stream.
+
+- tool `Bash`: Read the stream control actor
+
+- tool `Bash`: Look for a way to see the EE PC at a stall
+
+- tool `Bash`: Find the watchdog source
+
+- tool `Bash`: Read the watchdog code
+
+- tool `Bash`: Add prints in the stream actor and rerun
+
+- tool `Bash`: Rerun and show the non-repetitive log lines
+
+## Claude
+
+Found a real crash: NULL-pointer TLB misses at `0x185590` then an mts assertion ("Task 1"). Resolving that PC.
+
+- tool `Bash`: Map the crash PCs to source and read the assertion
+
+- tool `Bash`: Find the assertion and the task IDs
+
+- tool `Bash`: Read mts_wait_vbl
+
+- tool `Bash`: Find port code in mts and sound
+
+- tool `Bash`: Read the stream IRQ and mts_isend
+
+- tool `Bash`: Read the context switch and HAL thread calls
+
+- tool `Bash`: Read the HAL thread model and SPU IRQ callback
+
+- tool `Bash`: Find where the SPU IRQ callback is invoked
+
+- tool `Bash`: Read SPU IRQ dispatch and the ISR thread switch
+
+- tool `Bash`: Read ChangeTh and switch_check
+
+- tool `Bash`: Look at the history of the deferral logic
+
+- tool `Bash`: Read the HAL walkthrough on the ChangeTh window
+
+- tool `Bash`: Read the surrounding walkthrough section
+
+- tool `Read`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/thread_ps2.c
+
+- tool `Bash`: Find uses of the deferral counters
+
+- tool `Bash`: Make interrupt switches immediate inside the ChangeTh window
+
+- tool `Bash`: Update the comment and the thread test check
+
+- tool `Bash`: Read the test comment and Makefile
+
+- tool `Bash`: Rebuild and run the HAL thread test in PCSX2
+
+- tool `Bash`: Read the test's vblank handler and task B
+
+## Claude
+
+The `-1` comes from the test's own expectation. It encodes the old deferral ("back 2 vertical blanks after asking"); the switch now happens on the first vblank. Updating the expectation.
+
+- tool `Bash`: Fix the test expectation and run it twice
+
+## Claude
+
+The thread test passes twice. Now the MGS run, with the debug prints still in.
+
+- tool `Bash`: Relink MGS with the HAL fix and run 90 seconds
+
+## Claude
+
+The intro now plays: the first demo stream runs for ~33 s to `StreamPlay end`, then the next scene starts. Checking the rest of the run.
+
+- tool `Bash`: Show the end of the run and any TLB misses
+
+## Claude
+
+The full intro (three demo streams) now plays through and loops back to the title, with no TLB misses or asserts. Removing the debug prints. Next I'll test "new game", which needs pad input in PCSX2.
+
+- tool `Bash`: Remove debug prints and look for scripted pad input
+
+- tool `Bash`: Look for a way to inject pad presses
+
+- tool `Bash`: Check the pad code for scripted presses
+
+## Claude
+
+There's no scripted pad input yet. I'll add a small one to the port so the run can press START/Circle at set frames.
+
+- tool `Bash`: Find the game's pad entry points and the port build switches
+
+- tool `Bash`: Read mts_PadRead and the link options
+
+- tool `Bash`: Read mts_read_pad's start and the includes
+
+- tool `Bash`: Read the pad polling code
+
+- tool `Bash`: Read where the button state is stored
+
+- tool `Bash`: Add a scripted pad input for test runs; run the matching build
+
+## Claude
+
+The matching build still gives 80 OK. I've added scripted pad presses (`MGS_PAD_SCRIPT`) so the "new game" freeze can be reproduced in PCSX2. Tidying the parser, then running it.
+
+- tool `Bash`: Run with START and Circle presses to reach a new game
+
+- tool `Bash`: Rerun twice without the pad script
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/port/src/pad_script.c
+
+- tool `Bash`: Rerun with the interrupt-safe pad script
+
+## Claude
+
+The pad script no longer crashes, but the presses had no effect: the title waited and then went to the intro. I'm checking whether the button reads reach the game.
+
+- tool `Bash`: Read libgv's pad update
+
+- tool `Bash`: Print pad changes the game sees
+
+- tool `Bash`: Read the HAL's VSync
+
+- tool `Bash`: Check mts_get_tick_count
+
+- tool `Bash`: Key the script on mts's vblank count and rerun
+
+## Claude
+
+The presses now reach `GV_UpdatePadSystem` at the right times, but the title doesn't react. I suspect a wrong bit layout, so I'm checking the game's button defines.
+
+- tool `Bash`: Find button bit defines
+
+- tool `Bash`: Read the pad bit values
+
+## Claude
+
+I had the bit layout wrong: START is `0800`, Circle `0020`, Cross `0040`, up `1000`, down `4000`. Fixing the doc comment and rerunning.
+
+- tool `Bash`: Rerun with START and Circle at the right bits
+
+## Claude
+
+I reproduced the new game freeze. After Game Level = 1 and the memory card check, there's a TLB miss at `0x113e90` (addr 0x3), then `PROC 7EB076 NOT FOUND`, and the game sits there. Resolving it.
+
+- tool `Bash`: Map the TLB miss PC and find the PROC message
+
+- tool `Bash`: Read GCL proc lookup and ExecBlock
+
+## Claude
+
+Proc id `0x7EB076` isn't a proc id. It looks like a pointer into the game's heap (resident top `0x7BF7DC`), so the title code passes a pointer where an id belongs. Finding the caller.
+
+- tool `Bash`: List title overlay objects and their GCL proc calls
+
+- tool `Bash`: List the title overlay's sources that call GCL procs
+
+- tool `Bash`: Find the GCL proc calls in the title sources
+
+- tool `Bash`: Find where the proc fields are set
+
+- tool `Bash`: Find where the proc ids are read from GCL
+
+- tool `Bash`: Log the caller of the bad proc id
+
+- tool `Bash`: Map the caller address
+
+## Claude
+
+The bad id comes from `Act` in `delay.c`, the GCL delayed-proc actor. Reading it.
+
+- tool `Bash`: Read the delay actor
+
+- tool `Bash`: Find callers and similar sign tests on pointers
+
+- tool `Bash`: Read the callers that pass procs or blocks
+
+- tool `Bash`: Read GCL_GetNextValue
+
+- tool `Bash`: Read GCL_GetNextValue
+
+- tool `Bash`: Look for how proc values are flagged in GCL
+
+- tool `Bash`: Check item.c and other exec-option uses
+
+- tool `Bash`: Read the other GCL value uses and the header tags
+
+- tool `Bash`: Find other sign tests before GCL_ExecBlock calls
+
+## Claude
+
+Only those two. Applying the fix:
+
+- tool `Bash`: Add GCL_IsBlock, use it in delay.c and item.c, run matching build
+
+## Claude
+
+The matching build gives 80 OK. Rerunning the new game script.
+
+- tool `Bash`: Rerun the new game path
+
+## Claude
+
+New game now gets past the title: the `d00a` briefing stream plays, then the dock (`s00a`) loads. There's a NULL read at `0x15378c` during its scenario. Looking at that and the rest of the run.
+
+- tool `Bash`: Map the dock TLB miss and show the rest of the log
+
+## Claude
+
+The dock runs: the opening codec call starts and frames keep coming. Listing the unique TLB-miss PCs.
+
+- tool `Bash`: Count TLB misses by function
+
+## Claude
+
+Two remaining spots read through NULL: `FuncCmd` (4 times) and `sna_init_main_logic_800596FC` (46 times). Disassembling around them, since there's no line info.
+
+- tool `Bash`: Disassemble FuncCmd near the miss
+
+- tool `Bash`: Read FuncCmd
+
+## Claude
+
+`FuncCmd`'s `s` option reads `GM_PlayerControl` before Snake exists (it's NULL). On the PS1 that reads low kernel RAM. Now the second one:
+
+- tool `Bash`: Disassemble around the Snake logic miss
+
+- tool `Bash`: Read the start of Snake's main logic
+
+- tool `Bash`: Find the fields at the faulting offsets
+
+- tool `Bash`: Find the bullet pointer read in main logic
+
+- tool `Bash`: Look near the decrement for the bullets read
+
+## Claude
+
+Line 7925 reads `*work->field_918_n_bullets` every frame, and that pointer is NULL while Snake has no weapon. On the PS1 that read harmlessly returns kernel RAM. Guarding both spots.
+
+- tool `Bash`: Check the context and existing port branches
+
+- tool `Bash`: Guard the two NULL reads; run the matching build
+
+## Claude
+
+The matching build gives 80 OK. Rerunning the new game for longer, into the dock.
+
+- tool `Bash`: Run the new game path for 120 seconds
+
+- tool `Bash`: Check which frames the dump writes
+
+- tool `Bash`: Find the dump frame list
+
+- tool `Bash`: Dump frames from the dock and restore the list
+
+- tool `Bash`: Combine the dumped frames into one image
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/b1c516bc-0c11-49af-806e-efb24bae050b/scratchpad/dock_frames.png
+
+- tool `Bash`: Read the walkthrough's last section and HAL status
+
+## Claude
+
+I changed shared files (`libgcl.h`, `delay.c`, `item.c`), so I'm also checking the VR executable's matching build.
+
+- tool `Bash`: Run the VR executable matching build
+
+- tool `Bash`: Append the walkthrough section and update the plan
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+I fixed all three problems: the intro now plays in full, and New Game gets to the dock. Nothing is committed yet, in either this repo or the HAL.
+
+**Intro black screen and the crash after waiting on the title (one bug, in the HAL).** The intro's voice stream sends an interrupt that makes the scheduler switch to the sound task. If that interrupt arrived while another task switch was halfway through, the HAL put it off until the next vertical blank. In between, the wrong thread ran while the scheduler thought it was the sound task, and the game crashed. Whether it went black or crashed later depended on timing. The fix in [thread_ps2.c](../psx-to-ps2-HAL/src/ps2/thread_ps2.c) makes the switch immediately. The HAL's thread test passes twice in PCSX2, and the whole intro (three scenes) now plays and loops back to the title.
+
+**New Game freeze.** One field holds either a script procedure number or a pointer to script code. The game told them apart by the pointer's sign, which only works on the PS1 because its addresses are `0x80xxxxxx`. I added a `GCL_IsBlock` check in `libgcl.h` and used it in the two places that do this, `delay.c` and `item.c`.
+
+**Two NULL reads in the dock.** Snake's ammo is read every frame while he has no weapon, and the dock's script asks for Snake's position before he exists. Both read address 0, which is harmless on the PS1; I guarded them in the port.
+
+To reproduce these in PCSX2, I added scripted button presses for test runs: set `MGS_PAD_SCRIPT` when linking ([pad_script.c](port/src/pad_script.c)).
+
+With START, START, Circle, the run goes title → briefing cutscene → dock and reaches the opening codec call. It ran 120 s with no TLB misses, and frame dumps show the briefing and codec screens drawn correctly. The codec is just waiting for a button, so nothing past it has been tested yet. Both matching builds still pass (80 OK, VR 2 OK).
+
+I updated the walkthrough and the Step 3 notes in the planning doc. Should I commit both repos?
+
+## User
+
+Yes
+

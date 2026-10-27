@@ -7922,7 +7922,12 @@ void sna_init_main_logic_800596FC(SnaInitWork *work)
     }
 
     snake_weapon_idx_800BDCBA = work->field_91C_weapon_idx;
+#ifdef MGS_PORT
+    // NULL with no weapon in hand (the PS1 reads its kernel RAM at 0)
+    snake_weapon_max_ammo_800BDCBC = work->field_918_n_bullets ? *work->field_918_n_bullets : 0;
+#else
     snake_weapon_max_ammo_800BDCBC = *work->field_918_n_bullets;
+#endif
     snake_mag_size_800BDCB8 = GM_Magazine;
 }
 

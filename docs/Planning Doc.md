@@ -188,8 +188,13 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 - Copy protection: `safechk.obj`'s `SafetyCheck` passes (`port/src/cdbios_ps2.c`), and
   `CdControl`/`CdControlB` report a closed drive
 - To fix: `takabe/elevator.c`, `thing.c` test or set bit 31 of pointers (kseg0 on the PS1; EE pointers
-  don't have it)
-- PCSX2 now (2026-10-27): Konami logo → title (memory card check) → `opening`: the opening runs with its
+  don't have it). Done for GCL: `GCL_IsBlock` (`libgcl.h`) in `delay.c`, `item.c` (proc id vs block address)
+- Fixed (2026-10-27): intro hang/crash (HAL `ChangeTh` window deferred an interrupt switch mts had already made);
+  New Game (`GCL_IsBlock`); dock NULL reads (`sna_init.c` bullets, `script.c FuncCmd`). Scripted pad presses for
+  PCSX2 runs: `MGS_PAD_SCRIPT` (`port/src/pad_script.c`)
+- PCSX2 now (2026-10-27, later): intro plays in full and loops to the title; New Game → `d00a` briefing → `s00a`
+  dock codec call, 120 s with no TLB misses
+- PCSX2 before that (2026-10-27): Konami logo → title (memory card check) → `opening`: the opening runs with its
   3D scene (~1400 prims a frame), 120 s with no crash and no TLB misses (frame dumps:
   `MGS_DUMP_FRAMES=1 build/link_ps2.py`). New stubs: movie streaming (`CdRead2`, `St*`, `CdReady`)
   and `select`'s host files (`PCcreat`/`PCwrite`)

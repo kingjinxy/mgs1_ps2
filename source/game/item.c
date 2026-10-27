@@ -547,7 +547,7 @@ static void Die(Work *work)
 
     if (work->state == 2 && work->end_proc != 0)
     {
-        if (work->end_proc < 0)
+        if (GCL_IsBlock(work->end_proc))
         {
             GCL_ExecBlock((u_char *)work->end_proc, NULL);
         }

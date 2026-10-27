@@ -121,7 +121,7 @@ void camera_800C3A7C(unsigned long *runlevel, RECT *pRect)
     x2 = x + w;
     y2 = y + h;
 
-    cell = (unsigned long *)0x80182000; // ori
+    cell = (unsigned long *)PSX_ADDR(0x80182000); // ori
 
     DecDCTin(runlevel, 0);
 

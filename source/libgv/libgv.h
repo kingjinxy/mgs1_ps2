@@ -158,7 +158,7 @@ int   GV_LoadInit( void *data, int name, int cache_mode );
 #define PACK_SIZE       (188 * 1024) /* 188KiB */
 #define MEM_SIZE        (428 * 1024) /* 428KiB */
 
-#define MEM_BOTTOM      ((void *)0x801E0000)
+#define MEM_BOTTOM      ((void *)PSX_ADDR(0x801E0000))
 
 #define PACK_ADDR0      (MEM_BOTTOM - PACK_SIZE * 2)
 #define PACK_ADDR1      (MEM_BOTTOM - PACK_SIZE)

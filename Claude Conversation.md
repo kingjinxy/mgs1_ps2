@@ -3986,3 +3986,216 @@ Not done yet:
 
 Commit and then proceed with step 2
 
+## Claude
+
+First I'll update the conversation archive, as CLAUDE.md asks before commits:
+
+- tool `Bash`: Rebuild conversation archive, check for removals
+
+- tool `Bash`: Commit disc read work
+
+## Claude
+
+Committed as `ca96ffb6c`. Starting Step 2. I'll look at how SH1 handled fixed addresses (`psx_mem.h`):
+
+- tool `Bash`: Read SH1's psx_mem.h
+
+## Claude
+
+SH1 used a 2 MiB arena that mirrors the PS1 RAM layout; I'll do the same. I'll check SH1's finder script so it can drive the triage:
+
+- tool `Bash`: Read SH1's fixed-address finder
+
+## Claude
+
+I'll port it to MGS's layout (`source/`, which includes the overlays) and run it to see the scale:
+
+- tool `Bash`: Port finder script, run triage scan
+
+## Claude
+
+4585 hits, but most are in overlays, which are Step 3 and not compiled into the port yet. I'll narrow the scan to the files that are actually in the PS2 main executable:
+
+- tool `Bash`: Restrict hits to main executable sources
+
+## Claude
+
+Only 90 hits in the main executable's C files. Headers count too, since `MEM_BOTTOM` lives in one:
+
+- tool `Bash`: List header hits and small main-exe hits
+
+- tool `Bash`: Check scratchpad handling so far
+
+## Claude
+
+The HAL already defines `g_PsxScratch` (in [port/hal/common.h](port/hal/common.h)). Checking what's there and whether `g_PsxRam` exists:
+
+- tool `Bash`: Read HAL common.h and arena definitions
+
+- tool `Bash`: Show divide.c and demoscrn.c hits
+
+- tool `Bash`: Check header reach and scratchpad macro users
+
+## Claude
+
+23 main-executable files also go through `getScratchAddr`/`SCRPAD_ADDR`, so those macros get redirected too. Before the rewrite, a sample of the overlay RAM literals to see what kind they are:
+
+- tool `Bash`: Sample overlay RAM literals
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/source/include/psx_mem.h
+
+## Claude
+
+Next, the few high-RAM literals in the overlays, to classify them:
+
+- tool `Bash`: List high-RAM overlay literals
+
+- tool `Bash`: Update finder for buffer vs symbol split
+
+- tool `Bash`: Wrap buffer and scratchpad literals
+
+## Claude
+
+My regex skipped literals that come right after `(`. Fixing it and rerunning; the rerun only touches what's still unwrapped:
+
+- tool `Bash`: Fix regex and wrap the remaining literals
+
+## Claude
+
+Every buffer and scratchpad literal is wrapped. Next, the `#include` in `psxdefs.h`, and a shim for PSY-Q's own `getScratchAddr` in `libetc.h`:
+
+- tool `Bash`: Check shim style and getScratchAddr users
+
+- tool `Bash`: Add includes and shim, run matching build
+
+- tool `Bash`: Show matching build error
+
+## Claude
+
+`brf/overlay2.c` starts straight with data and has no includes. I'll add the header there and rebuild:
+
+- tool `Bash`: Fix include, run both matching builds
+
+- tool `Bash`: Check sd_main.c includes
+
+- tool `Bash`: Add include to sd_main.c, rerun matching builds
+
+## Claude
+
+Both matching builds pass (80 OK, plus VR). Now the PS2 build and a boot:
+
+- tool `Bash`: Link PS2 build and boot 90s
+
+## Claude
+
+A big step: the movie table is read, the sound driver starts and the first frame is displayed. Next problem: "Resident Memory Over". Checking how resident memory is bounded:
+
+- tool `Bash`: Find the resident memory check
+
+- tool `Bash`: Read resident.c and StageCharacterEntries
+
+## Claude
+
+`StageCharacterEntries` is the overlay base: resident memory grows down from `MEM_ADDR` toward the overlay area. Checking where the port puts that symbol:
+
+- tool `Bash`: Find overlay base symbol in port
+
+- tool `Bash`: Find StageCharacterEntries origin
+
+- tool `Bash`: Read mts_get_bss_tail and PS1 bss end
+
+- tool `Bash`: Find main exe bss end on PS1
+
+## Claude
+
+On the PS1, `_bss_orgend` is 0x800C3208. In the port, the overlay area belongs at that same offset in the arena, so it sits below `MEM_ADDR` as on the PS1:
+
+- tool `Bash`: Point bss tail at arena, matching build
+
+## Claude
+
+`mask.c` has no includes, so it needs the header for the port build:
+
+- tool `Bash`: Rebuild both and boot 90s
+
+## Claude
+
+It now loads the `init` stage, then `title`, and keeps drawing frames. I'll check how the run ended and look up the one remaining TLB-miss PC:
+
+- tool `Bash`: Check run end and resolve TLB miss
+
+- tool `Bash`: Read final_link
+
+- tool `Bash`: Temporarily wrap memcpy to find NULL source
+
+- tool `Bash`: Resolve memcpy caller
+
+## Claude
+
+The NULL source comes in through `LoadImage`. Wrapping that too, to find the game caller:
+
+- tool `Bash`: Wrap LoadImage to find game caller
+
+- tool `Bash`: Read the menu LoadImage callers
+
+- tool `Bash`: List menu LoadImage calls
+
+- tool `Bash`: Read menu rpk item loading
+
+- tool `Bash`: Read RPK item init code
+
+- tool `Bash`: Read menu_item_init_8003CBF0
+
+## Claude
+
+Both `weapon.c` sites take the pixels from a `PANEL_TEXTURE` (the first is inlined into `menu_item_init_8003CBF0`). I'll guard them under `MGS_PORT`, then remove the temporary wrap:
+
+- tool `Bash`: Guard NULL LoadImage, remove debug wrap, match build
+
+## Claude
+
+`radiofacedraw.c` didn't get wrapped: my first regex skipped it, and the finder files it under symbols. Wrapping it by hand:
+
+- tool `Bash`: Wrap radiofacedraw, rebuild all, boot 120s
+
+## Claude
+
+No TLB misses now, and the title stage runs at 2 prims per frame. Checking how the run ended:
+
+- tool `Bash`: Show end of 120s run
+
+- tool `Bash`: Test boot without cdbios critical sections
+
+## Claude
+
+Same stop at frame 801, so it isn't the critical section; I've restored it. It's deterministic. I'll rerun with direct logging to see the game's last messages before the hang:
+
+- tool `Bash`: Rerun with direct logging to see last messages
+
+- tool `Bash`: Update plan, final matching check, relink
+
+- tool `PushNotification`: 
+
+## Claude
+
+I committed the disc work as `ca96ffb6c` and did Step 2 for the main executable. The game now gets through the `init` stage and into the `title` stage with no TLB misses. About 13 seconds into the title stage the EE stops responding, and I haven't found the cause yet. The Step 2 changes are not committed.
+
+**How fixed addresses work now**
+- **`PSX_ADDR(literal)`**, in the new [source/include/psx_mem.h](source/include/psx_mem.h): in the matching build it is the literal itself. In the port it is the same offset inside the RAM and scratchpad arenas the HAL already had. It stays an integer, so casts, comparisons and `gte_*` arguments work unchanged.
+- **What got wrapped:** all 102 scratchpad literals, the 11 RAM buffer addresses (heap, pack and load buffers, sound and stream buffers, the jpegcam buffers), plus `SCRPAD_ADDR` and PSY-Q's `getScratchAddr` (through a shim in [port/include/libetc.h](port/include/libetc.h)).
+- **The other ~4470 literals are not buffers.** They are addresses of code and data, almost all in the overlays (jump tables, character tables). They need real symbols once the overlays are linked in, so they belong to Step 3. `tools/port/find_fixed_addresses.py --symbols` lists them; without the flag it reports nothing now.
+- **Overlay area:** it now sits at the PS1's offset in the arena, just below resident memory. Before, every resident allocation printed "Resident Memory Over".
+- **Menu textures:** I fixed a read from address 0 in the menu code, where textures were uploaded before `item.rpk` was loaded. The PS1 tolerates it; a real PS2 would crash.
+
+Both matching builds pass (80 OK, plus the VR executable).
+
+**The hang:** after about 13 seconds on the title stage the EE stops with no message from the game. It always stops at the same point. It isn't my disc-read critical section: I tested without it and got the same result. The likely cause is the title stage calling into overlay code, which the port can't run until Step 3.
+
+**One thing to check later:** the codec screen's static was made by reading the PS1 executable's own code as a texture. Through the arena it reads mostly zeros, so the static may come out blank. It's noted in the plan to compare against DuckStation.
+
+The only Step 2 item left is the shift test, which needs Step 3. Should I commit this and then either look into the title hang or start Step 3?
+
+## User
+
+Commit and then start step 3
+

@@ -8,6 +8,7 @@
 #include "../mts/mts.h"
 #include "../mts/taskid.h"
 #include "libfs/libfs.h"
+#include "psx_mem.h"
 
 extern unsigned char *se_header;
 
@@ -313,7 +314,7 @@ void keyOn(unsigned int ch)
 
 int sd_mem_alloc(void)
 {
-    sng_data = (unsigned char *)0x801E0000;
+    sng_data = (unsigned char *)PSX_ADDR(0x801E0000);
     printf("sng_data %X\n", (unsigned int)sng_data);
 
     wave_header = (WAVE_W *)(sng_data + 0x4000);

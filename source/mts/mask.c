@@ -12,10 +12,18 @@ void SetExMask()
 #endif
 }
 
+#include "psx_mem.h"
+
 void *mts_get_bss_tail(void)
 {
+#ifdef MGS_PORT
+    // The overlay area starts here, below the resident memory (MEM_ADDR): both are in the PS1 RAM
+    // arena, so it is where the PS1 executable's bss ends (_bss_orgend in obj/asm.map).
+    return (void *)PSX_ADDR(0x800C3208);
+#else
     // linker-defined symbol
     extern unsigned char _bss_orgend[];
 
     return (void *)_bss_orgend;
+#endif
 }

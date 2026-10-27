@@ -296,7 +296,7 @@ STATIC int DG_CopyPackToRVector( RVECTOREX *rvec )
 
     divide_mem = GetDivideMem();
 
-    if ( ( (unsigned int)divide_mem->rvec < 0x1f800254 ) && ( divide_mem->n_packs >= 4 ) )
+    if ( ( (unsigned int)divide_mem->rvec < PSX_ADDR(0x1f800254) ) && ( divide_mem->n_packs >= 4 ) )
     {
         gte_NormalClip( *(int*)&rvec->sxy, *(int*)&rvec[1].sxy, *(int*)&rvec[3].sxy, &divide_mem->opz );
         v1 = divide_mem->opz;
@@ -411,10 +411,10 @@ typedef struct cpystrct {
 
 static inline void copy_verts(unsigned char *faceIndexOffset, SVECTOR *vertexIndexOffset)
 {
-    *(cpystrct*)0x1F800038 = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[0]];
-    *(cpystrct*)0x1F800060 = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[1]];
-    *(cpystrct*)0x1F8000B0 = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[3]];
-    *(cpystrct*)0x1F8000D8 = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[2]];
+    *(cpystrct*)PSX_ADDR(0x1F800038) = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[0]];
+    *(cpystrct*)PSX_ADDR(0x1F800060) = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[1]];
+    *(cpystrct*)PSX_ADDR(0x1F8000B0) = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[3]];
+    *(cpystrct*)PSX_ADDR(0x1F8000D8) = *(cpystrct*)&vertexIndexOffset[faceIndexOffset[2]];
 }
 
 //function seems to call scratchpad addresses directly rather than through a struct
@@ -425,7 +425,7 @@ STATIC void DG_InitRVector( DG_OBJ *obj,  int idx )
     int           n_packs;
 
     org_pack = obj->packs[ idx ];
-    *(short*)0x1F800006 = obj->raise;
+    *(short*)PSX_ADDR(0x1F800006) = obj->raise;
 
     while ( obj )
     {
@@ -439,46 +439,46 @@ STATIC void DG_InitRVector( DG_OBJ *obj,  int idx )
             int pack_raise = pack->tag & 0xFFFF;
             int pack_addr  = pack->tag >> 8;
 
-            if ( ( *(unsigned int*)0x1F800014 < pack_addr ) &&
-                 ( pack_raise < *(int*)0x1F800018 )         &&
-                 ( *(int*)0x1F800028 >= 4 ) )
+            if ( ( *(unsigned int*)PSX_ADDR(0x1F800014) < pack_addr ) &&
+                 ( pack_raise < *(int*)PSX_ADDR(0x1F800018) )         &&
+                 ( *(int*)PSX_ADDR(0x1F800028) >= 4 ) )
             {
                 *(short*)pack = 0;
-                *(int*)0x1F80001C = (int)pack;
+                *(int*)PSX_ADDR(0x1F80001C) = (int)pack;
 
                 if ( pack_addr & 0x100 )
                 {
-                    *(int*)0x1F80000C = -*(int*)0x1F800010;
+                    *(int*)PSX_ADDR(0x1F80000C) = -*(int*)PSX_ADDR(0x1F800010);
                 }
                 else
                 {
-                    *(int*)0x1F80000C = *(int*)0x1F800010;
+                    *(int*)PSX_ADDR(0x1F80000C) = *(int*)PSX_ADDR(0x1F800010);
                 }
 
                 //loc_80019A04:
-                *(int*)0x1F800034 = (int)0x1F800038;
+                *(int*)PSX_ADDR(0x1F800034) = (int)PSX_ADDR(0x1F800038);
 
                 copy_verts( faceIndexOffset, vertexIndexOffset );
 
-                LCOPY2(  &pack->x0 , (void*)0x1F800044 , &pack->x1 , (void*)0x1F80006C );
-                LCOPY2(  &pack->x2 , (void*)0x1F8000BC , &pack->x3 , (void*)0x1F8000E4 );
-                SCOPYL2( &pack->u0 , (void*)0x1F80003E , &pack->u1 , (void*)0x1F800066 );
-                SCOPYL2( &pack->u2 , (void*)0x1F8000B6 , &pack->u3 , (void*)0x1F8000DE );
-                LCOPY2(  &pack->r0 , (void*)0x1F800040 , &pack->r1 , (void*)0x1F800068 );
-                LCOPY2(  &pack->r2 , (void*)0x1F8000B8 , &pack->r3 , (void*)0x1F8000E0 );
+                LCOPY2(  &pack->x0 , (void*)PSX_ADDR(0x1F800044) , &pack->x1 , (void*)PSX_ADDR(0x1F80006C) );
+                LCOPY2(  &pack->x2 , (void*)PSX_ADDR(0x1F8000BC) , &pack->x3 , (void*)PSX_ADDR(0x1F8000E4) );
+                SCOPYL2( &pack->u0 , (void*)PSX_ADDR(0x1F80003E) , &pack->u1 , (void*)PSX_ADDR(0x1F800066) );
+                SCOPYL2( &pack->u2 , (void*)PSX_ADDR(0x1F8000B6) , &pack->u3 , (void*)PSX_ADDR(0x1F8000DE) );
+                LCOPY2(  &pack->r0 , (void*)PSX_ADDR(0x1F800040) , &pack->r1 , (void*)PSX_ADDR(0x1F800068) );
+                LCOPY2(  &pack->r2 , (void*)PSX_ADDR(0x1F8000B8) , &pack->r3 , (void*)PSX_ADDR(0x1F8000E0) );
 
-                gte_ldv3( 0x1F800060 , 0x1F8000B0 , 0x1F8000D8 );
+                gte_ldv3( PSX_ADDR(0x1F800060) , PSX_ADDR(0x1F8000B0) , PSX_ADDR(0x1F8000D8) );
                 gte_rtpt();
-                gte_stsz3( 0x1F800070 , 0x1F8000C0 , 0x1F8000E8 );
+                gte_stsz3( PSX_ADDR(0x1F800070) , PSX_ADDR(0x1F8000C0) , PSX_ADDR(0x1F8000E8) );
 
-                gte_ldv0( 0x1F800038 );
+                gte_ldv0( PSX_ADDR(0x1F800038) );
                 gte_rtps();
-                gte_stsz( 0x1F800048 );
+                gte_stsz( PSX_ADDR(0x1F800048) );
 
-                DG_SetRVectorCode( (RVECTOREX*)0x1F800038 );
-                DG_SetRVectorCode( (RVECTOREX*)0x1F800060 );
-                DG_SetRVectorCode( (RVECTOREX*)0x1F8000B0 );
-                DG_SetRVectorCode( (RVECTOREX*)0x1F8000D8 );
+                DG_SetRVectorCode( (RVECTOREX*)PSX_ADDR(0x1F800038) );
+                DG_SetRVectorCode( (RVECTOREX*)PSX_ADDR(0x1F800060) );
+                DG_SetRVectorCode( (RVECTOREX*)PSX_ADDR(0x1F8000B0) );
+                DG_SetRVectorCode( (RVECTOREX*)PSX_ADDR(0x1F8000D8) );
                 DG_SubDivideRVectors();
 
             }
@@ -489,8 +489,8 @@ STATIC void DG_InitRVector( DG_OBJ *obj,  int idx )
                     u_long *ot;
                     u_short raise;
 
-                    ot = (*(u_long **)0x1F800000);
-                    raise = *(u_short *)0x1F800006;
+                    ot = (*(u_long **)PSX_ADDR(0x1F800000));
+                    raise = *(u_short *)PSX_ADDR(0x1F800006);
 
                     raise = pack_raise - raise;
                     pack_raise = raise;

@@ -10,7 +10,7 @@
 // getScratchAddr() but cast as a pointer to the specified type.
 // Unlike the original, offset is NOT multiplied by the sizeof(type).
 // TODO: remove
-#define getScratchAddr2(type, offset)   ((type *)(0x1f800000+(offset)))
+#define getScratchAddr2(type, offset)   ((type *)(PSX_ADDR(0x1f800000)+(offset)))
 
 int MENU_RadarScale = 13;
 int MENU_RadarRangeH = 21845;
@@ -522,7 +522,7 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
                     }
                 }
 
-                gte_ldv0h(0x1F800020);
+                gte_ldv0h(PSX_ADDR(0x1F800020));
                 gte_rt();
 
                 if (((((int *)scratchShort)[0x18 / 4] < pWall->p1.y) ||
@@ -549,7 +549,7 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
 
                 gte_stbh(&pLine->x0);
 
-                gte_ldv0h(0x1F800024);
+                gte_ldv0h(PSX_ADDR(0x1F800024));
                 gte_rt();
 
                 LSTORE(rgb, &pLine->r0);

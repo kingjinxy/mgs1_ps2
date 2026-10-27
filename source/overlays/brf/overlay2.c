@@ -1,4 +1,6 @@
-int brf_dword_800C3218 = 0x801CD000;
+#include "psx_mem.h"
+
+int brf_dword_800C3218 = PSX_ADDR(0x801CD000);
 int brf_dword_800C321C = 0x800E1014;
 int brf_dword_800C3220 = 0x0000004B;
 int brf_dword_800C3224 = 0x00033215;

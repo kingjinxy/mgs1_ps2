@@ -138,12 +138,28 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 
 ### Step 2 — Fixed addresses / shiftability
 
-- [ ] Triage the 156 files with `0x80xxxxxx` literals: real addresses vs constants
-- [ ] Single abstraction for fixed addresses (`PSX_RAM_ADDR`/`PSX_SCRATCH` as in SH1's `psx_mem.h`)
-- [ ] Route the 8 scratchpad users through `PSX_SCRATCH`
-- [ ] Port `find_fixed_addresses.py` and run it as a regression check
-- [ ] Matching build still passes (all hashes)
-- [ ] Shift test: pad an overlay and boot into its stage on PS1/emulator
+- [x] Triage of the `0x80xxxxxx` literals (2026-10-27, `tools/port/find_fixed_addresses.py`): 4585 in 156
+      files. Buffers (main RAM from `MEM_ADDR` 0x80117000 up: heap, pack/load buffers, stack values) and
+      the scratchpad: 102 scratchpad + 11 RAM, all wrapped. The rest (0x80010000-0x80116FFF) are addresses
+      of code/data symbols, almost all in overlays (jump tables, `NEWCHARA` tables, `const int` dwords):
+      they need real symbols when the overlays are linked in, so they go with Step 3
+      (`find_fixed_addresses.py --symbols` lists them)
+- [x] Single abstraction: `PSX_ADDR(literal)` (`source/include/psx_mem.h`, included by `psxdefs.h`): the
+      literal in the matching build, the same offset in the HAL's `g_PsxRam`/`g_PsxScratch` in the port,
+      kept an integer so casts, compares and `gte_*` arguments are unchanged. `SCRPAD_ADDR` and PSY-Q's
+      `getScratchAddr` (shim `port/include/libetc.h`) go through it. `mts_get_bss_tail` (the overlay area,
+      `StageCharacterEntries`) returns `PSX_ADDR(0x800C3208)`, the PS1's `_bss_orgend`, so it stays below the
+      resident memory as on the PS1 (else every resident allocation reported "Resident Memory Over")
+- [x] Scratchpad users routed (all `0x1F80xxxx` literals and macros)
+- [x] `find_fixed_addresses.py` ported (`tools/port/`); reports nothing by default now
+- [x] Matching build still passes (all hashes, and the VR executable)
+- [ ] Shift test: pad an overlay and boot into its stage on PS1/emulator (needs Step 3)
+- Note: `radiofacedraw.c`'s codec-screen noise read the PS1 executable's code at 0x80010000; through the
+  arena it reads that part of `g_PsxRam` (probably zeros), so the noise may be blank. Check against
+  DuckStation when the codec runs
+- PCSX2 now (2026-10-27): loads the `init` stage, then `title`, no TLB misses; the EE stops responding
+  ~13 s into the title stage (frame ~800 without direct logging), no message. Not the cdbios critical
+  section (tested without it). Next to investigate; the title stage's overlay code can't run before Step 3
 
 ### Step 3 — Static linking of overlays
 

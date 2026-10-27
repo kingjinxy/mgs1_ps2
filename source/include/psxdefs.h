@@ -4,6 +4,8 @@
 #ifndef __MGS_PSXDEFS_H__
 #define __MGS_PSXDEFS_H__
 
+#include "psx_mem.h"
+
 // Due to none of the OpenEvent callbacks using the correct prototype,
 // we now have to cast them to avoid warnings.
 typedef long (*openevent_cb_t)();
@@ -11,7 +13,7 @@ typedef long (*openevent_cb_t)();
 /*---------------------------------------------------------------------------*/
 // clang-format off
 
-#define SCRPAD_ADDR     0x1f800000
+#define SCRPAD_ADDR     PSX_ADDR(0x1f800000)
 #define SCRPAD_SIZE     0x400
 
 // These macros were taken from "GTE Advanced Topics" (slide 18),
@@ -26,7 +28,7 @@ typedef long (*openevent_cb_t)();
 // if these are set before the stack switch.
 
 /* scratch pad address 0x1f800000 - 0x1f800400 */
-#define SPAD_STACK_ADDR 0x1f8003fc
+#define SPAD_STACK_ADDR PSX_ADDR(0x1f8003fc)
 
 #ifdef MGS_PORT
 /* PS2 build: the stack stays where it is (the PS1's scratchpad isn't at this address on the EE, and moving the

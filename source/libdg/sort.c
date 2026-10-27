@@ -8,12 +8,12 @@ typedef struct _SCRATCHPAD_UNK {
 
 static inline SCRATCHPAD_UNK * get_scratch(void)
 {
-    return (SCRATCHPAD_UNK *)0x1f800000;
+    return (SCRATCHPAD_UNK *)PSX_ADDR(0x1f800000);
 }
 
 static inline unsigned int ** get_buf(void)
 {
-    return *(unsigned int ***)0x1f800000;
+    return *(unsigned int ***)PSX_ADDR(0x1f800000);
 }
 
 static inline int DG_GetCurrentGroupID(void)
@@ -86,17 +86,17 @@ void DG_SortChanl( DG_CHANL *chanl, int idx )
         }
 
         // TODO: clean up
-        ((SCRATCHPAD_UNK *)0x1f800000)->len = pPrim->raise;
+        ((SCRATCHPAD_UNK *)PSX_ADDR(0x1f800000))->len = pPrim->raise;
 
         prim_count = pPrim->prim_count;
         prim = (char *)pPrim->packs[idx];
         prim_size = (short)pPrim->psize;
 
         do {} while (0);
-        ot2 = *(u_long **)0x1f800004;
+        ot2 = *(u_long **)PSX_ADDR(0x1f800004);
 
         do {} while (0);
-        len = *(unsigned int *)0x1f800008;
+        len = *(unsigned int *)PSX_ADDR(0x1f800008);
 
         while (--prim_count >= 0)
         {

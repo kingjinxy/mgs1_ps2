@@ -537,8 +537,8 @@ static void JpegTryCompressFrame(Work *work)
         work->field_80 = 2;
 
         // Not matching with a pointer to the global array
-        work->field_84 = (char *)0x801B1000;
-        work->field_88 = (char *)0x801A1000;
+        work->field_84 = (char *)PSX_ADDR(0x801B1000);
+        work->field_88 = (char *)PSX_ADDR(0x801A1000);
 
         work->field_8C_size = JpegCompressFrame(work, &rect, q_scale);
         printf("%d try q_scale = %d size = %d\n", iteration, q_scale, work->field_8C_size);

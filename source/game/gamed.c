@@ -525,7 +525,7 @@ static void Act(Work *work)
                 memcard_exit();
                 ResetGraph(3);
                 StopCallback();
-                SetConf(0x10, 4, 0x801FFFF0); // note: hardcoded addresses
+                SetConf(0x10, 4, PSX_ADDR(0x801FFFF0)); // note: hardcoded addresses
                 ResetCallback();
                 StopCallback();
                 _96_remove();
@@ -533,7 +533,7 @@ static void Act(Work *work)
 
                 do {
                     printf("load %s\n", exe_name);
-                    LoadExec(exe_name, 0x801FFF00, 0);
+                    LoadExec(exe_name, PSX_ADDR(0x801FFF00), 0);
                 } while (1);
             }
         }

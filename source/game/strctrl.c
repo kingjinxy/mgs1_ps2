@@ -177,7 +177,7 @@ void *NewStreamControl( int stream_code, int gcl_proc, int flags )
         return (void *)&StrctrlWork;
     }
 
-    FS_StreamInit( ( void * )0x801E7800, FS_CDLOAD_BUF_SIZE );
+    FS_StreamInit( ( void * )PSX_ADDR(0x801E7800), FS_CDLOAD_BUF_SIZE );
     GV_InitActor( GV_ACTOR_MANAGER, ( GV_ACT * )&StrctrlWork, NULL );
     GV_SetNamedActor( ( GV_ACT * )&StrctrlWork, &Act, &Die, "strctrl.c" );
 

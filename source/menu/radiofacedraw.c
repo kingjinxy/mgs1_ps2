@@ -215,7 +215,7 @@ void menu_radio_draw_face_helper3_800487DC(menu_chara_struct *pStru, int idx)
     // It looks like this is a trick to quickly get
     // a pseudorandom noise. But, maybe this match is not correct
     // and 0x80010000 should not be hardcoded.
-    LoadImage(&rect, (u_long *)(0x80010000 + (rand() % 32) * 0x2000 + GV_Clock * 0x1000));
+    LoadImage(&rect, (u_long *)(PSX_ADDR(0x80010000) + (rand() % 32) * 0x2000 + GV_Clock * 0x1000));
 }
 
 void menu_radio_draw_face_helper4_80048868(MenuPrim *prim, menu_chara_struct_sub *a2, int idx)

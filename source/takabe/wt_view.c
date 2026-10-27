@@ -352,12 +352,12 @@ static void WaterViewDraw(Work *work)
     addPrim(ot, &work->prims->tile[GV_Clock * 2 + 0]);
     addPrim(ot, &work->prims->tile[GV_Clock * 2 + 1]);
 
-    scratch1 = (short *)0x1F800200;
+    scratch1 = (short *)PSX_ADDR(0x1F800200);
     scratch2 = (short *)0x1F800400;
 
     nprims = work->n_prims;
 
-    scratch3 = (short *)0x1F80000C;
+    scratch3 = (short *)PSX_ADDR(0x1F80000C);
 
     for (i = 6; i < 218; i += 2)
     {
@@ -383,7 +383,7 @@ static void WaterViewDraw(Work *work)
     scratch4 = scratch1 - 256;
     count2 = scratch4 - scratch3;
 
-    scratch1 = (short *)0x1F800200;
+    scratch1 = (short *)PSX_ADDR(0x1F800200);
 
     scratch5 = scratch2 - 512;
     count1 = scratch3 - scratch5;

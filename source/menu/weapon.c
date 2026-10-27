@@ -176,8 +176,15 @@ void menu_draw_texture_8003CEF8(PANEL_TEXTURE *pPanelTex)
 
                 iter->field_8_rect1.w = pPanelTex->field_10_w / 4;
                 iter->field_8_rect1.h = pPanelTex->field_12_h;
-                LoadImage(&iter->field_8_rect1, pPanelTex->field_0_pixels);
-                LoadImage(&iter->field_10_rect2, pPanelTex->field_4_word_ptr_pixels);
+#ifdef MGS_PORT
+                // Before item.rpk is cached (the init stage), the texture has no pixels: the PS1
+                // loaded from address 0 (BIOS memory) here.
+                if (pPanelTex->field_0_pixels)
+#endif
+                {
+                    LoadImage(&iter->field_8_rect1, pPanelTex->field_0_pixels);
+                    LoadImage(&iter->field_10_rect2, pPanelTex->field_4_word_ptr_pixels);
+                }
 
                 break;
             }
@@ -199,6 +206,13 @@ void sub_8003CFE0(PANEL_TEXTURE *pPanelTex, int index)
     pPanelTex->field_C_uvclut = LLOAD(&elem->field_0_u);
     elem->field_8_rect1.w = pPanelTex->field_10_w / 4;
     elem->field_8_rect1.h = pPanelTex->field_12_h;
+#ifdef MGS_PORT
+    // As in the function above: no pixels before item.rpk is cached.
+    if (!pPanelTex->field_0_pixels)
+    {
+        return;
+    }
+#endif
     LoadImage(&elem->field_8_rect1, pPanelTex->field_0_pixels);
     LoadImage(&elem->field_10_rect2, pPanelTex->field_4_word_ptr_pixels);
 }

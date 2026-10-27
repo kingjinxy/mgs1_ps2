@@ -36,10 +36,10 @@ void s03e_spark2_800CA0E8(int count)
     SVECTOR *in;
     SVECTOR *out;
 
-    rot = (MATRIX *)0x1F800000;
-    rotvec = (SVECTOR *)0x1F800028;
-    in = (SVECTOR *)0x1F800020;
-    out = (SVECTOR *)0x1F800030;
+    rot = (MATRIX *)PSX_ADDR(0x1F800000);
+    rotvec = (SVECTOR *)PSX_ADDR(0x1F800028);
+    in = (SVECTOR *)PSX_ADDR(0x1F800020);
+    out = (SVECTOR *)PSX_ADDR(0x1F800030);
 
     *in = DG_ZeroVector;
     rotvec->vz = 0;

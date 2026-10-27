@@ -5,8 +5,7 @@ HAL's main() (src/port_main.c) calls once the PS2 side is up.
 
     python3 build/link_ps2.py
 
-The HAL's disc and memory card files are left out until MGS has its own (decision B in
-docs/Planning Doc.md; the card mapping): every function nothing defines yet gets a generated stub that
+The HAL's disc file is left out until MGS has its own (decision B in docs/Planning Doc.md): every function nothing defines yet gets a generated stub that
 logs its first calls (obj_ps2/hal_stubs.c), and the link reports them.
 Environment: as build_ps2.py, plus GSKIT (default $PS2DEV/gsKit). MGS_LOG_DIRECT=1: console output
 straight through (port/src/hal_game.c), for debugging before the game's vertical blank handler runs.
@@ -39,8 +38,8 @@ HAL_CFLAGS = ["-O3", "-G0", "-fno-toplevel-reorder", "-mno-check-zero-division",
 PS2_CFLAGS = ["-O3", "-G0", "-D_EE", "-Wall", "-I" + os.path.join(PS2SDK, "ee", "include"),
               "-I" + os.path.join(PS2SDK, "common", "include"), "-I" + os.path.join(GSKIT, "include"),
               "-iquote", os.path.join(PORT, "hal"), "-iquote", os.path.join(HAL, "include")]
-# Left out for now (see the docstring): SH1's disc layout and the memory card.
-HAL_LEFT_OUT = {"src/ps2/libcd_ps2.c", "src/psx_card.c", "src/ps2/memcard_ps2.c"}
+# Left out for now (see the docstring): SH1's disc layout.
+HAL_LEFT_OUT = {"src/ps2/libcd_ps2.c"}
 IRX = ("sh1agent", "sh1spu")
 
 
@@ -56,7 +55,11 @@ def compile_hal():
     if not os.path.islink(os.path.join(HAL_INC, "psyq")):
         os.symlink(os.path.join(PSYQ, "psyq_4.4", "include"), os.path.join(HAL_INC, "psyq"))
     objs = []
-    for sub, flags in (("src", HAL_CFLAGS), ("src/ps2", PS2_CFLAGS)):
+    # Test cards (MGS_MC_FORMAT=1): an unformatted PS2 card in port 1 is formatted at the first card access,
+    # and each PS1 card image written is copied to host:cardN.mcd (ps2/memcard_ps2.c), for PCSX2 runs with
+    # pcsx2_run.py --memcards.
+    test = ["-DSH_PORT_MC_FORMAT"] if os.environ.get("MGS_MC_FORMAT") else []
+    for sub, flags in (("src", HAL_CFLAGS), ("src/ps2", PS2_CFLAGS + test)):
         for name in sorted(os.listdir(os.path.join(HAL, sub))):
             rel = sub + "/" + name
             if not name.endswith(".c") or rel in HAL_LEFT_OUT:

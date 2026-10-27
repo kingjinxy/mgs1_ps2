@@ -2907,3 +2907,138 @@ I'll add a matching entry to the HAL's walkthrough.
 
 - tool `Bash`: Append HAL walkthrough entry
 
+## Claude
+
+Next I'll update `Claude Conversation.md`, since this is a milestone.
+
+- tool `Bash`: Update conversation archive
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+MGS now links for the PS2 and boots past its `main()` in PCSX2. The `mts` scheduler starts its tasks, the game task begins `Main`, and the display comes up at 320x240. It then stops in `memcard_init`, waiting for card events that the stubbed libcard never sends; the memory card mapping is still to do. There are no TLB misses. Both matching builds pass, SH1 still links, and nothing is committed yet.
+
+To build: `python3 build/link_ps2.py` writes `obj_ps2/mgs.elf` and a bootable `obj_ps2/mgs_ps2.iso`, with overlays left out. 24 functions nothing provides yet get generated stubs that log their first calls: libcd, libcard and the BIOS card file calls, and three pad init calls.
+
+**The file count was wrong before.** The compile script stripped the template's `{% if %}` tags, so it compiled both branches of every condition. The real main-executable list is 168 files, not 219. It now reads the matching build's rendered file instead.
+
+What it took to get running:
+- **Duplicate variables:** several files define the same variables, which the PS1's compiler merged. I added `-fcommon`, and under `MGS_PORT` the `SECTION()` attribute is now empty, because a variable with a section attribute can't be merged.
+- **Kernel tables:** `mts` reads the PS1 kernel's Table of Tables at address `0x100`, both to find thread control blocks and to switch tasks from the vblank interrupt. Under `MGS_PORT` those reads go through `Port_PsxToT()`, the HAL's copy of those tables.
+- **A hang while the HAL loaded an IOP module:** the game defines `fprintf`, `getchar`, `random` and `sio_puts`, which the PS2's libraries also define. The game's versions won the link, so library code called them. The link script now renames every such clash on the game side to `MGS_<name>`. The retail build's empty `printf` is left out, so the game's messages now show in the console.
+- **The emulator check didn't recognise MGS:** the HAL detects PCSX2 by looking for SH1's `sh1_ps2.iso`, so under MGS it set up the read-only zero page meant for real hardware. That would have hidden PCSX2's "TLB Miss" lines. The file to look for is now a setting, `HAL_GAME_HOST_PROBE`, with SH1's file as the default.
+- **Silent logs:** `HalGame_Init` makes stdout unbuffered, as on the PS1. Setting `MGS_LOG_DIRECT=1` sends console output straight out, for debugging hangs early in boot.
+
+For now `_bss_orgend` (the end of the PS1 executable's memory) is the end of the ELF's BSS; where the PS1 heaps really go is a Step 2 question. The HAL's own `libcd_ps2.c` and memory card files are left out of the link because they're set up for SH1's disc and saves.
+
+The HAL changes are the `crash_ps2.c` setting and a copy of SH1's `mkiso.py`; SH1 still links with the same 9 stubs. In MGS, the new files are `build/link_ps2.py`, `port/hal/`, `port/src/hal_game.c` and `port/linkfile`. I updated both walkthroughs, the Planning Doc and `Claude Conversation.md`.
+
+Next up is the memory card mapping, then the pad. Should I commit now, or carry on with the card first?
+
+## User
+
+Commit and then proceed with the memory card
+
+- tool `Bash`: Commit HAL and MGS
+
+## Claude
+
+Committed (HAL `e918488`, MGS `d2c647168`). Now the memory card: first how MGS's card code calls libcard and the BIOS, and how SH1 maps those calls.
+
+- tool `Bash`: Survey MGS memcard code
+
+- tool `Bash`: psx_card API and SH1 mapping
+
+- tool `Bash`: Product code, callers, icon data
+
+- tool `Bash`: Title layout and open flag handling
+
+- tool `Bash`: Check async flags and read/write
+
+- tool `Bash`: Check MGS flags and event handlers
+
+- tool `Bash`: Test-card options and icon data
+
+## Claude
+
+Now the edits: HAL title-break setting, MGS config, `memcard.c` mapping, the icon, and the link changes.
+
+- tool `Bash`: Apply card mapping edits
+
+## Claude
+
+Now the icon TIM in `hal_game.c`:
+
+- tool `Bash`: Build icon TIM; relink with test cards
+
+- tool `Bash`: Boot with fresh test memory cards
+
+## Claude
+
+The card is formatted and the HAL's card side is ready. The game's first `_card_info` timed out (`[C.H.T.O]`), it retried, and then it hung. I'll read MGS's wait loops.
+
+- tool `Bash`: Read MGS card wait and HAL delivery
+
+- tool `Bash`: Read PS2 card info query
+
+- tool `Bash`: Find VSync and idle loop in mts
+
+- tool `Bash`: Read mts vsync and idle task
+
+- tool `Bash`: Check card query frequency
+
+## Claude
+
+These are save-menu and init calls, not per-frame polling, so a blocking query is fine. Implementing:
+
+- tool `Bash`: Blocking query off main thread; boot
+
+## Claude
+
+Still stuck after `RETRY`. I'll read `memcard_init`'s flow and where `[R]` is printed.
+
+- tool `Bash`: Read memcard_init flow
+
+- tool `Bash`: Read memcard_access_wait
+
+- tool `Bash`: Rest of memcard_access_wait
+
+- tool `Bash`: Read info_answer and event helpers
+
+## Claude
+
+`psx card: slot 1: card found` never printed, so it hangs inside the query itself (`PortMc_InfoStart`), not in delivery. I'll trace there.
+
+- tool `Bash`: Trace off-main info query
+
+- tool `Bash`: Find s_MainThread assignment
+
+- tool `Bash`: Config-driven blocking query; boot
+
+- tool `Bash`: Check for leftover debug; review HAL diff
+
+## Claude
+
+The extra `Port_CardPoll` declaration is redundant, since the function is defined above it. I'll remove it, then run the matching builds and SH1's regression check together.
+
+- tool `Bash`: Relink normally; matching builds
+
+- tool `Bash`: SH1 regression run, 150 s
+
+## Claude
+
+The comparison wasn't valid: the baseline file in this scratchpad has only 4 status lines. I'll check the SH1 run's log directly: progress, crashes, and TLB lines.
+
+- tool `Bash`: Inspect SH1 run log
+
+## Claude
+
+The baseline logs are in a different, shorter format, so I'll look at how they were produced and compare like with like.
+
+- tool `Bash`: Compare SH1 run with prior baseline
+
+- tool `Bash`: Find memory card plan item
+

@@ -97,3 +97,34 @@ and starts its system task and the game task, `Main` calls `ResetGraph` and frie
 the memory card mapping (Step 1), then the pad, then the CD replacement once the disc images are here.
 
 Matching build: 80 OK, and the VR executable. SH1 links unchanged (9 stubs).
+
+## Step 1: the memory card (2026-10-27)
+
+The HAL's PS1 card layer (`psx_card.c`: libcard and the BIOS file calls over one PS1 card image per slot,
+kept in a save folder on the PS2 card by `ps2/memcard_ps2.c`) is now linked:
+- `memcard/memcard.c` maps `open`/`close`/`lseek`/`read`/`write`/`firstfile`/`nextfile`/`erase`/`format` to the
+  HAL's `Port_Bu*` under `MGS_PORT` (the plain names are the PS2 C library's), as SH1's `memcard.c` does.
+- Settings (`port/hal/hal_game_config.h`): PS1 product `BISLPM-86247` (the game's `MGS_MemoryCardName`), PS2 save
+  folder `BISLPM-86247MGS`, icon file `MGS.ICO`, title "METAL GEAR SOLID / PS1 saves". The line break of the
+  title was fixed at SH1's 11 characters: now `HAL_GAME_PS2_SAVE_TITLE_BREAK` (default 11), 16 here.
+- The save icon: the HAL takes a 16x16 4-bit TIM. MGS keeps its icons as raw CLUT + pixels
+  (`clutsAndIcons_8009E774` in `menu/datasave.c`); `HalGame_Init` puts Snake's (the first) into a TIM,
+  `g_MgsSaveIconTim`.
+- `MGS_MC_FORMAT=1` builds format an unformatted card in port 1 and copy each PS1 image written to
+  `host:cardN.mcd` (the HAL's `SH_PORT_MC_FORMAT`): for PCSX2 runs with `pcsx2_run.py --memcards <empty folder>`.
+
+**`memcard_init` hung.** The HAL answers `_card_info` asynchronously: the PS2 card query runs in the background and
+its event is delivered from `TestEvent` (SH1 polls its card events that way every frame). MGS never calls
+`TestEvent`: its events' callbacks set flags that it waits for in `mts_wait_vbl` loops, so the answer never came.
+New HAL setting `HAL_GAME_CARD_INFO_WAIT` (set for MGS): `_card_info` runs the query to its end
+(`PortMc_InfoWait`) and delivers the event at once, as the PS1 BIOS's interrupt would have. MGS queries the card
+from its boot and the data screen, not every frame, so the wait doesn't cost frames. (Deciding by thread
+instead didn't work: `memcard_ps2.c` takes its "main thread" from its first caller, MGS's game task.)
+
+Now (PCSX2, a fresh card in port 1, none in port 2): port 1's card is found and reported as new
+(`*** sw card new`, as on the PS1 at boot), its image starts empty (no save folder yet); port 2 times out
+(`[C.S.T.O]`, no card). The game goes on to `pad:`, `gv:`, `fs:` and then waits on the stubbed libcd. Saving and
+loading can be tried once the game runs that far (the disc).
+
+Matching build: 80 OK, and the VR executable. SH1: links (9 stubs); 150 s in PCSX2 into its demo loop, card found
+and its image loaded, no TLB misses.

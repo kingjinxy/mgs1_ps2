@@ -9,6 +9,29 @@
 #include "mgstype.h"
 #include "mts/mts.h"
 
+#ifdef MGS_PORT
+/* The PS1 BIOS file calls on "buXY:" paths go to the HAL's PS1 card images (psx_card.c): the plain
+ * names belong to the PS2's C library. */
+long             Port_BuOpen(const char *path, unsigned long flags);
+long             Port_BuClose(long fd);
+long             Port_BuLseek(long fd, long offset, long whence);
+long             Port_BuRead(long fd, void *buf, long n);
+long             Port_BuWrite(long fd, void *buf, long n);
+struct DIRENTRY *Port_BuFirstFile(const char *pattern, struct DIRENTRY *de);
+struct DIRENTRY *Port_BuNextFile(struct DIRENTRY *de);
+long             Port_BuErase(const char *path);
+long             Port_BuFormat(const char *path);
+#define open(path, flags)         Port_BuOpen((path), (flags))
+#define close(fd)                 Port_BuClose(fd)
+#define lseek(fd, offset, whence) Port_BuLseek((fd), (offset), (whence))
+#define read(fd, buf, n)          Port_BuRead((fd), (buf), (n))
+#define write(fd, buf, n)         Port_BuWrite((fd), (buf), (n))
+#define firstfile(pattern, de)    Port_BuFirstFile((pattern), (de))
+#define nextfile(de)              Port_BuNextFile(de)
+#define erase(path)               Port_BuErase(path)
+#define format(path)              Port_BuFormat(path)
+#endif
+
 typedef void (*TMemCardFunc)(int);
 
 static int memcard_initialized = FALSE;

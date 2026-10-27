@@ -106,8 +106,9 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
         `ReadRotMatrix`: bit-exact against MGS's linked code (`tools/libgte_test`)
   - [x] Misc: `SetMem`, `SetConf`, `GetGp`/`GetSp`, `rand`/`srand` (PS1's), `StopCallback`, `StopPAD`,
         `ChangeClearPAD`, `PClseek`, `LoadExec` (soft reset: stops for now)
-  - [ ] BIOS file calls for the memory card (`open`/`read`/... → `Port_Bu*` on the game side, as SH1):
-        game code, so in Step 1 with the port build
+  - [x] BIOS file calls for the memory card (`open`/`read`/... → `Port_Bu*` in `memcard/memcard.c`, as SH1);
+        card detection works at boot in PCSX2. Saving and loading still to test once the game runs (needs the
+        disc)
   - [x] `rank`'s PocketStation code (`mcx`): `SysEnqIntRP`/`SysDeqIntRP`, `ChangeClearRCnt` as no-ops.
         Its `FlushCache(void)` clashes with ps2sdk's `FlushCache(int)`: rename the call when recompiling `rank`
   - [ ] **PocketStation support: planned, low priority** (the stubs above only stand in until then). The PS2

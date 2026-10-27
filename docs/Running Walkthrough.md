@@ -160,3 +160,103 @@ libcd as before. Buttons can be checked once the game gets past the disc. Stubs 
 
 Matching build: 80 OK, and the VR executable. SH1: links (9 stubs); 150 s in PCSX2 through its attract demos, pad
 stable, no TLB misses.
+
+## Step 6 (early): the PS1 disc on the DVD, and libfs's reads (2026-10-27)
+
+The user supplied the Integral discs as CHDs in `ps1-original/` (gitignored, never committed). Each disc is one
+MODE2_RAW data track, no audio. `build/link_ps2.py` extracts discs 1 and 2 with `chdman extractcd` (once, or when
+a CHD is newer) to `obj_ps2/ps1/DISC1.BIN`/`DISC2.BIN`, raw 2352-byte sectors, and puts both on the DVD image
+next to the ELF and SYSTEM.CNF (~1.47 GB, single layer). The VR disc is left out for now.
+
+The game counts sectors from MSF 00:00:00 (`srchfile.c` adds 150 to ISO9660 LBAs), so PS1 sector n is at byte
+(n - 150) * 2352 of the file, its data 24 bytes in (sync, header, subheader).
+
+`libfs/cdbios.c` under `MGS_PORT` (the planning doc said this was written in Step 1; it wasn't): the cdbios task
+keeps its request/stop/start flags, but instead of `CdlReadN` + a ready callback it reads chunks of 16 sectors
+through `port/src/cdbios_ps2.c` (`sceCdSearchFile("\DISC1.BIN;1")`, async `sceCdRead` into a bounce buffer,
+`sceCdSync(1)` polled once per vertical blank, data cache invalidated after the DMA as in the HAL's
+libcd_ps2.c) and hands each sector to the same logic as `CDBIOS_ReadyCallback`: copy, request callback,
+callback 0 stops, 2 doesn't advance the buffer. The header's MSF is checked against the expected sector. A request
+started from inside a callback ends delivery of the chunk. On the PS1 the callback ran in an interrupt; here each
+sector is delivered in `SwEnterCriticalSection` (HAL: plain DI/EI, not nestable, so one per sector). The stream
+callback stops itself when its buffer is full, so ~6x the PS1 drive's rate is safe. `CdInit`/`CdReset` find the
+file.
+
+Found on the way:
+- The directory's file sizes came out negative: `read_lsb_ulong` on `char` bytes >= 0x80. PSY-Q's `ccpsx` treats
+  `char` as unsigned (SH1's build passes `-funsigned-char` too); `build_ps2.py` now does. This affected all game
+  code, not only libfs.
+- `srchfile.c` printed `found->pos` with `found` NULL for the executable's entry: guarded under `MGS_PORT`.
+
+Then the game read STAGE.DIR's table into `MEM_ADDR` (0x80117000), which on the EE is kseg0 → physical 0x117000,
+the port's own code: `FS_MovieFileInit` was overwritten and the EE ran ASCII. That's Step 2.
+
+## Step 2: fixed addresses (2026-10-27)
+
+`tools/port/find_fixed_addresses.py` (from SH1, scanning `source/`): 4585 literals. Split by range: the
+scratchpad and RAM from `MEM_ADDR` up are buffers (heap, pack/load buffers, stack values); 0x80010000 up to
+`MEM_ADDR` are addresses of code/data symbols, almost all in overlays (jump tables, `NEWCHARA` tables, `const int`
+dwords), which need real symbols in Step 3 (`--symbols` lists them). Buffers: 102 scratchpad, 11 RAM.
+
+`PSX_ADDR(literal)` (`source/include/psx_mem.h`, included by `psxdefs.h`): the literal in the matching build, the
+same offset in the HAL's existing arenas (`g_PsxRam` 2 MiB, `g_PsxScratch` in the EE scratchpad) in the port. It
+stays an integer, so the wrap is mechanical: casts, compares (`divide.c`'s `rvec < 0x1f800254`) and `gte_*`
+arguments are unchanged. Applied with a one-off script (the first regex skipped literals right after `(`; a
+second pass caught them). `SCRPAD_ADDR` and PSY-Q's `getScratchAddr` (shim `port/include/libetc.h`) go through
+it. `brf/overlay2.c`, `sd_main.c` and `mask.c` needed the include.
+
+Then "Resident Memory Over" on every allocation: `StageCharacterEntries` (the overlay area, resident memory's
+lower limit) is `mts_get_bss_tail()`, the ELF's bss end (~0x738000), above the arena. It now returns
+`PSX_ADDR(0x800C3208)`, the PS1's `_bss_orgend` (obj/asm.map), so the overlay area stays below `MEM_ADDR` as on
+the PS1.
+
+NULL reads at `memcpy` (32 bytes from 0): found by temporarily wrapping `memcpy`, then `LoadImage`, with
+`-Wl,--wrap` and printing `__builtin_return_address` for low sources. Menu panel textures (`weapon.c`) are uploaded
+before `item.rpk` is cached, from address 0 on the PS1 (BIOS memory). Guarded under `MGS_PORT`.
+
+Now: init stage, then `title` loads; no TLB misses. The EE stopped ~13 s into the title stage with no message.
+Tried: delivering sectors without the critical section (same stop at the same frame, so not that). It was the
+title overlay's code, which couldn't run yet.
+
+`radiofacedraw.c`'s codec noise reads the PS1 executable's code at 0x80010000 as a texture; through the arena it
+reads that part of `g_PsxRam`, likely zeros. To check against DuckStation.
+
+## Step 3: the overlays linked into the executable (2026-10-27)
+
+The user chose SH1's route: overlays built into the executable (the PS2 has the RAM), back to loaded overlays only
+if memory runs short.
+
+`tools/port/overlay_survey.py`: per overlay, its objects (from the rendered `obj/linker_command_file_<ovl>_lhs.txt`),
+`INCLUDE_ASM` stubs (written `#pragma INCLUDE_ASM`; the first regex missed them) and literal code/data addresses
+(0x80010000 up, so `0x80000000` flag bits don't count). 59 of the 79 built overlays are clean.
+
+`build/overlays_ps2.py`, called by `link_ps2.py`: compiles the clean overlays' sources like the main executable,
+`ld -r`-merges each overlay, applies the main game's `MGS_<name>` renames, renames `_StageCharacterEntries` to
+`_StageCharacterEntries_<ovl>` and makes every other defined symbol local (`objcopy --keep-global-symbol`). Shared
+objects get their own copy and data per overlay, as on the PS1. Generated `obj_ps2/ovl/stages.c` lists the tables
+by stage name. PSY-Q library objects in the overlay lists come from the HAL. No clashes; ELF ~8 MB.
+
+Hook: `game/chara.c` `Port_SetStage(id)` picks the table whose `GV_StrCode(name)` matches the id's low 16 bits;
+`GM_GetCharaID` searches it instead of `StageCharacterEntries`, and `GM_ResetChara` switches to an empty table
+(rather than writing an end marker into the static table). Called from `GM_LoadInitBin` first, but that loader
+never runs for stage overlays: `cdstage.c` reads a `.bin` tag straight to `StageCharacterEntries`. The call there
+is the one that matters. The binary is still read into the arena, unused.
+
+Compile failures: `searchli.c`, `envmap3.c`, `libdg2.c`, `sub_efct.c` define their own GTE asm macros
+(`mtc2`/`mfc2`, not on the R5900). Translated with the HAL's `gen_gte_inline.py` into `port/include/gte_from_*.h`,
+included under `MGS_PORT` after the macros. `libdg2.c` has four groups of macros, each used before the next is
+defined: the translation is included after each group, its guard `#undef`'d first (as the `inline_n.h` shim does).
+
+`title`/`change` include `safechk.obj` (asm only): Sony's copy protection. `SafetyCheck` passes, and
+`CdControl`/`CdControlB` report "standby, shell closed" (`port/src/cdbios_ps2.c`, with `CdIntToPos`: libcdvd's
+header has a macro of that name, `#undef`'d).
+
+Title: `card1 = *memcard_files(0)` with a new card (checked usable, but its last operation wasn't a read, so
+NULL): the PS1 copied from address 0. `open.c` now uses `MEMCARD_FILES(port)`, an empty card for NULL in the port.
+
+Now (PCSX2): Konami logo → title (memory card check) → `opening`, whose 3D scene renders (~1400 prims a frame);
+120 s, no crash, no TLB misses. Frame dumps: `MGS_DUMP_FRAMES=1 python3 build/link_ps2.py` (HAL
+`SH_PORT_DUMP_FRAMES`, frames 30-2400 to `obj_ps2/`). New stubs: movie streaming (`CdRead2`, `St*`, `CdReady`),
+`select`'s `PCcreat`/`PCwrite`.
+
+Matching build: 80 OK, and the VR executable.

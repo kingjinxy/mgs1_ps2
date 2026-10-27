@@ -4445,3 +4445,44 @@ Shall I commit this?
 Add to the todo list: reduce memory usage of overlays by deduplicating data.
 Commit the changes
 
+- tool `Bash`: Add todo, archive conversation, commit
+
+## Claude
+
+I committed the overlay linking as `f0b182616`, and the working tree is clean.
+
+The new to-do is in Step 3 of [docs/Planning Doc.md](docs/Planning%20Doc.md): reduce the overlays' memory use by deduplicating. Right now each overlay has its own copy of every shared object's code and data. The item says to share identical code and read-only data between overlays and keep only the writable data per overlay.
+
+I also brought `Claude Conversation.md` up to date before the commit; no earlier lines were removed.
+
+## User
+
+Are we also keeping a walkthrough for all the changes we've made?
+
+- tool `Bash`: Check the running walkthrough's state
+
+- tool `Bash`: Append three walkthrough sections
+
+## Claude
+
+I'll save this so future sessions keep the walkthrough current without being asked:
+
+- tool `Write`: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/memory/keep-running-walkthrough.md
+
+- tool `Bash`: Index the new memory
+
+## Claude
+
+Yes, we keep one, but I hadn't added to it this session. [docs/Running Walkthrough.md](docs/Running%20Walkthrough.md) is the dated log of each change and what was tried, and its last entry was the earlier pad work. I've now added three sections in the same style:
+
+- **Disc reads (early Step 6):** extracting the CHDs, laying the disc images out on the DVD, how `cdbios.c` reads them, and the `-funsigned-char` fix.
+- **Step 2:** the 4585 hard-coded addresses split into buffers and code/data addresses, the `PSX_ADDR` macro, the overlay-area move, and how the NULL `LoadImage` was traced. It also covers what didn't pan out: the regex that missed some addresses at first, and the critical-section test, which didn't change the title-stage hang.
+- **Step 3:** the overlay linking, why the hook had to go in `cdstage.c` rather than `GM_LoadInitBin`, the GTE macro translations, the copy-protection stand-in, the memory card NULL fix, and the current state in PCSX2.
+
+I also saved a memory so future sessions update the walkthrough with the planning doc at each milestone. The walkthrough changes aren't committed yet; should I commit them?
+
+## User
+
+In Claude.md,  updating the walkthrough and conversation should be there, if it isn't already.
+Commit the walkthrough changes
+

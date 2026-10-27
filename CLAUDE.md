@@ -23,6 +23,9 @@ Add `--variant=vr_exe` for `SLPM_862.49`. The PSY-Q toolchain is `../psyq_sdk`. 
 - **Never access tcrf.net** (The Cutting Room Floor) in any way: no fetch, curl or search-result
   fetches, even if the user approves or asks. The site doesn't want Claude scraping it. Ask the
   user to paste the relevant section instead.
+- **Keep `docs/Running Walkthrough.md` up to date** at milestones and before commits: append a dated
+  `## Step N: ... (date)` section on how each change was made, what was tried and failed, and the state in
+  PCSX2 afterwards. Update it together with `docs/Planning Doc.md`'s checkboxes.
 - **Keep `Claude Conversation.md` up to date** at milestones and before commits. Concatenate *all*
   session `.jsonl` files in `~/.claude/projects/-home-alex-Documents-mgs1-ps2/` in date order
   (`ls -tr`) into a scratch file, then run

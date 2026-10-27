@@ -4981,3 +4981,49 @@ I updated the walkthrough and the Step 3 notes in the planning doc. Should I com
 
 Yes
 
+- tool `Bash`: Update the conversation archive and check status
+
+## Claude
+
+No lines removed from the archive. Committing both repos.
+
+- tool `Bash`: Commit the HAL and the port changes
+
+## Claude
+
+I committed both repos, and both working trees are clean:
+
+- **HAL** `980bd1b`: the task-switching fix (`thread_ps2.c`) that stopped the intro hang, plus the updated thread test.
+- **MGS port** `8b1b88611`: the New Game fix (`GCL_IsBlock`), the two NULL guards for the dock, the scripted button presses (`MGS_PAD_SCRIPT`), the walkthrough and planning doc updates, and the conversation archive (no lines removed).
+
+The next step would be to script presses that get through the dock's codec call and into gameplay, then see how far it gets.
+
+## User
+
+From what I observed, the game did get through the codec call and into gameplay.
+
+## Claude
+
+Good, thanks for checking. I was wrong to call that untested: my run stopped at the codec screen only because the button script ran out of presses. So the path from the title through the briefing and codec call into dock gameplay works.
+
+What's still unknown is how stable gameplay is past that point. Did anything go wrong once you were in the dock: crashes, freezes, missing graphics or sound? If it all looked fine, the next step from the plan is the heliport (`s01a`), which is linked in but hasn't been reached in any run yet.
+
+## User
+
+Add to the .md files
+
+- tool `Bash`: Record the dock gameplay result in both docs
+
+## Claude
+
+I've added your result to both docs. Nothing is committed yet.
+
+- **[Running Walkthrough.md](docs/Running%20Walkthrough.md):** a note that your run got through the dock's codec call into gameplay. It also explains that my scripted run stopped at the codec only because its button presses ran out.
+- **[Planning Doc.md](docs/Planning%20Doc.md):**
+  - The PCSX2 status line now says gameplay in the dock was reached.
+  - The "First playable path" item now reads "Dock gameplay reached (2026-10-27); heliport not yet". It stays unchecked until the heliport (`s01a`) has been reached too.
+
+## User
+
+Commit
+

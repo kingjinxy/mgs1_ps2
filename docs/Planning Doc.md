@@ -178,7 +178,8 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
       s11i (literal addresses: `NEWCHARA` tables, string/function pointer tables); rank, s14e (an
       object's source missing). Not in the matching build at all: s10a, s11b, s11h, s15a, s17a-s19a and
       some `r` variants
-- [ ] First playable path: dock (s00a) → heliport (s01a) are both linked in
+- [ ] First playable path: dock (s00a) → heliport (s01a) are both linked in. Dock gameplay reached (2026-10-27);
+      heliport not yet
 - [ ] Reduce the overlays' memory use by deduplicating: each overlay now has its own copy of every shared
       object's code and data (`enemy/*`, `takabe/*` in dozens of overlays). Share identical code (and
       read-only data) between overlays, keeping only the writable data per overlay
@@ -193,7 +194,7 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
   New Game (`GCL_IsBlock`); dock NULL reads (`sna_init.c` bullets, `script.c FuncCmd`). Scripted pad presses for
   PCSX2 runs: `MGS_PAD_SCRIPT` (`port/src/pad_script.c`)
 - PCSX2 now (2026-10-27, later): intro plays in full and loops to the title; New Game → `d00a` briefing → `s00a`
-  dock codec call, 120 s with no TLB misses
+  dock codec call, 120 s with no TLB misses. The user's run reaches dock gameplay past the codec call
 - PCSX2 before that (2026-10-27): Konami logo → title (memory card check) → `opening`: the opening runs with its
   3D scene (~1400 prims a frame), 120 s with no crash and no TLB misses (frame dumps:
   `MGS_DUMP_FRAMES=1 build/link_ps2.py`). New stubs: movie streaming (`CdRead2`, `St*`, `CdReady`)

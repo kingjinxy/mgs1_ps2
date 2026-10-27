@@ -297,3 +297,6 @@ at 0 there; guarded under `MGS_PORT`.
 
 Now (PCSX2, START, START, Circle): title → `d00a` (briefing, its stream plays and renders) → `s00a`, the dock's
 codec call on screen and waiting for a button; 120 s, no TLB misses. Matching build: 80 OK, VR 2 OK.
+
+User's run (2026-10-27): the game gets through the dock's codec call into gameplay. (The scripted run stopped at
+the codec only because its presses ran out.) Next: how far gameplay holds, and the heliport (`s01a`).

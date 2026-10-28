@@ -5027,3 +5027,483 @@ I've added your result to both docs. Nothing is committed yet.
 
 Commit
 
+- tool `Bash`: Update archive and commit the docs
+
+## Claude
+
+I committed the doc updates as `cadb5a883`, together with the refreshed conversation archive; no lines were removed. The working tree is clean.
+
+## User
+
+<command-name>/clear</command-name>
+            <command-message>clear</command-message>
+            <command-args></command-args>
+
+## User
+
+Alright, most of the limited part of the game that I saw seemed to render correctly. However, I noticed that some of the graphical effects in the intro cutscene were wrong, especially the "underwater" effect. Like we did with Silent Hill, we can use the same MGS Integral .bin/.cue pairs in Duckstation to compare frames pixel by pixel.
+
+## Claude
+
+I'll start by checking what comparison tooling already exists here and in the SH1 port.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls tools/port docs; grep -n -i "duckstation\|compare\|underwater" docs/*.md | head -40; ls ../silent-hill-1-ps2-port/tools/por
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; S=../silent-hill-1-ps2-port; head -50 $S/tools/port/compare_frames.py; echo ----; head -60 $S/tools/port/duckstation_cutscene.
+
+## Claude
+
+The SH1 port's `compare_frames.py` is the model. Next: what capture support the MGS port already has, and where the Integral images are.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls; ls src/port 2>/dev/null || find . -path ./build -prune -o -name "*.c" -path "*port*" -print | head -30; ls ~/Documents/"Pl
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls port port/src ps1-original; find ~/Documents/"PlayStation ISOs" ~/Downloads -maxdepth 3 -iname "*.cue" | grep -i -E "metal|
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls -la port/hal | head; ls port/hal/ | head -60; grep -n -i "pcsx2" docs/"Running Walkthrough.md" | head -20; grep -n -i "capt
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls -la port/hal/port; sed -n 40,130p docs/"Running Walkthrough.md"; sed -n 276,320p docs/"Running Walkthrough.md"
+
+## Claude
+
+Let me look at how SH1's tool captured the PS1 side (VRAM out of DuckStation) and the PS2 side, and where the HAL comes from.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; S=../silent-hill-1-ps2-port; grep -n "def \|vram\|VRAM" $S/tools/port/compare_frames.py | head -80; wc -l $S/tools/port/compar
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; S=../silent-hill-1-ps2-port; grep -n "^HAL\|HAL =" build/build_ps2.py; sed -n 47,165p $S/tools/port/compare_frames.py
+
+- tool `Bash`: cd /home/alex/Documents; S=silent-hill-1-ps2-port; wc -l $S/tools/port/gdb/capture_ps1.py; sed -n 1,200p $S/tools/port/gdb/capture_ps1.py; ls psx-to-ps2-HAL psx
+
+## Claude
+
+The HAL has no capture code — SH1's `capture_ps2.c` was in the SH1 repo. Let me read it to see how much carries over.
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; f=$(find . -name capture_ps2.c | head -1); echo $f; wc -l $f; grep -n "^[a-zA-Z].*(\|Capture_\|host:" $f | head 
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; cat src/hal_weak.c | head -80; grep -n "HalGame_" include/*.h | head -40; sed -n 25,120p ../silent-hill-1-ps2-port/src/p
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls ../psx-to-ps2-HAL/tools; grep -n "^void GpuGs_\|^int GpuGs_" ../psx-to-ps2-HAL/src/ps2/gpu_gs.c; ls obj/*.map obj/*.sym 2>/
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls obj/*.map | grep -v asm_ | head; M=$(ls obj/_mgsi.map obj/main*.map 2>/dev/null | head -1); echo MAP=$M; for s in DrawOTag 
+
+## Claude
+
+Symbols are all in `obj/asm.map`. Now the replay side of SH1's capture and the DuckStation helpers it depends on.
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 1,30p src/port/ps2/capture_ps2.c; sed -n 270,481p src/port/ps2/capture_ps2.c; grep -n "^def \|^SETTINGS\|
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "GV_Time\b" source/libgv/*.c | head -5; grep -rn "GM_StageName\|GM_CurrentStageFlag" source/game/*.c | head -8; ls so
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 25,45p source/libgv/gvd.c; grep -rln "opening" source --include=*.c | head; grep -rn "stage_name\|GV_StrCode\|StageName
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "NewLoader" -r source --include=*.c | head -5; grep -n "^ *[0-9A-F]* *NewLoader\b" obj/asm.map; grep -rn "\"opening\"\
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 92,108p source/libgv/gvd.c; grep -rn "GV_ResetSystem\b\|GV_InitActorSystem\b" source/game/*.c | head -5; grep -rn "Draw
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 200,319p tools/port/gdb/capture_ps1.py; grep -n "replay" -i docs/Running\ Walkthrough.md | head -10
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; sed -n 2384,2476p src/ps2/gpu_gs.c; for s in LoadImage MoveImage ClearImage; do grep -m1 -w " $s$" ../mgs1_ps2/obj/asm.m
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "HalGame_\|^[a-z].*(" port/src/hal_game.c | head -30; find .. -maxdepth 4 -name pcsx2_run.py 2>/dev/null; grep -rn "pc
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 1,40p tools/port/pcsx2_run.py; grep -n "add_argument\|host" tools/port/pcsx2_run.py | head -40
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 30,78p tools/port/gdb/warp_sweep.py; grep -n -i "gdb\|Renderer\|Muted\|BIOS\|SearchDirectory" ~/.local/sh
+
+## Claude
+
+Now writing the PS1-side gdb capture script.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls -la "ps1-original/Metal Gear Solid - Integral (Japan, Asia) (En,Ja)" obj_ps2/ps1/; grep -n "GV_Time\|DrawSync$" obj/asm.map
+
+## Claude
+
+The extracted `DISC1.cue`/`.BIN` pair already exists, so DuckStation can boot that. Writing the gdb capture script:
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/tools/port/gdb/capture_ps1.py
+
+## Claude
+
+Now the PS2 side: a replay hook in the port that loads `ps1_N_before.bin`, draws the PS1's packets through the HAL's GS renderer, and writes the VRAM back.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat port/src/hal_game.c | sed -n 1,16p; python3 -c "import PIL; print(PIL.__version__)"; grep -n "GpuGs_LoadImage" -A30 ../psx
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/port/src/capture_ps2.c
+
+## Claude
+
+Now the driver script:
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/tools/port/compare_frames.py
+
+## Claude
+
+First the PS1 side alone, a spread of frames to find the underwater part of the opening:
+
+- tool `Bash`: timeout 900 python3 tools/port/compare_frames.py --frames 50,200,400,600,800,1000,1300,1600 --skip-ps2 2>&1 | tail -40
+
+- tool `Bash`: grep -n "GDB\|\[Debug\]" ~/.local/share/duckstation/settings.ini; ls ~/.local/share/duckstation/*.bak 2>/dev/null; timeout 20 ~/Downloads/DuckStation-x64.AppIma
+
+- tool `Bash`: cat /home/alex/Documents/mgs1_ps2/obj_ps2/ps1/DISC1.cue; (setsid ~/Downloads/DuckStation-x64.AppImage -batch -fastboot -nofullscreen -- /home/alex/Documents/mgs
+
+- tool `Bash`: kill 255806 255811 2>/dev/null; sleep 1; kill -9 255806 255811 2>/dev/null; cd /home/alex/Documents/mgs1_ps2 && python3 - <<'E' p="tools/port/compare_frames.py"
+
+## Claude
+
+DuckStation capture works. Let me look at what those frames show to find the underwater section.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 - <<'E' import struct from PIL import Image fr=[50,200,400,600,800,1000,1300,1600] sheet=Image.new("RGB"
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/sheet.png
+
+## Claude
+
+That's the opening: "Alaska – Bering Sea", the submarine underwater (frames 400–600), then the swimmer (1600). Now building the port with the replay hook and replaying these frames in PCSX2.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && python3 link_ps2.py 2>&1 | tail -5 && cd .. && timeout 400 python3 tools/port/compare_frames.py --frames 50,200,400,60
+
+## Claude
+
+The renderer replays these frames almost exactly: 0 pixel differences up to frame 400, under 1.3% after. Let me look at where the differences are.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 -c " from PIL import Image ims=[Image.open('cmp_%d.png'%n) for n in (600,1600)] s=Image.new('RGB',(960,4
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/c.png
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; grep -n "HalGame_\|^void LoadImage\|^int LoadImage\|^.*MoveImage(\|^.*ClearImage(\|^.*DrawOTag(\|^.*PutDrawEnv(\|^.*Stor
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; sed -n 36,60p src/libgpu_port.c; sed -n 92,300p src/libgpu_port.c | grep -v "^\s*$" | head -150
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 1,12p source/game/loader.c; sed -n 52,90p source/game/loader.c; grep -rn "MGS_PORT" source/game/*.c | head -5; grep -n 
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="source/game/loader.c" s=open(p).read() s=s.replace("""#endif      work = GV_NewActor(GV_ACTOR_ASSIST, sizeo
+
+## Claude
+
+Now the live-capture half of `capture_ps2.c`:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="port/src/capture_ps2.c" s=open(p).read() s=s.replace("""/** @brief Renderer replay for comparing with DuckS
+
+## Claude
+
+Now a `--live` mode in the driver: the port plays the opening itself and its frames are compared against the PS1's.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/compare_frames.py" s=open(p).read() s=s.replace('''3. Per frame, obj_ps2/cap/ gets cmp_<N>.png''
+
+## Claude
+
+Live capture works and the frames line up (packet counts often match exactly, e.g. 459/459 and 913/913). Now there are large differences. Let me look:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 -c " from PIL import Image ns=(600,1000,1600) s=Image.new('RGB',(960,224*3)) for i,n in enumerate(ns): s
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/live.png
+
+- tool `Bash`: python3 - <<'E' import struct def pk(p):     d=open(p,"rb").read();o=[];i=0     while i+4<=len(d):         n=struct.unpack_from("<I",d,i)[0];o.append(struct.unp
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/compare_frames.py" s=open(p).read() s=s.replace('''def draw_area(n):     """The last E3/E4 (draw
+
+## Claude
+
+Looking at which sprites the PS1 drew that the PS2 didn't:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 - <<'E' import struct from collections import Counter def pk(p):     d=open(p,"rb").read();o=[];i=0     
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "opening" obj/linker_command_file_opening_lhs.txt 2>/dev/null | head; grep -o '[^" ]*\.obj' obj/linker_command_file_op
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 282,330p obj/linker_command_file_opening_lhs.txt | grep -o 'obj\\[^"]*' ; grep -rln "160" $(sed -n 282,330p obj/linker_
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; wc -l source/takabe/wt_view.c source/takabe/ripple.c source/okajima/blur.c; grep -n "160\|SPRT\|u0\|setUV\|LSTORE\|(int)\|(u_l
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 20,130p source/takabe/wt_view.c; sed -n 330,420p source/takabe/wt_view.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rnE "0x1[Ff]80[0-9A-Fa-f]{4}" source --include=*.c --include=*.h | grep -v "PSX_ADDR(0x1[Ff]80" | grep -v "^source/inclu
+
+## Claude
+
+Two more in [libdg2.c](source/takabe/libdg2.c#L1783); the `rank` ones are hardware registers (SIO/I_STAT) in an overlay that isn't linked. Checking libdg2's context:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 1770,1800p source/takabe/libdg2.c; grep -n "libdg2" obj/linker_command_file*_lhs.txt obj/linker_command_file.txt | head
+
+## Claude
+
+Those are inside a comment, so `wt_view.c` is the only real miss. Fixing it, then re-running the live comparison:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -i 's|    scratch2 = (short \*)0x1F800400;|    scratch2 = (short *)PSX_ADDR(0x1F800400);|' source/takabe/wt_view.c && git 
+
+## Claude
+
+Identical numbers means no new captures: the run crashed (jump to address 0) and the compare reused the old files. Clearing the stale captures and looking at the full log:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; rm -f obj_ps2/cap/ps2_*; echo "stage=opening live=600" > obj_ps2/capture.txt; timeout 400 python3 ../silent-hill-1-ps2-port/to
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; L=/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/run.log; grep -n "TLB Miss" $
+
+## Claude
+
+Crash at the opening's first frame, right after the load, with a jump to 0. That's new since the fix, so checking how `PSX_ADDR` maps the scratchpad, since `0x1F800400` is its very end:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat source/include/psx_mem.h | sed -n 1,60p; grep -rn "g_PsxScratch" ../psx-to-ps2-HAL/src/psx_mem.c ../psx-to-ps2-HAL/include
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="source/include/psx_mem.h" s=open(p).read() s=s.replace("""#define PSX_ADDR(addr)                           
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "0x1[Ff]800400\|getScratchAddr(0x100)\|getScratchAddr(256)" source port --include=*.[ch] | head; cd build && python3 
+
+## Claude
+
+No crash, and the differences roughly halved. The sprite strips are now all there (the PS2 has 8 more packets than the PS1, which needs a look). Viewing:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 -c " from PIL import Image ns=(600,1300,1600) s=Image.new('RGB',(960,224*3)) for i,n in enumerate(ns): s
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/live2.png
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "cue\|\.tmp" build/link_ps2.py | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="build/link_ps2.py" s=open(p).read() old='''            os.replace(bin_ + ".tmp", bin_) ''' new='''         
+
+## Claude
+
+Matching build: 80 OK, VR 2 OK. Now the walkthrough entry and the planning doc:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "^## \|^- \[ \]\|^### " docs/"Planning Doc.md" | sed -n 1,80p; tail -5 docs/"Running Walkthrough.md"
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 221,226p docs/"Planning Doc.md"; sed -n 139,160p docs/"Planning Doc.md"
+
+## Claude
+
+The planning doc says `find_fixed_addresses.py` "reports nothing by default", yet it missed `wt_view.c`. Checking why:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; git stash -q -- source/takabe/wt_view.c 2>/dev/null || true; python3 tools/port/find_fixed_addresses.py 2>&1 | tail -5; git st
+
+## Claude
+
+Same root cause: the tool's scratchpad range stopped at `0x1F8003FF`. Extending it to include the end address:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 4,8p tools/port/find_fixed_addresses.py; sed -i 's/    if 0x1F800000 <= value <= 0x1F8003FF or/    if 0x1F800000 <= val
+
+## Claude
+
+Now the walkthrough and planning doc entries:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat >> docs/"Running Walkthrough.md" <<'E'  ## Step 5: frame comparison with DuckStation; the opening's underwater background 
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+I fixed the underwater banding. The opening's underwater background now matches DuckStation by eye at frames 600, 1300 and 1600, with no TLB misses through frame 1600.
+
+**The new tool:** [compare_frames.py](tools/port/compare_frames.py) captures frames from DuckStation, which runs the Integral disc 1 CHD. Frames are counted in `DrawOTag` calls from when the stage loads (`--stage`, default `opening`). There are two modes:
+- **Replay (default):** the PS1's exact GPU commands go through the port's GS renderer. This tests the renderer alone.
+- **`--live`:** the port plays the opening itself and its own frames are compared with the PS1's. This tests the whole game.
+
+Output is in `obj_ps2/cap/`: `cmp[live]_N.png` shows PS1 | PS2 | difference, and the script prints pixel and packet counts. The capture hook is [capture_ps2.c](port/src/capture_ps2.c). Unlike SH1's version, it saves VRAM *before* each frame, so effects that read the framebuffer replay correctly.
+
+**What it showed:**
+- **Replay:** exact up to frame 400, then under 1.3% of pixels differ, all single pixels on polygon seams. The renderer wasn't the problem.
+- **Live:** bright horizontal bands over the underwater background, and 84 missing 160×2 strip sprites. Those strips are the water view effect in [wt_view.c:356](source/takabe/wt_view.c#L356). One of its scratchpad addresses, `(short *)0x1F800400`, was never wrapped in `PSX_ADDR`, so the strip count and texture coordinates came out wrong.
+
+**Behind that, two misses at the scratchpad's end address (0x1F800400):**
+- `PSX_ADDR` treated 0x1F800400 as main RAM. With only the wrap added, the effect wrote downward over the start of `g_PsxRam` and the port jumped to address 0 on the opening's first frame. [psx_mem.h](source/include/psx_mem.h) now counts 0x1F800000–0x1F800400 as scratchpad.
+- [find_fixed_addresses.py](tools/port/find_fixed_addresses.py) didn't check that address either. I fixed it, and it finds no other unwrapped addresses.
+
+**Smaller fixes:**
+- The extracted `DISC1.cue` named `DISC1.BIN.tmp`, so DuckStation couldn't boot it. [link_ps2.py](build/link_ps2.py) now writes the correct file name.
+- `NewLoader` calls the capture hook under `MGS_PORT` ([loader.c](source/game/loader.c)).
+
+**Still open:** live frames still differ by 20–30% of pixels. That appears to be timing, not rendering: the port is one frame out of step with the PS1 in the double buffer (`GV_Clock`, which also sets the wave's phase). It's logged as an open item in the planning doc.
+
+The matching build passes (80 OK, VR 2 OK). I updated the Running Walkthrough and the Planning Doc but haven't committed anything; I'll update `Claude Conversation.md` when we commit.
+
+If something else in the intro still looks off to you (the bubbles, ripple or blur effects), tell me roughly when it happens and I'll compare those frames.
+
+## User
+
+Show me the frames from PCSX2 and Duckstation side by side
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 -c " from PIL import Image, ImageDraw ns=(400,600,800,1300,1600) s=Image.new('RGB',(1280,(448+20)*len(ns
+
+- tool `ToolSearch`: 
+
+- tool `SendUserFile`: 
+
+## Claude
+
+I've sent the comparison image. It shows five frames of the opening (400, 600, 800, 1300 and 1600), DuckStation on the left and the PCSX2 port on the right. Both are scaled up 2× with nearest-neighbour so you can see individual pixels. They're from the live run after the fix, so the bands are gone.
+
+The small differences you can still see are the timing offset, not rendering errors: the wave's phase is slightly different, and in frame 1300 the sub interior's camera is a bit further along.
+
+The image is at `/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/side_by_side.png`. The full-size comparisons with the difference column are in `obj_ps2/cap/cmplive_N.png`.
+
+## User
+
+Let's fix the timing to make cutscene comparison easier
+
+## Claude
+
+Measuring first: I'll record `GV_Time` and `GV_Clock` at each captured frame and at the stage load on both sides, to see where the one-frame offset comes from.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/gdb/capture_ps1.py" s=open(p).read() s=s.replace('SCRATCH = 0x80100000','GV_TIME = 0x800AB330\nG
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "GV_PassageTime" source --include=*.c | grep -v "^source/libgv/gvd.c" | head -30; grep -n "mts_get_tick_count" -A8 so
+
+## Claude
+
+Few things use `GV_PassageTime`. Before guessing further, I'll record the vertical blank counter (`mts_time`) at the same frames on both sides, and look at how the opening's demo playback is clocked.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -m1 -w "mts_time" obj/asm.map; grep -rn "dword_800B\|GM_StreamGetLastCode\|StreamPos\|GM_StreamStatus" source/game/demo*.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "mts_time" source/mts/mts_new.c | head -3; grep -n "mts_time\b" obj/asm.map obj/*.sym 2>/dev/null | head -3; grep -rln
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "^[a-z].*(\|tick\|time\|Tick\|Time" source/libfs/stream.c | head -60
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "FS_StreamGetTick" source --include=*.c | grep -v "stream.c:5[0-9][0-9]:.*printf"; grep -m1 -w "FS_StreamGetTick" obj
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 115,175p source/kojo/demothrd.c; sed -n 60,100p source/game/strctrl.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n -w -E "ActStream|FS_StreamTickStart|demothrd_.*|DM_ThreadStream" obj/asm.map | head; grep -n "demothrd" obj/linker_com
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; ls obj/*.exe obj/SLPM* 2>/dev/null; f=$(ls obj/_mgsi.exe obj/SLPM_862.47 2>/dev/null | head -1); python3 - "$f" <<'E' import s
+
+## Claude
+
+The call at `0x80079678` is `ActStream`'s (inside `demothrd`, after `DM_ThreadStream`), so the tick is in `v0` at `0x80079680`. Implementing the PS1 side:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/gdb/capture_ps1.py" s=open(p).read() s=s.replace('''whose bytes are restored after. Addresses: o
+
+## Claude
+
+Now the port side: hooks in [stream.c](source/libfs/stream.c) and the tick table in `capture_ps2.c`.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 536,576p source/libfs/stream.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="source/libfs/stream.c" s=open(p).read() s=s.replace('''void FS_StreamTickStart( void ) {     *GetTicksPtr()
+
+## Claude
+
+Running both sides again (the PS1 capture has to be redone to record the ticks):
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && python3 link_ps2.py 2>&1 | grep -E " error|linked:"; cd .. && rm -f obj_ps2/cap/ps2_* && timeout 900 python3 tools/por
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && cat > /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/pdiff.py <<
+
+- tool `Bash`: python3 - <<'E' import struct,sys exec(open("/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/pdiff.py").read().sp
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "n_prims\|GV_Clock\|GV_Time" source/takabe/wt_view.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 140,200p source/takabe/wt_view.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 12,50p source/game/loader.c; grep -n "load complete time" -B5 -A5 source/game/*.c | head -30
+
+## Claude
+
+The anchor will be the loader's `Die` ("LoadEnd"), which calls `FS_LoadStageComplete`. Checking that this is its only caller:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "FS_LoadStageComplete" source --include=*.c | grep -v "^source/libfs/.*FS_LoadStageComplete *(" ; grep -m1 -w "FS_Loa
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' import re p="tools/port/gdb/capture_ps1.py" s=open(p).read() s=s.replace('''DuckStation. Frames are counted in
+
+## Claude
+
+PS1's tick start can now be negative (before the load ends), which my "no ticks" test (`s_TickStart < 0`) would misread. Keying that on the table instead:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="port/src/capture_ps2.c" s=open(p).read() s=s.replace('''static int  s_TickStart = -1; /* the PS1's FS_Strea
+
+## Claude
+
+No frames are drawn during the load on either side, so the anchor change made no difference. The 8-frame phase must come from somewhere else. Looking at the start of the PS1's tick log:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; head -12 obj_ps2/cap/ps1_ticks.txt; awk 'NR>1 && $2!=prev+2 {print "jump at", $0, "prev", prev} {prev=$2}' obj_ps2/cap/ps1_tic
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "frame" tools/port/gdb/capture_ps1.py | sed -n 1,60p
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tools/port/gdb/capture_ps1.py
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tools/port/gdb/capture_ps1.py
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/gdb/capture_ps1.py" s=open(p).read() rep=[('''DuckStation. Frames are counted in DrawOTag calls 
+
+## Claude
+
+Now the same on the port side:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 85,215p port/src/capture_ps2.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="port/src/capture_ps2.c" s=open(p).read() rep=[ ('''the game's own frame N of that stage (its Nth DrawOTag f
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 222,240p port/src/capture_ps2.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="port/src/capture_ps2.c" s=open(p).read() a='''    if (++s_Frame > 0 && is_live(s_Frame))     {         spri
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && cat > /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/pdiff2.py <
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "GV_Clock *=\|GV_Clock\^\|GV_Clock ^" source --include=*.c | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "GV_Clock" source/libgv/*.c source/libdg/*.c source/game/game*.c | grep -v "\[GV_Clock\]" | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 40,60p source/libgv/gvd.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' def edit(p, pairs):     s=open(p).read()     for a,b in pairs:         assert a in s,(p,a[:40]); s=s.replace(a
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && python3 link_ps2.py 2>&1 | grep -E "error|linked:" | head; cd .. && rm -f obj_ps2/cap/ps* && timeout 900 python3 tools
+
+## Claude
+
+Water view frames are down to 1–3% differing pixels: 600 went 11,619 → 991, 1600 went 14,423 → 2,019. The packet diff:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && python3 /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/pdiff2.py
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py 2>&1 | grep -c "OK
+
+- tool `Bash`: python3 -c " from PIL import Image, ImageDraw ns=(600,800,1000,1300,1600) s=Image.new('RGB',(1920,(224+16)*len(ns)),(20,20,20)) d=ImageDraw.Draw(s) for i,n in e
+
+- tool `Bash`: ls /home/alex/Documents/mgs1_ps2/obj_ps2/cap/ | grep -v "^ps" | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/obj_ps2/cap && ls cmplive* | head -3; python3 -c " from PIL import Image, ImageDraw ns=(600,800,1000,1300,1600) s=Image.new('RG
+
+- tool `SendUserFile`: 
+
+## Claude
+
+Now the docs:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat >> docs/"Running Walkthrough.md" <<'E'  ## Step 5: cutscene timing locked to the PS1's for comparisons (2026-10-27)  Goal:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/compare_frames.py" s=open(p).read() s=s.replace("""captures    frames of a stage (--stage, defau
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="tools/port/compare_frames.py" s=open(p).read() s=s.replace("""   With --live instead, the port plays the st
+
+## Claude
+
+I've locked the port's cutscene timing to the PS1's in comparison runs. In the opening, frames 50, 400, 600, 800, 1000 and 1600 now get exactly the same GPU commands on both sides. I've sent you the side-by-side image again with these synced frames.
+
+The fix only applies to comparison runs: every hook does nothing unless `capture.txt` is present. Normal play is unchanged, and the matching build passes (80 OK, VR 2 OK).
+
+There were four separate causes:
+1. **Cutscenes run on a clock, not on frames.** The demo's position comes from `FS_StreamGetTick`, which reads the voice stream's audio counter or counts vertical blanks. Now DuckStation records the tick the demo got on every game loop, and the port uses those same ticks.
+2. **Counting `DrawOTag` calls was the wrong frame index.** The game doesn't draw on every loop. Frames are now numbered by game loop (`GV_Time`), counted from the end of the stage's load.
+3. **The wait for the stream's first data depends on the CD.** The PS1 waited 31 loops, the port 7. The water effect's wave counts loops from the end of the load, so that gap caused the 16-line shift in its strips. The port now starts the stream on the same loop as the PS1 ([strctrl.c](source/game/strctrl.c)).
+4. **Which half of the double buffer is in use was set back at boot.** The water effect copies from that half. At the end of the load, the port now skips one buffer flip if needed to match the PS1 ([gvd.c](source/libgv/gvd.c)). This is the same flip-skip the game already does with `DG_HikituriFlag`.
+
+Results, in differing pixels:
+
+| Frame | Before | Now | GPU commands |
+|---|---|---|---|
+| 600 (water) | 13,581 | 991 | identical |
+| 800 (water) | 18,080 | 1,367 | identical |
+| 1000 (sub interior) | 7,208 | 58 | identical |
+| 1600 (swimmer) | 17,991 | 2,019 | identical |
+| 1300 (sub interior) | 14,071 | 3,803 | 75 polygons differ |
+
+Where the commands are identical, the leftover 1–3% is the renderer's rounding on polygon seams, the same as in replay mode.
+
+**Frame 1300 is not a timing problem:** the vertex colours of 75 lit polygons differ from the PS1's. Something in the game logic is different there, maybe the lighting or a random flicker. That's the next thing to look at with this tool; it's listed as an open item in the Planning Doc.
+
+**Usage:** `--live` needs a fresh DuckStation capture (a run without `--skip-ps1`) whenever the frame range grows. The tick log only goes up to the last frame captured.
+
+The walkthrough, Planning Doc and the tool's docstring are updated. Nothing is committed yet.
+
+## User
+
+Commit
+

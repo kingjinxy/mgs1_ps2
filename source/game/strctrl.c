@@ -60,6 +60,15 @@ static void Act( Work *work )
         work->field_20_state = 2;
 
     case 2:
+#ifdef MGS_PORT
+        {
+            extern int Capture_StreamMayStart( void ); /* port/src/capture_ps2.c: at the PS1's loop, in comparisons */
+            if ( !Capture_StreamMayStart() )
+            {
+                break;
+            }
+        }
+#endif
         if ( !work->field_22_sub_state )
         {
             work->field_20_state = 3;

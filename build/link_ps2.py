@@ -217,6 +217,8 @@ def ps1_discs():
             print("extracting " + os.path.basename(chd[0]))
             run(["chdman", "extractcd", "-f", "-i", chd[0], "-o", bin_[:-4] + ".cue", "-ob", bin_ + ".tmp"])
             os.replace(bin_ + ".tmp", bin_)
+            cue = bin_[:-4] + ".cue"  # names the temporary file: the final one, for DuckStation
+            open(cue, "w").write(open(cue).read().replace(os.path.basename(bin_) + ".tmp", os.path.basename(bin_)))
         if os.path.getsize(bin_) % 2352:
             sys.exit(bin_ + ": not raw 2352-byte sectors")
         entries.append("%s;1=%s" % (name, bin_))

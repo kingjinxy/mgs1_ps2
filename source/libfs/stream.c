@@ -537,6 +537,10 @@ static inline int *GetTicksPtr( void )
 
 void FS_StreamTickStart( void )
 {
+#ifdef MGS_PORT
+    extern void Capture_TickStart( void ); /* port/src/capture_ps2.c */
+    Capture_TickStart();
+#endif
     *GetTicksPtr() = VSync(-1);
 }
 
@@ -551,6 +555,14 @@ int FS_StreamGetTick( void )
 {
     int now = mts_get_tick_count();
     int ticks;
+
+#ifdef MGS_PORT
+    extern int Capture_Tick( int *tick ); /* port/src/capture_ps2.c: the PS1's clock, in comparisons */
+    if ( Capture_Tick( &ticks ) )
+    {
+        return ticks;
+    }
+#endif
 
     if (fs_stream_next_time != 0)
     {

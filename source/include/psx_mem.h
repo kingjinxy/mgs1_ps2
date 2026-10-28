@@ -19,9 +19,11 @@
 extern unsigned char g_PsxRam[];
 extern unsigned char g_PsxScratch[];
 
+/* The scratchpad's end address (0x1F800400) counts as the scratchpad: code starts lists there and
+ * fills them downwards (takabe/wt_view.c). */
 #define PSX_ADDR(addr)                                                                          \
-    (((unsigned int)(addr) & 0xFFFFFC00) == 0x1F800000                                         \
-         ? (unsigned int)g_PsxScratch + ((unsigned int)(addr) & (PSX_SCRATCH_SIZE - 1))        \
+    ((unsigned int)(addr) - 0x1F800000 <= PSX_SCRATCH_SIZE                                     \
+         ? (unsigned int)g_PsxScratch + ((unsigned int)(addr) - 0x1F800000)                    \
          : (unsigned int)g_PsxRam + ((unsigned int)(addr) & (PSX_RAM_SIZE - 1)))
 #else
 #define PSX_ADDR(addr) (addr)

@@ -43,7 +43,12 @@ static void Act( Work *work )
     GV_PassageTime = ticks - GV_LastTickCount;
     GV_LastTickCount = ticks;
 
+#ifdef MGS_PORT
+    extern int Capture_HoldClock( void ); /* port/src/capture_ps2.c: the PS1's buffer parity, in comparisons */
+    if ( DG_HikituriFlag == 0 && !Capture_HoldClock() )
+#else
     if ( DG_HikituriFlag == 0 )
+#endif
     {
         // Flip active buffer
         GV_Clock ^= 1;

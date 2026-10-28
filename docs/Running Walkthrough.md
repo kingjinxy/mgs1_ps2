@@ -300,3 +300,71 @@ codec call on screen and waiting for a button; 120 s, no TLB misses. Matching bu
 
 User's run (2026-10-27): the game gets through the dock's codec call into gameplay. (The scripted run stopped at
 the codec only because its presses ran out.) Next: how far gameplay holds, and the heliport (`s01a`).
+
+## Step 5: frame comparison with DuckStation; the opening's underwater background (2026-10-27)
+
+Reported (user): the intro cutscene's graphical effects looked wrong, especially the "underwater" effect.
+
+**`tools/port/compare_frames.py`**, after SH1's: DuckStation (software renderer, muted, GDB server) runs the
+Integral disc 1 CHD; `tools/port/gdb/capture_ps1.py` waits for `NewLoader("opening")` (`--stage`) and counts
+frames in `DrawOTag` calls from there. Per captured frame it writes the VRAM *before* the frame (SH1 took only
+the end state and redrew over it, wrong for effects that read the frame buffer in place), every GPU command of
+the frame (ordering table, `PutDrawEnv`'s packet, and `LoadImage`/`MoveImage`/`ClearImage` as GP0 A0/80/02
+commands), and the VRAM after. Addresses from `obj/asm.map`. Two PS2 modes (`port/src/capture_ps2.c`, through
+`host:capture.txt` in `obj_ps2/`):
+- replay (default): the PS1's commands drawn through the HAL's GS renderer from the PS1's VRAM: the renderer alone.
+- `--live`: the port plays the stage and captures its own Nth `DrawOTag` (`Capture_Stage`, called from
+  `game/loader.c`'s `NewLoader` under `MGS_PORT`): the whole game against the PS1.
+Output in `obj_ps2/cap/`: `cmp[live]_N.png` (draw area, PS1 | PS2 | difference) and the counts. Each side is
+cropped by its own drawing area: the port can be drawing the other half of the double buffer.
+
+Failed first: the extracted `obj_ps2/ps1/DISC1.cue` named `DISC1.BIN.tmp` (`chdman`'s output name before the
+rename), so DuckStation booted nothing and its GDB port never opened. The tool uses the CHD; `link_ps2.py` now
+also fixes the cue's file name.
+
+Results, opening frames 50-1600: **replay** is exact up to frame 400, then under 1.3% of pixels (single pixels on
+polygon seams of the background gradient): the renderer was not the problem. **Live**: horizontal bright bands
+over the underwater background (frames 600, 800, 1600), and 84 fewer 160x2 sprites than the PS1 at frame 600.
+Those strips are `takabe/wt_view.c`'s water view (the scene re-drawn in wavy lines): `scratch2 = (short
+*)0x1F800400` was never wrapped in `PSX_ADDR`, so one list went to the raw address and `count1` subtracted
+pointers in two areas (wrong count, wrong `v0`). Two misses behind it, both at the scratchpad's end address:
+`find_fixed_addresses.py`'s range stopped at 0x1F8003FF, and `PSX_ADDR` itself mapped 0x1F800400 to
+`g_PsxRam + 0x400`. With only the wrap, the effect wrote downwards over `g_PsxRam` 0x32C-0x3FE (the PS1's
+kernel area, used by the HAL) and the port jumped to 0 at the opening's first frame. Now `PSX_ADDR` takes
+0x1F800000-0x1F800400 as the scratchpad, and the tool reports that range (nothing else unwrapped). The other two
+0x1F80xxxx literals (`takabe/libdg2.c`) are inside a comment; the `rank` overlay's are hardware registers, and
+that overlay isn't linked.
+
+Now (PCSX2, live): the bands are gone; frames 600/1300/1600 match the PS1 by eye. The pixel differences left
+(20-30%) are timing: the port is one frame off in the double buffer's parity (`GV_Clock`, which also sets the
+wave's phase), and the sub interior's camera is slightly further along. No TLB misses through frame 1600.
+Matching build: 80 OK, VR 2 OK.
+
+## Step 5: cutscene timing locked to the PS1's for comparisons (2026-10-27)
+
+Goal: the port's frame N shows the same moment as the PS1's frame N, so `compare_frames.py --live` measures the
+port, not timing. Measured first (`GV_Time`/`GV_Clock` printed at each capture on both sides):
+1. **Cutscenes follow a clock, not frames.** `kojo/demothrd.c` `ActStream`: demo frame = `(FS_StreamGetTick() -
+   start) / 2`, and `FS_StreamGetTick` (`libfs/stream.c`) is the voice stream's SPU counter, or vertical blanks
+   when there's none. The PS1 runs about 2.5 ticks a loop, unevenly. Now `capture_ps1.py` records the tick
+   `ActStream` got on every loop (breakpoint after its call, 0x80079680), in `ps1_ticks.txt`. In comparison runs
+   (`ticks` in `capture.txt`), `FS_StreamGetTick` returns the PS1's tick for that loop (`Capture_Tick`, under
+   `MGS_PORT`). Sub interior frame 1000: 7208 → 58 differing pixels.
+2. **`DrawOTag` calls aren't loops.** The PS1 ran `ActStream` three times before the stage's first `DrawOTag`.
+   Frames are now game loops (`GV_Time`) from the end of the stage's load (`FS_LoadStageComplete`, the loader's
+   `Die`; `Capture_LoadEnd` on the port), captured at the first `DrawOTag` of loop N or later. Tried first:
+   counting from the load's end in `DrawOTag`s. No difference, because nothing is drawn during the load.
+3. **The wait for the stream's first data is the CD's.** The PS1 started the stream's clock 31 loops after the
+   load, the port 7. Loop-counting actors saw that gap: `takabe/wt_view.c`'s `n_prims` (the wave's phase) was
+   24 loops off, which is the 16-line shift of its strips. `strctrl.c` state 2 now waits for the PS1's loop
+   (`Capture_StreamMayStart`) in comparison runs.
+4. **Double-buffer parity** (`GV_Clock`, which picks the buffer the water view samples) is inherited from boot.
+   At the load's end, if it differs from the PS1's (recorded in `ps1_ticks.txt`), `gvd.c` skips one flip
+   (`Capture_HoldClock`, the same skip `DG_HikituriFlag` makes).
+All of these hooks do nothing without `host:capture.txt`.
+
+Result (opening, loops 50-1600): frames 50, 400, 600, 800, 1000 and 1600 now have identical GPU commands on both
+sides, once padding the GPU doesn't read is masked (the upper halves of a textured polygon's third/fourth UV words
+and the CLUT of 15-bit sprites hold PS1 stack garbage). Their pixel differences (0-3%) are the renderer's seam
+pixels, as in replay mode. Loop 1300 (sub interior) still differs in the vertex colours of 75 lit polygons: a
+game-side difference (lighting, or a random flicker), not investigated yet. Matching build: 80 OK, VR 2 OK.

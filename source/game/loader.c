@@ -44,6 +44,10 @@ static void Act(Work *work)
 
 static void Die(Work *work)
 {
+#ifdef MGS_PORT
+    extern void Capture_LoadEnd(void); /* port/src/capture_ps2.c */
+    Capture_LoadEnd();
+#endif
     printf("LoadEnd\n");
     FS_LoadStageComplete(work->info);
     GM_LoadComplete = -1;
@@ -58,6 +62,12 @@ void *NewLoader(const char *dir)
     if (strcmp(dir, "title") == 0)
     {
         dir = "select1";
+    }
+#endif
+#ifdef MGS_PORT
+    {
+        extern void Capture_Stage(const char *dir); /* port/src/capture_ps2.c */
+        Capture_Stage(dir);
     }
 #endif
 

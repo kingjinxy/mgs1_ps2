@@ -3,7 +3,7 @@
 
 Fixed addresses must go through `PSX_ADDR()` (source/include/psx_mem.h) so the port build can
 redirect them. This script flags literals outside comments, not wrapped in `PSX_ADDR(...)`, of two kinds:
-  - buffers: the scratchpad (0x1F800000-0x1F8003FF) and main RAM from MEM_ADDR (0x80117000) up, the
+  - buffers: the scratchpad (0x1F800000-0x1F800400, its end address included) and main RAM from MEM_ADDR (0x80117000) up, the
     game's heap, load buffers and stack. These belong in the arenas: reported by default.
   - symbols: main RAM below that, the addresses of the executable's and overlays' code and data
     (jump tables, NEWCHARA tables). They need real symbols when the overlays are linked in
@@ -41,7 +41,7 @@ def strip_comments(text):
 
 
 def is_fixed_address(value, symbols):
-    if 0x1F800000 <= value <= 0x1F8003FF or BUFFER_BOTTOM <= value <= 0x801FFFFF:
+    if 0x1F800000 <= value <= 0x1F800400 or BUFFER_BOTTOM <= value <= 0x801FFFFF:
         return True
     return symbols and 0x80010000 <= value < BUFFER_BOTTOM
 

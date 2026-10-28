@@ -223,6 +223,14 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 - [ ] `libdg` OT/prim submission through the HAL GS backend
 - [ ] Check MGS-specific prim use: semi-transparency modes, texture windows, offscreen VRAM tricks
       (codec/radio screen, thermal and night-vision goggles, menu overlays)
+- [x] Frame comparison with DuckStation (2026-10-27): `tools/port/compare_frames.py` (replay of the PS1's GPU
+      commands through the GS renderer, or `--live` for the port's own frames). Opening: renderer exact or
+      nearly; the underwater background's bands were `wt_view.c`'s unwrapped scratchpad end (0x1F800400,
+      also missed by `PSX_ADDR` and `find_fixed_addresses.py`), fixed
+- [x] Opening, live: timing locked to the PS1's for comparisons (2026-10-27): the demo stream's clock replayed,
+      frames counted in game loops from the load's end, stream start and `GV_Clock` parity matched. Identical
+      GPU commands at loops 600/800/1000/1600
+- [ ] Opening loop 1300 (sub interior): vertex colours of 75 lit polygons differ from the PS1
 
 ### Step 6 — Pad, CD, memory card
 

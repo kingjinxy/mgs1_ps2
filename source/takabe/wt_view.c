@@ -353,7 +353,7 @@ static void WaterViewDraw(Work *work)
     addPrim(ot, &work->prims->tile[GV_Clock * 2 + 1]);
 
     scratch1 = (short *)PSX_ADDR(0x1F800200);
-    scratch2 = (short *)0x1F800400;
+    scratch2 = (short *)PSX_ADDR(0x1F800400);
 
     nprims = work->n_prims;
 

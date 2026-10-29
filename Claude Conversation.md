@@ -5507,3 +5507,1047 @@ The walkthrough, Planning Doc and the tool's docstring are updated. Nothing is c
 
 Commit
 
+## Claude
+
+Per CLAUDE.md, updating `Claude Conversation.md` first:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; D=~/.claude/projects/-home-alex-Documents-mgs1-ps2; S=/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9
+
+## Claude
+
+No lines removed. Committing:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; git add -A build/link_ps2.py docs source port/src/capture_ps2.c tools/port/compare_frames.py tools/port/gdb/capture_ps1.py too
+
+## Claude
+
+I committed everything as `581a52aea` on `ps2-port`, and the working tree is clean. The commit has:
+- the comparison tools
+- the underwater background fix
+- the PS1-timing hooks for comparison runs
+- the corrected cue file name
+- the updated docs
+
+Before committing I regenerated `Claude Conversation.md` from all session logs, as CLAUDE.md asks. Its diff only adds lines; nothing was removed. Nothing was pushed.
+
+## User
+
+If cutscenes really do run on a clock, can they easily be forced to run at 60 FPS?
+
+## Claude
+
+The repo already has a 60 FPS doc, so I'll check what it covers before answering.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "^#\|demo\|cutscene\|tick\|interpol" -i "docs/60 FPS update.md" | head -50
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 17,48p "docs/60 FPS update.md"
+
+## Claude
+
+Not easily. The clock decides which part of the cutscene to show, but it doesn't give you more frames to show. `docs/60 FPS update.md` already covers this.
+
+**The cutscene data is 30 fps.** `ActStream` and `ActFile` compute the demo frame as `(ticks - start) / 2`, and there's one record per frame: one every two vertical blanks. Each record holds the absolute positions, rotations and joint angles of every model for that moment. If you set `DG_FrameRate` to 1 so the loop runs at 60 Hz, the demo stays in sync, but each record is drawn twice. The picture still moves at 30 fps.
+
+**Some things in a cutscene step once per loop, not by the clock.** At 60 Hz they would run at double speed while the demo stays in time:
+- effects the demos spawn (`ShowEffect`, the M1 and Hind helpers)
+- the water view's wave, which is the `n_prims` counter we just dealt with
+- character animation in the many story scenes that are GCL scripts driving live actors (`GM_ActMotion` advances one keyframe per call)
+
+**What would work** is the doc's option A: keep the logic at 30 Hz and, on the in-between vertical blank, draw the scene again from transforms halfway between demo records N and N+1. That's a reasonable task for streamed demos, because the records are absolute. Each in-between value is just a blend of two records, with no simulation to redo. What it needs:
+- **One record of lookahead.** Record N+1 must be read before N is freed (`FS_StreamGetData` / `FS_StreamClear`).
+- **Snapping at cuts.** Camera cuts and teleports must not be blended.
+- **Per-loop effects** either keep their 30 Hz look or get their own interpolation later.
+
+Option A leaves game logic untouched, so the matching build and today's frame comparison keep working. You'd compare at 30 Hz as now and check the in-between frames by eye. The doc records that you lean toward option B (logic at 60 Hz). For cutscenes, A still seems the right starting point: B would mean converting every per-loop actor that cutscenes use, and it still needs interpolation between demo records anyway.
+
+## User
+
+I want to deploy to the console like I've been doing with Silent Hill. I don't want conflicts to arise with file serving, so it may be wiser to only serve one game at a time, unless there are easy ways to avoid conflict.
+
+## Claude
+
+Let me look at how the SH1 deployment works and where the two games would collide.
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 1,40p tools/port/udpfs_serve.py; grep -n -i "udpfs\|neutrino\|deploy" docs/*.md CLAUDE.md 2>/dev/null | h
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 25,70p CLAUDE.md; cat build-and-deploy; grep -n "PORT\|port\b\|= [0-9]\{4,5\}\|sh1_ps2.iso\|SH1\|magic" t
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; grep -n -i "neutrino.*-bsd\|udpfs:\|-dvd=\|uLaunch\|ip=\|server.*port\|62966\|0xF5F6" docs/"Running Walkthrough.
+
+- tool `Bash`: S=~/ps2tools/neutrino_v1.8.0/udpfs_server/udpfs_server.py; grep -n "UDPFS_PORT\|DISCOVERY\|def main\|add_argument\|bind(" $S | head -20; grep -n "udpfs\|-dvd\|b
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; grep -n -i "udpfs:\|-dvd=\|neutrino.*arg\|\.elf.*neutrino\|wLaunch\|OPL\|uLE\b\|launch" "Running Walkthrough.md"
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 1138,1148p "Running Walkthrough.md"; ls ~/ps2tools/neutrino_v1.8.0/config; grep -rn "default_dvd\|default
+
+## Claude
+
+I've mapped where the two setups would collide. Next I'm checking whether the console tooling (IOP agent, restart) is generic HAL code that MGS already links.
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; ls iop; grep -n "62968\|restart\|LoadExec\|host_probe\|sh1_ps2" src/ps2/agent_ps2.c src/ps2/crash_ps2.c | head -20; grep
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; grep -rn "RELAUNCH_ELF" src include port 2>/dev/null | grep define; grep -rn "RELAUNCH\|SYSTEM.CNF\|BOOT2\|cdrom0:" /hom
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "title\s*=\|TITLE" build/link_ps2.py | head -5
+
+- tool `AskUserQuestion`: 
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 40,200p tools/port/udpfs_serve.py; ls -la build/port/usb build/port/usb/* 2>/dev/null | head; cat build/p
+
+## Claude
+
+The server might refuse symlinks that point outside its folder. Checking how it resolves paths:
+
+- tool `Bash`: S=~/ps2tools/neutrino_v1.8.0/udpfs_server/udpfs_server.py; grep -n "realpath\|abspath\|normpath\|islink\|startswith\|def _resolve\|def resolve\|\.\." $S | head 
+
+- tool `Bash`: S=~/ps2tools/neutrino_v1.8.0/udpfs_server/udpfs_server.py; sed -n 460,535p $S
+
+## Claude
+
+Only `_resolve_path` matters; the second copy is dead code after a `return`. Now the log receiver and `ps2_ctl.py`, to see what MGS can share:
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; wc -l tools/port/ps2_log.py tools/port/ps2_ctl.py; sed -n 14,60p tools/port/ps2_log.py; sed -n 32,140p tools/por
+
+## Claude
+
+Everything SH1 uses is generic except the paths. Checking how `ps2_ctl.py` finds the console and what `deploy` does:
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; sed -n 140,237p tools/port/ps2_ctl.py
+
+## Claude
+
+I have what I need. Writing the shared server into the HAL repo first: SH1's wrapper, with a shared folder and the symlink allowance.
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; git status --short | head; ls tools; grep -n "RELAUNCH_ELF\|HAL_GAME_HOST_PROBE" src/ps2/crash_ps2.c | head -5; grep -n 
+
+## Claude
+
+The HAL's `RELAUNCH_ELF` is already behind `#ifndef`, so MGS can set its boot ELF in its own `hal_game_config.h` without a HAL change. Checking that the config is included there:
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; sed -n 1,25p src/ps2/crash_ps2.c | grep -n "include"; cat /home/alex/Documents/mgs1_ps2/port/hal/hal_game_config.h | tai
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="port/hal/hal_game_config.h" s=open(p).read() a="/* Not set yet: the disc" b='''/* Restarts (crash restarts,
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/tools/udpfs_serve.py
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/tools/ps2_log.py
+
+## Claude
+
+Now MGS's `ps2_ctl.py`. It's SH1's with only the generic commands: no Demo menu, options or recordings, which MGS doesn't have.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' src=open("../silent-hill-1-ps2-port/tools/port/ps2_ctl.py").read() import re head='''#!/usr/bin/env python3 ""
+
+## Claude
+
+Now MGS's `build-and-deploy`, modelled on SH1's:
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/build-and-deploy
+
+## Claude
+
+Now the Neutrino folder for the stick: a copy of SH1's with only the image name changed.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; rm -rf obj_ps2/usb/neutrino_mgs; mkdir -p obj_ps2/usb && cp -r ../silent-hill-1-ps2-port/build/port/usb/neutrino obj_ps2/usb/n
+
+## Claude
+
+MGS side done. Now SH1's side, so both repos use the shared server. Checking that repo's state before I touch it:
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; git status --short | head; git log --oneline -1; pgrep -af "udpfs_serve|ps2_log" | grep -v pgrep
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="build-and-deploy" s=open(p).read() a='''# Silent Hill's own server and log receiver (from before they were 
+
+## Claude
+
+Now SH1's `build-and-deploy` and `ps2_ctl.py`:
+
+- tool `Bash`: cd /home/alex/Documents/silent-hill-1-ps2-port; python3 - <<'E' def edit(p,pairs):     s=open(p).read()     for a,b in pairs:         assert a in s,(p,a[:50]); 
+
+## Claude
+
+Both repos are wired up. I can't bind the real port while SH1's server is live, so I'll test the path patch directly against Neutrino's server class:
+
+- tool `Bash`: cd /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad && rm -rf serve_t && mkdir serve_t && ln -s /home/alex/Documen
+
+- tool `Bash`: S=~/ps2tools/neutrino_v1.8.0/udpfs_server/udpfs_server.py; sed -n 1724,1740p $S | grep -o "'-[a-z-]*'" | tr '\n' ' '; echo; cd /tmp/claude-1000/-home-alex-Docum
+
+- tool `Bash`: cd /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad && (timeout 4 python3 -u /home/alex/Documents/psx-to-ps2-HAL/t
+
+## Claude
+
+The server starts and lists the linked image. Rebuilding MGS so the new restart target (`MGSP_000.01`) is in the image, and checking it boots normally in PCSX2:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && python3 link_ps2.py 2>&1 | grep -E "error|linked:"; strings ../obj_ps2/mgs.elf | grep -m2 "MGSP_000\|SHPS_000"; cd .. 
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' def edit(p,pairs):     s=open(p).read()     for a,b in pairs:         assert a in s,(p,a[:50]); s=s.replace(a,
+
+- tool `Bash`: rm -rf /home/alex/Documents/psx-to-ps2-HAL/tools/__pycache__
+
+## Claude
+
+Both games can now be served at once from one UDPFS server, but none of this has been tested on the console yet. You pick the game on the PS2 by which Neutrino folder you start from uLaunchELF.
+
+**How it works:**
+- **One server and one log receiver**, now in the HAL repo (`tools/udpfs_serve.py`, `tools/ps2_log.py`), since both games share it.
+- **One folder:** the server serves `~/ps2serve/`, which holds a link to each game's image: `sh1_ps2.iso` and `mgs_ps2.iso`. Neutrino's server normally refuses links that point outside its folder, so the HAL's version allows links placed directly in it. Paths that try to climb out are still refused; I checked that.
+- **One log:** `~/ps2serve/ps2.log`. Both repos' usual log paths link to it, so existing tools keep working.
+- **Each repo's `./build-and-deploy`** builds its game, links its image, and starts the shared server if it isn't running. If it is running, it deploys to the console.
+
+**Changes on the MGS side:**
+- New `build-and-deploy` and [ps2_ctl.py](tools/port/ps2_ctl.py). The script is SH1's with only the generic commands: ping, restart, deploy, osd, md, where.
+- A Neutrino folder for the stick at `obj_ps2/usb/neutrino_mgs`. It's SH1's folder with only `default_dvd = "udpfs:mgs_ps2.iso"` changed.
+- A bug fix that blocked MGS on the console: the HAL's restart (used by deploys and crash restarts) booted SH1's `SHPS_000.01`. MGS now sets its own `MGSP_000.01` in [hal_game_config.h](port/hal/hal_game_config.h). The rebuilt image still boots to the opening in PCSX2.
+
+**Changes on the SH1 side:** its `build-and-deploy` and `ps2_ctl.py` now use the shared server, log and deploy flag, and its CLAUDE.md says so. Its old `tools/port/udpfs_serve.py` and `ps2_log.py` are no longer used. I left them in place in case you want to delete them.
+
+**What you need to do:**
+1. Copy `obj_ps2/usb/neutrino_mgs` onto the USB stick next to the existing `neutrino` folder.
+2. Run `./build-and-deploy --restart` once from either repo. SH1's old server is running right now (I left it alone); the script stops it and starts the shared one.
+3. Start `neutrino_mgs` (MGS) or `neutrino` (SH1) on the PS2.
+
+**Limitations:**
+- **A deploy restarts whichever game is running.** Deploying MGS while SH1 runs would restart SH1 into its newest build. To switch games, power-cycle and start the other Neutrino folder; each script prints this reminder.
+- **MGS has never run on real hardware.** The first boot may turn up problems PCSX2 hides, such as NULL reads.
+
+**Nothing is committed** in any of the three repos:
+- **MGS:** the new script and tool, the config change, CLAUDE.md and the walkthrough.
+- **HAL:** the two new tools.
+- **SH1:** `build-and-deploy`, `ps2_ctl.py` and its CLAUDE.md.
+
+## User
+
+I will boot MGS on PS2 shortly. Log any crashes that may occur
+
+## Claude
+
+I'll start the shared server and log receiver, then watch the console log for crashes.
+
+- tool `Bash`: ./build-and-deploy --no-build --restart; sleep 2; pgrep -af "psx-to-ps2-HAL/tools" | grep -v pgrep; cat ~/ps2serve/udpfs_server.log | head -8; ls -la ~/ps2serve
+
+## Claude
+
+The shared server is up and serving `mgs_ps2.iso`. Setting up a watch on the log:
+
+- tool `ToolSearch`: 
+
+- tool `Monitor`: MGS on PS2: crashes, asserts and stage loads in ~/ps2serve/ps2.log
+
+## Claude
+
+The shared server and log receiver are running, and I'm watching the log. Start **`neutrino_mgs`** on the PS2 whenever you're ready. Copy it from `obj_ps2/usb/` onto the stick first if you haven't yet.
+
+The watch reports:
+- the PS2 finding the server and its first log output
+- each stage load (`load opening`, `load s00a`…)
+- anything that looks like a crash: `CRASH`, TLB misses, exceptions, asserts, `HANGUP`, `NOT FOUND`, errors, restarts
+
+I'll record crashes with their context from the log as they come in. The watch lasts 30 minutes and I'll re-arm it if you're still playing. If the game freezes with nothing in the log, tell me, since a silent hang won't show up in the watch.
+
+Starting the server stopped SH1's old one. Its `sh1_ps2.iso` link gets added to `~/ps2serve/` the next time you run SH1's `./build-and-deploy`.
+
+## Claude
+
+Neutrino on the PS2 found the shared server and is loading its modules. Nothing has gone wrong so far. Some module lines got through because "installed" contains "stall"; that's harmless. I'm still watching.
+
+## Claude
+
+A second discovery is normal when Neutrino reboots the IOP before starting the game. Checking the log to confirm the game got there:
+
+- tool `Bash`: tail -n 25 ~/ps2serve/ps2.log | cut -c1-160; tail -n 5 ~/ps2serve/udpfs_server.log
+
+## Claude
+
+MGS is running on the PS2. It loaded `init` and then `title`, checked the memory card ("NO FILE", so no saves yet), and the title is drawing with heartbeats every second. No crashes or TLB misses so far.
+
+The `addresses 0-0x1FFF read as zeros` line is expected. On real hardware the HAL maps the zero page so that stray NULL reads return zeros, as they do on the PS1, instead of crashing. The other lines (`unload …`) are routine stage housekeeping. I'm still watching.
+
+## Claude
+
+The opening cutscene has loaded on the console (`load opening`). I'm still watching for crashes.
+
+## Claude
+
+The HAL's watchdog reports no new frame for 10 seconds at frame 2095, which means the game is stuck. Pulling the surrounding log:
+
+- tool `Bash`: n=$(grep -n "watchdog: no frame" ~/ps2serve/ps2.log | tail -1 | cut -d: -f1); sed -n "$((n-45)),$((n+30))p" ~/ps2serve/ps2.log | cut -c1-220
+
+## Claude
+
+The game is stuck at frame 2095, about 63 seconds into the opening. The vertical blank interrupt is still running, and something keeps printing `*`. Finding what prints those stars:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn 'printf( *"\*" *)\|printf("\*")\|putchar(.\*.)' source port ../psx-to-ps2-HAL/src --include=*.c | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 495,560p source/sound/sd_str.c
+
+- tool `Bash`: tr '\r' '\n' < ~/ps2serve/udpfs_server.log | grep -v "^\s*$" | tail -25 | cut -c1-150; grep -c "" ~/ps2serve/udpfs_server.log
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; timeout 15 python3 tools/port/ps2_ctl.py ping; timeout 20 python3 tools/port/ps2_ctl.py where | head -20
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "Sema\|sceCdSync\|sceCdRead\|while\|static.*;" port/src/cdbios_ps2.c | head -40; wc -l port/src/cdbios_ps2.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 1,153p port/src/cdbios_ps2.c; grep -n "Port_Cd" source/libfs/cdbios.c | head
+
+- tool `Bash`: grep -n -i "cdbios\|drive error\|NewStream\|stream\|SOUND STREAMING\|str_unplay" ~/ps2serve/ps2.log | tail -15 | cut -c1-160; grep -c '\*' ~/ps2serve/ps2.log; g
+
+- tool `Bash`: tr '\r' '\n' < ~/ps2serve/udpfs_server.log | grep "^\[00:" | awk '{print $1, $(NF-1), $NF}' | awk 'NR%4==1' | head -40
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 40,75p source/mts/mts_new.c; grep -n "typedef struct\|} MTS_TASK\|^typedef" source/mts/mts.h source/mts/*.h 2>/dev/null
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 60,110p source/mts/mts.h; grep -n "MTSID_\|define MTS_" source/mts/mts.h | head -30
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 150,172p source/mts/mts.h; grep -n "mts_tasks_800C0C30\[\|mts_active_task_800C0DB0;" source/mts/mts_new.c | head -3; gr
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "} MTS_TASK;" -B16 source/mts/ | head -30
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 28,36p source/mts/mts_new.h; timeout 30 python3 tools/port/ps2_ctl.py md mts_tasks_800C0C30 0x180 --out /tmp/claude-100
+
+- tool `Bash`: python3 - <<'E' import struct d=open("/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/tasks.bin","rb").read() nam
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; mkdir -p docs/hardware; n=$(grep -n "watchdog: no frame" ~/ps2serve/ps2.log | tail -1 | cut -d: -f1); s=$(grep -n "ps2_log: ou
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat >> "docs/Running Walkthrough.md" <<'E'  ## Step 6: first boot on the console: hang in the opening (2026-10-28)  The user b
+
+- tool `PushNotification`: 
+
+## Claude
+
+**MGS hung on the PS2 about 63 seconds into the opening.** It got through boot, the title, the memory card check (no saves) and most of the opening's 3D scenes before stopping. The opening's voice stream starts at 17.6 s in the log, and the freeze is at frame 2095 (80.2 s). There were no crash reports or TLB misses.
+
+**The cause appears to be a lost task switch, not a disc or rendering problem.** I read the game's state from the console while it was still frozen:
+- **MGS's task table:** the game task and the CD task are both marked ready, but its scheduler is running the idle task.
+- **HAL threads:** the game's thread is asleep on semaphore 25, the EE is idle in the kernel, and no SIF transfers are pending.
+- **Disc reads:** the server delivered a steady ~110 KB/s both while the cutscene played normally and after the freeze.
+
+So MGS's scheduler and the HAL's threads disagree about which task should be running. It's the same family as the Step 3 bug (a thread switch lost inside `ChangeTh`'s window), now hit on real hardware, where interrupt timing differs from PCSX2's. The `*` lines in the log are the voice stream running dry after the game stopped; they're a consequence, not the cause.
+
+I recorded it as a dated step in the Running Walkthrough, with the evidence. The log from boot to freeze is saved at `docs/hardware/2026-10-28-opening-hang.log`.
+
+**Next:**
+- **Power-cycle the PS2 whenever you like.** I have what I need from this state.
+- **I'm still watching the log.** If you boot it again, I'll catch the next crash or check whether it hangs at the same point.
+- **The fix belongs in the HAL's thread layer** (`thread_ps2.c`). I'll try to reproduce it in PCSX2 by playing the opening to the end several times, or with `tools/thread_test`, before changing anything.
+
+Nothing is committed yet.
+
+## User
+
+This time I will attempt to skip all cutscenes and proceed directly to gameplay
+
+## Claude
+
+I'll restart the watch with a cleaner filter, so module "installed" lines don't get through and a new boot gets a full 30 minutes.
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+- tool `Monitor`: MGS on PS2 (run 2): crashes, hangs and stage loads
+
+## Claude
+
+I'm watching the log again for this run. It reports the boot, each stage load (`load title`, `load d00a`, `load s00a`…), stream starts and stops (cutscene skips show up as `GM_StreamPlayStop`), and any crash, TLB miss, assert or watchdog hang. The server is still running, so just start `neutrino_mgs` after the power cycle.
+
+Skipping cutscenes is also a useful test of the hang. If it was a lost task switch, it could happen anywhere. If it only happened in the opening because of its long voice stream, gameplay may hold up.
+
+## Claude
+
+The second boot has started; this is the usual NULL-page setup line. I'm still watching.
+
+## Claude
+
+The `init` stage has loaded.
+
+## Claude
+
+The title has loaded; it looks like the Konami intro was skipped.
+
+## Claude
+
+That line just reports the memory card status: `error flag` 0 on both cards means no errors. Nothing wrong.
+
+## Claude
+
+New Game is in: the briefing stage, `d00a`, has loaded.
+
+## Claude
+
+The briefing stream has started. I'm watching for a skip or a hang.
+
+## Claude
+
+The briefing was skipped. The two `SOUND ERROR:SPU OFF ENV ON` lines came at the moment the stream stopped. They're from the sound driver's own check: the stream's voices were keyed off while their envelopes still read as on. That's probably the SPU2's envelope readback timing on real hardware during the abrupt stop, and not fatal. I'll note it and check whether PCSX2 ever prints it. Still watching.
+
+## Claude
+
+The dock, `s00a`, has loaded, so gameplay is next.
+
+## Claude
+
+Another stream stop, so the dock's intro was skipped as well. I'm watching through gameplay.
+
+## Claude
+
+A new stream started at sector 181472. That's probably the dock's codec call (the voice stream). Still watching.
+
+## Claude
+
+That stream ran for about 41 s and stopped cleanly, so the codec call ended normally. Gameplay should be up now; I'm still watching.
+
+## User
+
+I did hear the intro codec but there were strange audio artifacts. It seems like Snake is moving on his own, perhaps a leftover from the initial testing to get in game with the emulator. The audio issue should be noted but I want to test the gameplay right now. Also, let's set analog mode on the controller by default, like SH1 does.
+
+## Claude
+
+I'll note the codec audio and look at both: why Snake moves on his own, and the analog default. First, whether the scripted pad presses from the emulator tests are in this build:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 1,40p port/src/pad_script.c; strings obj_ps2/mgs.elf | grep -m3 -E "^[0-9]+-[0-9]+:"; grep -n "pad_script\|MGS_PAD" bui
+
+## Claude
+
+No scripted presses are compiled into this build, so the movement must come from the pad itself. Checking how SH1 sets analog mode and how MGS reads the sticks:
+
+- tool `Bash`: cd /home/alex/Documents; grep -n -i "analog\|DUALSHOCK\|padSetMainMode\|PAD_MMODE" silent-hill-1-ps2-port/include/hal_game_config.h psx-to-ps2-HAL/src/ps2/pad_p
+
+- tool `Bash`: cd /home/alex/Documents; sed -n 150,240p psx-to-ps2-HAL/src/ps2/pad_ps2.c; grep -rn "PadSetMainMode\|func_80089524" silent-hill-1-ps2-port/src --include=*.c | h
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "0x73\|0x53\|ANAJOY\|ANALOG\|capability\|lx\|rx" source/mts/mts_pad.c | head -40
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 100,180p source/mts/mts_pad.c; grep -n "TERMINAL_TYPE_" source/mts/terminal.h | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; for i in 1 2; do timeout 20 python3 tools/port/ps2_ctl.py md pad_800C14E0 0x10; timeout 20 python3 tools/port/ps2_ctl.py md pa
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; sed -n 240,330p src/ps2/pad_ps2.c
+
+## Claude
+
+The bytes come straight from ps2sdk's `padRead`, which uses the same layout as the PS1. The one thing in between is `Port_InputFilter`:
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; grep -n "Port_InputFilter" -A40 src/ps2/input_ps2.c | head -70
+
+- tool `Bash`: cd /home/alex/Documents/psx-to-ps2-HAL; sed -n 355,380p src/ps2/pad_ps2.c; grep -n "Port_PadSetMainMode" include/port/*.h src/*.c 2>/dev/null | head; sed -n 39,
+
+## Claude
+
+`Port_PadSetMainMode` queues the switch, and the HAL's pad thread applies it once the pad is ready, so it can be called at init. Adding it for both ports, unlocked so the Analog button still toggles:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="port/src/hal_game.c" s=open(p).read() s=s.replace('''#include "port/hal_game.h" ''','''#include "port/hal_g
+
+## Claude
+
+Built. A quick PCSX2 check that the pad still comes up and nothing else changed:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2 && timeout 120 python3 ../silent-hill-1-ps2-port/tools/port/pcsx2_run.py --seconds 20 obj_ps2/mgs_ps2.iso 2>&1 | grep -E "TLB M
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat >> "docs/Running Walkthrough.md" <<'E'  ## Step 6: second console run, cutscenes skipped; pad and audio findings (2026-10-
+
+## Claude
+
+**Snake moving on his own:** the controller itself was reporting Right on the d-pad. I read the pad data off the console while you played: it's a digital-mode pad with Right held. The leftover emulator test presses aren't the cause; they aren't compiled into this build. In digital mode many pads treat the left stick as the d-pad, so a stick resting slightly right counts as Right held. MGS reads the pad directly and never switches modes, unlike SH1's game code, so the pad stays in digital.
+
+**Analog by default:** the port now asks the HAL to switch both pads to analog mode once they're ready ([hal_game.c](port/src/hal_game.c)). It's unlocked, so the Analog button still toggles, and it should also fix the drift. It's built and boots normally in PCSX2, but it isn't on the console yet. Deploying restarts the game on the PS2, so I'll wait until you're done with this run. Run `./build-and-deploy --no-build` when you want it, or tell me and I'll do it.
+
+**Codec audio (noted for later):** the log shows `SOUND ERROR:SPU OFF ENV ON` for both voices of the codec's audio stream. It appeared once when a skip stopped the stream, and once 7 s into a codec call you didn't skip. That second one probably matches the artifacts you heard. Both findings are in the Running Walkthrough.
+
+So far this run has been clean through the dock: no crashes or hangs. I'm still watching.
+
+## User
+
+Try redeploying to the console
+
+- tool `Bash`: ./build-and-deploy --no-build 2>&1 | tail -5
+
+- tool `Bash`: sleep 20; tr '\r' '\n' < ~/ps2serve/udpfs_server.log | grep -E "deploy|now reads|OPEN" | tail -4; grep -n -E "port: restart|ps2_log: output|pad: port|Multi Task
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; timeout 20 python3 tools/port/ps2_ctl.py md padbuf_800C1480 0x10; timeout 20 python3 tools/port/ps2_ctl.py md pad_800C14E0 0x8
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "lx\|ly\|analog\|0x80\|128" source/libgv/pad.c | head -30
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "ANALOG_MARGIN" -r source --include=*.[ch] | head -3; sed -n 200,255p source/libgv/pad.c
+
+## Claude
+
+MGS's analog dead zone covers offsets of up to about ±63 from centre: `(lx − 128) >> 3` has to exceed 7 before it counts as a direction. A resting offset of 22 is well inside that, so Snake should now stand still. The d-pad conversion uses the same 64-unit margin.
+
+The redeploy worked and the pad change is live on the console:
+- **Server and restart:** the shared server switched to the new image, and the warm restart booted MGS's own `MGSP_000.01`. You won't need to power-cycle for deploys while that keeps working. SH1 has had trouble with warm restarts, so I'll keep an eye on them here too.
+- **Pad mode:** the pad is now in analog mode (ID `0x73`), with no buttons held.
+- **The drift:** the left stick rests at 150 instead of 128, so it sits slightly right. In digital mode that registered as Right held. In analog mode it falls inside MGS's dead zone.
+- **Run state:** it's already back through the title and briefing into the dock (`s00a`), with no crashes.
+
+The `SPU OFF ENV ON` sound error appeared again when the briefing stream was skipped, which is the audio issue already noted. Let me know whether Snake stays put now. I'm still watching the log.
+
+## Claude
+
+The dock's codec call (about 41 s) ended normally. Gameplay should be up; I'm still watching.
+
+## User
+
+Snake still moves on his own and when I try to move, it sort of works, but he keeps crouching and standing up over and over
+
+## Claude
+
+I'll sample the pad state live from the console several times to see what the game receives:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; for i in 1 2 3 4 5 6; do timeout 10 python3 tools/port/ps2_ctl.py md padbuf_800C1480 0x8 | cut -c1-40; done; grep -n "GV_PadDa
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "AnalogStat" -A40 source/libgv/pad.c | sed -n 1,50p
+
+- tool `AskUserQuestion`: 
+
+## Claude
+
+Noted on both points. A DualShock 2 that behaves in SH1, even today, points at the MGS-specific pad path rather than the controller. MGS is the only one that sets `HAL_GAME_PAD_THREAD`: the pads are polled from a HAL thread, and the data is copied into the game's buffers that MGS reads in its vertical blank interrupt. SH1 reads them differently. The log also shows `reads not ready in the last 600 polls: port 1 36`. That path is my main suspect for both the phantom Cross presses and the walking.
+
+The soft reset (L1+L2+R1+R2+Start+Select) hanging on a black screen is a separate bug. I'll log it, then reproduce it in PCSX2 with scripted presses, since it doesn't need the console.
+
+Go ahead and reboot. Once you're at the title, put the pad down untouched and tell me. I'll take about 20 samples of the raw pad data from the console, and that will show whether the bits change with nobody touching the pad.
+
+## Claude
+
+The PS2 has rebooted. While it comes up to the title, I'll save the log from the soft-reset hang:
+
+- tool `Bash`: n=$(grep -n "port: addresses 0-0x1FFF" ~/ps2serve/ps2.log | tail -1 | cut -d: -f1); sed -n "$((n-60)),$((n-1))p" ~/ps2serve/ps2.log | grep -v "heartbeat\|gs sta
+
+- tool `Bash`: n=$(grep -n "Starting Emulation Environment" ~/ps2serve/ps2.log | tail -1 | cut -d: -f1); sed -n "1,$((n-1))p" ~/ps2serve/ps2.log | grep -v "heartbeat\|gs stats
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; for i in $(seq 1 20); do timeout 5 python3 tools/port/ps2_ctl.py md padbuf_800C1480 0x8 | cut -c11-34; done | sort | uniq -c
+
+- tool `Bash`: sleep 8; cd /home/alex/Documents/mgs1_ps2; for i in $(seq 1 20); do timeout 5 python3 tools/port/ps2_ctl.py md padbuf_800C1480 0x8 | cut -c11-34; done | sort | 
+
+## Claude
+
+Those 20 samples are still the resting values, so you probably hadn't started holding the stick yet. Tell me once you're holding the left stick right (no buttons), and I'll sample then.
+
+## Claude
+
+The memory card check just ran, so something was pressed at the title. I'll wait for you to tell me when you're holding the stick before sampling.
+
+## Claude
+
+You've started a New Game (`d00a`, the briefing). I'm still waiting on your word before sampling the held stick. If you'd rather test it in the dock, that works too.
+
+## Claude
+
+The briefing stream has started. I'm waiting for your go-ahead to sample.
+
+## Claude
+
+The briefing was skipped, with the same sound error on the skip as before (already noted). The dock should load next.
+
+## Claude
+
+The dock has loaded. Tell me when you're holding the left stick right with no buttons pressed, and I'll sample.
+
+## Claude
+
+The dock's intro was skipped too. I'm ready to sample whenever you are.
+
+## Claude
+
+The dock's codec call is starting. I'm still waiting for your signal to sample the held stick.
+
+## Claude
+
+The codec call was skipped (the same sound error again on the stop). Gameplay should be up, and I'm ready to sample when you say.
+
+## Claude
+
+Another stream stopped, so you're in the dock's gameplay now. I'm ready to sample whenever you're holding the stick.
+
+## User
+
+I will hold the left stick momentarily
+now
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; for i in $(seq 1 20); do timeout 5 python3 tools/port/ps2_ctl.py md padbuf_800C1480 0x8 | cut -c11-34; done | sort | uniq -c
+
+## Claude
+
+The input is clean. While you held the stick, all 20 samples were identical: `ff ff` (no buttons) with the left stick at x=`0xff`, y=`0x58` (fully right, a bit up). There was no Cross bit, and nothing flickered.
+
+| | Buttons | Left stick (x, y) | Right stick (x, y) |
+|---|---|---|---|
+| Resting | none | 0x80, 0x91 | 0x99, 0x75 |
+| Holding right | none | 0xff, 0x58 | 0x99, 0x75 |
+
+So in analog mode the game gets exactly what you do with the pad. The one `0xbf` (Cross) reading came from the previous boot while you were playing, and you may simply have pressed it. If Snake still walks on his own and keeps crouching and standing with clean input like this, the bug is in the game side of the port, not the pad. Likely suspects are collision or height checks (the `libhzd` navigation code, or a missed fixed address like the water-effect one), which could make Snake think the floor or ceiling changes and push him around.
+
+Two questions so I aim at the right thing:
+1. **In this run (analog mode), does Snake still move with the stick released, and still crouch and stand by himself?**
+2. **Did you see the same thing in PCSX2** when you reached the dock earlier?
+
+If it happens without input, I can reproduce it in PCSX2 with the scripted presses and compare Snake's state (position, stance, collision results) against DuckStation frame by frame. That works like today's frame comparison, but for game state.
+
+## User
+
+Yes, he still moves when the stick is released, but he does not crouch and stand by himself. I saw the same thing in PCSX2
+
+## Claude
+
+That narrows it down. The crouching came from input (probably that Cross reading), and analog mode fixed it. The walking happens with clean input and in PCSX2 as well, so it's a game-side bug I can chase in the emulator without the console. Reading how MGS turns pad state into Snake's movement direction:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 112,200p source/libgv/pad.c
+
+## Claude
+
+Before reading more code, I'll look at what MGS's pad layer hands the game right now on the console (`GV_PadData`). You're in the dock with the stick released, so that's exactly the case to look at.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "} GV_PAD;" -B16 source/libgv/libgv.h | head -20; for i in 1 2 3; do timeout 8 python3 tools/port/ps2_ctl.py md GV_Pad
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n -w -E "GM_PlayerPosition|GM_PlayerControl|GM_PlayerStatus|GM_PlayerAction" obj/asm.map | head; for i in 1 2 3 4; do ti
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "HalGame_Status" port/src/*.c; grep -n "MGS_LOG_DIRECT\|debug = \|debug +=" build/link_ps2.py | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 74,92p build/link_ps2.py
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' def edit(p,pairs):     s=open(p).read()     for a,b in pairs:         assert a in s,(p,a[:50]); s=s.replace(a,
+
+## Claude
+
+I need the pad-script timings from the earlier PCSX2 dock run:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -o 'MGS_PAD_SCRIPT="[^"]*"' "Claude Conversation.md" | sort | uniq -c | tail -5
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -o "MGS_PAD_SCRIPT=[^ ]*" "Claude Conversation.md" | sort | uniq -c | tail -8
+
+- tool `Bash`: grep -oh 'MGS_PAD_SCRIPT=[^ \\]*' ~/.claude/projects/-home-alex-Documents-mgs1-ps2/*.jsonl | sort | uniq -c | tail -8
+
+- tool `Bash`: grep -oh 'MGS_PAD_SCRIPT=.\{0,80\}' ~/.claude/projects/-home-alex-Documents-mgs1-ps2/*.jsonl | grep -v '\[\^' | sort | uniq -c | sort -rn | head -8
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && MGS_DEBUG_PLAYER=1 MGS_PAD_SCRIPT="300-310:0800,420-430:0800,520-530:0020,620-630:0020,900-910:0800,1100-1110:0800,130
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; for s in pad_800C14E0 GV_UpdatePadSystem GM_PlayerPosition GM_PlayerStatus GV_Time GM_CurrentMap; do grep -m1 -w " $s" obj/asm
+
+## Claude
+
+I'll write a small gdb script for DuckStation. It holds the same buttons by writing MGS's pad state at the start of each game loop, then logs Snake's position and status every 60 loops.
+
+- tool `Bash`: mkdir -p /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/snake && cat > /tmp/claude-1000/-home-alex-Documents-mgs
+
+- tool `Bash`: cat > /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/snake/snake_ps1.py <<'E' import struct, gdb inf = gdb.selec
+
+- tool `Bash`: cd /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/snake && python3 - <<'E' p="snake_ps1.py" s=open(p).read() s=s
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -ln "INCLUDE_ASM" source/libhzd/*.c source/game/*.c source/libgv/*.c source/libdg/*.c 2>/dev/null | head; python3 tools/p
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && python3 link_ps2.py 2>&1 | grep -E "error|linked:"; strings ../obj_ps2/mgs.elf | grep -c "; snake"
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; mkdir -p tools/port/gdb && cp /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b/scratchpad/s
+
+## Claude
+
+**Snake walking on his own is a game bug, not input.** On the PS1, after the dock's codec, Snake stands perfectly still. In the port he starts from the same spot but gets moved about 1550 units sideways within one second, with no input, and then keeps sliding slowly while his height bobs:
+
+| | Right after the codec | 1 s later | After that |
+|---|---|---|---|
+| PS1 (DuckStation) | −5756, 1104, −1298 | unchanged | still for 30 s |
+| Port (PCSX2) | −5758, 1130, −1294 | **−4203**, 1132, −1304 | slides ~6 units/s, height bobs |
+
+That's far too fast for walking. It looks like collision or physics code pushing him, as if it thought he was inside a wall or in a current. Your console showed him resting at (−4202, 1074, −3046), which fits the same slide stopping against something.
+
+**What rules out input:**
+- On the console in analog mode, the pad data is clean both at rest and with the stick held.
+- MGS's own pad layer reports no buttons and no direction while he moves.
+- PCSX2 shows the same movement with no controller input at all.
+
+**How I measured it:**
+- `MGS_DEBUG_PLAYER=1` is a new build option that prints Snake's position, status and pad state once a second.
+- [snake_ps1.py](tools/port/gdb/snake_ps1.py) is a gdb script that drives DuckStation to the same idle moment and logs the same values.
+
+**Next:** compare the two loop by loop from the end of the codec, including Snake's control state and the collision results, to find the first loop where the port goes wrong. The obvious places came up empty: there are no unfinished functions or unwrapped fixed addresses in the collision, game, actor or drawing code.
+
+I've rebuilt the normal image, so the PS2 won't boot my scripted test build. The walkthrough has this step, the earlier pad and audio findings, and the soft-reset black screen is still on the list. Nothing is committed yet.
+
+## Claude
+
+The console-log watch has expired after 30 minutes. It caught no crashes after the soft-reset black screen, which I'd already noted. I haven't re-armed it; tell me if you go back to the console and I'll watch again. The server and log receiver are still running, and everything still goes into `~/ps2serve/ps2.log`.
+
+## User
+
+Continue the debugging in PCSX2
+
+## Claude
+
+I'll start by seeing the shape of the movement loop by loop: a single teleport, or a steady push? For that I'll log Snake's control block (`GM_PlayerControl`) on every frame where his position changes. It holds his position, his per-frame step, and the collision outputs.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "} CONTROL;" -B40 source/game/*.h | grep -v "^\s*//" | head -50
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "environ" build/build_ps2.py | head; grep -n "^void GM_ActControl\|^void GM_ActControl" -A5 source/game/control.c 2>/d
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 337,460p source/game/control.c; grep -n "CFLAGS\s*=\|cflags\s*=\|\"-D" build/build_ps2.py | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 30,45p build/build_ps2.py
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "getmtime\|up_to_date\|newer\|flags_hash\|stamp" build/build_ps2.py build/overlays_ps2.py | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "def compile\|def main\|run(\[" build/build_ps2.py | head; grep -n "exists" build/build_ps2.py | head
+
+## Claude
+
+Everything is recompiled on each build, so a define in `CFLAGS` is enough:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' def edit(p,pairs):     s=open(p).read()     for a,b in pairs:         assert a in s,(p,a[:50]); s=s.replace(a,
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && MGS_DEBUG_PLAYER=1 MGS_PAD_SCRIPT="300-310:0800,420-430:0800,520-530:0020,620-630:0020,900-910:0800,1100-1110:0800,130
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rln "left_dx\|left_dy\|->analog" source --include=*.c | head; grep -rn "left_dx\|left_dy" source --include=*.c | head -2
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -i 's|^    Port_PadSetMainMode(0, 1, 0);|    //DBG Port_PadSetMainMode(0, 1, 0);|; s|^    Port_PadSetMainMode(1, 1, 0);|  
+
+## Claude
+
+Digital mode makes no difference: Snake still runs into the same wall. Restoring the analog default, then looking at how Snake's state machine chooses between standing and running:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -i 's|^    //DBG Port_PadSetMainMode|    Port_PadSetMainMode|' port/src/hal_game.c; grep -c "DBG" port/src/hal_game.c; gre
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 7040,7075p source/chara/snake/sna_init.c; grep -n "gSnaMoveDir_800ABBA4" source/chara/snake/sna_init.c | head -30
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "void *(\*field_9[0-9A-F]*_.*)\|(\*field_9..*)(.*SnaInitWork" source/chara/snake/sna_init.h source/chara/snake/*.h 2>/
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 7825,7845p source/chara/snake/sna_init.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="source/chara/snake/sna_init.c" s=open(p).read() a='''    frame = work->field_9BC_anim_frame++;     work->fi
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "control.step\b\|control\.step\.\|ctrl->step\.\|->step = \|\.step = " source/chara/snake/sna_init.c source/game/*.c s
+
+## Claude
+
+The motion system writes Snake's root motion into `step` through `m_ctrl->step` (`motion.c:215`). Finding where that root motion is computed:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "m_ctrl->step\|->step)\|\*step\b" source/game/object.c source/game/motion.c source/libdg/*.c | head -20; sed -n 85,12
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 670,730p source/game/motion.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "define extract_archive\|define Mask_Op\|define Shift_Op" -A14 source/game/motion.c | head -60
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 580,600p source/game/motion.c; grep -n "archive;\|archive =\|u_short.*archive\|short.*\*archive\|stream;" source/game/m
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "extract_archive" source/game/*.c source/game/*.h | head -3; grep -n "MOTION_ARCHIVE;" -B6 source/game/*.h | head -12;
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 612,625p source/game/motion.c; python3 - <<'E' p="source/game/motion.c" s=open(p).read() a='''            gte_ldv0(&vec
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "stdio\|printf" source/game/motion.c | head -3; grep -n "GM_PlayerControl" source/game/game.h | head -2
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -i '1i #ifdef MGS_DEBUG_PLAYER\n#include <stdio.h>\nextern struct CONTROL *GM_PlayerControl;\n#endif' source/game/motion.c
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && MGS_DEBUG_PLAYER=1 MGS_PAD_SCRIPT="300-310:0800,420-430:0800,520-530:0020,620-630:0020,900-910:0800,1100-1110:0800,130
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -i 's/if ((vec.vx || vec.vz || m_ctrl->step->vx || m_ctrl->step->vz) \&\& dbg_lines++ < 60)/if (GV_Time >= 1900 \&\& dbg_l
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "^void sna_anim_idle_8005275C\|^static void sna_anim_idle_8005275C\|sna_anim_idle_8005275C(SnaInitWork" source/chara/s
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -n "actpack\b\|ACTPACK\|} SNA_STILL\|still;" source/chara/snake/sna_init.h source/chara/snake/*.h | head -20
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 40,116p source/chara/snake/sna_init.h; grep -n "ACTPACK.*=\|actpack = " source/chara/snake/*.c | head
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; NM=~/ps2dev/ee/bin/mips64r5900el-ps2-elf-nm; $NM -n obj_ps2/mgs.elf | grep -B2 -A2 "weapon_actions_8009ED8C\|actions_no_weapon
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "weapon_actions_8009ED8C\[" source --include=*.c; grep -rn "WEAPON_NONE" source/game/*.h source/include/*.h 2>/dev/nu
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "define WP_\|WEAPON_NONE\|GM_Weapon *= *-1\|GM_Weapon < 0" source --include=*.h | head -5; sed -n 170,182p source/cha
+
+## Claude
+
+The fix: when `GM_Weapon` is negative, use the no-weapon table explicitly. Before applying it, other arrays indexed by `GM_Weapon` could rely on the same PS1 adjacency, so checking all of them:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; grep -rn "\[ *GM_Weapon *\]\|\[ *GM_CurrentWeaponId *\]\|\[ *GM_CurrentItemId *\]\|\[ *GM_Item *\]" source --include=*.c | gre
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; sed -n 1888,1907p source/chara/snake/sna_init.c; sed -n 2044,2054p source/chara/snake/sna_init.c; sed -n 8356,8364p source/cha
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; python3 - <<'E' p="source/chara/snake/sna_init.c" s=open(p).read() old="    work->actpack = &weapon_actions_8009ED8C[GM_Weapon
+
+## Claude
+
+The fix is in. I'll drop the motion-decode print (it hardcodes loop 1900) and keep the general Snake prints behind `MGS_DEBUG_PLAYER`, then rerun the same PCSX2 test:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; git checkout source/game/motion.c; git diff --stat source/game/motion.c; cd build && MGS_DEBUG_PLAYER=1 MGS_PAD_SCRIPT="300-31
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/build && python3 link_ps2.py 2>&1 | grep -E " error|linked:"; strings ../obj_ps2/mgs.elf | grep -c "sna %d\|; snake"; PATH=/hom
+
+## Claude
+
+Normal image rebuilt with no debug code in it, and the matching build passes (80 OK, VR 2 OK). Recording the finding:
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2; cat >> "docs/Running Walkthrough.md" <<'E'  ## Step 6: Snake ran on his own: the no-weapon action table (2026-10-28)  Narrowed
+
+## Claude
+
+I found and fixed the bug that made Snake run on his own. In PCSX2 he now stands still after the dock's codec, at exactly the position the PS1 holds (−5756, 1104, −1298).
+
+**Cause:** with no weapon equipped, `GM_Weapon` is −1, and the game picks Snake's animation table with `&weapon_actions_8009ED8C[GM_Weapon]`.
+- **On the PS1**, index −1 happens to land on the no-weapon table, which is linked directly before that array.
+- **In the port**, the PS2 compiler aligns the array and leaves a 4-byte gap between the two tables. Index −1 therefore read the no-weapon table one pointer off. Its "stand still" entry was really its "move" table, so idling played a running animation, and the animation's forward motion moved him.
+
+**How I narrowed it down** (in PCSX2, using a new `MGS_DEBUG_PLAYER` build option):
+1. Collision barely moved him. His own per-frame movement was a steady 108 units, like a run cycle.
+2. His state was idle, with no direction.
+3. The animation being played really contained running motion. Decoding and rotation were correct; it was simply the wrong animation.
+4. The idle state's animation lookup led to the −1 index.
+
+**Fix:** both places in [sna_init.c](source/chara/snake/sna_init.c) now use the no-weapon table directly when `GM_Weapon` is negative. The change only applies to the port (`MGS_PORT`). The other places that index by `GM_Weapon` are already safe. The same pattern, relying on whatever is linked just before an array, could exist elsewhere in the code. It's noted in the walkthrough.
+
+The matching build passes (80 OK, VR 2 OK). I rebuilt the normal image without any debug code, so it's ready for the console. Run `./build-and-deploy --no-build` (or tell me and I'll deploy) to try it on the PS2.
+
+Still open: the codec audio artifacts, the soft-reset black screen, and the opening hang (lost task switch). Nothing is committed yet.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Monitor, PushNotification, Read, SendUserFile, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Compare the intro's graphical effects (especially the "underwater" effect) pixel by pixel between the PS2 port and DuckStation running MGS Integral, as was done for Silent Hill. Done: tool built, banding fixed.
+   - "Show me the frames from PCSX2 and Duckstation side by side". Done: images sent with SendUserFile.
+   - "Let's fix the timing to make cutscene comparison easier". Done.
+   - "Commit". Done as 581a52aea.
+   - Asked whether cutscenes could easily run at 60 FPS. Answered: no, the demo data is 30 fps; it needs interpolation (option A in docs/60 FPS update.md).
+   - Deploy MGS to the console like SH1, avoiding file-serving conflicts. The user chose "Both served at once". Implemented.
+   - "Log any crashes" during console boots. Done: opening hang logged.
+   - Set analog mode on the controller by default, like SH1 does. Done and deployed.
+   - Note the codec audio artifacts (not fix now); the user wanted to test gameplay.
+   - "Try redeploying to the console". Done; the warm restart worked.
+   - "Continue the debugging in PCSX2" (Snake moving on his own). Root cause found and fixed; the user has not been told yet.
+
+2. Key Technical Concepts:
+   - **PSX_ADDR mapping.** Fixed PS1 addresses map into g_PsxRam/g_PsxScratch. The scratchpad end address 0x1F800400 now counts as scratchpad.
+   - **DuckStation capture.** Via the gdb stub: breakpoints, calling StoreImage/DrawSync from gdb, writing mts pad state to inject presses.
+   - **Replay vs live comparison.** Replay draws the PS1's GP0 commands through the HAL GS renderer (GpuGs_Commands, GpuGs_LoadImage, GpuGs_StoreImage). Live compares the port's own frames.
+   - **Cutscene clock.** FS_StreamGetTick (voice SPU counter or vertical blanks); demo frame = (ticks - start)/2.
+   - **Frame index.** Game loops (GV_Time) from the stage's load end. GV_Clock is the double-buffer parity; DG_HikituriFlag-style flip skip.
+   - **Console setup.** Neutrino UDPFS (port 0xF5F6), udptty log broadcast to UDP 18194, HAL IOP agent on UDP 62968 (ps2_ctl commands ping/restart/deploy/md/where), RELAUNCH_ELF.
+   - **mts scheduler over HAL threads.** Task table mts_tasks_800C0C30 (32-byte MTS_TASK).
+   - **Pads.** libpad padRead data: [0] ok, [1] mode ID (0x41 digital, 0x73 analog), [2..3] active-low buttons, [4..7] rx ry lx ly. MGS analog dead zone is about ±63 (`(lx-128)>>3` must exceed 7).
+   - **Snake movement chain.** GM_ActControl, then step from motion root delta (game/motion.c NextKeyframe), then actpack tables. GM_Weapon is -1 with no weapon.
+   - **Data alignment.** The EE GCC aligns arrays, so a PS1 negative index into an adjacent preceding variable breaks.
+
+3. Files and Code Sections:
+
+   **Committed in 581a52aea (MGS repo):**
+   - **tools/port/compare_frames.py** (new)
+     - `--frames`, `--stage` (default opening), `--live`, `--skip-ps1`, `--skip-ps2`.
+     - Uses the CHD at `ps1-original/.../(Disc 1).chd`.
+     - Output: obj_ps2/cap/cmp[live]_N.png; each side is cropped by its own E3/E4 draw area.
+     - Live runs write `stage=NAME ticks live=N...` to obj_ps2/capture.txt.
+     - Imports SH1's warp_sweep (DuckStation settings) and SH1's pcsx2_run.py.
+   - **tools/port/gdb/capture_ps1.py** (new)
+     - Frames = game loops since FS_LoadStageComplete (0x80023804).
+     - Writes ps1_N_before.bin, ps1_N_gp0.bin (OT packets, PutDrawEnv packet, LoadImage as A0+pixels, MoveImage as 80, ClearImage as 02) and ps1_N_vram.bin.
+     - Writes ps1_ticks.txt: "clock C", "start L", "loop tick" lines; the tick is read at 0x80079680 after ActStream's FS_StreamGetTick call.
+     - Addresses: NEWLOADER 0x8002E460, DRAWOTAG 0x8008FE58, PUTDRAWENV 0x8008FEC8, LOADIMAGE 0x8008FB10, MOVEIMAGE 0x8008FBD0, CLEARIMAGE 0x8008F9E8, STOREIMAGE 0x8008FB70, DRAWSYNC 0x8008F864, GV_TIME 0x800AB330, GV_CLOCK 0x800AB920, TICK_START 0x800243D8.
+   - **port/src/capture_ps2.c** (new)
+     - Replay entries (`replay=`), and live capture through HalGame_OnDrawOTag and HalGame_OnPacket.
+     - Hooks called from game code: Capture_Stage, Capture_LoadEnd, Capture_TickStart, Capture_Tick, Capture_HoldClock, Capture_StreamMayStart.
+   - **Game-side hooks, all under MGS_PORT:**
+     - source/game/loader.c: Capture_Stage in NewLoader, Capture_LoadEnd in Die.
+     - source/libfs/stream.c: Capture_TickStart, Capture_Tick.
+     - source/game/strctrl.c: case 2 waits for Capture_StreamMayStart.
+     - source/libgv/gvd.c: `DG_HikituriFlag == 0 && !Capture_HoldClock()`.
+   - **Underwater fix:**
+     - source/takabe/wt_view.c: `scratch2 = (short *)PSX_ADDR(0x1F800400);`
+     - source/include/psx_mem.h: `((unsigned int)(addr) - 0x1F800000 <= PSX_SCRATCH_SIZE ? g_PsxScratch + (addr - 0x1F800000) : g_PsxRam + ...)`
+     - tools/port/find_fixed_addresses.py: scratchpad range now goes to 0x1F800400.
+   - **build/link_ps2.py**: rewrites the extracted cue so it names the final .BIN (it named DISC1.BIN.tmp).
+   - Docs updated.
+
+   **Uncommitted since (MGS repo):**
+   - **port/hal/hal_game_config.h**: `#define RELAUNCH_ELF "cdrom0:\\MGSP_000.01;1"`
+   - **build-and-deploy** (new, executable)
+     - Builds with `cd build && python3 link_ps2.py`.
+     - Links `~/ps2serve/mgs_ps2.iso` to the image and `obj_ps2/ps2.log` to `~/ps2serve/ps2.log`.
+     - Stops SH1's old per-repo server/log receiver (found by command line plus /proc cwd).
+     - Starts the HAL's tools/udpfs_serve.py (--root ~/ps2serve) and tools/ps2_log.py, or deploys with ps2_ctl.
+     - Options `--restart`, `--no-build`.
+   - **tools/port/ps2_ctl.py** (new)
+     - SH1's tool with only ping/restart/deploy/osd/md/where.
+     - FLAG `~/ps2serve/.udpfs_refresh`, LOG `obj_ps2/ps2.log`, ELF `obj_ps2/mgs.elf`.
+   - **obj_ps2/usb/neutrino_mgs** (gitignored): copy of SH1's Neutrino folder with `default_dvd = "udpfs:mgs_ps2.iso"`.
+   - **port/src/hal_game.c**
+     - `#include "port/pad.h"`.
+     - In HalGame_Init: `Port_PadSetMainMode(0, 1, 0); Port_PadSetMainMode(1, 1, 0);` with a comment about analog mode.
+     - Under MGS_DEBUG_PLAYER: HalGame_Status prints "; snake x y z status; pad status dir analog".
+   - **build/link_ps2.py**: MGS_DEBUG_PLAYER env adds -DMGS_DEBUG_PLAYER to port files.
+   - **build/build_ps2.py**: `CFLAGS += ["-DMGS_DEBUG_PLAYER"] if os.environ.get("MGS_DEBUG_PLAYER") else []`
+   - **source/game/control.c**: under MGS_DEBUG_PLAYER, GM_ActControl prints "ctl ..." per stage for GM_PlayerControl (up to 400 lines).
+   - **source/chara/snake/sna_init.c**
+     - Debug print of anim function changes ("sna %d: anim %p ...") under MGS_DEBUG_PLAYER, before `work->field_9B8_fn_anim(work, frame);`.
+     - THE FIX, at both actpack sites:
+       ```c
+       #ifdef MGS_PORT
+           /* No weapon (GM_Weapon -1): on the PS1, weapon_actions_8009ED8C[-1] is actions_no_weapon_8009ED70, ... */
+           work->actpack = GM_Weapon < 0 ? &actions_no_weapon_8009ED70 : &weapon_actions_8009ED8C[GM_Weapon];
+       #else
+           work->actpack = &weapon_actions_8009ED8C[GM_Weapon];
+       #endif
+       ```
+   - source/game/motion.c: the temporary print was reverted with `git checkout` (clean).
+   - **tools/port/gdb/snake_ps1.py** (new): drives DuckStation to dock gameplay (presses written to pad_800C14E0 at GV_UpdatePadSystem 0x8001682C) and logs GM_PlayerPosition (0x800ABA10) and GM_PlayerStatus (0x800ABA50).
+   - **docs/hardware/2026-10-28-opening-hang.log** (new).
+   - **CLAUDE.md**: Real hardware deploy notes.
+   - **docs/Running Walkthrough.md**: Step 6 entries (deploy, opening hang, pad/audio, Snake moving, action table fix).
+
+   **HAL repo (../psx-to-ps2-HAL), uncommitted:**
+   - tools/udpfs_serve.py: shared server; patches `_resolve_path` so a symlink directly in the root may point outside it; flag at root/.udpfs_refresh.
+   - tools/ps2_log.py: default log `~/ps2serve/ps2.log`.
+
+   **SH1 repo (../silent-hill-1-ps2-port), uncommitted:**
+   - build-and-deploy uses the HAL's server and log receiver, links sh1_ps2.iso and build/port/ps2.log, and stops the old tools/port servers.
+   - tools/port/ps2_ctl.py FLAG is now `~/ps2serve/.udpfs_refresh`.
+   - CLAUDE.md note.
+
+4. Errors and fixes:
+   - **DuckStation GDB didn't start:** DISC1.cue named DISC1.BIN.tmp. Fixed by using the CHD, and link_ps2 now fixes the cue.
+   - **Crash (jump to 0) after wrapping wt_view:** PSX_ADDR mapped 0x1F800400 to g_PsxRam+0x400. Fixed in the macro.
+   - **Stale compare results:** an old ps2_ capture was reused after a crash. Fixed by deleting old captures before runs.
+   - **Live parity mismatch (PS2 drew the other buffer):** fixed by per-side cropping, then GV_Clock alignment.
+   - **Wrong frame index:** DrawOTag count isn't one per loop (three ActStream calls before the first DrawOTag). Switched to GV_Time loops.
+   - **Snake runs on his own:** the actions_no_weapon/weapon_actions gap (0x20 instead of 0x1C) made `weapon_actions[-1]` point one pointer off. Fixed.
+   - **snake_ps1.py first attempts:** fixed-time presses missed the title, then the idle log started before the codec. Fixed with stage-driven presses and START while status != 0.
+   - **MGS script's pgrep missed SH1's server** (relative command line). Fixed by checking the /proc cwd.
+   - **Scripted debug image left in obj_ps2:** always rebuild the normal image afterwards (done).
+
+5. Problem Solving:
+   - **Solved:**
+     - Underwater banding.
+     - Comparison timing: identical GPU commands at loops 600/800/1000/1600.
+     - Shared console serving.
+     - Analog default; console pad confirmed ID 0x73 with clean data.
+     - Snake running: PCSX2 now matches the PS1 position (-5756 1104 -1298).
+     - Matching build 80 OK, VR 2 OK after the final change.
+   - **Open:**
+     - **Console hang about 63 s into the opening:** a lost mts/HAL task switch. GAME and CDBIOS are READY while the active task is IDLE (11); the game thread waits on semaphore 25; thread_ps2.c switch_check is the suspect.
+     - **Codec audio artifacts:** `SOUND ERROR:SPU OFF ENV ON(STR_TRACK_R/L=0)` from sd_str.c.
+     - **Soft reset** (L1+L2+R1+R2+Start+Select) hangs on a black screen on the console.
+     - **Opening loop 1300:** vertex colours of 75 lit polygons differ from the PS1.
+     - The SH1 tools/port udpfs_serve.py/ps2_log.py copies are now unused.
+
+6. All user messages:
+   - "Alright, most of the limited part of the game that I saw seemed to render correctly. However, I noticed that some of the graphical effects in the intro cutscene were wrong, especially the "underwater" effect. Like we did with Silent Hill, we can use the same MGS Integral .bin/.cue pairs in Duckstation to compare frames pixel by pixel."
+   - "Show me the frames from PCSX2 and Duckstation side by side"
+   - "Let's fix the timing to make cutscene comparison easier"
+   - "Commit"
+   - "If cutscenes really do run on a clock, can they easily be forced to run at 60 FPS?"
+   - "I want to deploy to the console like I've been doing with Silent Hill. I don't want conflicts to arise with file serving, so it may be wiser to only serve one game at a time, unless there are easy ways to avoid conflict." (Answered the setup question with "Both served at once".)
+   - "I will boot MGS on PS2 shortly. Log any crashes that may occur"
+   - "This time I will attempt to skip all cutscenes and proceed directly to gameplay"
+   - "I did hear the intro codec but there were strange audio artifacts. It seems like Snake is moving on his own, perhaps a leftover from the initial testing to get in game with the emulator. The audio issue should be noted but I want to test the gameplay right now. Also, let's set analog mode on the controller by default, like SH1 does."
+   - "Try redeploying to the console"
+   - "Snake still moves on his own and when I try to move, it sort of works, but he keeps crouching and standing up over and over"
+   - "I need to reboot first because I tried the soft reset and the game hung on a black screen. I am using a DualShock 2, and it works fine in SH1, even during today's testing."
+   - "At the title screen"
+   - "I will hold the left stick momentarily" / "now"
+   - "Yes, he still moves when the stick is released, but he does not crouch and stand by himself. I saw the same thing in PCSX2"
+   - "Continue the debugging in PCSX2"
+
+   Standing constraints from CLAUDE.md and memory:
+   - GitHub only without asking; never access tcrf.net.
+   - Never PR or push to mgs_reversing.
+   - No `pkill -f` with a pattern in its own command line.
+   - Notify at stopping points.
+   - Keep Running Walkthrough, Planning Doc and Claude Conversation.md updated at milestones and before commits.
+   - Run the matching build after port changes.
+   - PCSX2 uses the software renderer; a 15 s stall is a crash; never dismiss TLB misses.
+   - A hung PS2 needs a power cycle.
+
+7. Pending Tasks:
+   - Tell the user about the Snake fix (found, fixed, verified in PCSX2) and offer to deploy it to the console (the normal image is already rebuilt).
+   - **Not committed yet:** all post-commit work in MGS, HAL and SH1. Commit only when asked; update Claude Conversation.md and the Planning Doc before committing.
+   - **Known bugs to investigate later:**
+     - opening hang (lost task switch)
+     - codec audio artifacts
+     - soft-reset black screen
+     - loop 1300 lighting difference
+
+8. Current Work:
+   This was the PCSX2 debugging of Snake moving on his own.
+   - **Path:** GM_ActControl showed step ≈108/loop. sna_anim_idle was active with dir -1. motion.c showed the decoded root delta (0,108), a run motion. actpack = &weapon_actions_8009ED8C[GM_Weapon] with GM_Weapon -1. nm showed actions_no_weapon at 0x5d1f10 and weapon_actions at 0x5d1f30 (a 0x20 gap; the PS1 has 0x1C).
+   - **Fix:** applied at both sites in sna_init.c.
+   - **Verification:** PCSX2 run shows Snake still at -5756 1104 -1298, matching DuckStation.
+   - **After the fix:** rebuilt the normal image (no debug strings), matching build 80 OK / VR 2 OK, and appended a walkthrough section "Step 6: Snake ran on his own: the no-weapon action table (2026-10-28)".
+   - The final user-facing summary had not yet been given.
+
+9. Optional Next Step:
+   Report the fix to the user, who asked to "Continue the debugging in PCSX2". Explain the root cause (the weapon_actions[-1] alignment gap, so standing played a run motion), the PCSX2 verification, the matching build passing, and that nothing is committed. Offer to deploy to the console with `./build-and-deploy --no-build` (the normal image is built) so they can confirm Snake stands still.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/cab0c5ea-a046-427f-a46e-9ac1502f819b.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+I'm debating the pros and cons of using the same overlay system as the original game. We do have more memory on PS2, but I don't want to be wasteful, and I think it would be useful to have the game act in a way that it expects. What do you think?
+
+## Claude
+
+I'd keep the overlays linked into the executable, which is what Step 3 did. The part of the overlay system the game actually relies on is what happens at load time, and you can reproduce that cheaply without loading code from disc.
+
+**Memory cost is small.** MGS1's stage overlays are tens to a few hundred KB each, so all of them together come to a few MB of the PS2's 32 MB. The game's data heaps stay at their original sizes either way. Duplicating all the code doesn't cost much.
+
+**A real overlay loader costs a lot more:**
+- You'd need a linker setup that links each overlay at one shared address against the main ELF's symbols. That's a custom linker script per stage plus build tooling.
+- After every load you'd need to flush the EE instruction cache (`FlushCache`), and that's a new place for crashes that only appear on hardware.
+- Each stage change would add a disc read, and over UDPFS/USB that means slower stage changes and one more thing that can fail.
+- Debugging is harder because gdb symbols for overlapping addresses get ambiguous.
+
+**What the game does depend on:**
+1. **A fresh copy of the overlay's `.data`/`.bss` on every load.** On the PS1, an overlay's static variables are reset each time its stage loads. When everything is linked in, those values carry over between stages. That can cause bugs that are hard to trace, like a boss state flag left over from a previous visit or a counter that doesn't reset. **This is the part worth reproducing.** Give each overlay its own sections in the linker script, keep a copy of each overlay's initial `.data`, and on stage load restore it and zero its `.bss`. It's cheap and faithful.
+2. **Pointers into an unloaded overlay.** On the PS1, a stale function pointer into the previous stage's overlay points at the new stage's code. With everything linked in, it calls the old stage's code, which still exists, so the bug is hidden. Correct code never does this. To catch it, a debug build could fill the inactive overlays' `.data`/`.bss` with a poison value, then check that value or catch the crash. That's the same idea as the SH1 sentinel approach, since EE data breakpoints don't fire under Neutrino.
+3. **Code that assumes overlay addresses or sizes**, such as range checks against the overlay region. Look for these in the decomp. They're usually few and easy to patch.
+
+I haven't checked how Step 3 currently places the overlay sections or whether anything resets them on stage load. If it'd help, I can look at [link_ps2.py](build/link_ps2.py) and the stage-load path and propose the per-stage reset.
+
+## User
+
+What about for SH1?
+
+- tool `Bash`: Search SH1 port docs for overlay notes
+
+- tool `Bash`: Read SH1 overlay reset notes
+
+## Claude
+
+The SH1 port already took this approach: it links the overlay code statically and keeps the game's load-time behaviour. Only the data reset is unfinished there, so it's a useful guide for MGS1, including the part it got stuck on.
+
+**What SH1 did:**
+- **All overlay code is linked statically:** bodyprog, B_KONAMI, the four screen overlays and all 43 map overlays. This replaced the fixed overlay load addresses in `main.c` (Step 2 of its plan).
+- **The game still reads the overlay files.** They go through the file queue into the PS1 RAM arena at their original load addresses, so disc timing and file-queue behaviour stay as the game expects.
+- **A hook switches maps.** `Fs_QueueStartRead` calls `Port_OverlayActivate(fileIdx)` in `src/port/overlay.c`, which points `g_MapOverlayHdrPtr` at that map's header. The overlay code is never actually loaded.
+- **The data reset exists but is off.** Under the `SH_PORT_OVERLAY_RESET` flag, the port snapshots each overlay's `.data`/`.bss` at startup, using markers from `port_link.py`, and restores them when the file is read again. Their walkthrough says it fixed a map loaded twice in a row during the map sweep. It stayed off because "the PS1 overlay memory isn't fully modelled yet". Both planning-doc checkboxes for it are still open.
+
+**What held SH1 back:** the four screen overlays (STREAM, SAVELOAD, OPTION, STF_ROLL) load on top of a buffer at `0x801E2600` on the PS1, so their memory is shared with game data. In the port the code lives outside the arena, so the reset doesn't model that sharing. That's the open TODO.
+
+**What this means for MGS1:** do the same, and include the `.data`/`.bss` reset from the start. Before building it, check whether any MGS1 overlay region doubles as buffer or heap space. If none does, the simple snapshot/restore is complete and you avoid SH1's problem.
+
+## User
+
+Add the overlay cleanup plan to the docs folder in each port's respective directory, then commit changes.
+
+- tool `Bash`: Check both repos' docs and MGS link script
+
+- tool `Bash`: Inspect MGS overlay linking and planning doc
+
+- tool `Bash`: Read Step 3 section of planning doc
+
+- tool `Bash`: Find SH1 overlay reset implementation
+
+- tool `Bash`: Read SH1 overlay reset code
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/docs/Overlay Data Reset.md
+
+- tool `Write`: /home/alex/Documents/silent-hill-1-ps2-port/docs/Overlay Data Reset.md
+

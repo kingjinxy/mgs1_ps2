@@ -79,6 +79,8 @@ def compile_port():
     debug = ["-DMGS_LOG_DIRECT"] if os.environ.get("MGS_LOG_DIRECT") else []
     # MGS_PAD_SCRIPT="from-to:buttons,...": scripted pad presses for PCSX2 runs (port/src/pad_script.c).
     debug += ['-DMGS_PAD_SCRIPT="%s"' % os.environ["MGS_PAD_SCRIPT"]] if os.environ.get("MGS_PAD_SCRIPT") else []
+    # MGS_DEBUG_PLAYER=1: Snake's position and the pad state on each status line (port/src/hal_game.c).
+    debug += ["-DMGS_DEBUG_PLAYER"] if os.environ.get("MGS_DEBUG_PLAYER") else []
     objs = []
     for name in sorted(os.listdir(os.path.join(PORT, "src"))):
         if name.endswith(".c"):

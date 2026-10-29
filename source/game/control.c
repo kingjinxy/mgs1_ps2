@@ -356,12 +356,21 @@ void GM_ActControl(CONTROL *ctrl)
             ctrl->mov.vy = ctrl->hzd_height;
         }
 
+#ifdef MGS_DEBUG_PLAYER
+        SVECTOR dbg_in = ctrl->mov, dbg_col, dbg_near;
+#endif
         CheckCollide(ctrl, hzd);
+#ifdef MGS_DEBUG_PLAYER
+        dbg_col = ctrl->mov;
+#endif
 
         ctrl->mov.vx += ctrl->step.vx;
         ctrl->mov.vz += ctrl->step.vz;
 
         CheckNear(ctrl, hzd);
+#ifdef MGS_DEBUG_PLAYER
+        dbg_near = ctrl->mov;
+#endif
 
         if (ctrl->hzd_height != -0x7fff)
         {
@@ -381,6 +390,21 @@ void GM_ActControl(CONTROL *ctrl)
         }
 
         CheckHeight(ctrl, hzd);
+#ifdef MGS_DEBUG_PLAYER
+        if (ctrl == GM_PlayerControl && (dbg_in.vx != ctrl->mov.vx || dbg_in.vy != ctrl->mov.vy ||
+                                         dbg_in.vz != ctrl->mov.vz))
+        {
+            static int dbg_lines;
+            if (dbg_lines++ < 400)
+            {
+                printf("ctl %d: in %d %d %d | collide %d %d %d | step %d %d | near %d %d %d | height %d %d %d "
+                       "touches %d grounded %d levels %d %d hzd_h %d\n", GV_Time, dbg_in.vx, dbg_in.vy, dbg_in.vz,
+                       dbg_col.vx, dbg_col.vy, dbg_col.vz, ctrl->step.vx, ctrl->step.vz, dbg_near.vx, dbg_near.vy,
+                       dbg_near.vz, ctrl->mov.vx, ctrl->mov.vy, ctrl->mov.vz, ctrl->n_touches, ctrl->grounded,
+                       ctrl->levels[0], ctrl->levels[1], ctrl->hzd_height);
+            }
+        }
+#endif
     }
     else if (ctrl->r_sphere < 0)
     {

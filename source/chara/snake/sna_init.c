@@ -1902,7 +1902,14 @@ static inline int sna_weapon_switching_helper2_800511BC(SnaInitWork *work, int c
     work->field_926 = 0;
     work->field_924 = 0;
     work->field_908_weapon_actor = pWeaponActor;
+#ifdef MGS_PORT
+    /* No weapon (GM_Weapon -1): on the PS1, weapon_actions_8009ED8C[-1] is actions_no_weapon_8009ED70, the
+     * ACTPACK linked right before it. The EE's GCC aligns the array, leaving a gap: [-1] read the no-weapon
+     * table one pointer off, and standing still played a run motion (Snake ran on his own). */
+    work->actpack = GM_Weapon < 0 ? &actions_no_weapon_8009ED70 : &weapon_actions_8009ED8C[GM_Weapon];
+#else
     work->actpack = &weapon_actions_8009ED8C[GM_Weapon];
+#endif
 
     return 0;
 }
@@ -7833,6 +7840,18 @@ void sna_init_main_logic_800596FC(SnaInitWork *work)
     sna_act_helper2_helper3_8004ED6C(work);
 
     frame = work->field_9BC_anim_frame++;
+#ifdef MGS_DEBUG_PLAYER
+    {
+        static void *dbg_last;
+        static int   dbg_lines;
+        if ((void *)work->field_9B8_fn_anim != dbg_last && dbg_lines++ < 200)
+        {
+            dbg_last = (void *)work->field_9B8_fn_anim;
+            printf("sna %d: anim %p frame %d dir %d step %d %d\n", GV_Time, dbg_last, frame,
+                   gSnaMoveDir_800ABBA4, work->control.step.vx, work->control.step.vz);
+        }
+    }
+#endif
     work->field_9B8_fn_anim(work, frame);
 
     if ( GM_FirstPerson != 0 )
@@ -8347,7 +8366,14 @@ static inline void InitEmpty(SnaInitWork *work)
 
     sna_800515BC(work, 0);
 
+#ifdef MGS_PORT
+    /* No weapon (GM_Weapon -1): on the PS1, weapon_actions_8009ED8C[-1] is actions_no_weapon_8009ED70, the
+     * ACTPACK linked right before it. The EE's GCC aligns the array, leaving a gap: [-1] read the no-weapon
+     * table one pointer off, and standing still played a run motion (Snake ran on his own). */
+    work->actpack = GM_Weapon < 0 ? &actions_no_weapon_8009ED70 : &weapon_actions_8009ED8C[GM_Weapon];
+#else
     work->actpack = &weapon_actions_8009ED8C[GM_Weapon];
+#endif
     work->field_A28 = 450;
     work->field_A44 = work->control.mov;
     work->field_A60 = work->control.mov;

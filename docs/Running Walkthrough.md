@@ -368,3 +368,120 @@ sides, once padding the GPU doesn't read is masked (the upper halves of a textur
 and the CLUT of 15-bit sprites hold PS1 stack garbage). Their pixel differences (0-3%) are the renderer's seam
 pixels, as in replay mode. Loop 1300 (sub interior) still differs in the vertex colours of 75 lit polygons: a
 game-side difference (lighting, or a random flicker), not investigated yet. Matching build: 80 OK, VR 2 OK.
+
+## Step 6: deploying to the console, alongside Silent Hill (2026-10-28)
+
+The user deploys SH1 to their PS2 over Ethernet (Neutrino from a USB stick, its UDPFS server on the PC). The two
+games would have collided in four places: Neutrino's server listens on a fixed UDP port (0xF5F6) and serves one
+folder; the stick's Neutrino config names one image (`default_dvd = "udpfs:sh1_ps2.iso"`); both games broadcast
+their log to UDP 18194 and run the same IOP agent (62968), and SH1's `build-and-deploy` found "its" server with a
+pattern an MGS server would match; and the HAL's restart (`crash_ps2.c` `RELAUNCH_ELF`) booted SH1's
+`SHPS_000.01`. The user chose to serve both at once:
+- **One server, in the HAL** (`tools/udpfs_serve.py`, from SH1's wrapper): serves `~/ps2serve/`, which holds a
+  symlink per game to its image. Neutrino's server refuses paths that resolve outside its folder, so the wrapper
+  also accepts a symlink placed directly in the folder (tested: the image resolves, `../` paths are still
+  refused). Deploy flag: `~/ps2serve/.udpfs_refresh`.
+- **One log receiver, in the HAL** (`tools/ps2_log.py`): `~/ps2serve/ps2.log`; `obj_ps2/ps2.log` and SH1's
+  `build/port/ps2.log` link to it.
+- **MGS:** `build-and-deploy` (builds, links `mgs_ps2.iso` and the log, starts the shared server and receiver or
+  deploys), `tools/port/ps2_ctl.py` (SH1's, the generic commands only: ping, restart, deploy, osd, md, where),
+  `RELAUNCH_ELF` = `cdrom0:\MGSP_000.01;1` in `port/hal/hal_game_config.h`, and `obj_ps2/usb/neutrino_mgs`
+  (SH1's Neutrino folder, `default_dvd = "udpfs:mgs_ps2.iso"`) for the stick.
+- **SH1:** `build-and-deploy` uses the shared server and receiver and links `sh1_ps2.iso`; `ps2_ctl.py` uses the
+  shared flag. Each script stops SH1's old per-repo server/receiver, found by command line and working directory
+  (they were started with relative paths).
+
+Not tried on the console yet. A deploy restarts whichever game is running; to switch games, power-cycle and start
+the other Neutrino folder. PCSX2: still boots to the opening, no TLB misses.
+
+## Step 6: first boot on the console: hang in the opening (2026-10-28)
+
+The user booted `neutrino_mgs` on the PS2 (shared UDPFS server, first MGS run on hardware). Log:
+`docs/hardware/2026-10-28-opening-hang.log` (from this boot's first line to the watchdog).
+
+Reached: Neutrino → `init` → `title` (memory card check: no saves) → `opening` at 16.7 s, its voice stream
+started at 17.6 s (`NewStream 2970`), the opening's 3D scenes drawn (up to ~1600 prims a frame), no TLB misses or
+crash reports.
+
+**Hang at frame 2095 (log 80.2 s, about 63 s into the opening).** No new frame; the vertical blank interrupt and
+heartbeat carry on; the HAL watchdog reported `no frame for 10 s (frame 2095); D6 CHCR 00000085`. The voice stream
+then starves: `sd_str.c` prints `*` each time it has no data and plays silence (the first `*` in the log is at the
+hang). Found with the console still in that state:
+- `ps2_ctl.py ping`: EE idle in the kernel (pc 0x81fe0), the game thread "status 4 wait 1/25" (HAL thread asleep
+  on semaphore 25), no SIF DMA in flight (IOP ch10 CHCR 0x701, EE ch6 0x85), IOP sending nothing to the EE.
+- `ps2_ctl.py md mts_tasks_800C0C30`: mts thinks **GAME (3) and CDBIOS (10) are READY** while the active task
+  (`mts_active_task_800C0DB0`) is **IDLE (11)**. SYSTEM and SOUND_INT receiving, SOUND_MAIN sleeping. A task switch
+  was lost between mts and the HAL's threads: the scheduler has runnable tasks but the CPU stays in the idle task.
+  Same family as Step 3's "thread switch inside ChangeTh's window" (`thread_ps2.c` `switch_check`), now on hardware,
+  whose interrupt timing differs from PCSX2's.
+- Not disc bandwidth: the UDPFS server served a steady ~110 KB/s from the stream's start, while the opening played
+  normally, and after the hang alike (2.1 MB/s during the boot loads).
+
+Next: reproduce in PCSX2 (opening played to the end, several runs) or with `tools/thread_test`; read the HAL
+thread layer's state at the hang (which EE thread is current, the parked state of the GAME thread) through `md`.
+
+## Step 6: second console run, cutscenes skipped; pad and audio findings (2026-10-28)
+
+The user skipped every cutscene: `init` → `title` → `d00a` (briefing skipped) → `s00a`, through the dock's
+codec call into gameplay, no crash or hang.
+
+**Snake moved on his own.** No scripted presses were compiled in (`MGS_PAD_SCRIPT` unset). Read from the console
+(`ps2_ctl.py md`): `padbuf_800C1480` held a digital pad (ID 0x41) with buttons `df ff`, Right held (active low),
+and mts's `pad_800C14E0` agreed (0xdfff, `PAD_RIGHT`). The bytes come unchanged from ps2sdk's `padRead`
+(`pad_ps2.c`; the input-script filter reads `host:`, absent on hardware), so the pad itself reported Right: in
+digital mode many pads map the left stick onto the d-pad, and a stick resting off-centre holds a direction. MGS
+never switches modes (it reads the pad directly), unlike SH1's game code, which calls `PadSetMainMode`. Now
+`HalGame_Init` asks the HAL to put both pads in analog mode once ready (`Port_PadSetMainMode(port, 1, 0)`,
+unlocked: the Analog button still toggles). PCSX2: boots as before. Not yet tried on the console.
+
+**Codec audio artifacts (noted, not investigated).** The user heard artifacts in the dock's codec call. The log
+has `SOUND ERROR:SPU OFF ENV ON(STR_TRACK_R=0)` / `(STR_TRACK_L=0)` from `sd_str.c`: the stream's two voices
+found keyed off while their envelope still reads as on. Seen when a stream was stopped by a skip (358.97 s) and
+also 7 s into a codec stream that wasn't skipped (649.08 s). Candidates: the HAL's SPU2 key-off/envelope readback
+(`ENVX`) timing on hardware, or the stream's SPU writes falling behind. Check whether PCSX2 ever prints it.
+
+## Step 6: Snake walks on his own: reproduced in PCSX2, not input (2026-10-28)
+
+After the analog switch (console: pad ID 0x73, no buttons), the user reported Snake still moves with the stick
+released (the crouching was gone), and that PCSX2 does the same. Sampled on the console: resting stick values
+inside MGS's dead zone, holding right gives clean data (no button bits), and `GV_PadData[0]` reads status 0, dir
+-1. So the pad layer tells the game nothing, and the movement comes from the game side.
+
+`MGS_DEBUG_PLAYER=1` (link time) adds Snake's position and status and the pad's state to each HAL status line
+(`HalGame_Status`, `port/src/hal_game.c`). PS1 reference: `tools/port/gdb/snake_ps1.py` drives DuckStation to the
+dock's gameplay (presses written to mts's pad state each game loop, START through the briefing and codec) and
+logs the same. First tries failed: presses at fixed loop numbers missed the title (the PS1's opening runs on its
+own clock; now driven by the stage, via `NewLoader`); the idle log then started before the codec (status 0x20).
+
+| | right after the codec | 1 s later | then |
+|---|---|---|---|
+| PS1 (DuckStation) | -5756 1104 -1298 | the same | still for 30 s |
+| Port (PCSX2) | -5758 1130 -1294 | **-4203** 1132 -1304 | x steady, y bobbing 1074-1138, z -6/s |
+
+The port moves Snake about 1550 units along x in one second with no input, then keeps sliding slowly. Too fast for
+walking: more like collision or physics pushing him (as if inside geometry, or in a current). The console's
+resting position (-4202 1074 -3046) fits the same slide, stopped by something. No `INCLUDE_ASM` or unwrapped
+fixed addresses in `libhzd`, `game`, `libgv`, `libdg`. Next: per-loop comparison from the codec's end (Snake's
+control state, the collision results of `libhzd`), to find the first loop where the port differs.
+
+## Step 6: Snake ran on his own: the no-weapon action table (2026-10-28)
+
+Narrowed in PCSX2 with `MGS_DEBUG_PLAYER` (now also passed to the game's files by `build_ps2.py`), from the
+outside in:
+1. `game/control.c` `GM_ActControl`, per stage for Snake's control: collision (`CheckCollide`, `CheckNear`,
+   `CheckHeight`) barely moved him. His `step` was ~108 per loop along +x with a 17-loop wobble (a run cycle's
+   root motion); collision only stopped him at a wall (x -4202).
+2. `chara/snake/sna_init.c`, Snake's state function (`field_9B8_fn_anim`, looked up with `nm`): `sna_anim_idle`
+   from loop 1907, no direction (`gSnaMoveDir` -1).
+3. `game/motion.c` `NextKeyframe` (temporary print): the decoded root delta of the playing motion was (0, 108):
+   the bitstream decode and the GTE rotation were right, the motion was a run.
+4. `sna_anim_idle` takes its motion from `work->actpack->still->stand`, and `actpack` is
+   `&weapon_actions_8009ED8C[GM_Weapon]`: with no weapon, `GM_Weapon` is -1. On the PS1, index -1 is
+   `actions_no_weapon_8009ED70`, the `ACTPACK` (7 pointers, 0x1C bytes) linked right before the array. In the
+   port they are 0x20 apart (the EE's GCC aligns the array), so [-1] began 4 bytes into the no-weapon table:
+   `still` was its `move` table, and standing played a run motion.
+
+Fixed under `MGS_PORT` at both sites: `GM_Weapon < 0 ? &actions_no_weapon_8009ED70 : &weapon_actions[...]`.
+PCSX2: Snake stays at -5756 1104 -1298 after the codec, the PS1's position (`tools/port/gdb/snake_ps1.py`).
+The other `[GM_Weapon]` indexings are guarded (`>= 0`) or use `+ 1`. The pattern (a negative index reaching the
+variable linked before an array) may recur elsewhere in the decomp. Matching build: 80 OK, VR 2 OK.

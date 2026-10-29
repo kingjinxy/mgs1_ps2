@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "port/hal_game.h"
+#include "port/pad.h"
 
 extern void Port_LogDirect(void); /* HAL ps2/log_ps2.c */
 
@@ -41,9 +42,28 @@ void HalGame_Init(void)
     /* The PS1's printf writes at once; MGS prints its boot steps without newlines ("mem:", "pad:" ...). */
     setvbuf(stdout, NULL, _IONBF, 0);
     save_icon_build();
+    /* Pads start in analog mode (the HAL's pad thread switches each once it's ready), unlocked so the
+     * Analog button still toggles. MGS never asks for it (mts_pad.c reads whatever mode the pad is in), and
+     * in digital mode some pads map the left stick onto the d-pad: a stick resting off-centre held Right. */
+    Port_PadSetMainMode(0, 1, 0);
+    Port_PadSetMainMode(1, 1, 0);
 #ifdef MGS_LOG_DIRECT
     /* Debugging: console writes straight through, not via the log thread (which the vertical blank
      * handler wakes, so it is silent until the game sets that up). */
     Port_LogDirect();
 #endif
 }
+
+#ifdef MGS_DEBUG_PLAYER
+/* Debugging: Snake's position, status and the pad (GV_PadData[0]: status, dir) on each status line (the
+ * HAL calls this about once a second, after its DrawOTag statistics). */
+void HalGame_Status(void)
+{
+    extern short          GM_PlayerPosition[4]; /* SVECTOR */
+    extern int            GM_PlayerStatus;
+    extern unsigned short GV_PadData[];         /* GV_PAD: status, press, release, quick, dir, analog */
+    printf("; snake %d %d %d status %08x; pad %04x dir %d analog %d\n", GM_PlayerPosition[0],
+           GM_PlayerPosition[1], GM_PlayerPosition[2], GM_PlayerStatus, GV_PadData[0], (short)GV_PadData[4],
+           (short)GV_PadData[5]);
+}
+#endif

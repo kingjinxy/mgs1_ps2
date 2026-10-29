@@ -1,0 +1,92 @@
+#!/bin/bash
+# Builds the port's disc image (obj_ps2/mgs_ps2.iso) and serves it to the PS2 (Neutrino over UDPFS).
+#
+#   ./build-and-deploy              build; if the server is running, switch it to the new image and
+#                                   restart the game on the PS2; if not, start the server (and the
+#                                   console log receiver), then boot the PS2 yourself
+#   ./build-and-deploy --restart    also stop and start the server and log receiver fresh first
+#   ./build-and-deploy --no-build   skip the build (serve / deploy the image as it is)
+#
+# The server and log receiver are the HAL's (tools/udpfs_serve.py, tools/ps2_log.py), shared with the
+# Silent Hill port: one server serves ~/ps2serve/, which links to both games' images (mgs_ps2.iso and
+# sh1_ps2.iso), and the console log goes to ~/ps2serve/ps2.log (obj_ps2/ps2.log links to it). The game is
+# chosen on the PS2 by the Neutrino folder started: neutrino_mgs boots mgs_ps2.iso (obj_ps2/usb/, copy it to
+# the USB stick next to Silent Hill's). A deploy restarts whichever game is running.
+#
+# Server output: ~/ps2serve/udpfs_server.log; log receiver output: ~/ps2serve/ps2_log.out.
+set -e
+cd "$(dirname "$0")"
+
+RESTART=0
+BUILD=1
+for arg in "$@"; do
+    case "$arg" in
+        --restart) RESTART=1 ;;
+        --no-build) BUILD=0 ;;
+        -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
+        *) echo "unknown option: $arg (see --help)"; exit 1 ;;
+    esac
+done
+
+HAL=$(realpath "${MGS_HAL:-../psx-to-ps2-HAL}")
+SERVE=~/ps2serve
+mkdir -p "$SERVE"
+
+if [ "$BUILD" = 1 ]; then
+    echo "== building"
+    (cd build && python3 link_ps2.py) > obj_ps2/build_link.log 2>&1 || {
+        echo "build failed (obj_ps2/build_link.log):"; tail -n 20 obj_ps2/build_link.log; exit 1; }
+fi
+[ -f obj_ps2/mgs_ps2.iso ] || { echo "no obj_ps2/mgs_ps2.iso: build first"; exit 1; }
+
+# This game's image and log in the shared folder.
+ln -sfn "$(realpath obj_ps2/mgs_ps2.iso)" "$SERVE/mgs_ps2.iso"
+touch "$SERVE/ps2.log"
+[ -L obj_ps2/ps2.log ] || { [ -f obj_ps2/ps2.log ] && cat obj_ps2/ps2.log >> "$SERVE/ps2.log"; rm -f obj_ps2/ps2.log; }
+ln -sfn "$SERVE/ps2.log" obj_ps2/ps2.log
+
+running() { pgrep -f "$HAL/tools/$1" > /dev/null; }
+
+# Silent Hill's own server and log receiver (from before they were shared) hold the same ports. They were
+# started with relative paths from that repository: found by command line and working directory.
+SH1=$(realpath ../silent-hill-1-ps2-port 2>/dev/null || true)
+for p in udpfs_serve.py ps2_log.py; do
+    for pid in $(pgrep -f "tools/port/$p"); do
+        [ "$(readlink "/proc/$pid/cwd")" = "$SH1" ] || continue
+        echo "== stopping Silent Hill's old $p (pid $pid): the HAL's shared one replaces it"
+        kill "$pid" 2>/dev/null || true
+        sleep 1
+    done
+done
+
+if [ "$RESTART" = 1 ]; then
+    echo "== stopping the server and log receiver"
+    for p in udpfs_serve.py ps2_log.py; do
+        for pid in $(pgrep -f "$HAL/tools/$p"); do kill "$pid" 2>/dev/null || true; done
+    done
+    sleep 1
+fi
+
+STARTED=0
+if ! running udpfs_serve.py; then
+    echo "== starting the UDPFS server ($SERVE/udpfs_server.log)"
+    nohup python3 -u "$HAL/tools/udpfs_serve.py" --root "$SERVE" > "$SERVE/udpfs_server.log" 2>&1 &
+    STARTED=1
+fi
+if ! running ps2_log.py; then
+    echo "== starting the console log receiver ($SERVE/ps2_log.out)"
+    nohup python3 -u "$HAL/tools/ps2_log.py" --log "$SERVE/ps2.log" >> "$SERVE/ps2_log.out" 2>&1 &
+fi
+
+if [ "$STARTED" = 1 ]; then
+    echo "== server started: start neutrino_mgs on the PS2 (uLaunchELF) now"
+    exit 0
+fi
+
+echo "== switching the server to the new image and restarting the game"
+echo "   (this restarts whichever game the PS2 is running: if it's Silent Hill, power-cycle and start neutrino_mgs)"
+if timeout 40 python3 tools/port/ps2_ctl.py deploy; then
+    echo "   done; if the PS2 doesn't come back within ~30 s, power-cycle it (hold power to switch off) and start neutrino_mgs again: it will load the new image"
+else
+    echo "   the PS2 didn't answer (frozen or off): power-cycle it and start neutrino_mgs again; it will load the new image"
+fi

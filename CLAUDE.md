@@ -60,6 +60,12 @@ Add `--variant=vr_exe` for `SLPM_862.49`. The PSY-Q toolchain is `../psyq_sdk`. 
 
 ## Real hardware
 
+- **Deploy with `./build-and-deploy`** (`--restart`, `--no-build`). The UDPFS server and log receiver are the
+  HAL's (`tools/udpfs_serve.py`, `tools/ps2_log.py`), shared with the SH1 port: one server serves `~/ps2serve/`,
+  which links to both images; the log is `~/ps2serve/ps2.log` (`obj_ps2/ps2.log` links to it). The PS2 picks the
+  game by the Neutrino folder started: `neutrino_mgs` (from `obj_ps2/usb/`) boots `mgs_ps2.iso`. A deploy or
+  `tools/port/ps2_ctl.py` command reaches whichever game is running.
+
 - **A hung PS2 needs a power cycle.** RESET has never brought Neutrino back on the user's console.
   Ask them to hold power to switch off, turn it on, and restart Neutrino from uLaunchELF. A power
   cycle is a cold boot, which also separates restart-path hangs from build bugs.

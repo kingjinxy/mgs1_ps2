@@ -27,6 +27,10 @@
  * polls them instead of VSync (ps2/pad_ps2.c). */
 #define HAL_GAME_PAD_THREAD 1
 
+/* Restarts (crash restarts, tools/port/ps2_ctl.py restart/deploy) boot the disc's BOOT2 again
+ * (build/link_ps2.py's SYSTEM.CNF). */
+#define RELAUNCH_ELF "cdrom0:\\MGSP_000.01;1"
+
 /* Not set yet: the disc (decision B in docs/Planning Doc.md replaces the HAL's libcd_ps2.c);
  * build/link_ps2.py leaves that file out until then. */
 

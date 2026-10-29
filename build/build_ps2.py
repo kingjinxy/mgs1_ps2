@@ -38,6 +38,8 @@ CFLAGS = ["-O2", "-G0", "-std=gnu89", "-nostdinc", "-fno-strict-aliasing", "-fno
           "-Wno-error=implicit-function-declaration", "-Wno-error=int-conversion",
           "-Wno-error=incompatible-pointer-types", "-Wno-error=implicit-int", "-Wno-error=return-mismatch",
           "-D_LANGUAGE_C", "-DLANGUAGE_C", "-DMGS_PORT", "-DINTEGRAL"]
+# MGS_DEBUG_PLAYER=1: debugging prints about Snake (game/control.c; port/src/hal_game.c, via link_ps2.py).
+CFLAGS += ["-DMGS_DEBUG_PLAYER"] if os.environ.get("MGS_DEBUG_PLAYER") else []
 
 
 def main_exe_sources():

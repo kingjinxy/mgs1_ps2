@@ -99,10 +99,19 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [ ] Streams: the port's `St*` functions are stubbed, so the dock's opening voice-over/subtitle stream ends at
       once (`FS_StreamGetData` gets no packets; first seen at loop 572 before the timing work) and the intro's
       demo stream differs (`DG_UnDrawFrameCount` at 497, the seed at 808). A port gap (Step 6), not the harness.
-- [ ] Loop 1016: Snake's first running steps after the ladder: x/z one loop ahead of the PS1's, y a few units
-      off. Find out whether it's the port or the reference's sampling (Lua samples at the end of a loop's first
-      video frame; a loop longer than one vertical blank is sampled midway). `GM_PlayTimeSeconds` differs that
-      way at loop 315 (a 212-blank load loop).
+- [x] Sample points (2026-10-30): a loop runs `gvd.c`'s `Act` (`GV_Time`, clock, passage time), `dgd.c`'s wait
+      for the vertical blank and pad update, then the actors. BizHawk's line N is taken during that wait:
+      loop N's timing, loop N-1's game state, and loop N-1's pads; loop N's pads are on line N+1 (with line N's,
+      the title goes to New Game a loop late). The port samples at the end of `gvd.c`'s `Act` to match.
+- [x] The port's trace fields 18-19 (with `trace_debug.lua`, which stops at frame 3,300 and adds them):
+      `GM_PlayerStatus` and Snake's `CONTROL` (compared without its pointers).
+- [x] The tables are read from `host:` at startup (`tas_*.bin` next to the disc image), not linked in:
+      embedded, they pushed `.bss` past 16 MB, and the HAL's ordering tables keep 24-bit links (TLB misses in
+      `DrawOTagImpl` at boot). `port/linkfile` now asserts `_end_bss <= 0x1000000`. Placing them after `.bss`
+      fails: ps2sdk's `crt0` zeroes up to `_end` and starts the heap there.
+- [ ] Loop 1012 (0:00:48.50 in the movie): Snake's `CONTROL.turn` takes the stick's direction (2951) a loop
+      earlier than on the PS1, with the same `GV_PadData` (dir 2951) and `GM_PlayerStatus`; his rotation and,
+      from loop 1016, his position follow a loop early. A port difference in Snake's control code.
 - [ ] Load end 4 (after the dock's alert): the port's at loop 5635, the PS1's 5457: after the divergence above.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

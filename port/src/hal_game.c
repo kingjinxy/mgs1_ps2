@@ -37,6 +37,8 @@ static void save_icon_build(void)
     }
 }
 
+extern void Port_TasInit(void);
+
 void HalGame_Init(void)
 {
     /* The PS1's printf writes at once; MGS prints its boot steps without newlines ("mem:", "pad:" ...). */
@@ -47,6 +49,7 @@ void HalGame_Init(void)
      * in digital mode some pads map the left stick onto the d-pad: a stick resting off-centre held Right. */
     Port_PadSetMainMode(0, 1, 0);
     Port_PadSetMainMode(1, 1, 0);
+    Port_TasInit(); /* tas_replay.c: TAS replays only */
 #ifdef MGS_LOG_DIRECT
     /* Debugging: console writes straight through, not via the log thread (which the vertical blank
      * handler wakes, so it is silent until the game sets that up). */

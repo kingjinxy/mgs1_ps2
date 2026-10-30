@@ -97,6 +97,10 @@ SECTIONS {
 	_end_bss = .;
 	/* The PS1 executable's end of BSS (mts_get_bss_tail): for now the ELF's. */
 	_bss_orgend = .;
+	/* The HAL's ordering tables keep PS1-style 24-bit links (libgpu_port.c ptr24): every OT and primitive the
+	   game links (its .data/.bss, the PS1 RAM) must be below 16 MB, or the links wrap (TLB misses in
+	   DrawOTagImpl). */
+	ASSERT(_end_bss <= 0x1000000, "game data past 16 MB: the ordering tables' 24-bit links would wrap")
 
 	_end = . ;
 	PROVIDE(end = .);

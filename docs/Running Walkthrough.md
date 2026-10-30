@@ -535,3 +535,22 @@ the final `trace.lua`; `xz` 105 MB to 1.5 MB) and a README on remaking it and re
 `.xz` directly. The unattended full run ended correctly: `OK`, last line frame 313,202 in `roll`, BizHawk closed
 itself. Matching build: 80 OK, VR 2 OK; the port links with and without the TAS options; SH1 links with the HAL
 changes.
+
+## Step 6: TAS harness fixes; 16 MB limit; Snake turns a loop early (2026-10-30)
+
+**Sample points.** A loop runs `gvd.c`'s `Act` (`GV_Time`, clock, passage time), `dgd.c`'s wait for the vertical
+blank and pad update, then the actors; BizHawk's line N is taken during the wait. Snake's position diverging at
+loop 1016 first looked like the trace's sampling, so the pads were tried both ways: with line N's pads the title
+goes to New Game a loop late; with line N+1's (kept) it matches. The port's trace samples at the end of
+`gvd.c`'s `Act`, once per loop.
+
+**TLB misses at boot from a bigger ELF.** With the full replay tables linked in (5.6 MB), `DrawOTagImpl` read
+`0x20257`/`0x43170`: `.bss` (the ordering tables, `DG_Chanls`) had passed 16 MB, and the HAL keeps ordering-table
+links as 24-bit PS1 addresses. Small tables: no misses. Tried: a `.tasdata` section after `.bss` (crt0 zeroes
+`_fbss`..`_end` and starts the heap at `_end`). Kept: the tables are read from `host:` into the heap at startup
+(`Port_TasInit`), and `port/linkfile` asserts `_end_bss <= 0x1000000`.
+
+**Snake's turn.** `trace_debug.lua` (stops at frame 3,300) and the port's trace add `GM_PlayerStatus` and Snake's
+`CONTROL`. Loop 1012 (0:00:48.50 in the movie): same `GV_PadData` (dir 2951) and status, but the port's
+`CONTROL.turn` takes 2951 a loop before the PS1's; rotation and position follow a loop early. `compare_trace.py`
+prints movie timestamps. Matching build: 80 OK, VR 2 OK.

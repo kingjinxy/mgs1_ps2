@@ -7662,3 +7662,192 @@ SH1 still links against the changed HAL. Now updating the walkthrough and the co
 
 - tool `Bash`: Update docs and rebuild conversation archive
 
+## Claude
+
+The archive gained 1,111 lines and lost none. Committing the MGS repo:
+
+- tool `Bash`: Show MGS repo changes before commit
+
+- tool `Bash`: Commit TAS work in MGS repo
+
+## Claude
+
+Now the HAL repo. I'll commit only my two files: `tools/ps2_log.py` and `tools/udpfs_serve.py` were already untracked before today, so I'm leaving them alone.
+
+- tool `Bash`: Commit HAL changes
+
+## Claude
+
+Both repos are committed. Nothing is pushed.
+
+- **MGS** (`ps2-port`), `5c77ce122` "Port: TAS regression test (BizHawk reference trace, replay by game loop)": the `tas/` folder, the TAS tools, the replay code and its hooks, the `MGS_MC_IMAGE`/`MGS_TAS_*` build options, the docs and the conversation archive.
+- **HAL**, `541b71a` "Fixed test memory cards; rand state accessor": `memcard_fixed.c`, the `#ifndef` around `memcard_ps2.c`, and `Hal_RandSeed`. I committed this directly on `main`, because that's where the HAL's existing history is. `tools/ps2_log.py` and `tools/udpfs_serve.py` were already untracked before today, so I left them out.
+
+All checks before committing passed:
+- **Matching build:** 80 OK, and 2 OK for the VR executable.
+- **Port builds:** it links both with and without the TAS options, and the normal build contains none of the TAS data.
+- **SH1:** it links with the HAL changes.
+- **Conversation archive:** 1,111 lines added, none removed.
+
+The docs record that the unattended full run ended properly. The plan's next open items are the stubbed streams and the loop-1016 movement difference.
+
+## User
+
+Let’s proceed with those
+
+## Claude
+
+Starting with the loop-1016 difference, since it's narrow and decides whether the reference can be trusted at that level of detail. Then the streams. First, the movie frames at which the PS1 samples were taken around there:
+
+- tool `Bash`: Show frame timing of samples around 1016
+
+- tool `Bash`: Find where pad update runs in the loop
+
+- tool `Bash`: Read dgd.c context of pad update
+
+- tool `Bash`: Measure stream call time vs sample time
+
+- tool `Bash`: Shift pad and stream data; move trace hook
+
+- tool `Bash`: Read raw pad doc comment lines
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+- tool `Bash`: Rebuild with shifted data and compare
+
+- tool `Bash`: List unique TLB miss PCs and context
+
+- tool `Bash`: Map TLB miss PC to function
+
+- tool `Bash`: Find startup hook and DrawOTag loop
+
+- tool `Bash`: Read HalGame_Init; find DrawOTagImpl source
+
+## Claude
+
+Adding a `Port_TasInit` called from `HalGame_Init` that opens the trace file before the game starts:
+
+- tool `Bash`: Locate trace file open code
+
+- tool `Bash`: Read Port_TasTrace beginning
+
+## Claude
+
+The load-end scan of the 164,000-entry table also runs inside the first loop, so it moves to init too:
+
+- tool `Bash`: Open trace at init; rebuild and rerun
+
+## Claude
+
+Still 8 misses, so the timing theory was wrong. Checking where they fall now:
+
+- tool `Bash`: Context of TLB misses; check older runs
+
+- tool `Bash`: Find DrawOTag callers in game code
+
+- tool `Bash`: Read DG OT draw function and callers
+
+- tool `Bash`: Read DG frame start, vsync callback, end frame
+
+## Claude
+
+The drawing path is involved, but before going further I'll check whether the hook's position really is the trigger. Temporarily moving it back before `GV_Time++` and booting for 20 seconds:
+
+- tool `Bash`: Bisect: trace hook back before GV_Time++
+
+- tool `Bash`: Test with small tables to check size effect
+
+- tool `Bash`: Check PS1 memory mapping and ELF extent
+
+- tool `Bash`: Check OT addresses and 24-bit link handling
+
+- tool `Bash`: Find toolchain variable definitions
+
+- tool `Bash`: Move TAS data after bss; assert 16 MB; rerun
+
+- tool `Bash`: Check which symbols crt0 clears and uses for heap
+
+- tool `Bash`: Disassemble crt0 to find bss clear bounds
+
+- tool `Bash`: Find crt0 and bss boundary symbols
+
+- tool `Bash`: List symbols crt0 references
+
+- tool `Bash`: Survey table symbol uses in tas_replay.c
+
+- tool `Bash`: Load TAS tables from host at init
+
+- tool `Bash`: Rebuild with host-loaded tables and rerun
+
+- tool `Bash`: Read CONTROL struct and player globals
+
+- tool `Bash`: Get player symbol addresses and HZD_EVT size
+
+- tool `Bash`: Write debug trace Lua with Snake state
+
+- tool `Bash`: Run debug trace to frame 3300
+
+## Claude
+
+The debug reference works (1,210 loops). The port's trace gets the same two fields at the same positions, with placeholders for the four reference-only fields before them:
+
+- tool `Bash`: Add Snake state to port trace; compare
+
+- tool `Bash`: Compare pad dir and Snake turn per loop
+
+- tool `Bash`: Check actor priority levels for gvd and dgd
+
+- tool `Bash`: Revert pad shift; rebuild and compare both
+
+- tool `Bash`: Move port trace to after pad update
+
+## Claude
+
+`script.c` also calls `GV_UpdatePadSystem`, for the script's pad commands, so the trace hook can run twice in one loop. Guarding it to one line per loop:
+
+- tool `Bash`: Rebuild with trace after pad update; compare
+
+- tool `Bash`: Restore N+1 pads; add movie timestamps; rerun
+
+## Claude
+
+Back to the consistent version, now with movie timestamps. Updating the plan with today's findings:
+
+- tool `Bash`: Record findings in plan doc
+
+## Claude
+
+**Loop numbers:** a "loop" is `GV_Time`, the game's own frame counter. It goes up by one on each pass of the main loop, which is 30 times a second in normal play. The comparison now shows each loop as a time in the TAS movie as well as the movie frame, for example:
+
+```
+Snake CONTROL   first differs at loop 1012 (s00a, movie 0:00:48.50, frame 2907): turn 0000870b00000000/0000000400000000
+```
+
+So you can open the TAS encode at 0:48.5 and see the moment: Snake has just stepped off the ladder at the dock and starts to run.
+
+**The loop-1016 difference** turned out to start earlier, at loop 1012 (0:48.50).
+- **What differs:** I added Snake's internal state to both traces: `GM_PlayerStatus` and his `CONTROL` struct. Both games get the same stick direction (2951) on the same loop, but the port's Snake sets his turn target one loop earlier than the PS1's. His rotation, and from loop 1016 his position, then stay one loop ahead.
+- **It's the port:** I checked the harness's timing against the title screen. With the pads one loop earlier, the title goes to New Game a loop late; as they are now, it matches the PS1 exactly. So the harness feeds the right pads at the right time, and this is a real difference in how the port runs Snake's control code. That's what I'll look into next.
+
+**Fixed along the way:**
+- **TLB misses:** the full-size replay tables made the ELF big enough to push the game's data past 16 MB. The HAL stores ordering-table links as 24-bit PS1-style addresses, so the links wrapped and caused TLB misses at boot.
+  - The tables are now read from `host:` at startup instead of being built in.
+  - The linker refuses any build whose game data passes 16 MB, so normal builds are protected too.
+- **Sample points:** the port's trace now samples at the same point in the loop as BizHawk's. The details are in the plan.
+
+Streams are still to do.
+
+None of today's changes since the last commit are committed yet. Shall I commit them now and then go into Snake's turn code, or keep going first?
+
+## User
+
+Commit and then go into Snake’s turn code
+
+## Claude
+
+Before the commit, CLAUDE.md asks for the matching build check (game files changed again), a walkthrough entry and the conversation archive:
+
+- tool `Bash`: Matching build, VR check, plain port link
+
+- tool `Bash`: Walkthrough entry, conversation archive, status
+

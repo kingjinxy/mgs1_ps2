@@ -36,10 +36,6 @@ static void Act( Work *work )
 {
     int ticks;
 
-#ifdef MGS_PORT
-    extern void Port_TasTrace( void ); /* port/src/tas_replay.c: TAS replays, the finished loop's state */
-    Port_TasTrace();
-#endif
     GV_Time++;
 
     ticks = mts_get_tick_count();
@@ -61,6 +57,10 @@ static void Act( Work *work )
         // Flip active buffer
         GV_Clock ^= 1;
     }
+#ifdef MGS_PORT
+    extern void Port_TasTrace( void ); /* port/src/tas_replay.c: TAS replays, where BizHawk's trace samples */
+    Port_TasTrace();
+#endif
 
     if ( GV_PauseLevel == 0 )
     {

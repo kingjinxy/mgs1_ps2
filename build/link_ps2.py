@@ -101,13 +101,11 @@ def compile_port():
             os.makedirs(os.path.dirname(obj), exist_ok=True)
             run([CC, "-c", *PS2_CFLAGS, *debug, os.path.join(PORT, "src", name), "-o", obj])
             objs.append(obj)
-    for env, name in (("MGS_TAS_PADS", "mgs_tas_pads"), ("MGS_TAS_RAW", "mgs_tas_raw"),
-                      ("MGS_TAS_TIME", "mgs_tas_time")):
+    for env, name in (("MGS_TAS_PADS", "tas_pads.bin"), ("MGS_TAS_RAW", "tas_raw.bin"),
+                      ("MGS_TAS_TIME", "tas_time.bin")):
+        # read from host: at startup (port/src/tas_replay.c), not embedded: they'd push .bss past 16 MB
         if os.environ.get(env):
-            c = os.path.join(OUT, "port", name + ".c")
-            run([os.path.join(PS2SDK, "bin", "bin2c"), os.path.expanduser(os.environ[env]), c, name])
-            run([CC, "-c", "-O2", "-G0", c, "-o", c[:-2] + ".o"])
-            objs.append(c[:-2] + ".o")
+            shutil.copy(os.path.expanduser(os.environ[env]), os.path.join(OUT, name))
     return objs
 
 

@@ -1,12 +1,14 @@
 /** @brief TAS replay (docs/TAS Testing Plan.md, Phase 3): the pads the PS1 game read, game loop by game loop.
  *
- * MGS_TAS_PADS=<file> (build/link_ps2.py; made by tools/port/tas/trace_to_pads.py from BizHawk's trace)
- * links in mgs_tas_pads: records of a little-endian u32 GV_Time and the 64 bytes of GV_PadData[0..3] the PS1
+ * MGS_TAS_PADS=<file> (build/link_ps2.py; made by tools/port/tas/trace_to_pads.py from BizHawk's trace) is
+ * copied next to the disc image as tas_pads.bin, and Port_TasInit reads it from host: (likewise MGS_TAS_RAW,
+ * MGS_TAS_TIME: tas_raw.bin, tas_time.bin) into the heap: embedded, the 5.6 MB of tables pushed the game's
+ * .bss past 16 MB (see port/linkfile). mgs_tas_pads holds records of a little-endian u32 GV_Time and the 64 bytes of GV_PadData[0..3] the PS1
  * game had after GV_UpdatePadSystem in that loop, one record each time they change. Port_TasPads (end of
  * libgv/pad.c's GV_UpdatePadSystem) overwrites GV_PadData with the record for the current GV_Time, so the
  * game sees the PS1's pads however the port's pad and timing differ.
  *
- * With MGS_TAS_TIME=<file> too, mgs_tas_time holds 24 bytes per loop from GV_Time 0 (little-endian): the
+ * With MGS_TAS_TIME too, mgs_tas_time holds 24 bytes per loop from GV_Time 0 (little-endian): the
  * tick the PS1's FS_StreamGetTick returned (s32; 0x80000000: no stream), and the PS1's GM_GameStatus,
  * GM_LoadRequest, GV_PassageTime, rand seed and GV_Clock at the end of the loop. The port's timing then follows the
  * PS1's, so the game loops line up:
@@ -22,29 +24,38 @@
  *    different number of loops before New Game (the boot's wait isn't a stage load), and a load's own
  *    loops call rand.
  *
- * With MGS_TAS_RAW=<file> too, mgs_tas_raw holds the PS1's raw mts pads (pad_800C14E0[0..1], 16 bytes) and
+ * With MGS_TAS_RAW too, mgs_tas_raw holds the PS1's raw mts pads (pad_800C14E0[0..1], 16 bytes) and
  * pad init states (pad_state_800C14F0[0..1], 8 bytes) as records of a u32 GV_Time and the 24 bytes, one each
- * time they change, taken at the end of the loop before (closest to when the game reads them). Port_TasRawPads
+ * time they change, as at the loop's vertical blank (just before the game reads them). Port_TasRawPads
  * (the end of mts_pad.c's do_control, in the vertical blank interrupt) puts them in place of the port's pads:
  * the readers that bypass GV_PadData (cancel.c's cutscene skip, gamed.c, movie.c) and
  * mts_get_pad_vibration_type (Psycho Mantis, GM_CONFIG_VIBRATION_OFF) then see the PS1's controller.
  *
- * Port_TasTrace (libgv/gvd.c's Act, before GV_Time moves on) writes the finished loop's state to
- * host:tas_trace.log, one line per loop in tools/port/tas/trace.lua's format (the first field is the
- * port's vertical blank count, not a movie frame), for tools/port/tas/compare_trace.py.
+ * Port_TasTrace (the end of libgv/gvd.c's Act: GV_Time, GV_Clock and GV_PassageTime are the new loop's, the
+ * game state the last loop's, which is where BizHawk's trace samples) writes host:tas_trace.log, one line per
+ * loop in tools/port/tas/trace.lua's format (the first field is the port's vertical blank count, not a movie
+ * frame), for tools/port/tas/compare_trace.py.
  * Without the define both do nothing. */
 
 #include <stdio.h>
 #include <string.h>
 
 #ifdef MGS_TAS
-extern unsigned int  size_mgs_tas_pads;
-extern unsigned char mgs_tas_pads[];
+#include <stdlib.h>
+
+static unsigned char* mgs_tas_pads; /* NULL: no table (host: file missing) */
+static unsigned int   size_mgs_tas_pads;
+static unsigned char* mgs_tas_raw;
+static unsigned int   size_mgs_tas_raw;
+static unsigned char* mgs_tas_time;
+static unsigned int   size_mgs_tas_time;
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
 extern int          DG_UnDrawFrameCount;
 extern short        linkvarbuf[96];
 extern unsigned char GV_PadData[64], pad_800C14E0[16], GM_PlayerPosition[8];
+extern int          GM_PlayerStatus;
+extern void*        GM_PlayerControl;
 extern char*        GM_GetArea(int flag);
 extern int          mts_get_tick_count(void);
 extern unsigned int Hal_RandSeed(void);
@@ -57,10 +68,32 @@ extern void         srand(unsigned int seed);
 #define TIME_RECORD 24
 #define MAX_LOADS 4096
 
-extern unsigned int  size_mgs_tas_raw __attribute__((weak));
-extern unsigned char mgs_tas_raw[] __attribute__((weak));
-extern unsigned int  size_mgs_tas_time __attribute__((weak));
-extern unsigned char mgs_tas_time[] __attribute__((weak));
+/** A host: file into the heap (NULL if missing). */
+static unsigned char* load(const char* name, unsigned int* size)
+{
+    FILE*          f = fopen(name, "rb");
+    unsigned char* data;
+    long           n;
+    if (!f)
+    {
+        printf("tas: no %s\n", name);
+        return 0;
+    }
+    fseek(f, 0, SEEK_END);
+    n = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    data = malloc(n > 0 ? n : 1);
+    if (!data || fread(data, 1, n, f) != (size_t)n)
+    {
+        printf("tas: reading %s failed\n", name);
+        free(data);
+        fclose(f);
+        return 0;
+    }
+    fclose(f);
+    *size = (unsigned int)n;
+    return data;
+}
 
 static unsigned int read_u32(const unsigned char* p)
 {
@@ -191,7 +224,7 @@ void Port_TasPads(void)
 #ifdef MGS_TAS
     static unsigned int next;
     unsigned int        count = size_mgs_tas_pads / RECORD, time = (unsigned int)GV_Time;
-    if (count == 0 || time < read_u32(mgs_tas_pads))
+    if (!mgs_tas_pads || count == 0 || time < read_u32(mgs_tas_pads))
     {
         return;
     }
@@ -207,35 +240,54 @@ void Port_TasPads(void)
 #endif
 }
 
+#ifdef MGS_TAS
+static FILE* s_Trace;
+static int   s_Ps1Loads;
+static int   s_Ps1LoadEnd[MAX_LOADS]; /* the PS1's load ends: the loops whose line has GM_LoadRequest back to 0 */
+#endif
+
+/** HalGame_Init, before the game starts: the file and the table scan here, not in a game loop (a few
+ * milliseconds after the GV_Clock flip let the HAL draw an ordering table not yet built: TLB misses in
+ * DrawOTagImpl). */
+void Port_TasInit(void)
+{
+#ifdef MGS_TAS
+    int t, prev = 0, n;
+    mgs_tas_pads = load("host:tas_pads.bin", &size_mgs_tas_pads);
+    mgs_tas_raw  = load("host:tas_raw.bin", &size_mgs_tas_raw);
+    mgs_tas_time = load("host:tas_time.bin", &size_mgs_tas_time);
+    n            = mgs_tas_time ? (int)(size_mgs_tas_time / TIME_RECORD) : 0;
+    for (t = 0; t < n && s_Ps1Loads < MAX_LOADS; t++)
+    {
+        int request = (int)read_u32(mgs_tas_time + t * TIME_RECORD + 8);
+        if (prev && !request)
+        {
+            s_Ps1LoadEnd[s_Ps1Loads++] = t;
+        }
+        prev = request;
+    }
+    s_Trace = fopen("host:tas_trace.log", "w");
+    printf("tas: replay, %d PS1 load ends, trace %s\n", s_Ps1Loads, s_Trace ? "host:tas_trace.log" : "unavailable");
+#endif
+}
+
 void Port_TasTrace(void)
 {
 #ifdef MGS_TAS
-    static FILE*         f;
-    static int           failed, loads, ps1_loads = -1, prev_request;
-    static int           ps1_load_end[MAX_LOADS];
+    static int           loads, prev_request, traced = -1;
+    FILE*                f = s_Trace;
     const char*          stage;
     const unsigned char* r;
-    if (ps1_loads < 0)
+    if (GV_Time == traced)
     {
-        /* the PS1's load ends: the loops at whose end GM_LoadRequest is back to 0 */
-        int t, prev = 0, n = mgs_tas_time ? (int)(size_mgs_tas_time / TIME_RECORD) : 0;
-        ps1_loads       = 0;
-        for (t = 0; t < n && ps1_loads < MAX_LOADS; t++)
-        {
-            int request = (int)read_u32(mgs_tas_time + t * TIME_RECORD + 8);
-            if (prev && !request)
-            {
-                ps1_load_end[ps1_loads++] = t;
-            }
-            prev = request;
-        }
+        return; /* once per loop */
     }
-    if (prev_request && !GM_LoadRequest && loads < ps1_loads)
+    if (prev_request && !GM_LoadRequest && loads < s_Ps1Loads)
     {
-        if (GV_Time != ps1_load_end[loads])
+        if (GV_Time != s_Ps1LoadEnd[loads])
         {
-            printf("tas: load end %d at loop %d, the PS1's at %d\n", loads, GV_Time, ps1_load_end[loads]);
-            GV_Time = ps1_load_end[loads];
+            printf("tas: load end %d at loop %d, the PS1's at %d\n", loads, GV_Time, s_Ps1LoadEnd[loads]);
+            GV_Time = s_Ps1LoadEnd[loads];
         }
         if ((r = time_record()) != 0)
         {
@@ -252,13 +304,10 @@ void Port_TasTrace(void)
         srand(read_u32(r + 16));
     }
     s_LoadEnded = 0;
+    traced      = GV_Time;
     if (!f)
     {
-        if (failed || !(f = fopen("host:tas_trace.log", "w")))
-        {
-            failed = 1;
-            return;
-        }
+        return;
     }
     stage = GM_GetArea(0);
     fprintf(f, "%d %d %d %d %08x %08x %.8s ", mts_get_tick_count(), GV_Time, GV_Clock, GV_PassageTime,
@@ -268,6 +317,17 @@ void Port_TasTrace(void)
     hex(f, GM_PlayerPosition, 8);
     fprintf(f, "%d %d %d ", GM_AlertMode, GM_LoadRequest, DG_UnDrawFrameCount);
     hex(f, linkvarbuf, 192);
+    /* trace_debug.lua's fields: the 4 BizHawk-only ones (stream clock, pad states) as "-", then
+       GM_PlayerStatus and Snake's CONTROL (124 bytes) */
+    fprintf(f, "- - - - %08x ", GM_PlayerStatus);
+    if (GM_PlayerControl)
+    {
+        hex(f, GM_PlayerControl, 124);
+    }
+    else
+    {
+        fputs("- ", f);
+    }
     fputc('\n', f);
     if ((GV_Time & 63) == 0)
     {

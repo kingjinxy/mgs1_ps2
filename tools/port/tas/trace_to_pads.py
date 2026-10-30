@@ -2,7 +2,7 @@
 """Makes the port's TAS replay tables from BizHawk's trace (trace.lua), for port/src/tas_replay.c:
  - pads.bin: for each change of GV_PadData[0..3], a little-endian u32 GV_Time and the 64 bytes;
  - raw.bin: for each change, a u32 GV_Time and the PS1's raw mts pads (pad_800C14E0[0..1]) and pad init
-   states (pad_state_800C14F0[0..1]) as they were at the end of the loop before;
+   states (pad_state_800C14F0[0..1]) at the loop's vertical blank;
  - time.bin: for each loop from GV_Time 0, the tick FS_StreamGetTick returned (s32, 0x80000000: no stream;
    computed from mts_time and libfs/stream.c's fs_stream_last_time/next_time as the function does),
    GM_GameStatus, GM_LoadRequest, GV_PassageTime, the rand seed and GV_Clock.
@@ -29,32 +29,41 @@ def stream_tick(now, last, nxt):
     return now - last
 
 
-out, prev, lines, time, ticks = bytearray(), None, 0, {}, 0
-raw, prev_raw, last_line_raw = bytearray(), None, None
-os.makedirs(out_dir, exist_ok=True)
+# trace.lua samples at the end of the video frame in which GV_Time became N: after gvd.c's Act (GV_Time, GV_Clock,
+# GV_PassageTime of loop N) but during dgd.c's wait for the vertical blank, before loop N's pad update and actors.
+# So line N's game state is loop N-1's result, and loop N's pads are on line N+1 (checked: with line N's, the
+# title goes to New Game one loop late).
+rows = []
 for line in (lzma.open(src, "rt") if src.endswith(".xz") else open(src)):
     f = line.split()
     if len(f) < 14:
         continue
-    lines += 1
-    pads = bytes.fromhex(f[7])
-    if len(pads) != 64:
+    if len(bytes.fromhex(f[7])) != 64:
         sys.exit("%s: GV_PadData isn't 64 bytes (a trace from before trace.lua recorded [0..3])" % src)
-    if pads != prev:
-        out += struct.pack("<I", int(f[1])) + pads
-        prev = pads
-    if len(f) < 17:
-        sys.exit("%s: no stream timing fields (a trace from before trace.lua recorded them)" % src)
     if len(f) < 18:
-        sys.exit("%s: no pad state field (a trace from before trace.lua recorded it)" % src)
-    if last_line_raw is not None and last_line_raw != prev_raw:
-        raw += struct.pack("<I", int(f[1])) + last_line_raw
-        prev_raw = last_line_raw
-    last_line_raw = bytes.fromhex(f[8]) + bytes.fromhex(f[17])
-    tick = stream_tick(int(f[14]), int(f[15]), int(f[16]))
+        sys.exit("%s: no stream timing or pad state fields (an older trace.lua)" % src)
+    rows.append(f)
+out, prev, raw, prev_raw, time, ticks = bytearray(), None, bytearray(), None, {}, 0
+for i, f in enumerate(rows):
+    t = int(f[1])
+    n = rows[i + 1] if i + 1 < len(rows) else f
+    pads = bytes.fromhex(n[7])                      # the pads loop t's actors used
+    if pads != prev:
+        out += struct.pack("<I", t) + pads
+        prev = pads
+    r = bytes.fromhex(f[8]) + bytes.fromhex(f[17])  # raw pads at loop t's vertical blank
+    if r != prev_raw:
+        raw += struct.pack("<I", t) + r
+        prev_raw = r
+    last, nxt = int(n[15]), int(n[16])              # the stream clock after loop t's call
+    if nxt != 0 and last >= 0 and last != int(f[15]):
+        tick = nxt                                  # the call updated it: it returned the new value
+    else:
+        tick = stream_tick(int(f[14]) + 1, last, nxt)  # the call comes one vertical blank after the sample
     ticks += tick != NO_TICK
-    time[int(f[1])] = struct.pack("<iIIiIi", tick, int(f[4], 16), int(f[11]), int(f[3]), int(f[5], 16),
-                                    int(f[2]))
+    # status: whether loop t started a stream (line t+1); load request, passage, seed, clock: line t
+    time[t] = struct.pack("<iIIiIi", tick, int(n[4], 16), int(f[11]), int(f[3]), int(f[5], 16), int(f[2]))
+lines = len(rows)
 pads_path, time_path = os.path.join(out_dir, "pads.bin"), os.path.join(out_dir, "time.bin")
 open(pads_path, "wb").write(out)
 open(os.path.join(out_dir, "raw.bin"), "wb").write(raw)

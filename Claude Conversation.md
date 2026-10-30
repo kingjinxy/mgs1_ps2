@@ -8861,3 +8861,354 @@ The first 18 fields are identical to the old reference. Only the line-end handli
 
 - tool `Bash`: Update README, archive conversation, status
 
+## Claude
+
+I'll add a line to the plan about `run_port.py`, then commit:
+
+- tool `Bash`: Update plan and commit
+
+## Claude
+
+The reference run finished, and everything is committed as `ef3302f84`. Nothing has been pushed.
+
+- **New reference:** the PS1 trace for the whole movie now has three extra fields: how long the game waited each loop, how much stream data had come in from the disc, and how much of a CD file read was left. The fields that were there before are identical to the old reference, and it's in `tas/reference/` (2.2 MB compressed). I rebuilt the full replay tables in `~/emu/tas` from it.
+- **Commit contents:**
+  - the stream timing fixes in the port and the Redux control run;
+  - the live stop (`run_port.py`);
+  - the new trace fields;
+  - updated docs: TAS plan, Running Walkthrough Step 7, the README, and the conversation archive (lines added only, none removed).
+- **Matching build:** 80 OK, VR 2 OK.
+
+The next port desync is the rand seed at loop 930, then `STATE_CUT_IN` at 1,164.
+
+## User
+
+Alright, where to next?
+
+## Claude
+
+Next I'd fix the rand seed difference at loop 930. It's now the first place the port drifts from the PS1, and with the live stop each attempt takes under a minute.
+
+What's known about it:
+- The seed is reset to the PS1's at the load at 921, and the port's seed differs again 9 loops later. So in those 9 loops the port calls `rand()` a different number of times than the PS1, or with a different seed.
+- The game status at that point is `0x104a0040`: gameplay is just starting at the s00a heliport.
+- The same gap shows up in the Redux control run. Redux drifted at 821 and 841 for the codec reason, but matched after 921. So whatever happens at 930 is specific to the port, not the harness.
+
+How I'd find it:
+1. Break on `rand` in Redux for loops 921–930 and list who calls it. This is quick and doesn't touch DuckStation.
+2. Log the same callers in the port with a temporary print in `rand` for those loops, and compare the two lists. The first extra or missing caller names the actor.
+
+Once that's fixed, the live stop will take us to `STATE_CUT_IN` at 1,164 or whatever comes first after it. Should I start on 930?
+
+## User
+
+Yes
+
+- tool `Bash`: Log PS1 rand callers loops 921-931 in Redux
+
+## Claude
+
+Almost every call goes through the `GV_RandU`/`GV_RandS` wrappers, so I need their callers. Logging at those entries instead:
+
+- tool `Bash`: Log callers of GV_RandU/GV_RandS on PS1
+
+## Claude
+
+The callers are at 0x800D5xxx, in the s00a stage overlay. Identifying the functions:
+
+- tool `Bash`: Caller set and overlay map files
+
+- tool `Bash`: Map caller addresses to s00a functions
+
+- tool `Bash`: Find GV_Rand definitions
+
+- tool `Bash`: Add temporary rand caller log
+
+- tool `Bash`: Find port compile script
+
+- tool `Bash`: Build port with log; run to loop 932
+
+## Claude
+
+No log lines. Checking whether the output reached the run log:
+
+- tool `Bash`: Look for log output
+
+- tool `Bash`: Inspect run log
+
+## Claude
+
+The run log is empty: `pcsx2_run.py`'s output is block-buffered through the pipe and lost when it's stopped. Running it unbuffered:
+
+- tool `Bash`: Unbuffered run; collect port rand callers
+
+- tool `Bash`: Check log and binary contain the logging
+
+## Claude
+
+Still empty, so `pcsx2_run.py` must print PCSX2's log only at the end. Checking where it reads it from:
+
+- tool `Bash`: Find PCSX2 log handling in pcsx2_run
+
+- tool `Bash`: View SIGTERM handler and main loop
+
+- tool `Bash`: Graceful SIGTERM in pcsx2_run; rerun
+
+## Claude
+
+The port's rat calls match the PS1's exactly (41/41/41/3/3). The difference is in `s00a_mouse_800D3E9C`: its four call sites each run once on the PS1 but twice in the port. Looking at which loops:
+
+- tool `Bash`: Loops of the mouse helper rand calls
+
+## Claude
+
+In the port the helper runs at loops 930 and 931; on the PS1 only at 931. So a rat's state change happens one loop early in the port. Reading the rat code:
+
+- tool `Bash`: Read the mouse helper
+
+## Claude
+
+The seeds match from 921 to 929 and the rand call counts match, so the rats get the same random values. The difference must be in how fast a rat's segment counter runs. Reading further:
+
+- tool `Bash`: Find mouse counters and timing
+
+- tool `Bash`: Read state 0 helper and Act
+
+## Claude
+
+The rat logic is deterministic per loop, so one rat has done one more `Act` in the port. Comparing per-loop counts to see where they first differ:
+
+- tool `Bash`: Per-loop rand counts PS1 vs port
+
+- tool `Bash`: Widen logging window with seeds
+
+- tool `Bash`: Rerun both with load-window logging
+
+- tool `Bash`: View Port_TasLoadEnd
+
+- tool `Bash`: Resync seed immediately at load start/end
+
+## Claude
+
+Running both, with the codec seed ignored only up to the load (809–920):
+
+- tool `Bash`: Rebuild; live port run; Redux control run
+
+## Claude
+
+The port still desyncs at 930. Checking whether the Redux control run's seed agrees at 921–931, since `compare_trace` only shows the first difference:
+
+- tool `Bash`: Seeds 919-932 in Redux, PS1, port
+
+- tool `Bash`: Rand callers during load loop 920
+
+- tool `Bash`: Compare seeds at rat rand calls post-fix
+
+- tool `Bash`: Compute seed sequence from srand(1)
+
+- tool `Bash`: Redux post-fix seed sequence with load hooks
+
+- tool `Bash`: Find HAL rand implementation
+
+- tool `Bash`: Read HAL rand
+
+- tool `Bash`: Check how port builds HAL sources
+
+- tool `Bash`: Log seed at loop and load hooks in port
+
+- tool `Bash`: Check loader hooks
+
+- tool `Bash`: Check LoadEnd order in log
+
+- tool `Bash`: Restore tas_replay.c; view trace load logic
+
+## Claude
+
+I'll take the immediate-seed change back out, since its comment ("GV_Time stays put during a load") turned out to be wrong. Then I'll add the request-rise resync in both the port and Redux:
+
+- tool `Bash`: Resync seed on load request rise; live port run
+
+- tool `Bash`: Identify linkvarbuf[92]
+
+## Claude
+
+`linkvarbuf[92]` is `GM_PlayTimeSeconds`, the play time shown on the score screen. Checking how it's counted:
+
+- tool `Bash`: Find play time updates
+
+- tool `Bash`: Read play time computation
+
+- tool `Bash`: Find gTotalFrameTime resets
+
+- tool `Bash`: Test rebuilding play time from passage sums
+
+- tool `Bash`: Add gTotalFrameTime field 21
+
+- tool `Bash`: Rerun full BizHawk reference trace
+
+## Claude
+
+While it runs, the plumbing: the tables get the value from line t (sampled before loop t's `gamed.c` adds its passage time). The port and Redux set it at each load-end realign, next to `GV_Clock`.
+
+- tool `Bash`: Plumb play time through tables, port, Redux
+
+## Claude
+
+Line 19 of `tas_replay.c` ran too long, so I'll rewrap it:
+
+- tool `Bash`: View header comment
+
+- tool `Bash`: Rewrap and document seed rule
+
+## Claude
+
+An existing bullet already covers the seed, so I'll merge into it rather than duplicate, and add the play time to the realign bullet:
+
+- tool `Bash`: Merge seed rule into existing bullet
+
+- tool `Bash`: Rewrap; port build; matching builds
+
+## Claude
+
+Port builds, and the matching build is 80 OK, VR 2 OK. Checking the reference run's progress, to test on a partial trace:
+
+- tool `Bash`: Check reference progress
+
+## Claude
+
+It's only at loop 1,466. I'll wait until it passes loop 6,000, so the live stop has room to find the next desync:
+
+- tool `ToolSearch`: 
+
+- tool `Bash`: Wait for reference past loop 6000
+
+## Claude
+
+The loop-930 desync is fixed, and the port now stays in sync until loop 1001. I'm waiting for a BizHawk reference rerun to test the next fix; nothing is committed yet.
+
+**Loop 930 (rand seed).** On the PS1, a rat in s00a changes state at 931; in the port it changed at 930.
+- **Cause:** the codec timing difference had left the port's seed a few draws off. The rats draw their timing while s00a loads, before the seed resync at the load's end. The resync at the load's start never ran, because this load doesn't go through `loader.c`.
+- **Fix:** the harness now also resyncs the seed when `GM_LoadRequest` is set, in both the port and Redux. Redux had the same drift; it only happened to agree at 930.
+- **Result:** the seed now matches through 930.
+
+**Loop 1001 (play time, `GM_PlayTimeSeconds`).** This is the field I'd been ignoring as "known". Play time adds the passage time on every loop, including loading loops. The port's loads take fewer loops than the PS1's, so its play time falls behind (15 s against 21 s). Play time matters for gameplay (the torture sequence checks the time since your last save), so I'm syncing it rather than ignoring it.
+- **Fix:** the harness sets `gTotalFrameTime` to the PS1's value at each load end, alongside the clocks it already syncs.
+- **Why a rerun:** that value can't be rebuilt from the existing reference, so I added it as trace field 21 and restarted the BizHawk run (about an hour).
+
+When the trace passes loop 6,000 (about 10 minutes), I'll run the live stop with the new field to confirm 1001 is gone and find the next desync. The commit comes after the reference run finishes.
+
+- tool `Bash`: Partial tables; live port run
+
+## Claude
+
+Still at 490, the first load end. The realign sets `gTotalFrameTime`, but `GM_PlayTimeSeconds` is only recomputed in `gamed.c`'s next update, after that loop's trace line. Checking the next loops:
+
+- tool `Bash`: Play seconds port vs PS1 after realign
+
+## Claude
+
+Confirmed: correct from 491 on, one loop late at the load end itself. I'll set the derived hours and seconds together with `gTotalFrameTime` at the realign, the way `gamed.c` computes them:
+
+- tool `Bash`: Set play hours/seconds at realign
+
+- tool `Bash`: Rebuild and live port run
+
+## Claude
+
+Play time now matches. The next stop is the one we already knew about: `GM_GameStatus` bit `0x40` at loop 1,164, set in the port but not on the PS1. Looking at what sets it:
+
+- tool `Bash`: Find the 0x40 status flag
+
+- tool `Bash`: Writers of STATE_CUT_IN; status around 1164
+
+- tool `Bash`: Read STATE_CUT_IN setters
+
+## Claude
+
+The likeliest setter is `camera.c`'s camera change, which prints `[GV_Time]change camera N`. Checking the port's log around 1164:
+
+- tool `Bash`: Port camera changes
+
+- tool `Bash`: What precedes GM_CameraList on PS1
+
+- tool `Bash`: CAMERA struct and selection logic
+
+- tool `Bash`: UnkCameraStruct2 layout and port symbol order
+
+- tool `Bash`: Check ChangeCamera index use
+
+- tool `Bash`: Check guards in ChangeCamera
+
+## Claude
+
+`ChangeCamera` handles -1 safely. Only line 867 reads out of bounds. The fix reads the same bytes the PS1 reads, kept under `MGS_PORT` so the matching build is unaffected:
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/source/game/camera.c
+
+- tool `Bash`: Build, matching check, live run
+
+- tool `Bash`: Redux control run to loop 2480
+
+- tool `Bash`: Raw vs processed sticks near 2462
+
+- tool `Bash`: Read pad analog processing
+
+- tool `Bash`: Read Port_TasPads
+
+- tool `Bash`: Write sticks in analog mode; live run
+
+## Claude
+
+That fixed it. The port is now in sync to loop 4,221 (2:35 into the movie). The next desync is a one-unit difference in Snake's position (`...82bc` against the PS1's `...81bc`).
+
+- tool `PushNotification`: 
+
+## Claude
+
+The port now replays the TAS in sync to loop 4,221 (2:35 into the movie), up from 930. The codec's rand seed in the intro is still the only difference I'm ignoring. One of the four fixes was a real port bug; the other three were in the replay harness and were confirmed against the PS1 game in Redux. Nothing is committed yet.
+
+| Loop | What differed | Cause | Fix |
+|---|---|---|---|
+| 930 | rand seed | The s00a load doesn't go through `loader.c`, so the seed was never reset at its start. The rats drew their timing from the drifted seed left over from the codec. | Harness: also reset the seed when a load is requested. |
+| 1001 | play time | Play time keeps counting during loads, and the port's loads take fewer loops. | Harness: set the play time to the PS1's at each load end. This needed a new recorded field and a BizHawk rerun, which is in progress. |
+| 1164 | `STATE_CUT_IN` | **Port bug.** When there's no camera, `camera.c` reads `GM_CameraList[-1]`, outside the array. On the PS1 that memory happens to be 0; in the port it's stream buffer data. | `MGS_PORT` fix that reads the same bytes the PS1 reads. Matching build: 80 OK. |
+| 2462 | stick values | Holding the d-pad in analog mode clears `GV_PadData`'s analog flag, so the harness stopped replaying the sticks. | Harness: write the sticks whenever the recorded pad is in analog mode. |
+
+Each step was found with the live stop, mostly in under two minutes per run.
+
+**Next desync:** at loop 4,221, Snake's position differs by one unit. Whether that's the harness or the port isn't checked yet; I'd compare against Redux first. The full reference run has about 40 minutes left, and I'll commit once it finishes.
+
+## User
+
+Add an agent rule: when discussing the loops in the context of the TAS, also provide the timestamp
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/CLAUDE.md
+
+## Claude
+
+I added the rule to the project's [CLAUDE.md](CLAUDE.md), under "Working with the user". Whenever I mention a TAS loop, I'll now give its timestamp in the movie, in the same form the comparison scripts print, for example "loop 4,221 (0:02:35.57)". It goes in with the next commit, after the reference run finishes.
+
+## Claude
+
+The reference run finished. Verifying it, then replacing the repo's copy:
+
+- tool `Bash`: Verify, compress, rebuild tables
+
+## Claude
+
+The run played to the end. All 163,838 loops have 22 fields, and fields 0–20 are identical to the previous reference. Confirming the full tables give the same port result:
+
+- tool `Bash`: Live port run with full tables
+
+## Claude
+
+Same result: in sync to loop 4,221 (0:02:35.57). Updating the docs, then committing:
+
+- tool `Bash`: Docs updates and matching builds
+
+## Claude
+
+Rewrapping the long README line, then the conversation archive:
+
+- tool `Bash`: Rewrap README; archive; status both repos
+

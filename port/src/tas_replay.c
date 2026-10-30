@@ -10,13 +10,14 @@
  * command at a codec's end, with STATE_PADRELEASE cleared in between), and writing the recorded result at both
  * gave Snake the stick a call early (found with tools/port/tas/redux_replay.lua).
  *
- * With MGS_TAS_TIME too, mgs_tas_time holds 36 bytes per loop from GV_Time 0 (little-endian): the
+ * With MGS_TAS_TIME too, mgs_tas_time holds 40 bytes per loop from GV_Time 0 (little-endian): the
  * tick the PS1's FS_StreamGetTick returned (s32; 0x80000000: its stream clock not started, so it returned
  * mts_time + 1), and the PS1's GM_GameStatus, GM_LoadRequest, GV_PassageTime, rand seed, GV_Clock and how far
  * its stream's data had come in from the disc (fs_stream_bottom's offset in the stream heap; not used yet: the
  * port's St* streaming is stubbed) at the end of the loop, the number of streams it had started, and the CD file
- * read's bytes still to come (FS_LoadFileSync; not used yet: the port's file reads are synchronous). The port's timing then follows the
- * PS1's, so the game loops line up:
+ * read's bytes still to come (FS_LoadFileSync; not used yet: the port's file reads are synchronous) and
+ * gTotalFrameTime (the play time, which counts the load's loops too) before the loop. The port's timing then
+ * follows the PS1's, so the game loops line up:
  *  - streams (cutscenes, codec voice) run on the PS1's clock (Port_TasTick, from capture_ps2.c's
  *    Capture_Tick) and start in the loop the PS1's did, not when the port's CD has the data
  *    (Port_TasStreamMayStart, from Capture_StreamMayStart: no start while the port has started as many as the
@@ -24,11 +25,11 @@
  *  - the game loop runs during loads, and they take a different number of loops here: when a load has
  *    ended (GM_LoadRequest back to 0 at the end of a loop), GV_Time becomes the loop the PS1's matching
  *    load ended in (the same count of load ends since boot), with the PS1's GV_Clock (the double buffer's
- *    parity) and GV_PassageTime there, in Port_TasTrace;
+ *    parity), GV_PassageTime and gTotalFrameTime there, in Port_TasTrace;
  *  - GV_PassageTime is the PS1's (Port_TasPassageTime, libgv/gvd.c);
- *  - at the end of the loops a load starts and ends in, the rand seed becomes the PS1's: the title runs a
- *    different number of loops before New Game (the boot's wait isn't a stage load), and a load's own
- *    loops call rand.
+ *  - at the end of the loops a load is requested in (GM_LoadRequest set: not every load goes through loader.c),
+ *    starts and ends in, the rand seed becomes the PS1's: the title runs a different number of loops before
+ *    New Game (the boot's wait isn't a stage load), and a load's own loops call rand.
  *
  * With MGS_TAS_RAW too, mgs_tas_raw holds the PS1's raw mts pads (pad_800C14E0[0..1], 16 bytes) and
  * pad init states (pad_state_800C14F0[0..1], 8 bytes) as records of a u32 GV_Time and the 24 bytes, one each
@@ -61,6 +62,7 @@ extern int          DG_UnDrawFrameCount;
 extern short        linkvarbuf[96];
 extern unsigned char GV_PadData[64], pad_800C14E0[16], GM_PlayerPosition[8];
 extern int          GM_PlayerStatus;
+extern int          gTotalFrameTime;
 extern void*        GM_PlayerControl;
 extern char*        GM_GetArea(int flag);
 extern int          mts_get_tick_count(void);
@@ -69,7 +71,7 @@ extern void         srand(unsigned int seed);
 
 #define RECORD 68
 #define NO_TICK 0x80000000u
-#define TIME_RECORD 36
+#define TIME_RECORD 40
 #define MAX_LOADS 4096
 
 /** A host: file into the heap (NULL if missing). */
@@ -251,7 +253,9 @@ void Port_TasPads(void)
     }
     {
         /* mts's raw pads as the PS1's controller this loop: [2]/[3].status are mts_PadRead's buttons (plus the
-           stick's d-pad bits when the pad is in analog mode: cleared then), [0]/[1] hold the sticks */
+           stick's d-pad bits when GV_PadData's analog is set: cleared then), [0]/[1] hold the sticks, written
+           whenever the raw pad (its mode from Port_TasRawPads) is analog: a held d-pad clears GV_PadData's analog
+           but the game still copies the sticks (loop 2,462) */
         const unsigned char* r = mgs_tas_pads + next * RECORD + 4;
         int                  port;
         for (port = 0; port < 2; port++)
@@ -262,6 +266,9 @@ void Port_TasPads(void)
             if (analog > 0)
             {
                 buttons &= 0x0FFF;
+            }
+            if (analog > 0 || p[0] > 1)
+            {
                 memcpy(p + 4, r + port * 16 + 12, 4);
             }
             p[2] = (unsigned char)~buttons;
@@ -322,11 +329,19 @@ void Port_TasTrace(void)
         }
         if ((r = time_record()) != 0)
         {
-            GV_PassageTime = (int)read_u32(r + 12);
-            GV_Clock       = (int)read_u32(r + 20);
+            GV_PassageTime  = (int)read_u32(r + 12);
+            GV_Clock        = (int)read_u32(r + 20);
+            gTotalFrameTime = (int)read_u32(r + 36);
+            linkvarbuf[91]  = gTotalFrameTime / 60 / 3600; /* GM_PlayTimeHours/Seconds, as gamed.c's Act */
+            linkvarbuf[92]  = gTotalFrameTime / 60 % 3600;
         }
         loads++;
         s_LoadEnded = 1;
+    }
+    if (!prev_request && GM_LoadRequest)
+    {
+        s_LoadEnded = 1; /* a load requested: not every load goes through loader.c (s00a's at loop 917), and the
+                            stage's actors made before its end (the rats) draw from the seed */
     }
     prev_request = GM_LoadRequest;
     r            = time_record();
@@ -348,9 +363,10 @@ void Port_TasTrace(void)
     hex(f, GM_PlayerPosition, 8);
     fprintf(f, "%d %d %d ", GM_AlertMode, GM_LoadRequest, DG_UnDrawFrameCount);
     hex(f, linkvarbuf, 192);
-    /* the 7 BizHawk-only fields (stream clock, pad states, the game task's wait, stream data, file read) as "-", then
+    /* the 8 BizHawk-only fields (stream clock, pad states, the game task's wait, stream data, file read, play time)
+       as "-", then
        trace_debug.lua's: GM_PlayerStatus, Snake's CONTROL (124 bytes) and his work from 0x9B0 (192 bytes) */
-    fprintf(f, "- - - - - - - %08x ", GM_PlayerStatus);
+    fprintf(f, "- - - - - - - - %08x ", GM_PlayerStatus);
     if (GM_PlayerControl)
     {
         hex(f, GM_PlayerControl, 124);

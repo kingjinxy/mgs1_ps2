@@ -36,7 +36,7 @@ local function lookup(tab, size, t)
   while lo < hi do local mid = math.floor((lo + hi + 1) / 2); if le(tab, mid * size) <= t then lo = mid else hi = mid - 1 end end
   return lo * size + 4
 end
-local REC = 36
+local REC = 40
 local function time_rec(t) if t < 0 or (t + 1) * REC > #TIME then return nil end; return t * REC end
 
 -- PS1 addresses (obj/asm.map, and the returns read from the executable)
@@ -85,7 +85,9 @@ bp(0x8001682C, "tas pads", function()            -- GV_UpdatePadSystem's entry
     local p = a(PAD_RAW) + port * 8
     local active = bit.band(bit.bnot(buttons), 0xFFFF)
     mem[p + 2] = active % 256; mem[p + 3] = math.floor(active / 256)
-    if analog > 0 then for i = 0, 3 do mem[p + 4 + i] = PADS:byte(o + port * 16 + 12 + i + 1) end end
+    -- the sticks whenever the raw pad is analog: a held d-pad clears GV_PadData's analog, but the game still copies
+    -- them (loop 2,462)
+    if analog > 0 or mem[p] > 1 then for i = 0, 3 do mem[p + 4 + i] = PADS:byte(o + port * 16 + 12 + i + 1) end end
   end
 end)
 if os.getenv("TAS_NO_RAW") == nil then bp(0x8008C090, "tas raw pads", function()        -- do_control's return (vertical blank)
@@ -168,9 +170,17 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
       t = load_ends[loads]; w32(GV_TIME, t)
     end
     r = time_rec(t)
-    if r then w32(GV_PASSAGE, le(TIME, r + 12)); w32(GV_CLOCK, le(TIME, r + 20)) end
+    if r then w32(GV_PASSAGE, le(TIME, r + 12)); w32(GV_CLOCK, le(TIME, r + 20)); w32(0x800AB9E8, le(TIME, r + 36))
+      local m = math.floor(le(TIME, r + 36) / 60)  -- GM_PlayTimeHours/Seconds (linkvarbuf[91]/[92]), as gamed.c's Act
+      local hm, sm = math.floor(m / 3600), m % 3600
+      mem[a(LINKVAR) + 182] = hm % 256; mem[a(LINKVAR) + 183] = math.floor(hm / 256)
+      mem[a(LINKVAR) + 184] = sm % 256; mem[a(LINKVAR) + 185] = math.floor(sm / 256)
+    end
     loads = loads + 1; load_flag = true
   end
+  -- a load requested: not every load goes through loader.c (s00a's at loop 917), and the stage's actors made before
+  -- its end (the rats) draw from the seed
+  if prev_request == 0 and request ~= 0 then load_flag = true end
   prev_request = request
   if load_flag and r then w32(SEED, le(TIME, r + 16)) end
   load_flag = false
@@ -180,7 +190,7 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
   for i = 0, 7 do local c = u8(STAGE + i); if c == 0 then break end; stage = stage .. string.char(c) end
   local ctrl = u32(PCTRL)
   local okc = ctrl >= 0x80000000 and ctrl < 0x80200000
-  out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s - - - - - - - %08x %s %s\n",
+  out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s - - - - - - - - %08x %s %s\n",
     u32(MTS_TIME), t, s32(GV_CLOCK), s32(GV_PASSAGE), u32(GM_STATUS), u32(SEED), stage == "" and "-" or stage,
     hex(GV_PADDATA, 64), hex(PAD_RAW, 16), hex(POS, 8), s32(ALERT), s32(LOADREQ), s32(UNDRAW), hex(LINKVAR, 192),
     u32(PSTATUS), okc and hex(ctrl, 124) or "-", okc and hex(ctrl - 0x20 + 0x9B0, 192) or "-"))

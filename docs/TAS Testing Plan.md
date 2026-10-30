@@ -184,7 +184,19 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       live and closes PCSX2 at the first differing loop (`--ignore` for known ones, still reported). First use:
       45 s, and it showed the seed differing again at loop 930, after the resync at 921 (the whole-run compare
       reports only each field's first difference, so it was hidden behind 809).
-- [ ] Port only: the seed at 930, `STATE_CUT_IN` at 1,164.
+- [x] Seed at loop 930 (0:00:45.76): a rat (`mouse.c`) changed state a loop early. The s00a load at 917
+      (0:00:44.86) doesn't go through `loader.c`, so the seed wasn't resynced at its start, and the rats drew their
+      segment lengths from the seed the codec had drifted. The seed is now also resynced when `GM_LoadRequest` is
+      set (port and Redux).
+- [x] Play time at loop 490 (0:00:33.95), shown at 1,001 (0:00:48.13): `gTotalFrameTime` adds `GV_PassageTime`
+      on every loop, load loops too, and the port's loads take fewer loops. Trace field 21 records it (it can't be
+      rebuilt from the passage times); at each load end it and `GM_PlayTimeHours/Seconds` become the PS1's.
+- [x] `STATE_CUT_IN` at loop 1,164 (0:00:53.57), a port bug: with no camera (`i == -1`) `camera.c` reads
+      `GM_CameraList[-1].trg.pad`, which on the PS1 is the high half of `gUnkCameraStruct2_800B76F0.type` (0) and
+      in the port the stream buffer before the list. `MGS_PORT` reads the PS1's bytes.
+- [x] Sticks at loop 2,462 (0:01:36.88): a held d-pad in analog mode clears `GV_PadData`'s analog but the game
+      still copies the sticks; the rebuild now writes them whenever the raw pad (its recorded mode) is analog.
+- [ ] Snake's position at loop 4,221 (0:02:35.57): one unit in z (port `82bc`, PS1 `81bc`).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

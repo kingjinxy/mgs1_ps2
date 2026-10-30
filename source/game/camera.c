@@ -864,7 +864,13 @@ STATIC int CheckEvents(GV_ACT *work)
 
     GM_GameStatus &= ~STATE_CUT_IN;
 
+#ifdef MGS_PORT
+    /* No camera (i == -1): the PS1 reads GM_CameraList[-1].trg.pad, which is the high half of
+       gUnkCameraStruct2_800B76F0.type there (s00a at loop 1,163); the port's .bss isn't in that order */
+    if (i < 0 ? ( gUnkCameraStruct2_800B76F0.type >> 16 ) & 1 : GM_CameraList[i].trg.pad & 1)
+#else
     if (GM_CameraList[i].trg.pad & 1)
+#endif
     {
         GM_GameStatus |= STATE_CUT_IN;
     }

@@ -32,6 +32,9 @@ Add `--variant=vr_exe` for `SLPM_862.49`. The PSY-Q toolchain is `../psyq_sdk`. 
   `python3 tools/port/archive_conversation.py <that file> "Claude Conversation.md"`. The script
   rewrites the whole file, so passing only the newest session drops earlier history; check that
   `git diff` shows no removed lines.
+- **TAS loops come with their movie timestamp.** When mentioning a game loop (`GV_Time`) in the context of the
+  TAS replay, also give its time in the TAS movie (h:mm:ss, as `compare_trace.py`/`run_port.py` print it), e.g.
+  "loop 4,221 (0:02:35.57)".
 - **Check what was already tried.** Before planning a debugging technique (especially on
   hardware), search `docs/` and the SH1 port's `Running Walkthrough.md`/`Planning Doc.md` for what
   has already been tried and failed.

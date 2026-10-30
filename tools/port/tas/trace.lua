@@ -12,7 +12,8 @@
 --   or after the loop's pad update (tools/port/tas/trace_to_pads.py),
 --   how far a stream's data had come in from the disc: fs_stream_bottom - fs_stream_heap (libfs/stream.c; -1 with
 --   no stream heap; FS_StreamGetData doesn't look past it),
---   the CD file read's bytes still to come (cdbios_task.remaining * 4 at 0x800B4E74: what FS_LoadFileSync returns)
+--   the CD file read's bytes still to come (cdbios_task.remaining * 4 at 0x800B4E74: what FS_LoadFileSync returns),
+--   gTotalFrameTime (gamed.c: the play time in vertical blanks, behind GM_PlayTimeHours/Seconds)
 -- Addresses: obj/asm.map of the matching build (SLPM-86247). Ends with END at the movie's last frame.
 local OUT   = "Z:\\home\\alex\\emu\\tas\\trace.log"
 local LAST  = 313202
@@ -59,11 +60,11 @@ while true do
   local t = u32(0x800AB330)                       -- GV_Time
   if t ~= prev then
     prev = t
-    out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s %d %d %d %s %s %d %d\n",
+    out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s %d %d %d %s %s %d %d %d\n",
       f, t, u32(0x800AB920), u32(0x800AB924), u32(0x800AB3CC), u32(0x800C1530), name(0x800AB3C4),
       hex(0x800B05C0, 64), hex(0x800C14E0, 16), hex(0x800ABA10, 8),
       u32(0x800ABA00), u32(0x800AB3D0), u32(0x800AB380), hex(0x800B4D98, 192),
-      u32(0x800A3D78), s32(0x8009D510), s32(0x8009D514), hex(0x800C14F0, 8), wait(), bottom(), s32(0x800B4E74) * 4))
+      u32(0x800A3D78), s32(0x8009D510), s32(0x8009D514), hex(0x800C14F0, 8), wait(), bottom(), s32(0x800B4E74) * 4, s32(0x800AB9E8)))
   end
   if f >= LAST then
     out:write("END\n"); out:close()

@@ -93,7 +93,7 @@ def main():
     if os.path.exists(TRACE):
         os.remove(TRACE)
     log = open(os.path.join(REPO, "obj_ps2", "run_port.log"), "w")
-    run = subprocess.Popen([sys.executable, PCSX2_RUN, os.path.join(REPO, "obj_ps2", "mgs_ps2.iso"),
+    run = subprocess.Popen([sys.executable, "-u", PCSX2_RUN, os.path.join(REPO, "obj_ps2", "mgs_ps2.iso"),
                             "--seconds", str(a.seconds), "--stall", "15"], stdout=log, stderr=subprocess.STDOUT)
     first, ignored_first, last_t, desync, buf, f = {}, {}, -1, None, "", None
     try:

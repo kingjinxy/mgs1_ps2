@@ -8,7 +8,8 @@
    GM_GameStatus, GM_LoadRequest, GV_PassageTime, the rand seed, GV_Clock and how far the stream's data had come
    in (fs_stream_bottom's offset in the stream heap, -1: no heap) and how many streams the PS1 had started
    (FS_StreamTickStart: fs_stream_last_time from -1, the FS_StreamTaskStart value, to a vertical blank, with
-   fs_stream_next_time still 0), and the CD file read's bytes still to come after the loop (FS_LoadFileSync).
+   fs_stream_next_time still 0), the CD file read's bytes still to come after the loop (FS_LoadFileSync) and
+   gTotalFrameTime (the play time) before the loop.
 Link them with MGS_TAS_PADS=<pads.bin> MGS_TAS_RAW=<raw.bin> MGS_TAS_TIME=<time.bin> python3 build/link_ps2.py.
 
 usage: trace_to_pads.py [TRACE (default tas/reference/trace.log.xz; plain or .xz)] [OUT_DIR (default ~/emu/tas)]"""
@@ -46,8 +47,9 @@ for line in (lzma.open(src, "rt") if src.endswith(".xz") else open(src)):
         continue
     if len(bytes.fromhex(f[7])) != 64:
         sys.exit("%s: GV_PadData isn't 64 bytes (a trace from before trace.lua recorded [0..3])" % src)
-    if len(f) < 21:
-        sys.exit("%s: no stream timing, pad state, stream data or file read fields (an older trace.lua)" % src)
+    if len(f) < 22:
+        sys.exit("%s: no stream timing, pad state, stream data, file read or play time fields (an older trace.lua)"
+                 % src)
     rows.append(f)
 out, prev, raw, prev_raw, time, ticks, starts = bytearray(), None, bytearray(), None, {}, 0, 0
 for i, f in enumerate(rows):
@@ -75,14 +77,14 @@ for i, f in enumerate(rows):
     if int(f[15]) == -1 and last >= 0 and nxt == 0:
         starts += 1                                 # loop t started a stream's clock
     # status: line t+1; load request, passage, seed, clock: line t; stream data: what loop t could have used (line
-    # t+1); stream starts: up to and including loop t; file read: line t+1
-    time[t] = struct.pack("<iIIiIiiIi", tick, int(n[4], 16), int(f[11]), int(f[3]), int(f[5], 16), int(f[2]),
-                          int(n[19]), starts, int(n[20]))
+    # t+1); stream starts: up to and including loop t; file read: line t+1; play time: line t
+    time[t] = struct.pack("<iIIiIiiIii", tick, int(n[4], 16), int(f[11]), int(f[3]), int(f[5], 16), int(f[2]),
+                          int(n[19]), starts, int(n[20]), int(f[21]))
 lines = len(rows)
 pads_path, time_path = os.path.join(out_dir, "pads.bin"), os.path.join(out_dir, "time.bin")
 open(pads_path, "wb").write(out)
 open(os.path.join(out_dir, "raw.bin"), "wb").write(raw)
-empty = struct.pack("<iIIiIiiIi", NO_TICK, 0, 0, 0, 0, 0, -1, starts, 0)
+empty = struct.pack("<iIIiIiiIii", NO_TICK, 0, 0, 0, 0, 0, -1, starts, 0, 0)
 open(time_path, "wb").write(b"".join(time.get(t, empty) for t in range(max(time) + 1)))
 print("%s: %d game loops, %d records; raw.bin: %d records; %s: %d loops with a stream tick"
       % (pads_path, lines, len(out) // 68, len(raw) // 28, time_path, ticks))

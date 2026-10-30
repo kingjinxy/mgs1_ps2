@@ -12,7 +12,7 @@ import os
 
 FIELDS = {2: "GV_Clock", 3: "GV_PassageTime", 4: "GM_GameStatus", 5: "rand seed", 6: "stage", 7: "GV_PadData",
           9: "GM_PlayerPosition", 10: "GM_AlertMode", 11: "GM_LoadRequest", 12: "DG_UnDrawFrameCount",
-          13: "linkvarbuf", 21: "GM_PlayerStatus", 22: "Snake CONTROL"}
+          13: "linkvarbuf", 22: "GM_PlayerStatus", 23: "Snake CONTROL"}
 
 # CONTROL's fields that are the same on both machines (offset, size, name); the pointers differ
 CONTROL = [(0, 8, "mov"), (8, 8, "rot"), (48, 2, "name"), (50, 2, "height"), (52, 2, "hzd_height"),
@@ -54,7 +54,7 @@ def control_diff(a, b):
 def same(i, p, r):
     if i >= len(p) or i >= len(r):
         return True  # a field only the debug traces have
-    if i == 22:
+    if i == 23:
         return control_key(p[i]) == control_key(r[i])
     return p[i] == r[i]
 

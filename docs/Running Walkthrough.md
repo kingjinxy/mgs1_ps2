@@ -587,3 +587,14 @@ read left) was tried as a gate for the codec's radio data load and made things w
 The full BizHawk reference was rerun with fields 18-20. In PCSX2: the intro's stream matches; Snake matches to loop
 1,781. Left: the intro codec's call state a few loops early (seed, resynced at 921) and `STATE_CUT_IN` at 1,164.
 Matching build: 80 OK, VR 2 OK.
+
+## Step 8: TAS desyncs to 2:35 (2026-10-30)
+
+With `run_port.py` stopping at the first desync, four were fixed in turn: the rand seed at loop 930 (0:00:45.76),
+not resynced at the start of the s00a load, which skips `loader.c`; the play time (`gTotalFrameTime`, new trace
+field 21, synced at load ends); `STATE_CUT_IN` at 1,164 (0:00:53.57), a port bug: `camera.c` reads
+`GM_CameraList[-1]` with no camera, which on the PS1 is a zero half-word of the struct before it; the sticks at
+2,462 (0:01:36.88), skipped by the pad rebuild while the d-pad was held in analog mode. Each fix was checked in the
+Redux control run. Tried and dropped: setting the seed at `NewLoader` (this load doesn't use it). The full
+reference was rerun with field 21. In PCSX2 the replay is now in sync to loop 4,221 (0:02:35.57), Snake's position
+off by one there. Matching build: 80 OK, VR 2 OK.

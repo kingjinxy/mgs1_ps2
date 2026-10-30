@@ -188,13 +188,24 @@ int Capture_HoldClock(void)
 /** strctrl.c: the stream's clock starts at the PS1's loop (the wait for the stream's data is the CD's). */
 int Capture_StreamMayStart(void)
 {
+    extern int Port_TasStreamMayStart(void); /* tas_replay.c: in TAS replays, the PS1's loop */
+    int        tas = Port_TasStreamMayStart();
+    if (tas >= 0)
+    {
+        return tas;
+    }
     return !s_Ticks || !s_InStage || s_TickStart < 0 || loop() >= s_TickStart;
 }
 
 /** FS_StreamGetTick: the PS1's tick in this loop, if recorded. */
 int Capture_Tick(int* tick)
 {
-    int n = loop();
+    extern int Port_TasTick(int* tick); /* tas_replay.c: in TAS replays, the PS1's tick */
+    int        n = loop();
+    if (Port_TasTick(tick))
+    {
+        return 1;
+    }
     if (!s_Ticks || n < 0 || n >= MAX_TICKS || s_Ticks[n] < 0)
     {
         return 0;

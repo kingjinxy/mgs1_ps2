@@ -6551,3 +6551,1114 @@ Add the overlay cleanup plan to the docs folder in each port's respective direct
 
 - tool `Write`: /home/alex/Documents/silent-hill-1-ps2-port/docs/Overlay Data Reset.md
 
+## Claude
+
+Now the conversation archive (CLAUDE.md asks for it before commits), then the commits.
+
+- tool `Bash`: Archive conversation and check for removed lines
+
+- tool `Bash`: Commit the plan docs in both repos
+
+## Claude
+
+I've written the overlay data reset plan for each port and committed it in both repos.
+
+- **MGS1:** [docs/Overlay Data Reset.md](docs/Overlay%20Data%20Reset.md), commit `af9bc69fe` on `ps2-port`. The plan has six steps: mark each overlay's data and zero-filled ranges in `overlays_ps2.py`, copy the initial data at startup, restore it in the `Port_SetStage` stage-load hook behind a new flag (off by default), optionally fill unloaded overlays with a poison value in debug builds, test, then turn the flag on. It lists SH1's open questions to check first.
+- **SH1:** `docs/Overlay Data Reset.md`, commit `2671b217c` on `hal-split`. That repo's `docs/` folder otherwise holds the decomp's own docs; SH1's port docs are at the repo root. I put the file in `docs/` as you asked, so move it if you'd rather keep it with the others. This plan is about getting the existing, switched-off reset working. It lists four possible causes of the attract-demo bug: the reset runs when the read is queued rather than when it finishes, the second demo may not really reload the map, some data may sit outside the marked ranges, or the world object tables may be filled by resident code after the load. The cheap logging checks come first.
+
+**Correction to my last answer:** SH1's reset isn't off because of the screen overlays sharing a buffer. Their walkthrough says that needs no fix. It's off because it breaks the second attract demo (map2_s00 loaded again), and nobody found out why.
+
+Each commit contains only the new plan. In MGS1 I also committed the updated `Claude Conversation.md`, as CLAUDE.md requires before commits; it only gained lines. Your other uncommitted changes in both repos are still uncommitted. I didn't add a Running Walkthrough step, because this is a plan rather than a change to the port.
+
+## User
+
+In this folder I have a TAS for MGS1: "/home/alex/Downloads/submission5139". I believe this could greatly assist in automated testing of the game. Create a plan to use it with our remake and check it against a PS1 emulator.
+
+- tool `Bash`: Inspect TAS submission files
+
+- tool `Bash`: Survey docs and existing port tooling
+
+- tool `Bash`: Extract bk2 and check port pad scripting
+
+- tool `Bash`: Analyze TAS input log contents
+
+- tool `Bash`: Read pad script and pad polling code
+
+- tool `Bash`: Read comparison section and pad symbols
+
+## Claude
+
+I've unpacked and checked the TAS. Now I'm writing up the plan.
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/docs/TAS Testing Plan.md
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/Planning Doc.md
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+I've written the plan in [docs/TAS Testing Plan.md](docs/TAS%20Testing%20Plan.md) and added a checkbox pointing to it in [Planning Doc.md](docs/Planning%20Doc.md). Nothing has been built or run yet.
+
+**What the TAS is:** a BizHawk 1.11.4 movie on the Octoshock core for MGS Integral, the same disc the port uses. It's 313k frames (about 87 minutes) and fights all the bosses. Four things in it affect the port:
+- It starts from a memory card that already has an Integral save on it.
+- It moves the analog sticks on about 60% of frames.
+- It uses controller port 2 on 3,803 frames, probably for Psycho Mantis.
+- It swaps to disc 2 at frame 181,883.
+
+**The approach:** playing the inputs back frame by frame won't work, because the port's load times and timing differ from Octoshock's and the run would fall out of step within seconds. Instead:
+1. **Reference run:** replay the movie in BizHawk itself. A Lua script records, for each game frame, the pad values the game read and the game state (stage, `GV_Time`, random number generator seed, Snake's state, and hashes of the game data).
+2. **Port run:** extend `pad_script.c` to feed those same pad values by game frame, counted from each stage load. That includes analog values and port 2. The port writes the same per-frame record.
+3. **Compare:** a script reports the first frame and value where the two runs differ, and calls `compare_frames.py` against DuckStation to show a picture of that frame.
+4. **Segments:** each stage visit can start from the reference's saved game state, so one bug only fails its own segment.
+5. **Coverage:** the test starts with boot through the heliport and grows as more stages are linked in, then the memory card, then disc 2.
+
+**Main risk:** the movie may not play back correctly on any BizHawk build that runs here. 1.11.4 is a Windows .NET program, and Wine here is 64-bit only.
+
+Two things I need from you:
+- Can I download BizHawk releases from GitHub to test whether the movie plays back correctly? That's allowed, but it's a big step, so I'm checking first.
+- Can you paste the link to the TASVideos page for this run? It says which emulator version the run was verified on, and it isn't on GitHub, so I need your OK to fetch it.
+
+## User
+
+Yes download BizHawk from Github, and wasn't there something you wanted me to install 32 bit Wine for? I saved the TASVideos .html file to Downloads, so read that.
+
+- tool `Bash`: Find saved HTML and prior 32-bit Wine mentions
+
+- tool `Bash`: Extract text from saved TASVideos page
+
+- tool `Bash`: List BizHawk releases on GitHub
+
+- tool `Bash`: Query GitHub API for old BizHawk releases
+
+- tool `Bash`: Download BizHawk 1.11.4 and check binaries
+
+## Claude
+
+I downloaded BizHawk 1.11.4 (into `~/emu`) and found that all of it is 32-bit, so I'm adding the findings to the plan before replying.
+
+- tool `Bash`: Update plan with BizHawk and TASVideos findings
+
+## Claude
+
+I downloaded BizHawk 1.11.4 from GitHub to `~/emu/bizhawk-1.11.4`. That's the version the run was verified on, according to the TASVideos page you saved. It can't run yet, because both `EmuHawk.exe` (.NET 4) and the PlayStation core `octoshock.dll` are 32-bit Windows programs. Wine here is 64-bit only, and wibo can't run .NET programs.
+
+**On 32-bit Wine:** yes, I asked you to install it earlier for the PSY-Q build. We got around it that time with wibo, so it was never installed. BizHawk does need it:
+
+```
+sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32:i386
+```
+
+After that I'll install .NET 4 and the Visual C++ runtimes into a separate Wine prefix with winetricks, so your existing Wine setup stays as it is. Winetricks downloads those from Microsoft, so I'll check with you before running it. If BizHawk still won't run under Wine, the fallback is a Windows PC or VM.
+
+**From the TASVideos page:**
+- The run uses the save on the memory card plus a code to unlock Extreme difficulty, going for BIGBOSS rank. So the port needs working memory card loading early, before the first stage. In the plan that was a later item; it's now flagged as needed early.
+- It was verified with both discs loaded together in BizHawk, as an XML file or `.m3u` playlist listing the disc 1 and disc 2 `.cue` files. I'll set that up from your images in `ps1-original/`.
+- BizHawk's load times are close to a real console's. Keying the inputs to game frames, as the plan already does, means load times don't matter.
+
+I added these to [docs/TAS Testing Plan.md](docs/TAS%20Testing%20Plan.md). Tell me once `wine32` is installed.
+
+## User
+
+Isn't there a version of 1.11.4 of BizHawk for linux?
+
+## Claude
+
+No. GitHub has only two downloads for 1.11.4: `BizHawk-1.11.4.zip` (Windows) and `BizHawk_mac_1.11.4.zip` (a macOS port). Official Linux builds start at 2.6, five years later.
+
+None of the other routes give you 1.11.4's PlayStation core on Linux:
+- **The Windows build under Mono:** Mono could load the .NET part, but the PlayStation emulation lives in `octoshock.dll`, a native Windows library. Linux can't load it.
+- **The mac build:** its native libraries are macOS-only, so it won't run on Linux either.
+- **Linux 2.6 or later:** I'm fairly sure Octoshock was never in the Linux builds. Later versions replaced it with Nymashock. A movie made on Octoshock 1.11.4 won't stay in sync on a different core, or even on a different version of the same core.
+
+So the realistic options are:
+1. **32-bit Wine** with the Windows 1.11.4 build (the `wine32:i386` install from my last message). This is my recommendation.
+2. **A Windows PC or VM** running 1.11.4, if Wine can't run it. Its trace files would then be copied over here.
+3. **Nymashock on a Linux 2.x build:** native, but the movie will almost certainly fall out of sync. It's only worth one short try if the first two fail.
+
+## User
+
+About the run using a save on the memory card, how about we fake it for now by tricking the game into having the same memory values at the start? I installed 32 bit wine.
+
+- tool `Bash`: Check Wine tools and port memcard state
+
+## Claude
+
+The HAL already has a code path that imports a PS1 memory card image (`SH1_MC_IMPORT` in `memcard_ps2.c`). Now setting up a Wine prefix for BizHawk.
+
+- tool `Bash`: List wine-mono releases and octoshock DLL deps
+
+- tool `Bash`: Create 32-bit Wine prefix and install wine-mono
+
+## Claude
+
+Now a launch test of EmuHawk (it should open its window; I'll stop it after a few seconds).
+
+- tool `Bash`: Test-launch EmuHawk under Wine for 25s
+
+## Claude
+
+EmuHawk 1.11.4 starts under 32-bit Wine using wine-mono, so .NET from Microsoft isn't needed. Next I need a BIOS that matches the movie's and the disc images. Searching for them.
+
+- tool `Bash`: Locate disc images, chdman and PS1 BIOS files
+
+- tool `Bash`: Match BIOS hash and list disc images
+
+## Claude
+
+The movie's BIOS is `ps-10j.bin` (SCPH-1000, v1.0J); its SHA-1 matches. BizHawk 1.11.4 can't read CHD files, so I'm extracting discs 1 and 2 to cue/bin.
+
+- tool `Bash`: Extract discs to cue/bin and place BIOS
+
+## Claude
+
+Discs are extracted. Now I'm setting up the two-disc bundle and a small Lua logger, so I can check that the movie stays in sync (it should reach each stage on schedule).
+
+- tool `Bash`: Find symbol map addresses for trace fields
+
+- tool `Bash`: Write disc bundle XML and sync-check Lua
+
+- tool `Bash`: Run TAS movie in BizHawk with sync logger
+
+- tool `ToolSearch`: 
+
+- tool `Monitor`: BizHawk TAS sync log: stage changes and end
+
+## Claude
+
+The movie is now playing in BizHawk 1.11.4 under Wine, with a logger that records the stage every 600 frames. I'll know it's in sync if it moves through the stages in order to the end (frame 313,202).
+
+**Faking the save at the start:** yes, that works. I'd fake it one level lower than you suggested, though. Instead of writing the save's values into game memory, the port would hand the game this save whenever it reads the memory card. The game then runs its own load code, which sets everything the save affects: the Extreme unlock, rank and clear data, and any codec data. If we write values directly, we have to know every variable the save sets and the exact frame it sets them. Miss one, or get the timing wrong, and the run drifts out of sync quietly.
+
+Most of this already exists. The HAL can import a PS1 memory card image (`SH1_MC_IMPORT` in `memcard_ps2.c`), and the movie's `MovieSaveRam.bin` is both PS1 cards back to back, 128 KB each. The missing piece is in `source/memcard/memcard.c`: reads from the card need to go to that image, read-only, with no real PS2 card involved. That's smaller than the full memory card work in Step 6, and it's the same code path Step 6 will use later.
+
+To check it, I'll compare the BizHawk trace with the port right after the card is read at the title screen. Difficulty, `GM_GameStatus` and the game work area should be identical. If you'd rather start by writing the values directly anyway, I can do that instead.
+
+I'll report back when the sync check has gone a good way into the run.
+
+- tool `Bash`: Check why EmuHawk exited
+
+## Claude
+
+BizHawk exited about a minute after starting, without writing any sync log. To find which step fails, I'm launching it with disc 1 only (no movie, no Lua) and Wine's error output on.
+
+- tool `Bash`: Launch BizHawk with disc 1 and Wine errors
+
+- tool `Bash`: Search Wine trace for exception messages
+
+- tool `Bash`: Show non-trace Wine output
+
+## User
+
+[Request interrupted by user]
+
+## User
+
+I got this error:
+
+<pasted_content id="8d55">
+System.InvalidOperationException: Error compiling shader: <anonymous>:44:1: E5017: Aborting due to not yet implemented feature: Flatten "if" conditionals branches.
+=øE= ---> SlimDX.CompilationException: <anonymous>:44:1: E5017: Aborting due to not yet implemented feature: Flatten "if" conditionals branches.
+=øE= ---> SlimDX.Direct3D9.Direct3D9Exception: E_NOTIMPL: The function called is not supported at this time (-2147467263)
+  at SlimDX.Result.Throw[T] (System.Object dataKey, System.Object dataValue) [0x0003a] in <80d0d9e4d31646ac95aed514d284c444>:0 
+  at SlimDX.Result.Record[T] (System.Int32 hr, System.Boolean failed, System.Object dataKey, System.Object dataValue) [0x00078] in <80d0d9e4d31646ac95aed514d284c444>:0 
+  at SlimDX.Result.Record[T] (System.Int32 hr, System.Object dataKey, System.Object dataValue) [0x00005] in <80d0d9e4d31646ac95aed514d284c444>:0 
+  at SlimDX.CompilationException.Check[T] (System.Int32 hr, System.String errors) [0x0000a] in <80d0d9e4d31646ac95aed514d284c444>:0 
+   --- End of inner exception stack trace ---
+  at SlimDX.Direct3D9.ShaderBytecode.Compile (System.Byte[] sourceData, SlimDX.Direct3D9.Macro[] defines, SlimDX.Direct3D9.Include includeFile, System.String functionName, System.String profile, SlimDX.Direct3D9.ShaderFlags flags, System.String& errors) [0x00104] in <80d0d9e4d31646ac95aed514d284c444>:0 
+  at SlimDX.Direct3D9.ShaderBytecode.Compile (System.String sourceData, SlimDX.Direct3D9.Macro[] defines, SlimDX.Direct3D9.Include includeFile, System.String functionName, System.String profile, SlimDX.Direct3D9.ShaderFlags flags, System.String& errors) [0x0000b] in <80d0d9e4d31646ac95aed514d284c444>:0 
+  at BizHawk.Bizware.BizwareGL.Drivers.SlimDX.IGL_SlimDX9.CreateFragmentShader (System.Boolean cg, System.String source, System.String entry, System.Boolean required) [0x00082] in <7163e6c2873e40e8827122030ea15acd>:0 
+   --- End of inner exception stack trace ---
+  at BizHawk.Bizware.BizwareGL.Drivers.SlimDX.IGL_SlimDX9.CreateFragmentShader (System.Boolean cg, System.String source, System.String entry, System.Boolean required) [0x000e5] in <7163e6c2873e40e8827122030ea15acd>:0 
+  at BizHawk.Bizware.BizwareGL.GuiRenderer..ctor (BizHawk.Bizware.BizwareGL.IGL owner) [0x001a2] in <16112ad0811d446084cf3e2552c5291a>:0 
+  at BizHawk.Client.EmuHawk.DisplayManager..ctor (BizHawk.Client.EmuHawk.PresentationPanel presentationPanel) [0x000c0] in <004737c2d92b48d394bc3ce7f83a76dd>:0 
+  at BizHawk.Client.EmuHawk.MainForm..ctor (System.String[] args) [0x0040f] in <004737c2d92b48d394bc3ce7f83a76dd>:0 
+  at (wrapper remoting-invoke-with-check) BizHawk.Client.EmuHawk.MainForm..ctor(string[])
+  at BizHawk.Client.EmuHawk.Program.SubMain (System.String[] args) [0x00241] in <004737c2d92b48d394bc3ce7f83a76dd>:0
+</pasted_content id="8d55">
+
+## Claude
+
+That's the Direct3D display driver: Wine can't compile one of BizHawk's shaders. BizHawk can draw with GDI+ instead, so I'm switching its display method in the config.
+
+- tool `Bash`: Check BizHawk config display setting
+
+- tool `Bash`: Set GDI+ display and relaunch BizHawk
+
+## Claude
+
+It now stays up with the game loaded (killed by my 40-second timeout, no exceptions). Restarting the movie run with the sync logger.
+
+- tool `Bash`: Rerun TAS movie in BizHawk with sync logger
+
+## Claude
+
+Fixed. The error came from BizHawk's Direct3D display driver: Wine's shader compiler can't build one of its shaders yet. I switched BizHawk to its GDI+ display (`"DispMethod": 1` in `~/emu/bizhawk-1.11.4/config.ini`). With that change it loaded disc 1 and ran for 40 seconds with no errors.
+
+The movie run has restarted, playing both discs with the sync logger. A monitor will report each stage change as it happens and stop at the end of the movie.
+
+- tool `Bash`: Check why the second run exited
+
+- tool `Bash`: Test loading discs via an m3u playlist
+
+## Claude
+
+The BIOS error makes sense: BizHawk only finds firmware automatically if it recognizes the file, and v1.0J may not be on its list. I'm pointing it at the file explicitly in the config.
+
+- tool `Bash`: Set explicit PSX J BIOS in BizHawk config
+
+- tool `Bash`: Check BizHawk's firmware database for the BIOS
+
+## Claude
+
+BizHawk 1.11.4 does know this BIOS (`ps-10j.bin`, v1.0 J), so the file is right and only the lookup was failing. I've set it explicitly in the config. Retrying the movie.
+
+- tool `Bash`: Run the movie for 60s to test BIOS and sync
+
+- tool `Bash`: Rerun with Lua logger that reports errors
+
+## Claude
+
+The BIOS problem is fixed, but the Lua logger never starts. Even its first line ("start") isn't written, so either BizHawk ignores `--lua` or its Lua engine doesn't load under Wine. You can see the BizHawk window and I can't, so I need you to check something.
+
+Please run this:
+
+```
+cd ~/emu/bizhawk-1.11.4 && WINEPREFIX=~/emu/wine-bizhawk wine EmuHawk.exe "--movie=Z:\home\alex\emu\tas\mgs.bk2" "--lua=Z:\home\alex\emu\tas\synccheck.lua" "Z:\home\alex\emu\tas\mgs.xml"
+```
+
+Then tell me:
+1. Does a **Lua Console** window open? If it does, what does it show? If it doesn't, open it from **Tools → Lua Console**, then **Script → Open Script** and pick `Z:\home\alex\emu\tas\synccheck.lua`. Copy any error it prints.
+2. Does the movie play: the intro, then the game? Is the frame counter going up?
+
+## Claude
+
+That notice is just the old sync-log monitor timing out. It found nothing because the Lua logger never ran. I'm still waiting for what you see in the BizHawk window (the Lua Console, and whether the movie plays) before I go further.
+
+## User
+
+BizHawk runs but the lua console doesn't open. Running the sync check gives "invalid speed value"
+
+- tool `Bash`: Check whether the Lua logger wrote output
+
+- tool `Bash`: Fix sync-check Lua script
+
+- tool `Monitor`: BizHawk TAS sync log: stage changes and end
+
+## Claude
+
+I fixed the script. Please restart the movie so it plays from frame 0. Use **File → Movie → Play Movie** and pick `mgs.bk2`, or rerun the command from before. Then open `Z:\home\alex\emu\tas\synccheck.lua` in the Lua Console as you did before.
+
+It should run unthrottled now, with no speed message. I'm watching `~/emu/tas/synccheck.log` and will report each stage change as it happens. If it ends up in the right stages at the right frames all the way to frame 313,202, the movie is in sync on this setup.
+
+## User
+
+I reran the command and opened the sync check. There is no error output from lua now
+
+- tool `Bash`: Read sync log progress
+
+- tool `Bash`: Check stage name variable type
+
+## Claude
+
+My bug again: `GM_CurrentStageName` is a `char[8]` array, not a pointer, so the stage shows as "?". Fixing the script.
+
+- tool `Bash`: Read stage name as an array
+
+## Claude
+
+Fixed. In the Lua Console, select the script and click **Restart** (or toggle it off and on). The movie can keep playing, since logging picks up from the current frame.
+
+It's going slowly so far: 1,800 frames logged since you started it, which looks like roughly normal speed or slower. Once the stage names show up I'll measure the actual speed. If it's near 1x, the full movie takes about 1.5 hours, and we may want to look at BizHawk's speed settings or check sync in sections.
+
+## User
+
+Can we try opengl to speed things up?
+
+- tool `Bash`: Measure emulation speed and host GL renderer
+
+## Claude
+
+Yes, we can try it. Two things first, though.
+
+**Current speed:** about 30 frames per second, half of real time. At that rate the full movie takes about 3 hours. The logger works now: it's in `s00a` (the dock) at frame 3,600.
+
+**OpenGL may not help much.** When BizHawk started, Wine reported its OpenGL renderer as `llvmpipe`, which is software rendering on the CPU. So OpenGL here wouldn't use your GPU, unless Wine is choosing that over a working GPU driver. Under Wine and wine-mono, the drawing and the .NET layer are the likely bottlenecks, more than the emulator core. Two settings should give more:
+- **Frame skip** while running unthrottled: draw 1 frame in 8, which removes most of the display cost.
+- **Sound off.**
+
+I'd try all three at once: OpenGL, frame skip and sound off. BizHawk rewrites `config.ini` when it exits, so please **close BizHawk** first and tell me when it's closed. I'll edit the config, and then you can restart it with the same command and the Lua script. The log starts over from frame 0, which is fine.
+
+## User
+
+Alright, I've closed it. Give me the script to run bizhawk and choose the lua script again
+
+- tool `Bash`: Switch BizHawk to OpenGL, sound off, frameskip
+
+- tool `Bash`: Write BizHawk launch script
+
+## Claude
+
+I set OpenGL display and turned sound off. Frame skip was already at 4, so I raised it to 7. Since it was already skipping frames, drawing probably wasn't the bottleneck, and OpenGL may change little. We'll see from the log.
+
+To start it:
+
+```
+~/emu/tas/run_bizhawk.sh
+```
+
+Then open **Tools → Lua Console → Script → Open Script** and pick `Z:\home\alex\emu\tas\synccheck.lua`.
+
+The script also contains these steps as a comment. Tell me once it's running and I'll measure the speed again.
+
+## User
+
+Can you write a script that I can run again and again?
+
+- tool `Bash`: List Lua-related BizHawk config keys
+
+- tool `Write`: /home/alex/emu/tas/run_bizhawk.sh
+
+- tool `Bash`: Write reusable BizHawk launch script
+
+## Claude
+
+I wrote a launch script you can run as often as you like:
+
+```
+~/emu/tas/run_bizhawk.sh
+```
+
+It does three things on every start:
+- **Refuses to start a second copy** if BizHawk is already running.
+- **Reapplies the settings**, because BizHawk rewrites `config.ini` when it exits: OpenGL display, sound off, frame skip 7, and the v1.0J BIOS.
+- **Opens the Lua script for you.** It turns on BizHawk's "auto-load most recent Lua script" option and puts `synccheck.lua` at the top of the recent list, then starts the movie on both discs.
+
+You can pass a different Lua script as an argument (`run_bizhawk.sh other.lua`). The trace script for Phase 2 will use this too.
+
+I've only checked the script's syntax. I haven't run BizHawk with it, so I haven't confirmed that the auto-load opens the Lua Console. If the console doesn't appear, tell me, and as a fallback open the script by hand once.
+
+## User
+
+The game is running much faster now. Make sure the movie runs to the end properly.
+
+- tool `Bash`: Measure speed and list stage changes
+
+- tool `Bash`: Check whether sync log is still updating
+
+- tool `Bash`: Confirm launch script applied config
+
+## Claude
+
+I can't confirm it runs to the end yet. **The Lua script isn't running in this session**: the log stopped at 22:36, while the previous BizHawk session was still open. The config does have auto-load turned on for `synccheck.lua`, so BizHawk 1.11.4 either ignores that option at startup or loads the script without starting it.
+
+That may also explain part of the speed-up: the Lua callback isn't running on every frame now.
+
+Please check in the BizHawk window:
+- **If a Lua Console is open with `synccheck.lua` listed but not running** (no green ▶ icon next to it): double-click the script, or select it and press the toggle button.
+- **If no Lua Console is open:** open **Tools → Lua Console**, and the script should be at the top of **File → Recent Scripts**.
+
+The movie doesn't need to restart, since the log picks up from the current frame. Once the log moves again, I'll keep watching it to the end and tell you if it stops changing or the stages come in the wrong order. I'll also tell you the real speed with the script running.
+
+If auto-load really doesn't work in 1.11.4, opening the script by hand from Recent Scripts is one click per run. I'll note that in the launch script.
+
+## User
+
+The script should be running again
+
+- tool `Bash`: Measure speed and list stage changes
+
+- tool `Monitor`: BizHawk TAS sync: stage changes, end, or stall
+
+## Claude
+
+I'm watching the log now. I'll get a message on each stage change, at frame 313,202, or if the log stops changing for 90 seconds (a hang, a pause or BizHawk exiting).
+
+Things to watch for on your side:
+- **The disc swap at frame 181,883**, about 35 minutes in. The movie opens the tray and puts in disc 2 itself, from the two-disc bundle.
+- **Don't press keys in the BizHawk window** while it plays. That's only an issue if the movie gets switched out of playback; plain playback ignores keyboard input.
+
+I'll report back when it reaches the end or if something goes wrong.
+
+## Claude
+
+The run reached the tank hangar (`s02a`) at frame 15,600. Still in order.
+
+## Claude
+
+The run reached the cell block (`s03a`) at frame 19,800. Still in order.
+
+## Claude
+
+At frame 22,200 the run entered `s16a`. Its jump out of the stage order is expected: the TAS skips sections with glitches. The real check is whether it finishes.
+
+## Claude
+
+At frame 22,800 the run moved on to `s03d`. Still running.
+
+## Claude
+
+At frame 28,800 the run is in `s03b`, about 9% of the way through.
+
+## Claude
+
+At frame 29,400 the run is back in `s03a`.
+
+## Claude
+
+At frame 30,600 the run reached `s04a`.
+
+## Claude
+
+At frame 31,800 the run is in `s04b`.
+
+## Claude
+
+At frame 34,200 the run is in `s04c`.
+
+## Claude
+
+At frame 34,800 the run is in `s16c`. I'll stop posting every stage change from here on and only report a problem or the end.
+
+## Claude
+
+Frame 35,400, `s04c`: still running.
+
+## Claude
+
+Frame 37,200: still running.
+
+## Claude
+
+Frame 38,400: still running.
+
+## Claude
+
+Frame 40,200, `s05a`: still running.
+
+## Claude
+
+Frame 42,600, `s06a`: still running.
+
+## Claude
+
+The stage-by-stage messages are just noise now, so I'm switching to a quieter watcher that only reports the end of the movie or a stall.
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Wait for TAS end or stall
+
+## Claude
+
+The movie is at frame 45,600, in stage `s07a`, about 15% of the way through. The stages so far match the expected route. From here I'll only report when the movie reaches frame 313,202 or if the log stops for 90 seconds. That's roughly 55 more minutes at the current speed.
+
+## Claude
+
+That notice is an older monitor from before the restart expiring; it's not this run. The watcher for the end of the movie or a stall is still running.
+
+- tool `Bash`: Read end result and disc-swap stages
+
+- tool `Bash`: Record Phase 1 results in plan doc
+
+- tool `PushNotification`: 
+
+## Claude
+
+The movie played through to the end in BizHawk with no desync.
+
+- **Full run:** all 313,202 frames. The log recorded 118 stage visits, in the order you'd expect from the route.
+- **Disc swap:** the game's disc-change screen (`change` stage) came at frame 181,800, and disc 2 then continued at `s13a`.
+- **Ending:** the credits (`roll`) start at frame 290,400 and run to the last frame. That fits a completed game: Liquid in `s19a`/`s19b`, the escape in `s20a`.
+
+The log is saved as `~/emu/tas/synccheck_full_run1.log`, and I've marked Phase 1 done in [TAS Testing Plan.md](docs/TAS%20Testing%20Plan.md). The plan also notes the Wine setup and that the Lua script has to be opened by hand.
+
+The next step is Phase 2: a Lua trace that writes the pad values and game state for every game frame. It will also give us the memory values right after the save loads at the title screen, which we need for faking the memory card. Should I start on it?
+
+## User
+
+I still want to see if there’s some way to completely automate the TAS run
+
+- tool `Bash`: List EmuHawk 1.11.4 command-line options
+
+- tool `Bash`: Find Lua console auto-open settings
+
+- tool `Bash`: Check for a Lua exit function in 1.11.4
+
+- tool `Bash`: Auto-open Lua console, exit at end, add watchdog
+
+## Claude
+
+Now testing a launch with no manual steps. If the Lua log appears without anyone opening the console, the auto-start works.
+
+- tool `Bash`: Test fully automatic BizHawk launch for 100s
+
+## Claude
+
+The BizHawk window from the last run is still open: the movie finished and it's paused on the last frame. The launch script won't start a second copy. Can you close it? Or I can close it myself (PID 47325). Nothing in it is needed now, because the log is already saved as `synccheck_full_run1.log`.
+
+Once it's closed, I'll test the unattended launch. These are the changes:
+- **The Lua Console now opens on its own.** 1.11.4 has no `--lua` option, which is why the script never ran from the command line. The console has its own auto-open setting, separate from "load recent script", and the launch script now turns on both.
+- **BizHawk closes itself at the end.** The Lua script calls `client.exit()` at frame 313,202. This version seems to have it; if not, the script pauses instead.
+- **A watchdog in the launch script** stops BizHawk if the log stops changing for 90 seconds, or doesn't appear within 2 minutes. It then prints `OK: movie played to the end (N stage visits)` and exits with 0, or prints a stall or failure message and exits with an error code. That makes it usable from other scripts later.
+
+## User
+
+Try now
+
+- tool `Bash`: Test fully automatic BizHawk launch for 100s
+
+## Claude
+
+The PID it found was my own test shell: its command line contains "EmuHawk.exe", so `pgrep -f` matched itself. I'm switching to an exact process-name match (`pgrep -x`), in the launch script too.
+
+- tool `Bash`: Test fully automatic BizHawk launch for 100s
+
+- tool `Bash`: Full unattended TAS run with watchdog
+
+## Claude
+
+The full run is going, started with nothing but `~/emu/tas/run_bizhawk.sh`. Please don't touch the BizHawk window while it plays. When it finishes, I'll check two things:
+- that BizHawk closed itself at the last frame;
+- that the script printed `OK: movie played to the end (118 stage visits)`, matching the 118 from the first run.
+
+If the watchdog stops it instead, I'll find out where and why.
+
+## User
+
+I'm going to resume this later. We'll restart this script from the beginning
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Stop BizHawk and Wine for this prefix
+
+- tool `Bash`: Note unfinished unattended run in plan
+
+## Claude
+
+I stopped the run (it was at frame 3,600) and shut down BizHawk and its Wine process. Nothing is running now.
+
+When you're back, run `~/emu/tas/run_bizhawk.sh` and it starts the movie from the beginning. The first run's log is kept separately in `synccheck_full_run1.log`, so restarting doesn't touch it.
+
+I added an open item to [TAS Testing Plan.md](docs/TAS%20Testing%20Plan.md) for what's still unchecked: that BizHawk closes itself at frame 313,202 and the script prints `OK: ... (118 stage visits)`.
+
+None of this is committed. The plan doc and the Planning Doc change are in the repo's working tree; the BizHawk scripts are in `~/emu/tas`, outside the repo.
+
+## User
+
+Try the scipt again
+
+- tool `Bash`: Full unattended TAS run with watchdog
+
+- tool `Monitor`: TAS run started logging
+
+## Claude
+
+The run has started from the beginning, with `~/emu/tas/run_bizhawk.sh` and no manual steps. I'll confirm in a moment that the log is moving. Then I'll report when it finishes in about 70 minutes: either `OK` with BizHawk closing itself at the last frame, or wherever the watchdog stopped it.
+
+## Claude
+
+The Lua script started on its own and logged frame 0. The run is going, and I'll report when it ends.
+
+## User
+
+Alright, let's stop the run. I see that it's still going just fine.
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Stop BizHawk and its Wine processes
+
+## Claude
+
+I stopped it at frame 88,200, in stage `s10a`, about 28% of the way through, and BizHawk and its Wine processes are closed. The unattended start works, and the run stayed in sync as far as it got.
+
+The end of the run is still unverified: `client.exit()` at frame 313,202 and the `OK` message. That open item stays in the plan for a run you let finish.
+
+Next, when you're ready, is Phase 2: the per-game-frame trace script, launched the same way with `run_bizhawk.sh trace.lua`.
+
+## User
+
+Proceed
+
+- tool `Bash`: Find game frame counter and pad update code
+
+- tool `Bash`: Read rest of pad update and GV_Time increment
+
+- tool `Bash`: Inspect game loop, RNG and map files
+
+- tool `Bash`: Look up trace symbol addresses in map
+
+- tool `Bash`: Disassemble rand to find the seed address
+
+## Claude
+
+I'm collecting addresses for the trace. The random number seed is at `0x800C1530` (from `rand`'s code). Next are Snake's health and position, then I'll write the trace script.
+
+- tool `Bash`: Find health and game work symbols
+
+- tool `Bash`: Locate health/weapon declarations
+
+- tool `Bash`: Search game-wide health and weapon names
+
+- tool `Bash`: Find game data struct macros
+
+- tool `Bash`: Read linkvar layout for game state
+
+- tool `Bash`: Get linkvarbuf size and MTS_PAD layout
+
+## Claude
+
+Still collecting addresses. The game's saved-state array (`linkvarbuf`: health, weapons, position, difficulty) is at `0x800B4D98`. Once I know its size, I'll write the trace script.
+
+- tool `Bash`: Get linkvarbuf length and MTS_PAD struct
+
+- tool `Bash`: Check Lua API functions available in 1.11.4
+
+- tool `Bash`: Check Lua API names in assembly metadata
+
+- tool `Bash`: Write trace Lua; log name follows script
+
+- tool `Bash`: Test trace script for 100 seconds
+
+- tool `Bash`: Run trace twice and compare the overlap
+
+## Claude
+
+The two runs match line for line (3,173 lines in common). Now I'm moving the scripts into the repo under `tools/port/tas/`, so they're version-controlled. The movie, discs and logs stay in `~/emu`.
+
+- tool `Bash`: Move TAS scripts into repo and retest
+
+## Claude
+
+It runs fine from the repo. Starting the full reference trace now, about 70 minutes unattended.
+
+- tool `Bash`: Full unattended reference trace run
+
+- tool `Bash`: Update plan doc Phase 2 status
+
+## Claude
+
+While the trace runs, I'm using the start of the log to find when the save values appear in memory.
+
+- tool `Bash`: Find when the save state first changes
+
+- tool `Bash`: Check trace log is being written
+
+- tool `Monitor`: trace.log reaches 4000 lines
+
+## Claude
+
+The full reference trace is running, launched by script with no manual steps. I've updated Phase 2 in [TAS Testing Plan.md](docs/TAS%20Testing%20Plan.md). Once the start of the log has some content, I'll look for the frame where the save's values (Extreme difficulty and so on) first appear.
+
+- tool `Bash`: Find when the save state first changes
+
+- tool `Bash`: Find the title menu's Extreme unlock check
+
+- tool `Bash`: Read title menu difficulty condition
+
+- tool `Bash`: Find where clear data and Extreme flag are set
+
+- tool `Bash`: Read clear-data and demo_rank logic
+
+- tool `Bash`: List save files on the movie's memory cards
+
+- tool `Bash`: Find how the title derives rank flags
+
+- tool `Bash`: Read memory card scan in title code
+
+- tool `Bash`: Inspect port's memcard directory handling
+
+## Claude
+
+The port already sends PS1 card calls to the HAL's PS1 card images (`psx_card.c`). Checking where those images come from:
+
+- tool `Bash`: Read the HAL's PS1 card image layer
+
+- tool `Bash`: Locate psx_card.c and its image source
+
+- tool `Bash`: Read HAL memory card import path
+
+- tool `Bash`: Find card load/save hooks and build defines
+
+- tool `Bash`: Read memcard_ps2 info/store/reload functions
+
+- tool `Bash`: See how the build picks HAL sources
+
+- tool `Bash`: Read link_ps2 source selection and defines
+
+- tool `Bash`: Check bin2c output and memcard_ps2 header
+
+- tool `Bash`: See bin2c array declaration
+
+## Claude
+
+Writing the fixed-card file and gating the normal one:
+
+- tool `Write`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/memcard_fixed.c
+
+- tool `Bash`: Gate memcard_ps2.c on SH_PORT_MC_FIXED
+
+- tool `Bash`: List exported functions in memcard_ps2.c
+
+## Claude
+
+All covered. Now the MGS link step: `MGS_MC_IMAGE=<file>` embeds the image and sets the define.
+
+- tool `Bash`: Add MGS_MC_IMAGE to link script; extract card image
+
+- tool `Bash`: Find how the PS2 build is invoked
+
+- tool `Bash`: Build PS2 port with the fixed test card
+
+## Claude
+
+It builds and links. Now testing in PCSX2: the title screen should print `clear data exists` and `This Is Rank 2` (the game's own debug output) once it scans the fixed card.
+
+- tool `Bash`: Find the PCSX2 run script
+
+- tool `Bash`: Locate pcsx2_run.py and its options
+
+- tool `Bash`: See how MGS runs in PCSX2
+
+- tool `Bash`: See compare_frames PCSX2 invocation
+
+- tool `Bash`: Boot port in PCSX2 to title and check card scan
+
+- tool `Bash`: Run the matching build regression check
+
+- tool `Bash`: Count matches and check for failures
+
+## Claude
+
+The matching build passes: 80 outputs match their target hashes, with no failures. Updating the plan and the Running Walkthrough.
+
+- tool `Bash`: Find last walkthrough step
+
+- tool `Bash`: Update walkthrough and plan with progress
+
+- tool `Bash`: Check reference trace progress
+
+## Claude
+
+Phase 2 is mostly done, and the memory card question is answered: you were right to suspect the save, but it doesn't set any game values.
+
+**The trace:** `tools/port/tas/trace.lua` writes one line per game frame. Each line has the pad values the game actually used, the game clock, the random number seed, the stage, Snake's position and the game's whole saved-state array. Two runs produced identical output. The full reference trace is still running; it's at movie frame 26,280 and slowed down while I was building and running PCSX2.
+
+**The memory card:**
+- **What the save does:** it only unlocks Extreme on the New Game menu. The title screen reads just the card's file names, not their contents. The one save, `BISLPM-86247G:E0pBAA`, carries a clear flag that unlocks Extreme. The TAS then picks Extreme itself at movie frame 1,582, and the trace shows the difficulty changing at that frame.
+- **The fake:** instead of writing values into memory, I added a fixed test memory card mode to the HAL, in a new file `src/ps2/memcard_fixed.c`. Both card slots hold cards loaded from an image built into the program, and anything the game writes stays in memory only. So every run starts with the same cards, whether or not PCSX2 or the console has a card in.
+  ```
+  MGS_MC_IMAGE=~/emu/tas/MovieSaveRam.bin python3 build/link_ps2.py
+  ```
+- **Tested in PCSX2:** the title screen prints `clear data exists BISLPM-86247G:E0pBAA`, `This Is Rank 2` and `demo_rank = 2`, so Extreme is unlocked as on the PS1.
+- **Matching build:** still passes, 80 outputs OK.
+
+**SH1:** the HAL is shared with the Silent Hill port, so I touched it as little as I could. `memcard_ps2.c` gets only an `#ifndef SH_PORT_MC_FIXED` around its contents. SH1 never sets that define, so its build is unchanged. I haven't built SH1 to confirm.
+
+**Also changed:** `build/link_ps2.py` (the `MGS_MC_IMAGE` option), the scripts in `tools/port/tas/`, and the docs (the plan, Planning Doc and a new Running Walkthrough step). Nothing is committed yet, in either repo.
+
+**Next is Phase 3:** extending `pad_script.c` to replay the trace's pad values by game frame in the port, plus a script that compares the two traces.
+
+## User
+
+Continue to step 3
+
+- tool `Bash`: Read ApplyConfig and mts pad read functions
+
+- tool `Bash`: Test which trace line holds the pad the game read
+
+- tool `Bash`: Find other pad readers and the end of pad update
+
+- tool `Bash`: Count pad changes and GV_Time continuity
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Stop trace run; record all four pad entries
+
+- tool `Bash`: Full reference trace with four pad entries
+
+- tool `Bash`: Check which rand the port links
+
+- tool `Bash`: Read HAL rand and port sources list
+
+- tool `Bash`: Check accessors for trace fields and capture code
+
+## Claude
+
+Everything the trace needs is reachable: `GM_GetArea` returns the stage name and the rest are globals. Writing the HAL seed accessor and the port's replay and trace file:
+
+- tool `Bash`: Add rand seed accessor to HAL
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+## Claude
+
+Now the two hooks in the game code, both under `MGS_PORT`:
+
+- tool `Bash`: Read end of pad update and gvd includes
+
+- tool `Bash`: Add TAS hooks and link option
+
+## Claude
+
+Now the two tools: converting the reference trace into the replay table, and comparing the port's trace with the reference.
+
+- tool `Bash`: Write trace_to_pads and compare_trace tools
+
+## Claude
+
+Building with a replay table made from the start of the new trace, then running it in PCSX2:
+
+- tool `Bash`: Build port with TAS replay and fixed card
+
+- tool `Bash`: Run TAS replay build in PCSX2 for 180s
+
+- tool `Bash`: Compare port trace with reference trace
+
+- tool `Bash`: Show status/stage/load transitions in both traces
+
+- tool `Bash`: Read how capture replays the PS1 stream clock
+
+- tool `Bash`: Read stream tick functions and strctrl gate
+
+- tool `Bash`: Check BizHawk 1.11.4 exec callback support for PSX
+
+- tool `Bash`: Read the rest of stream tick and counter
+
+- tool `Bash`: Write exec-callback test Lua script
+
+## Claude
+
+The reference trace is using BizHawk right now, so I'm running the test in a separate copy of BizHawk to leave it undisturbed:
+
+- tool `Bash`: Test exec callbacks in a second BizHawk copy
+
+- tool `Bash`: Find stream timing and tick count variables
+
+## Claude
+
+Those are `static`, so they're not in the map. I'll read their addresses from the code of the small functions that set them:
+
+- tool `Bash`: Disassemble to find stream and tick variables
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Add stream timing fields to trace
+
+- tool `Bash`: Full reference trace with stream timing fields
+
+- tool `Bash`: Find stream status bit and capture gate code
+
+- tool `Bash`: Find the VOX stream state bit value
+
+## Claude
+
+The stream bit is `0x20`, and the earlier run shows the problem directly: the port started the intro's stream at loop 353, and the PS1 at 491. Adding the stream clock to the replay:
+
+- tool `Bash`: Add stream tick replay and start gate
+
+## Claude
+
+Now `trace_to_pads.py` also writes the timing table:
+
+- tool `Bash`: Generate timing table in trace_to_pads
+
+- tool `Bash`: Check stream fields in new trace
+
+- tool `Bash`: Show stream activity periods in trace
+
+- tool `Bash`: Rebuild with stream timing and compare again
+
+- tool `Bash`: Debug whether stream tick override is used
+
+- tool `Bash`: Read stream control state machine end logic
+
+- tool `Bash`: Remove debug print; compare from New Game
+
+- tool `Bash`: Read the stage loader actor
+
+- tool `Bash`: Check ELF size and memory layout
+
+## Claude
+
+The build uses about 12 MB of the PS2's 32, so the tables fit. Implementing the load gate, the `GV_PassageTime` replay and the seed resync at each load's end:
+
+- tool `Bash`: Add load gate, passage time and seed resync
+
+## Claude
+
+Before building: the load gate calls `FS_LoadStageSync` again on every held loop after the load has finished. Checking that repeating it is harmless:
+
+- tool `Bash`: Check FS_LoadStageSync repeated-call safety
+
+- tool `Bash`: Check LoadStageFiles when already done
+
+## Claude
+
+Repeating it is safe: once the load is done, `LoadStageFiles` stops at the end tag and returns 0 again. Building and running:
+
+- tool `Bash`: Rebuild with load gate and compare
+
+- tool `Bash`: Fix load lag, resync seed at load start
+
+## Claude
+
+No change at all, which is suspicious. Looking at the raw lines around the intro's load end in both traces:
+
+- tool `Bash`: Compare load transition lines in both traces
+
+- tool `Bash`: Read port log around the intro load
+
+- tool `Bash`: Realign GV_Time at load ends; rebuild and compare
+
+- tool `Bash`: Take PS1 clock and passage time at realign
+
+- tool `Bash`: Check linkvar timer fields and their updates
+
+- tool `Bash`: Read how play time is counted
+
+- tool `Bash`: Rebuild with clock fix and compare
+
+- tool `Bash`: Read vibration config logic
+
+- tool `Bash`: Read vibration type and raw pad read functions
+
+- tool `Bash`: Find pad state symbol and its size
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Add pad init state to trace
+
+- tool `Bash`: Full reference trace with pad state field
+
+- tool `Bash`: Locate end of do_control in mts_pad.c
+
+- tool `Bash`: Add raw mts pad and pad state replay
+
+## Claude
+
+Waiting for the new trace to get past the dock before testing:
+
+- tool `Monitor`: new trace.log passes 12000 lines
+
+## Claude
+
+Phase 3 is mostly built, and the reference trace is running again with one more field (the PS1's pad init state). Once it's past the dock I'll test the raw-pad replay and report the comparison.
+
+- tool `Bash`: Build with raw pad replay and compare
+
+## Claude
+
+The vibration configuration now matches. Next is the first real gameplay difference: Snake's position at loop 1016. The lines around it:
+
+- tool `Bash`: Show positions and pads around loop 1016
+
+- tool `Bash`: Record Phase 3 status in plan and walkthrough
+
+- tool `PushNotification`: 
+
+## Claude
+
+Phase 3 works. The port replays the TAS in PCSX2 and matches the PS1 loop by loop from New Game (loop 315) through loop 1015 in the dock. That covers the intro, the dock's opening and Snake climbing down the ladder. Up to there, every difference I traced came from stubbed stream code or from where Lua samples. There are no TLB misses.
+
+**How the replay works** (`port/src/tas_replay.c`):
+- **Pads:** each game loop, the port writes the PS1's pad results for that loop (`GV_PadData`), so the game sees exactly what the PS1 game read. It also writes the PS1's raw pad and pad init state, which some code reads directly: cutscene skip, and the vibration check that Psycho Mantis uses.
+- **Timing:** load times differ in both directions, and the game loop keeps counting during loads. So at each load end the port takes the PS1's loop counter, clock parity and frame time. It also uses the PS1's frame time every loop and the PS1's clock for streams, and resets the random seed to the PS1's at each load start and end.
+- **Comparison:** the port writes its own trace in the same format, and `tools/port/tas/compare_trace.py` reports the first loop where each value differs.
+
+**What it found:**
+1. **Streams are the main gap.** The port's streaming functions (`StGetNext` and the rest) are still stubs, so the dock's opening voice-over and subtitles end at once, and the intro's demo stream behaves differently. That's the streaming bug in your last commit message. It needs to be fixed in the port, and the TAS will check the fix.
+2. **Loop 1016:** when Snake starts running after the ladder, the port's x/z position changes one loop before the PS1's, and y is a few units off. It may be a real one-loop difference in how Snake starts moving. It may also be a limit of the reference, because Lua samples each loop at the end of its first video frame, and slow loops get sampled partway through. I haven't settled which.
+3. **Fixed along the way:** vibration was on in the port and off on the PS1. The game sets this from the pad type, so it's now part of the pad replay.
+
+**Things to know:**
+- The reference trace is running again from the start. I restarted it each time I added a field, and it takes about 70 minutes. So far the replay has only been tested on the dock section.
+- A TAS build needs four extra settings. The exact build line is in [TAS Testing Plan.md](docs/TAS%20Testing%20Plan.md) under Phase 3; the plan and the Running Walkthrough are both updated.
+- I added TAS hooks, all under `MGS_PORT`, to five game files: `pad.c`, `gvd.c`, `mts_pad.c`, `loader.c` and `capture_ps2.c`. The HAL gained the fixed-card file and a small seed accessor (`Hal_RandSeed`).
+- I haven't rerun the matching build since these edits, and I haven't built SH1 against the HAL changes.
+- Nothing is committed, in either repo.
+
+Which next: implement the stream functions, so the cutscenes and codec run and the TAS can go further, or look into the loop-1016 movement difference first?
+
+## User
+
+I want to save all of the TAS info in the project folder so we can reuse it easily. However, let’s wait until the current run ends before we do that
+
+## Claude
+
+Sounds good. The reference run is still going, about 70 minutes from its restart. When it finishes I'll check it reached the end (`OK` from the script, the last line at movie frame 313,202). Then I'll gather the TAS material into the project folder:
+- the movie (`.bk2`) and its memory card image;
+- the BizHawk disc bundle and config notes;
+- the full reference trace (compressed);
+- the replay tables built from it.
+
+I'll tell you the size and whether it belongs in git before I commit anything.
+
+## User
+
+How long does the reference run take to run in real time? How far along are we?
+
+- tool `Bash`: Measure trace progress and speed
+
+## Claude
+
+A full run takes about an hour of real time. BizHawk plays the movie at about 82 frames per second, 1.4 times normal speed, through all 313,202 frames.
+
+The current run is about two-thirds of the way through: frame 209,940 of 313,202, after 41 minutes. That leaves about 21 minutes, so it should finish around 9:20.
+
+- tool `Bash`: Check run result and list TAS files
+
+- tool `Bash`: Build final tables and compress the trace
+
+- tool `Bash`: Save TAS data to repo; read .xz traces
+
+## Claude
+
+Both tools now read the saved trace by default and give the same results as before. Writing the README:
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/tas/README.md
+
+- tool `Bash`: Check unzip command and tas folder size
+
+## Claude
+
+Everything from the TAS work is now in a new `tas/` folder in the project, 1.9 MB in total:
+
+- **`tas/movie/metalgearsolidintegral-allbosses-theenglishman.bk2`**: the original movie. The memory card image is inside it, so there's no separate copy.
+- **`tas/reference/trace.log.xz`**: the full reference trace, every game loop of the movie (163,839), compressed from 105 MB to 1.5 MB.
+- **`tas/reference/synccheck.log`**: the first full sync-check log.
+- **`tas/README.md`**: what the movie is, how to set up BizHawk under Wine and remake the reference, and the exact commands to build, run and compare a TAS replay.
+
+`trace_to_pads.py` and `compare_trace.py` now read the saved trace by default, so a replay needs nothing from `~/emu` except the generated tables. I rebuilt the tables from the saved copy and compared against it; the results match the earlier run.
+
+The disc images, the BIOS and BizHawk aren't included; the README says where each comes from. Your `~/emu` setup is untouched.
+
+`tas/` and `tools/port/tas/` aren't committed yet. At 1.9 MB they're fine in git, and this branch is never pushed to upstream. Should I commit them, along with the rest of today's changes to this repo and the HAL?
+
+## User
+
+Yes
+
+## Claude
+
+Before committing, CLAUDE.md asks for three things: the matching build check, the walkthrough note and the conversation archive. Running the build check first, since there have been game source changes since the last one:
+
+- tool `Bash`: Run matching build and VR variant checks
+
+## Claude
+
+The matching build passes: 80 OK, plus 2 for the VR executable. Now checking that a normal port build without the TAS options still links, and that the SH1 port still builds against the changed HAL:
+
+- tool `Bash`: Normal port link; find SH1 build script
+
+- tool `Bash`: Build SH1 port against the changed HAL
+
+## Claude
+
+SH1 still links against the changed HAL. Now updating the walkthrough and the conversation archive:
+
+- tool `Bash`: Update docs and rebuild conversation archive
+

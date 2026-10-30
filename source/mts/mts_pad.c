@@ -202,6 +202,10 @@ static void do_control( void )
             sendbuf_800C14D0[i][0] = 0;
         }
     }
+#ifdef MGS_PORT
+    extern void Port_TasRawPads( void *pads, void *states ); /* port/src/tas_replay.c: TAS replays, the PS1's */
+    Port_TasRawPads( pad_800C14E0, pad_state_800C14F0 );
+#endif
 }
 
 /**

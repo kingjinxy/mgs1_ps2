@@ -485,3 +485,53 @@ Fixed under `MGS_PORT` at both sites: `GM_Weapon < 0 ? &actions_no_weapon_8009ED
 PCSX2: Snake stays at -5756 1104 -1298 after the codec, the PS1's position (`tools/port/gdb/snake_ps1.py`).
 The other `[GM_Weapon]` indexings are guarded (`>= 0`) or use `+ 1`. The pattern (a negative index reaching the
 variable linked before an array) may recur elsewhere in the decomp. Matching build: 80 OK, VR 2 OK.
+
+## Step 6: TAS reference replay and trace; fixed test memory card (2026-10-29/30)
+
+Plan: `docs/TAS Testing Plan.md` (TASVideos submission #5139, the all-bosses Integral run, 313,202 frames).
+
+**Reference replay.** The movie needs BizHawk 1.11.4 (Octoshock): its `EmuHawk.exe` and `octoshock.dll` are
+32-bit Windows binaries, so 32-bit Wine (`wine32:i386`) plus wine-mono 9.4.0 (GitHub) in a separate prefix
+`~/emu/wine-bizhawk`; Microsoft's .NET wasn't needed. Failed first: the Direct3D display (Wine's shader compiler:
+"Flatten if conditionals not implemented"; OpenGL works), the BIOS lookup (v1.0J `ps-10j.bin` is in BizHawk's
+database but wasn't found in `Firmware/`; set explicitly), `--lua` (not in 1.11.4: the Lua console's own
+auto-open setting and the recent-script auto-load do it), `pcall` around `emu.frameadvance` (Lua 5.1 can't yield
+across it), `client.speedmode(6400)` (invalid in 1.11.4). Discs: cue/bin from the CHDs (`chdman extractcd`), both
+listed in an XML bundle. `tools/port/tas/run_bizhawk.sh [script.lua]` runs it with no clicks and a stall watchdog.
+The whole movie plays in sync: 118 stage visits, disc change at frame 181,800, credits from 290,400.
+
+**Trace.** `tools/port/tas/trace.lua`: one line per game loop (`GV_Time` change) with the pads the game read,
+clock, `rand` seed (`0x800C1530`), stage, position, `linkvarbuf`. Two runs identical. Full trace running.
+
+**The movie's memory card.** The trace shows the save doesn't set game state: Extreme is chosen on the New Game
+menu (frame 1,582, `GM_GameLevel` 3). The title (`onoda/open/open.c`) only reads the card's file names: card 1
+holds `BISLPM-86247G:E0pBAA` (clear flag 2: `has_clear_data`, rank 2, Extreme unlocked). So no memory poking:
+the HAL gained fixed test cards (`src/ps2/memcard_fixed.c`, `SH_PORT_MC_FIXED`, in place of `memcard_ps2.c`):
+both PS1 slots hold cards from an image linked in, writes stay in EE memory. MGS: `MGS_MC_IMAGE=<file>
+python3 build/link_ps2.py` (the movie's `MovieSaveRam.bin`, both cards back to back). PCSX2: the title prints
+`clear data exists BISLPM-86247G:E0pBAA`, `This Is Rank 2`, `demo_rank = 2`. Matching build: 80 OK.
+
+## Step 6: TAS replay in the port (2026-10-30)
+
+`port/src/tas_replay.c` with hooks in `libgv/pad.c`, `libgv/gvd.c`, `mts/mts_pad.c`, `game/loader.c` and
+`capture_ps2.c`'s stream hooks; `tools/port/tas/trace_to_pads.py` and `compare_trace.py`; the HAL's
+`Hal_RandSeed` (its PS1 `rand`'s state). Details and the build line in `docs/TAS Testing Plan.md`, Phase 3.
+
+What was tried: replaying the raw pad (`pad_800C14E0`) for `GV_UpdatePadSystem`: the trace samples it at frame
+end, and the stick bytes the game copied matched the previous line's only 99.7% of the time, so the port
+writes the reference's `GV_PadData` itself. Keying everything by `GV_Time` from boot: the title arrives at loop
+36 here, 146 on the PS1 (its loads loop longer), and loads differ both ways, so at each load end the port takes the
+PS1's `GV_Time`, `GV_Clock` and `GV_PassageTime`. Holding the load end until the PS1's loop: didn't help where
+the port's load was the slower one. An execute callback on `FS_StreamGetTick` in BizHawk: registers, never
+fires (Octoshock 1.11.4); the tick is computed from `mts_time` and `stream.c`'s statics (read from
+`FS_StreamSoundMode`'s code). `GM_CONFIG_VIBRATION_OFF` differed: `gamed.c` sets it from the pad's vibration type,
+so the raw pads and `pad_state_800C14F0` are replayed too.
+
+PCSX2 (dock): no TLB misses; identical to the PS1 from New Game to loop 1015 except the stubbed streams'
+effects. First gameplay difference: loop 1016, Snake's first running steps after the ladder.
+
+**Saved in the repo** (2026-10-30): `tas/` holds the movie and the full reference trace (163,839 loops, made with
+the final `trace.lua`; `xz` 105 MB to 1.5 MB) and a README on remaking it and replaying it; the tools read the
+`.xz` directly. The unattended full run ended correctly: `OK`, last line frame 313,202 in `roll`, BizHawk closed
+itself. Matching build: 80 OK, VR 2 OK; the port links with and without the TAS options; SH1 links with the HAL
+changes.

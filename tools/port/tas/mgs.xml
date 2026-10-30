@@ -1,0 +1,6 @@
+<BizHawk-XMLGame System="PSX" Name="SNAKE">
+ <LoadAssets>
+  <Asset FileName="Z:\home\alex\emu\mgs-integral\disc1.cue" />
+  <Asset FileName="Z:\home\alex\emu\mgs-integral\disc2.cue" />
+ </LoadAssets>
+</BizHawk-XMLGame>

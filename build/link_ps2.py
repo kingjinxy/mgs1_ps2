@@ -62,6 +62,9 @@ def compile_hal():
     test = ["-DSH_PORT_MC_FORMAT"] if os.environ.get("MGS_MC_FORMAT") else []
     # MGS_DUMP_FRAMES=1: some frames written to host:frame_<n>.ppm (ps2/display_ps2.c DUMP_FRAMES).
     test += ["-DSH_PORT_DUMP_FRAMES"] if os.environ.get("MGS_DUMP_FRAMES") else []
+    # MGS_MC_IMAGE=<file>: fixed test cards from that image (ps2/memcard_fixed.c), e.g. a TAS movie's
+    # MovieSaveRam.bin; the PS2 cards aren't used.
+    test += ["-DSH_PORT_MC_FIXED"] if os.environ.get("MGS_MC_IMAGE") else []
     for sub, flags in (("src", HAL_CFLAGS), ("src/ps2", PS2_CFLAGS + test)):
         for name in sorted(os.listdir(os.path.join(HAL, sub))):
             rel = sub + "/" + name
@@ -71,6 +74,12 @@ def compile_hal():
             os.makedirs(os.path.dirname(obj), exist_ok=True)
             run([CC, "-c", *flags, os.path.join(HAL, rel), "-o", obj])
             objs.append(obj)
+    if os.environ.get("MGS_MC_IMAGE"):
+        c = os.path.join(OUT, "hal", "mc_fixed_image.c")
+        run([os.path.join(PS2SDK, "bin", "bin2c"), os.path.expanduser(os.environ["MGS_MC_IMAGE"]), c,
+             "hal_mc_fixed_image"])
+        run([CC, "-c", "-O2", "-G0", c, "-o", c[:-2] + ".o"])
+        objs.append(c[:-2] + ".o")
     return objs
 
 
@@ -81,6 +90,10 @@ def compile_port():
     debug += ['-DMGS_PAD_SCRIPT="%s"' % os.environ["MGS_PAD_SCRIPT"]] if os.environ.get("MGS_PAD_SCRIPT") else []
     # MGS_DEBUG_PLAYER=1: Snake's position and the pad state on each status line (port/src/hal_game.c).
     debug += ["-DMGS_DEBUG_PLAYER"] if os.environ.get("MGS_DEBUG_PLAYER") else []
+    # MGS_TAS_PADS=<file>: TAS replay, the PS1's pads by game loop, and a trace to host:tas_trace.log;
+    # MGS_TAS_RAW, MGS_TAS_TIME=<file>: the PS1's raw pads and its timing too (port/src/tas_replay.c; the
+    # files from tools/port/tas/trace_to_pads.py).
+    debug += ["-DMGS_TAS"] if os.environ.get("MGS_TAS_PADS") else []
     objs = []
     for name in sorted(os.listdir(os.path.join(PORT, "src"))):
         if name.endswith(".c"):
@@ -88,6 +101,13 @@ def compile_port():
             os.makedirs(os.path.dirname(obj), exist_ok=True)
             run([CC, "-c", *PS2_CFLAGS, *debug, os.path.join(PORT, "src", name), "-o", obj])
             objs.append(obj)
+    for env, name in (("MGS_TAS_PADS", "mgs_tas_pads"), ("MGS_TAS_RAW", "mgs_tas_raw"),
+                      ("MGS_TAS_TIME", "mgs_tas_time")):
+        if os.environ.get(env):
+            c = os.path.join(OUT, "port", name + ".c")
+            run([os.path.join(PS2SDK, "bin", "bin2c"), os.path.expanduser(os.environ[env]), c, name])
+            run([CC, "-c", "-O2", "-G0", c, "-o", c[:-2] + ".o"])
+            objs.append(c[:-2] + ".o")
     return objs
 
 

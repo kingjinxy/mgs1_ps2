@@ -36,12 +36,20 @@ static void Act( Work *work )
 {
     int ticks;
 
+#ifdef MGS_PORT
+    extern void Port_TasTrace( void ); /* port/src/tas_replay.c: TAS replays, the finished loop's state */
+    Port_TasTrace();
+#endif
     GV_Time++;
 
     ticks = mts_get_tick_count();
 
     GV_PassageTime = ticks - GV_LastTickCount;
     GV_LastTickCount = ticks;
+#ifdef MGS_PORT
+    extern void Port_TasPassageTime( void ); /* port/src/tas_replay.c: in TAS replays, the PS1's */
+    Port_TasPassageTime();
+#endif
 
 #ifdef MGS_PORT
     extern int Capture_HoldClock( void ); /* port/src/capture_ps2.c: the PS1's buffer parity, in comparisons */

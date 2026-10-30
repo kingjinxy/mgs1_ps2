@@ -46,7 +46,9 @@ static void Die(Work *work)
 {
 #ifdef MGS_PORT
     extern void Capture_LoadEnd(void); /* port/src/capture_ps2.c */
+    extern void Port_TasLoadEnd(void); /* port/src/tas_replay.c */
     Capture_LoadEnd();
+    Port_TasLoadEnd();
 #endif
     printf("LoadEnd\n");
     FS_LoadStageComplete(work->info);
@@ -67,7 +69,9 @@ void *NewLoader(const char *dir)
 #ifdef MGS_PORT
     {
         extern void Capture_Stage(const char *dir); /* port/src/capture_ps2.c */
+        extern void Port_TasLoadEnd(void); /* port/src/tas_replay.c: the PS1's seed after this loop */
         Capture_Stage(dir);
+        Port_TasLoadEnd();
     }
 #endif
 

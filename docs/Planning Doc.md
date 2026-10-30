@@ -255,6 +255,9 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 - [ ] PC debug build on psyz's SDL backend: debug game-code bugs (32-bit assumptions, NULL reads,
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
+- [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`
+
 ## Open questions
 
 (none yet)

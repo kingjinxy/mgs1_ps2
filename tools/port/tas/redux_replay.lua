@@ -1,7 +1,8 @@
 -- TAS control run in PCSX-Redux (docs/TAS Testing Plan.md): the PS1 game under the port's replay harness
 -- (port/src/tas_replay.c), from the same tables (tools/port/tas/trace_to_pads.py), with execute breakpoints where the
 -- port has its hooks. Its trace (the port's format) compared with BizHawk's shows what the harness gets wrong; the
--- port compared with it shows the port's own differences. Not done here: the stream start gate (needs a code patch).
+-- port compared with it shows the port's own differences. The stream start gate jumps over strctrl.c's
+-- case 2, and the stream data gate is the PS1's disc timing (FS_StreamGetData).
 --
 -- pcsx-redux -no-ui -debugger -run -bios=ps-10j.bin -memcard1=card1.mcd -iso=disc1.cue -dofile=redux_replay.lua
 -- Environment: TAS_DIR (the tables, default ~/emu/tas), TAS_OUT (default TAS_DIR/redux_trace.log), TAS_LAST (stop at
@@ -35,7 +36,8 @@ local function lookup(tab, size, t)
   while lo < hi do local mid = math.floor((lo + hi + 1) / 2); if le(tab, mid * size) <= t then lo = mid else hi = mid - 1 end end
   return lo * size + 4
 end
-local function time_rec(t) if t < 0 or (t + 1) * 24 > #TIME then return nil end; return t * 24 end
+local REC = 36
+local function time_rec(t) if t < 0 or (t + 1) * REC > #TIME then return nil end; return t * REC end
 
 -- PS1 addresses (obj/asm.map, and the returns read from the executable)
 local GV_TIME, GV_CLOCK, GV_PASSAGE, GM_STATUS, SEED = 0x800AB330, 0x800AB920, 0x800AB924, 0x800AB3CC, 0x800C1530
@@ -44,7 +46,7 @@ local LINKVAR, STAGE, PSTATUS, PCTRL, MTS_TIME = 0x800B4D98, 0x800AB3C4, 0x800AB
 
 -- the PS1 load ends in the tables: loops whose line has GM_LoadRequest back to 0
 local load_ends, prev = {}, 0
-for t = 0, #TIME / 24 - 1 do local r = le(TIME, t * 24 + 8); if prev ~= 0 and r == 0 then load_ends[#load_ends + 1] = t end; prev = r end
+for t = 0, #TIME / REC - 1 do local r = le(TIME, t * REC + 8); if prev ~= 0 and r == 0 then load_ends[#load_ends + 1] = t end; prev = r end
 
 local out = assert(io.open(OUT, "w"))
 -- per loop, whether its pad update ran in the video frame in which GV_Time became N (then BizHawk's line N, taken
@@ -93,10 +95,64 @@ if os.getenv("TAS_NO_RAW") == nil then bp(0x8008C090, "tas raw pads", function()
     for i = 0, 7 do mem[a(PAD_STATE) + i] = RAW:byte(o + 16 + i + 1) end
   end
 end) end
+-- strctrl.c's case 2, as Capture_StreamMayStart: no stream start while we've started as many as the PS1 had by
+-- this loop (counted at FS_StreamTickStart; STATE_VOX_STREAM comes earlier, when the actor is made)
+local starts = 0
+bp(0x800243D8, "tas stream start", function() starts = starts + 1 end)
+if os.getenv("TAS_NO_GATE") == nil then bp(0x80037894, "tas stream gate", function()
+  local r = time_rec(u32(GV_TIME))
+  if r and starts >= le(TIME, r + 28) then PCSX.getRegisters().pc = 0x80037AD0 end   -- the case's break
+end) end
+-- FS_StreamGetTick: the PS1's value; with its stream clock not started (NO_TICK, fs_stream_last_time -1) it returned
+-- mts_time + 1, so a packet went as soon as its data was in
 bp(0x800244D4, "tas tick", function()            -- FS_StreamGetTick's return
   local r = time_rec(u32(GV_TIME))
-  if r and le(TIME, r) ~= NO_TICK then PCSX.getRegisters().GPR.n.v0 = le(TIME, r) end
+  if not r then return end
+  local tick = le(TIME, r)
+  PCSX.getRegisters().GPR.n.v0 = tick ~= NO_TICK and tick or (u32(MTS_TIME) + 1) % 0x100000000
 end)
+-- FS_StreamGetData looks through the packets from fs_stream_top to fs_stream_bottom (the data in from the disc so
+-- far); the disc's timing differs between emulators, so it stops at the PS1's bottom when this one has got further
+-- (the PS1's is then one of the packets before ours). At the beq after its load (and the load delay), v1 holds
+-- fs_stream_bottom.
+local HEAP, HEAP_SIZE, TOP = 0x800B52A4, 0x800B52AC, 0x800B52B4
+local function packet_before(from, to, want)      -- whether `want` is on the packet chain from `from` to `to`
+  local heap, size, p = u32(HEAP), u32(HEAP_SIZE), from
+  for _ = 1, 4096 do
+    if p == want then return true end
+    if p == to then return false end
+    local tag = u32(p)
+    if tag % 256 == 0xFF then p = heap
+    else
+      p = p + math.floor(tag / 256)
+      if p >= heap + size then p = heap end
+    end
+  end
+  return false
+end
+if os.getenv("TAS_NO_DATA_GATE") == nil then bp(0x8002411C, "tas stream data", function()
+  local r = time_rec(u32(GV_TIME))
+  local heap = u32(HEAP)
+  if not r or heap == 0 then return end
+  local off = le(TIME, r + 24)
+  if off >= 0x80000000 then return end            -- -1: no stream heap on the PS1
+  local regs = PCSX.getRegisters().GPR.n
+  local bottom, want = u32(0x800B52BC), heap + off
+  if want ~= bottom and packet_before(u32(TOP), bottom, want) then regs.v1 = want end
+end) end
+-- FS_LoadFileSync (the codec's radio data, some overlays): still reading while the PS1 was, when ours has finished
+-- (returns at once with the PS1's bytes to come). Opt-in (TAS_FILE_GATE): at the intro's codec (loop 816) it moved
+-- the extra rand() from 820 to 840 and lost the skip; the PS1's CD task was still the ended stream's then
+-- (0x7FFF0000 to come), so its codec read waited behind it: not modelled yet.
+if os.getenv("TAS_FILE_GATE") then bp(0x80021F48, "tas file read", function()
+  local r = time_rec(u32(GV_TIME))
+  if not r then return end
+  local left = le(TIME, r + 32)
+  -- not a file's size (0x7FFF0000: the CD task a stream left, which reads until stopped): no gate
+  if left == 0 or left >= 0x1000000 or u32(0x800B4E74) ~= 0 then return end
+  local regs = PCSX.getRegisters()
+  regs.GPR.n.v0 = left; regs.pc = regs.GPR.n.ra
+end) end
 bp(0x8002E460, "tas load start", function() load_flag = true end)   -- NewLoader
 bp(0x8002E458, "tas load end", function() load_flag = true end)     -- loader.c's Die
 bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_TasPassageTime and Port_TasTrace
@@ -124,7 +180,7 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
   for i = 0, 7 do local c = u8(STAGE + i); if c == 0 then break end; stage = stage .. string.char(c) end
   local ctrl = u32(PCTRL)
   local okc = ctrl >= 0x80000000 and ctrl < 0x80200000
-  out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s - - - - - %08x %s %s\n",
+  out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s - - - - - - - %08x %s %s\n",
     u32(MTS_TIME), t, s32(GV_CLOCK), s32(GV_PASSAGE), u32(GM_STATUS), u32(SEED), stage == "" and "-" or stage,
     hex(GV_PADDATA, 64), hex(PAD_RAW, 16), hex(POS, 8), s32(ALERT), s32(LOADREQ), s32(UNDRAW), hex(LINKVAR, 192),
     u32(PSTATUS), okc and hex(ctrl, 124) or "-", okc and hex(ctrl - 0x20 + 0x9B0, 192) or "-"))

@@ -572,3 +572,18 @@ loop's pad update. Snake's early turn: at the codec's end a loop updates the pad
 `STATE_PADRELEASE`, then the codec script's pad command), and the harness wrote the final recorded `GV_PadData` at
 both. Now it rebuilds the raw pads at `GV_UpdatePadSystem`'s entry and the game computes `GV_PadData` (identical
 to BizHawk's in the control run). Snake matches to loop 1,078 in both runs. Matching build: 80 OK, VR 2 OK.
+
+## Step 7: TAS stream timing (2026-10-30)
+
+The intro's demo packet came 10 loops early in the Redux control run (7 in the port). The stream start gate keyed
+on `STATE_VOX_STREAM`, which `strctrl.c` sets when its actor is made (loop 489), while the PS1's stream clock started
+at 512. The tables now count the PS1's stream starts and a start waits until ours are behind. The tick table took
+the stream clock after the loop's last call, which is wrong in the audio packet's loop (`FS_StreamSoundMode` resets
+it) and a stream's last loop; both now use the clock before the loop. A new trace field (stream data in from the
+disc, `fs_stream_bottom`) holds Redux's `FS_StreamGetData` to the PS1's disc speed. Two mistakes cost runs: the
+executable's base (0x8000F800, not 0x7FFFF800) and setting a register in a load delay slot. Field 20 (CD file
+read left) was tried as a gate for the codec's radio data load and made things worse (opt-in, documented).
+
+The full BizHawk reference was rerun with fields 18-20. In PCSX2: the intro's stream matches; Snake matches to loop
+1,781. Left: the intro codec's call state a few loops early (seed, resynced at 921) and `STATE_CUT_IN` at 1,164.
+Matching build: 80 OK, VR 2 OK.

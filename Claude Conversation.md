@@ -8209,3 +8209,655 @@ The table builder then takes each loop's case from that file. Load times differ 
 
 - tool `Bash`: Matching build, docs, archive before commit
 
+- tool `Bash`: Commit controller replay change
+
+## Claude
+
+The pad timing is settled, and the loop-1012 difference was a bug in the test harness, not the port. Committed as `dc19153c5`.
+
+**What was happening:**
+- **The trace's timing was right all along.** I added the loop's start time (`GV_LastTickCount`) to the trace, and it shows that every BizHawk line is taken before that loop's pad update. So loop N's pads are always on line N+1, the rule the harness already used.
+- **The bug was at the end of the codec call.** During the codec the game ignores the pads (`STATE_PADRELEASE`). In loop 1011 the game updated the pads once with input still off, so Snake saw no direction. Then the codec script turned input back on and updated the pads a second time in the same loop. The trace only records the final result. The harness wrote that final result at both updates, so Snake got the stick one update too early.
+- **The fix:** the harness now replays the controller instead of the result. At each pad update it rebuilds the raw controller state from the recorded data, and the game computes its own pad data, with input on or off as it should be. In the PCSX-Redux control run, the game's pad data now matches BizHawk on every loop.
+
+**Where things stand:**
+- **Snake matches BizHawk through loop 1,078 (0:50.7 in the movie)**, in both the port and the control run. Port against control run, Snake is identical.
+- **Harness issues left**, shown by the control run as well:
+  - The intro's stream timing (`DG_UnDrawFrameCount`, the random seed). Redux has no stream start gate yet, and the port's gate doesn't quite match.
+  - Snake's collision vectors at loop 1,079, likely downstream of the seed.
+- **Port-only issues left:**
+  - The intro stream: stubbed streaming, so `DG_UnDrawFrameCount` changes 7 loops early.
+  - A cut-in (`STATE_CUT_IN`) at loop 1,164 that the PS1 doesn't start.
+
+Matching build: 80 OK, plus 2 for the VR executable. The plan and walkthrough are updated.
+
+I'd go to the stream timing next. It's the earliest remaining difference, it affects both runs, and implementing the port's stubbed stream functions is the larger job that follows it. Should I start there?
+
+## User
+
+Commit the changes
+
+- tool `Bash`: Check for uncommitted changes
+
+## Claude
+
+Everything is already committed: the last commit, `dc19153c5`, included all of this round's changes, and the MGS repo is clean. In the HAL repo the only untracked files are `tools/ps2_log.py` and `tools/udpfs_serve.py`, which were there before this session and aren't mine, so I've left them alone. Nothing has been pushed.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - The goal is to use TASVideos submission #5139 (MGS Integral all-bosses BizHawk movie, `/home/alex/Downloads/submission5139/*.bk2`) as an automated regression test for the MGS1 PS2 port (repo `/home/alex/Documents/mgs1_ps2`, branch `ps2-port`), checked against PS1 emulators.
+   - Requests made along the way, all done:
+     - plan the work (docs/TAS Testing Plan.md);
+     - download BizHawk from GitHub and run it under 32-bit Wine;
+     - fully automate the run;
+     - fake the memory card save;
+     - phases 2 and 3 (reference trace and port replay);
+     - save the TAS data in the project folder (`tas/`);
+     - commit;
+     - investigate Snake's turn;
+     - run the DuckStation check;
+     - download PCSX-Redux from distrib.app and do a control run;
+     - settle the pad timing with Redux.
+   - Latest user message: "Commit the changes". Everything is already committed (the last commit is dc19153c5).
+
+2. Key Technical Concepts:
+   - BizHawk 1.11.4 (Octoshock) under a 32-bit Wine prefix `~/emu/wine-bizhawk` with wine-mono 9.4.0.
+     - Config `DispMethod` 0 (OpenGL; Direct3D shaders fail under Wine).
+     - BIOS set via `FirmwareUserSpecifications` `PSX+J` = ps-10j.bin.
+     - Lua console auto-load; there is no `--lua` option in 1.11.4.
+     - Execute and write memory callbacks don't fire for PSX.
+   - The trace has one line per `GV_Time` change. Line N is sampled before loop N's pad update, so loop N's pads are on line N+1.
+     - Field 18 is `last:target:tick`: the game task's (mts task 3) wait plus `GV_LastTickCount`.
+   - The replay is keyed by `GV_Time`:
+     - At each load end, `GV_Time`, `GV_Clock` and `GV_PassageTime` are realigned to the PS1's.
+     - The stream tick is replayed, along with a VOX stream start gate (the gate is in the port only).
+     - The seed is resynced at each load start and end.
+     - The raw controller is rebuilt at `GV_UpdatePadSystem`'s entry from the recorded `GV_PadData[2]/[3].status` (UDLR bits cleared when analog) and the `[0]/[1]` sticks; the game computes `GV_PadData` itself.
+   - The HAL's 24-bit ordering-table links require `.bss` below 16 MB. The linker asserts this, and the TAS tables are loaded from `host:` at runtime instead of being linked in.
+   - Fixed test memory cards: HAL `SH_PORT_MC_FIXED` (`memcard_fixed.c`), enabled by `MGS_MC_IMAGE`.
+   - PCSX-Redux control run: Lua breakpoint handles must be global or they get garbage-collected; it needs `-fastboot`.
+
+3. Files and Code Sections (all committed):
+   - **docs/**
+     - `docs/TAS Testing Plan.md`: phases, findings and status.
+     - Running Walkthrough and Planning Doc entries.
+     - `Claude Conversation.md`: the archive, updated before commits.
+   - **tools/port/tas/**
+     - `run_bizhawk.sh`: unattended run with a watchdog; it reapplies the BizHawk config each time.
+     - `trace.lua`: 19 fields.
+     - `trace_debug.lua`: adds `GM_PlayerStatus`, Snake's CONTROL, and his work from 0x9B0; stops at TAS_LAST, default 3300.
+     - `synccheck.lua`, `mgs.xml`.
+     - `trace_to_pads.py`: writes pads.bin, raw.bin and time.bin (24 B/loop) from `tas/reference/trace.log.xz`, using the N+1 pad rule.
+     - `compare_trace.py`: reports the first difference per field, with movie timestamps; `--from 315`; fields 19/20 are status and CONTROL.
+     - `redux_replay.lua`: the control harness.
+   - **tools/port/gdb/snake_turn_ps1.py**: DuckStation check. Result: the PS1's Snake reacts in the same loop as the pad update that read the press.
+   - **Port side**
+     - `port/src/tas_replay.c`: `Port_TasInit` (loads `host:tas_*.bin`, opens `host:tas_trace.log`), `Port_TasPads` (raw rebuild at entry), `Port_TasRawPads`, `Port_TasTick`, `Port_TasStreamMayStart`, `Port_TasLoadEnd`, `Port_TasPassageTime`, `Port_TasTrace`.
+     - Hooks, all under `MGS_PORT`: `source/libgv/pad.c` (entry), `source/libgv/gvd.c` (end of Act: Trace; PassageTime), `source/mts/mts_pad.c`, `source/game/loader.c`, `port/src/capture_ps2.c`, `port/src/hal_game.c`.
+     - `port/linkfile`: the 16 MB assert.
+     - `build/link_ps2.py`: `MGS_MC_IMAGE`, `MGS_TAS_PADS`/`RAW`/`TIME`; the tables are copied to obj_ps2.
+   - **tas/**: the README, the movie, `reference/trace.log.xz` (the full trace, without field 18), and `synccheck.log`.
+   - **HAL** (`../psx-to-ps2-HAL`, commit 541b71a on main): `memcard_fixed.c`, the `memcard_ps2.c` gate, `Hal_RandSeed`.
+
+4. Errors and fixes:
+   - Direct3D shader error under Wine: switched to OpenGL.
+   - BIOS not found: set it explicitly in the config.
+   - `--lua` ignored: used the console auto-load settings instead.
+   - Lua yield inside pcall: removed the pcall.
+   - Invalid speedmode: used `limitframerate(false)` instead.
+   - `pgrep -f` matched its own shell and killed the run: switched to `pgrep -x`.
+   - TLB misses in DrawOTagImpl: embedding the TAS tables pushed `.bss` past 16 MB. The tables now load from `host:`, and the linker asserts the limit.
+   - Redux breakpoints were silently dropped: keep them in a global (`TAS_BREAKPOINTS`).
+   - Snake's early turn: the codec's double pad update, fixed by replaying the raw controller.
+
+5. Problem Solving:
+   - Current status: Snake matches BizHawk through loop 1078 in both the port and the Redux control run, and the port is identical to the control run for Snake.
+   - Remaining harness issues, shown by both runs:
+     - the intro's stream timing (`DG_UnDrawFrameCount` at 504, the seed at 821; Redux has no stream gate);
+     - Snake's `CONTROL.vecs` at loop 1079.
+   - Remaining port-only issues:
+     - `DG_UnDrawFrameCount` at 497 (stubbed `St*` streaming);
+     - `STATE_CUT_IN` (0x40) at loop 1164.
+   - Matching build: 80 OK, VR 2 OK.
+
+6. All user messages:
+   - Asked me to create a plan to use the TAS "/home/alex/Downloads/submission5139" with the remake and check it against a PS1 emulator.
+   - "Yes download BizHawk from Github, and wasn't there something you wanted me to install 32 bit Wine for? I saved the TASVideos .html file to Downloads, so read that."
+   - "Isn't there a version of 1.11.4 of BizHawk for linux?"
+   - "About the run using a save on the memory card, how about we fake it for now by tricking the game into having the same memory values at the start? I installed 32 bit wine."
+   - Reported an error (pasted SlimDX shader exception).
+   - "It was giving an error about the BIOS not being set up properly"
+   - "BizHawk runs but the lua console doesn't open. Running the sync check gives 'invalid speed value'"
+   - "I reran the command and opened the sync check. There is no error output from lua now"
+   - "Can we try opengl to speed things up?"
+   - "Alright, I've closed it. Give me the script to run bizhawk and choose the lua script again"
+   - "Can you write a script that I can run again and again?"
+   - "The game is running much faster now. Make sure the movie runs to the end properly."
+   - "The script should be running again"
+   - "I still want to see if there's some way to completely automate the TAS run"
+   - "Try now"
+   - "I'm going to resume this later. We'll restart this script from the beginning"
+   - "Try the scipt again"
+   - "Alright, let's stop the run. I see that it's still going just fine."
+   - "Proceed"
+   - "Continue to step 3"
+   - "I want to save all of the TAS info in the project folder so we can reuse it easily. However, let's wait until the current run ends before we do that"
+   - "How long does the reference run take to run in real time? How far along are we?"
+   - "Yes" (commit)
+   - "Let's proceed with those"
+   - "What are the loop numbers referring to? Can we label them with timestamps in the TAS movie?"
+   - "Commit and then go into Snake's turn code"
+   - "Commit the changes and then go ahead with the DuckStation check"
+   - "What do you think about trying to make the TAS work in DuckStation? I don't know if we can get more useful info out of it"
+   - "Do I have PCSX Redux installed?"
+   - "Download from GitHub and try the control run"
+   - Answered the question with "Download from distrib.app (Recommended)".
+   - "Yes" (settle pad timing with Redux)
+   - "Commit the changes"
+   - Constraints from CLAUDE.md, which must keep applying:
+     - Only GitHub may be accessed without asking (distrib.app was approved once, for PCSX-Redux).
+     - Never access tcrf.net in any way.
+     - Never contribute or push upstream to mgs_reversing.
+     - Run the matching build after port changes.
+     - Update the docs and `Claude Conversation.md` (check that no lines are removed) before commits.
+     - No `pkill -f` with a pattern that's in the command's own command line.
+     - Keep gdb stops rare.
+     - Notify at stopping points.
+
+7. Pending Tasks:
+   - Nothing uncommitted. The next work was proposed but is awaiting the user's choice: the stream timing (harness gate in Redux and port, then implementing the stubbed `St*` streaming), then the `STATE_CUT_IN` difference at loop 1164.
+   - Optional: rerun the full reference trace so it includes field 18.
+
+8. Current Work:
+   - The user said "Commit the changes". `git status` showed the MGS repo clean at dc19153c5 ("TAS: replay the controller, not GV_PadData; pad timing settled").
+   - The HAL repo has only the pre-existing untracked `tools/ps2_log.py` and `tools/udpfs_serve.py`, which are not ours and are deliberately left out.
+
+9. Optional Next Step:
+   - Tell the user everything is already committed (dc19153c5, matching build 80 OK / VR 2 OK).
+   - Ask whether to start on the stream timing, as proposed in my last message: "I'd go to the stream timing next... Should I start there?"
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Proceed to the stream timing next
+
+## Claude
+
+Starting on the stream timing. First I'll re-read where the plan left it and how the port's gate works.
+
+- tool `Bash`: Find stream notes in plan and harness
+
+- tool `Bash`: Show the stream gate and its callers
+
+- tool `Bash`: Read strctrl.c gate area
+
+## Claude
+
+Redux needs the same gate in `strctrl.c`'s case 2. I'll find the instruction addresses in the PS1 executable.
+
+- tool `Bash`: Locate strctrl Act and disassembler
+
+- tool `Bash`: Get exe load address and neighbouring symbols
+
+- tool `Bash`: List symbols near strctrl
+
+- tool `Bash`: Disassemble region before NewStreamControl
+
+- tool `Bash`: Find stream function addresses
+
+- tool `Bash`: Find calls to FS_StreamTickStart
+
+## Claude
+
+Found the PS1's stream start at 0x800278C0; checking the code around it so I can mirror the gate in Redux.
+
+- tool `Bash`: Disassemble stream start in strctrl Act
+
+## Claude
+
+The gate goes at 0x80027894 (case 2's check). When the PS1 hadn't started its stream yet in that loop, I'll jump to the `break` target, 0x80027AD0.
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/tas/redux_replay.lua
+
+- tool `Bash`: Recall Redux run command
+
+- tool `Bash`: Recreate cards and recall paths
+
+- tool `Bash`: Run the Redux control run with the gate
+
+## Claude
+
+The gate fired only after loop ~1150, so the intro's stream doesn't go through `strctrl.c`. Comparing the trace first:
+
+- tool `Bash`: Compare control trace against BizHawk
+
+- tool `Bash`: Show both traces around loop 490-506
+
+- tool `Bash`: Where UnDraw changes on PS1 vs Redux
+
+- tool `Bash`: PS1 UnDraw drops and stream tick
+
+## Claude
+
+PS1 reaches the demo packet (`DG_UnDrawFrameCount = 3`) at loop 514, Redux at 504. Checking the replayed stream tick for those loops:
+
+- tool `Bash`: Dump replayed tick table 486-520
+
+## Claude
+
+The PS1's stream clock only starts at loop 512, while Redux's own clock was already running (the replay passes through when the PS1 had no tick). Reading `FS_StreamGetTick`:
+
+- tool `Bash`: Find stream tick code and callers
+
+- tool `Bash`: Check FS_StreamGetTick return paths
+
+- tool `Bash`: Disassemble FS_StreamGetTick fully
+
+## Claude
+
+I had the executable's base wrong by 0x10000 (the PS-X header is 0x800 bytes, so file offset 0 is 0x8000F800). The real case 2 is at 0x80037894. Rechecking with the right base:
+
+- tool `Bash`: Verify gate and tick addresses with correct base
+
+## Claude
+
+Fixing the gate address. The tick hook also covers only one of `FS_StreamGetTick`'s three returns, which explains its 21 hits:
+
+- tool `Bash`: Disassemble FS_StreamGetTick
+
+## Claude
+
+Only one return, so the tick hook is fine. The gate was the bad address (and it jumped somewhere wrong 45 times late in the run). Fixing it and rerunning:
+
+- tool `Bash`: Fix gate address and rerun control
+
+- tool `Bash`: Read tick derivation in trace_to_pads
+
+- tool `Bash`: Add tick wait rule and rerun control
+
+- tool `Bash`: Native tick only on first transition call; rerun
+
+## Claude
+
+Same result, so I need to see the calls. I'll log each `FS_StreamGetTick` call (native and replayed value) around loops 505–516:
+
+- tool `Bash`: Log tick calls around the demo packet
+
+## Claude
+
+The logged values don't fit my model, so I'm checking where else `DG_UnDrawFrameCount` gets set to 3:
+
+- tool `Bash`: Find writers of DG_UnDrawFrameCount
+
+- tool `Bash`: Read demothrd tick usage
+
+- tool `Bash`: Read stream.c statics and functions
+
+- tool `Bash`: Read FS_StreamGetData and trace.lua stream fields
+
+- tool `Bash`: Read trace.lua header and stream addresses
+
+- tool `Bash`: Disassemble FS_StreamGetData for static addresses
+
+- tool `Bash`: Find trace field indices in consumers
+
+- tool `Bash`: Read rest of trace.lua and debug header
+
+- tool `Bash`: Add stream bottom field to trace scripts
+
+## Claude
+
+Starting the full reference run in the background (about an hour; it writes `~/emu/tas/trace.log` as it goes, and the repo keeps the old reference in `tas/reference/`):
+
+- tool `Bash`: Run full BizHawk reference trace
+
+## Claude
+
+While it runs: the tables get the PS1's bottom per loop (time.bin records grow from 24 to 28 bytes). I'm updating the consumers:
+
+- tool `Bash`: Find record sizes and field maps
+
+- tool `Bash`: Update trace_to_pads and compare_trace
+
+- tool `Bash`: Check compare_trace index use and tas_replay header
+
+- tool `Bash`: Update tas_replay.c record size and trace
+
+- tool `Bash`: Port tick: NO_TICK returns mts_time+1
+
+## Claude
+
+Now the Redux script: 28-byte records, the bottom gate, and the tick hook back to plain replay.
+
+- tool `Bash`: Rewrite Redux stream tick and data gate
+
+## Claude
+
+While BizHawk runs, the matching build (the port source changed):
+
+- tool `Bash`: Matching builds and trace progress
+
+## Claude
+
+Matching builds are OK. The new trace already covers enough loops for the control run, so I'll build tables from it and check the stream field near the intro:
+
+- tool `Bash`: Make tables from partial new trace
+
+## Claude
+
+Off by one: the bottom is index 19 (index 18 is the wait). Fixing it, along with `compare_trace.py`'s CONTROL index, which moved from 20 to 21:
+
+- tool `Bash`: Fix field index and regenerate tables
+
+## Claude
+
+The PS1's data starts arriving at loop 503 and reaches its plateau (95,996 bytes) at 512, just before the demo packet at 513, which fits. Running the control run on these tables:
+
+- tool `Bash`: Control run with stream data gate
+
+- tool `Bash`: Restore start gate, log data gate decisions
+
+## Claude
+
+At 0x80024118, `v1` is still in the load delay slot, so the values are garbage. I'll read the bottom from memory and set `v1` one instruction later, at the `beq` (0x8002411C):
+
+- tool `Bash`: Rerun with gate at beq
+
+- tool `Bash`: PS1 mts_time, last, next around intro
+
+- tool `Bash`: Find writers of stream clock statics
+
+- tool `Bash`: Read capture_ps2 stream hooks
+
+## Claude
+
+I'll implement the count in all three places (tables, port, Redux):
+
+- tool `Bash`: Add stream start count to tables
+
+- tool `Bash`: View tas_replay.c sections to edit
+
+- tool `Bash`: Port gate uses PS1 stream start count
+
+- tool `Bash`: View static block context
+
+- tool `Bash`: Hook start count in capture_ps2
+
+## Claude
+
+Now Redux: 32-byte records, a start counter at `FS_StreamTickStart`'s entry, and the gate on the count. I'm also removing the debug log.
+
+- tool `Bash`: Redux gate by start count; regenerate tables
+
+## Claude
+
+Only one PS1 stream start by loop 2000: the intro at 512. Running the control run:
+
+- tool `Bash`: Control run with start-count gate
+
+- tool `Bash`: Fix first-call tick and rerun control
+
+## Claude
+
+The `DG_UnDrawFrameCount` difference is gone: the control run now matches the intro's stream. What's left is the rand seed at loop 821 and `linkvarbuf[92]` at 490. Looking at the seed:
+
+- tool `Bash`: Seed around loop 821 in both traces
+
+- tool `Bash`: Seed change points after the demo
+
+- tool `Bash`: Tick table and PS1 clock 812-823
+
+- tool `Bash`: Use pre-reset clock in reset loop; rerun
+
+## Claude
+
+Still at 821, and it was there before today's changes too, so it isn't the tick. I'll find the caller with a one-off breakpoint on `rand` in loop 820:
+
+- tool `Bash`: Find rand address
+
+- tool `Bash`: Log rand callers in loops 815-822
+
+- tool `Bash`: Identify function calling rand
+
+- tool `Bash`: Find the codec helper's rand use
+
+- tool `Bash`: Read codec rand context
+
+- tool `Bash`: Pads around loop 812-824
+
+## Claude
+
+The pads match, and the PS1's skip press comes at 823, so on the PS1 the codec hadn't reached its call state before the skip. Checking what the codec waits on before state 5:
+
+- tool `Bash`: Codec state machine transitions
+
+- tool `Bash`: Read codec ringing gate helper
+
+## Claude
+
+The codec rings until `FS_LoadFileSync` reports the radio data loaded (`radiomes.c:639`), which is disc timing again but in a different loader. Looking at what it reads:
+
+- tool `Bash`: Read FS_LoadFileSync
+
+- tool `Bash`: Read CDBIOS_ReadSync
+
+- tool `Bash`: Find cdbios_task.remaining address
+
+## Claude
+
+The remaining count is at 0x800B4E74 (`cdbios_task.remaining`). Checking who else calls `CDBIOS_ReadSync` before gating it the same way:
+
+- tool `Bash`: Callers of CD read sync and request
+
+- tool `Bash`: Check reference run progress
+
+## Claude
+
+The run is about 20% through. I'll restart it with the extra field rather than run it twice:
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Check BizHawk processes after stop
+
+## Claude
+
+BizHawk is gone. Adding the field (`cdbios_task.remaining` × 4, what `FS_LoadFileSync` returns) to both trace scripts:
+
+- tool `Bash`: Add CD read remaining field; shift compare indices
+
+- tool `Bash`: Rerun full BizHawk reference trace
+
+## Claude
+
+Meanwhile I'm updating the tables (36-byte records, with the remaining count from line t+1), the port's record size and trace, and adding the Redux gate at `FS_LoadFileSync`'s entry:
+
+- tool `Bash`: Wire file-read field into tables, port, Redux
+
+## Claude
+
+Running the matching build while the trace runs:
+
+- tool `Bash`: Matching builds, port link, trace progress
+
+## Claude
+
+Matching build: 80 OK, VR 2 OK, and the port links. The trace is far enough for the control run:
+
+- tool `Bash`: Tables from new trace; control run
+
+- tool `Bash`: Limit file gate to real sizes; rerun
+
+- tool `Bash`: Make file gate opt-in; rerun default
+
+## Claude
+
+The default control run is back to: stream timing matched, plus the codec's extra `rand()` at 821 (the seed resyncs at 921). Now the port with the new tables:
+
+- tool `Bash`: Port TAS replay run and compare
+
+- tool `Bash`: Read doc sections to update
+
+- tool `Bash`: Update TAS plan with stream timing
+
+- tool `Bash`: Append walkthrough step
+
+- tool `PushNotification`: 
+
+## Claude
+
+The intro's stream now matches the PS1 in both the Redux control run and the port. Nothing is committed yet: I'm waiting on a full BizHawk reference rerun (about 40 minutes left) and will commit when it finishes. The matching build passes (80 OK, VR 2 OK).
+
+**What was wrong:**
+- **The start gate used the wrong signal.** `STATE_VOX_STREAM` is set when the stream control actor is created (loop 489), but the PS1 actually starts the stream at loop 512. The replay tables now count the PS1's stream starts, and a start waits until ours is behind that count. This is in the port (`Port_TasTickStart`) and in Redux.
+- **The stream clock was taken at the wrong moment.** The table recorded the clock after the loop's last call. That is wrong in the audio packet's loop, which resets the clock mid-loop, and in a stream's last loop. Both now use the clock from before the loop.
+- **When the PS1's clock hadn't started, the replay used the emulator's own value.** It now replays `mts_time + 1`, which is what the PS1 returned.
+- **New trace field 19: how much stream data had arrived from the disc.** Redux's `FS_StreamGetData` now stops there. It made no difference in this case but keeps disc speed out of later ones.
+- **My first Redux gate never did anything.** I used the wrong load address for the executable when disassembling it, so the gate was on the wrong function.
+
+**Results to loop 1,300:**
+- **Redux vs BizHawk:** everything matches except the codec issue below. Snake's `CONTROL.vecs` difference at loop 1,079 is gone too.
+- **Port:** the `DG_UnDrawFrameCount` difference at 497 is gone. Snake matches to loop 1,781 and the alert mode to 2,388.
+
+**Still open:**
+- **The intro codec with Campbell reaches its call state too early:** at loop 820 in Redux and 808 in the port. On the PS1 the skip press at 823 came first. The codec waits for its data from the disc, and on the PS1 that read was queued behind the finished stream's disc read. I added trace field 20 to gate this, but it made things worse (the `rand()` moved to 840 and the skip was lost), so it's opt-in only (`TAS_FILE_GATE`). The rand seed is resynced at the load at 921, so the run recovers there.
+- **Port only:** `STATE_CUT_IN` at loop 1,164.
+
+The plan and Running Walkthrough (Step 7) are updated. When the reference run finishes, I'll replace `tas/reference/trace.log.xz`, update the README, refresh the conversation archive, and commit.
+
+## User
+
+Do these changes work in such a way that only the TAS works better in the port? I just want to make sure that we’re not hacking things together just for that; I wanted to use the TAS to test accuracy.
+
+## Claude
+
+No. Nothing here changes how the port plays outside a TAS replay. What I changed is the replay harness, not the game.
+
+**Where the changes live**
+- Everything is in the replay tools (`trace.lua`, `trace_to_pads.py`, `redux_replay.lua`, `compare_trace.py`) or in `port/src/tas_replay.c`, which only does anything in a TAS build with the tables loaded.
+- The only new line in shared port code is a call in `Capture_TickStart` to `Port_TasTickStart`, which is empty unless `MGS_TAS` is defined.
+- No game source under `source/` changed, and the matching build still passes.
+
+**Why it isn't tuning to the port**
+Every fix was checked against the original PS1 code running in PCSX-Redux, not against the port. The Redux control run uses the same tables and hooks as the port. If a change only helped the port, Redux would still have differed from BizHawk. Instead Redux went from differing at loop 504 to matching BizHawk through 1,300, apart from the one known codec issue. So the harness was feeding the game the wrong timing, and the real PS1 code proved it.
+
+**What the harness does hide, deliberately**
+A replay can't stay in sync if the two machines' disc reads or load times differ. So the harness forces a few things to the PS1's timing:
+- when a stream starts;
+- the stream clock;
+- the loop number and clocks at each load's end;
+- the rand seed at loads.
+
+The trade-off is that the test won't catch a port bug that only changes the timing of those things, such as a stream starting late. It still catches what the game does with that timing: gameplay logic, Snake's movement, AI, scripts, alerts and saved state. Those are the differences it is finding now:
+- `STATE_CUT_IN` at loop 1,164;
+- the codec reaching its call state at 808 in the port, against 820 in the control run;
+- the stubbed streaming, which still shows up.
+
+**What I could add so the hidden part stays visible**
+The port could log every time a gate steps in and by how much, e.g. "stream start held 7 loops" or "load ended 180 loops early". That would make port timing differences a reported number instead of something silently absorbed. Should I add that before committing?
+
+## User
+
+No, that’s not necessary for now. What can we do for now as the test runs? On a side note, I don’t think it’s necessary to run the whole test from start to finish every single time; we can simply stop when we encounter a sync issue.
+
+## Claude
+
+Agreed for the port runs. One distinction: the BizHawk run that's going now is different. It records the PS1 reference, so it has to cover the whole movie once, and it only needs redoing when `trace.lua` gains a field. Port replays don't need to run to the end, and they shouldn't.
+
+While it finishes (about 30 minutes), two things fit:
+
+1. **Stop port runs at the first desync.** I'd add a `--live` mode to `compare_trace.py`. It would follow `obj_ps2/tas_trace.log` as PCSX2 writes it, compare each loop against the reference, and close PCSX2 at the first difference in a field we care about. It would then print the loop, the movie timestamp and the field. Each run would then take only as long as the game stays in sync, instead of a fixed 120 s or more. It uses only the trace, so the partial reference we have now is enough to test it.
+2. **`STATE_CUT_IN` at loop 1,164.** This is the earliest port-only gameplay difference, and with the live stop it's a quick loop of fix, rerun, see where it breaks next. I'd look at who sets `GM_GameStatus` bit `0x40` around that loop in the s00a script, and why the port sets it while the PS1 doesn't.
+
+The codec timing issue (808/820) can wait; it resyncs at 921 and isn't blocking.
+
+I'll start with the live stop, then use it on loop 1,164, unless you'd rather go straight to the bug.
+
+## User
+
+Let’s start with the live stop
+
+- tool `Bash`: Read compare_trace main and pcsx2_run options
+
+- tool `Bash`: Check pcsx2_run termination handling
+
+## Claude
+
+`pcsx2_run.py` closes PCSX2 on SIGTERM, so a wrapper can stop it cleanly. Checking whether the port flushes its trace as it goes:
+
+- tool `Bash`: Check trace flushing
+
+- tool `Bash`: See flush cadence
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/tools/port/tas/run_port.py
+
+- tool `Bash`: Test the live-stop runner
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tas/README.md
+
+## Claude
+
+I've added the live stop as `tools/port/tas/run_port.py`. A port run now stops at the first loop that differs from the reference instead of running for a fixed time. It isn't committed yet; I'll include it in the commit after the reference run finishes.
+
+What it does:
+- links the port with the replay tables;
+- starts PCSX2;
+- follows the port's trace as it's written and compares each loop with the PS1 reference;
+- closes PCSX2 at the first difference and prints the loop, movie timestamp, field and values.
+
+It also stops on a crash, a stall, `--last N`, or after `--seconds`.
+
+Known differences can be let through with `--ignore`, by field and optionally a loop range, e.g. `--ignore "rand seed@809-921"`. For `linkvarbuf` you can name a single entry, e.g. `--ignore "linkvarbuf[92]"`. Ignored differences are still listed at the end, so nothing goes unreported. The command is in [tas/README.md](tas/README.md).
+
+First run: it stopped after 45 seconds, at loop 930. The rand seed differs there again, just after the resync at the load at 921. The old whole-run compare only reported each field's first difference, so this one was hidden behind the earlier difference at 809. It's now the first port desync after the codec, ahead of `STATE_CUT_IN` at 1,164.
+
+The full BizHawk reference run is still going.
+
+## Claude
+
+The reference run finished. Checking it, then refreshing the repo's copy:
+
+- tool `Bash`: Verify new reference trace
+
+## Claude
+
+163,838 loops, 21 fields each, the same count as before. Checking that the first 18 fields are identical to the committed reference:
+
+- tool `Bash`: Compare new vs old reference fields
+
+- tool `Bash`: Inspect field layout difference
+
+- tool `Bash`: Show actual line differences
+
+- tool `Bash`: Check line endings and recompare
+
+## Claude
+
+The first 18 fields are identical to the old reference. Only the line-end handling differed in my comparison; both files use CRLF. Replacing the reference and making the full tables:
+
+- tool `Bash`: Compress reference and rebuild tables
+
+- tool `Bash`: Update README, archive conversation, status
+

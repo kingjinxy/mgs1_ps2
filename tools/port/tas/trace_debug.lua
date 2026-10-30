@@ -10,7 +10,10 @@
 --   pad_state_800C14F0[0..1] (hex, 2 ints: mts's pad init states, behind mts_get_pad_vibration_type),
 --   the game task's (mts task 3, dgd.c's mts_wait_vbl) last wake and target vertical blank and GV_LastTickCount (the
 --   vertical blank of this loop's GV_Time++), "last:target:tick": with mts_time, whether this line is from before
---   or after the loop's pad update (tools/port/tas/trace_to_pads.py)
+--   or after the loop's pad update (tools/port/tas/trace_to_pads.py),
+--   how far a stream's data had come in from the disc: fs_stream_bottom - fs_stream_heap (libfs/stream.c; -1 with
+--   no stream heap; FS_StreamGetData doesn't look past it),
+--   the CD file read's bytes still to come (cdbios_task.remaining * 4 at 0x800B4E74: what FS_LoadFileSync returns)
 -- Addresses: obj/asm.map of the matching build (SLPM-86247). Ends with END at the movie's last frame.
 local OUT   = "Z:\\home\\alex\\emu\\tas\\trace_debug.log"
 local LAST  = (os and os.getenv and tonumber(os.getenv("TAS_LAST") or "")) or 3300
@@ -42,6 +45,13 @@ local function wait()
   return string.format("%d:%d:%d", u32(intr + 8), u32(intr + 12), u32(0x800AB334))
 end
 
+-- fs_stream_bottom's offset in the stream heap (fs_stream_heap 0x800B52A4, fs_stream_bottom 0x800B52BC)
+local function bottom()
+  local heap = u32(0x800B52A4)
+  if heap == 0 then return -1 end
+  return u32(0x800B52BC) - heap
+end
+
 -- Snake's CONTROL (124 bytes; pointer fields differ between the PS1 and the port)
 local function ctrl()
   local p = u32(0x800AB9F4)
@@ -65,11 +75,11 @@ while true do
   local t = u32(0x800AB330)                       -- GV_Time
   if t ~= prev then
     prev = t
-    out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s %d %d %d %s %s %08x %s %s\n",
+    out:write(string.format("%d %d %d %d %08x %08x %s %s %s %s %d %d %d %s %d %d %d %s %s %d %d %08x %s %s\n",
       f, t, u32(0x800AB920), u32(0x800AB924), u32(0x800AB3CC), u32(0x800C1530), name(0x800AB3C4),
       hex(0x800B05C0, 64), hex(0x800C14E0, 16), hex(0x800ABA10, 8),
       u32(0x800ABA00), u32(0x800AB3D0), u32(0x800AB380), hex(0x800B4D98, 192),
-      u32(0x800A3D78), s32(0x8009D510), s32(0x8009D514), hex(0x800C14F0, 8), wait(), u32(0x800ABA50), ctrl(), snawork()))
+      u32(0x800A3D78), s32(0x8009D510), s32(0x8009D514), hex(0x800C14F0, 8), wait(), bottom(), s32(0x800B4E74) * 4, u32(0x800ABA50), ctrl(), snawork()))
   end
   if f >= LAST then
     out:write("END\n"); out:close()

@@ -11,8 +11,9 @@ The plan and its status: `docs/TAS Testing Plan.md`. Scripts: `tools/port/tas/`.
   (`MovieSaveRam.bin` inside the zip, both cards back to back) holding `BISLPM-86247G:E0pBAA`, a cleared save that
   unlocks Extreme on the New Game menu; the run picks Extreme at frame 1,582.
 - `reference/trace.log.xz`: the PS1 game's state on every game loop of the full movie, from
-  `tools/port/tas/trace.lua` (163,839 loops; the line format is at the top of that script). Made 2026-10-30;
-  two runs of the script give identical lines.
+  `tools/port/tas/trace.lua` (163,838 loops, 21 fields; the line format is at the top of that script). Made
+  2026-10-30, with the game task's wait, stream data and CD file read fields (18-20); fields 0-17 are identical
+  to the first reference's, and two runs of the script give identical lines.
 - `reference/synccheck.log`: the first full sync check (`synccheck.lua`): the stage every 600 frames.
 
 ## Making the reference again (only if trace.lua changes)
@@ -41,6 +42,13 @@ MGS_MC_IMAGE=~/emu/tas/MovieSaveRam.bin MGS_TAS_PADS=~/emu/tas/pads.bin MGS_TAS_
   MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py
 python3 ../silent-hill-1-ps2-port/tools/port/pcsx2_run.py obj_ps2/mgs_ps2.iso --seconds 120 --stall 15
 python3 tools/port/tas/compare_trace.py obj_ps2/tas_trace.log --from 315
+```
+
+Or, stopping at the first desync instead of running for a fixed time (links, runs PCSX2, follows the trace live
+and closes PCSX2 at the first differing loop; `--ignore` lets known differences through, reported at the end):
+
+```
+python3 tools/port/tas/run_port.py --ignore "linkvarbuf[92]@490-1000" --ignore "rand seed@809-921"
 ```
 
 The port writes its trace to `obj_ps2/tas_trace.log` (`host:`). `--from 315` starts at New Game: before it, the

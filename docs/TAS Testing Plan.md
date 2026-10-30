@@ -97,8 +97,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       faster in the port).
 - [x] First run (dock): identical from New Game (loop 315) to loop 1015 except the items below.
 - [ ] Streams: the port's `St*` functions are stubbed, so the dock's opening voice-over/subtitle stream ends at
-      once (`FS_StreamGetData` gets no packets; first seen at loop 572 before the timing work) and the intro's
-      demo stream differs (`DG_UnDrawFrameCount` at 497, the seed at 808). A port gap (Step 6), not the harness.
+      once (`FS_StreamGetData` gets no packets; first seen at loop 572 before the timing work). A port gap (Step
+      6), not the harness. The intro's demo stream now matches (stream timing, below).
 - [x] Sample points (2026-10-30): a loop runs `gvd.c`'s `Act` (`GV_Time`, clock, passage time), `dgd.c`'s wait
       for the vertical blank and pad update, then the actors. BizHawk's line N is taken during that wait:
       loop N's timing, loop N-1's game state, and loop N-1's pads; loop N's pads are on line N+1 (with line N's,
@@ -155,9 +155,36 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       run). Snake now matches BizHawk to loop 1,078 in the control run and the port; port against control: Snake
       identical. Redux's own phase measurement (pad update in the same video frame as `GV_Time++`): "later"
       everywhere, but its CPU timing isn't BizHawk's.
-- [ ] Harness, both runs: the intro's stream (`DG_UnDrawFrameCount` at 504, the seed at 821; Redux has no
-      stream start gate), Snake's `CONTROL.vecs` at 1,079. Port only: `DG_UnDrawFrameCount` at 497 (the
-      control: 504), `STATE_CUT_IN` at 1,164.
+- [x] Stream timing (2026-10-30): the intro's demo packet (`DG_UnDrawFrameCount = 3`, `strctrl.c` type 5) came
+      10 loops early in the control run. Found:
+      - the start gate was wrong: `STATE_VOX_STREAM` is set when `strctrl.c`'s actor is made (PS1 loop 489), but
+        the stream's clock starts (`FS_StreamTickStart`) at 512. The tables now count the PS1's starts
+        (`fs_stream_last_time` from -1, `FS_StreamTaskStart`'s value, to a vertical blank with
+        `fs_stream_next_time` 0), and a start waits while ours have caught up (port: `Port_TasTickStart`; Redux:
+        a breakpoint at `FS_StreamTickStart` and a jump over case 2);
+      - the tick table held the clock after the loop's last call: in the audio packet's loop
+        `FS_StreamSoundMode` resets it, and the last loop of a stream has the reset (`FS_StreamTaskStart`); both
+        now take the clock before the loop. `NO_TICK` replays as `mts_time + 1` (the function with
+        `fs_stream_last_time` -1), not the emulator's own value;
+      - new trace field 19: `fs_stream_bottom`'s offset in the stream heap (the disc data in so far). Redux
+        stops `FS_StreamGetData` at the PS1's bottom (`v1` at the `beq` after its load); here the PS1 had the
+        packet's data 10 loops before using it, so the start and tick were what mattered.
+      Mistakes on the way: disassembling `_mgsi.exe` with base 0x7FFFF800 (the PS-X header is 0x800 bytes: the
+      base is 0x8000F800), which put the first gate on a gameover function; setting `v1` at the load's delay
+      slot (still the old value).
+      Result (dock, to 1,300): the control run matches BizHawk except the codec below; Snake's `CONTROL.vecs` at
+      1,079 went too. The port: Snake to 1,781, the alert to 2,388.
+- [ ] The intro's codec (Campbell, from loop 816) reaches its call state (`radio.c` case 5: `rand()` every 4th
+      loop) in the control run at 820 and the port at 808; on the PS1 the skip at 823 came first. The codec
+      rings until `FS_LoadFileSync` (its radio data) is done. Trace field 20 is `cdbios_task.remaining * 4`;
+      gating `FS_LoadFileSync` on it (Redux, opt-in `TAS_FILE_GATE`) moved the `rand()` to 840 and lost the
+      skip: the PS1's CD task then was the ended stream's endless read (0x7FFF0000 to come), so its codec read
+      waited behind it. Not modelled yet. The seed is resynced at the load at 921.
+- [x] Stop at the first desync (2026-10-30): `tools/port/tas/run_port.py` links, runs PCSX2, follows the trace
+      live and closes PCSX2 at the first differing loop (`--ignore` for known ones, still reported). First use:
+      45 s, and it showed the seed differing again at loop 930, after the resync at 921 (the whole-run compare
+      reports only each field's first difference, so it was hidden behind 809).
+- [ ] Port only: the seed at 930, `STATE_CUT_IN` at 1,164.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

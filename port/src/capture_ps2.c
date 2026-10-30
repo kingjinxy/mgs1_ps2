@@ -163,9 +163,11 @@ void Capture_LoadEnd(void)
     }
 }
 
-/** FS_StreamTickStart: the loop count becomes the PS1's at its tick start. */
+/** FS_StreamTickStart: the loop count becomes the PS1's at its tick start; TAS replays count the start. */
 void Capture_TickStart(void)
 {
+    extern void Port_TasTickStart(void); /* tas_replay.c: counted against the PS1's starts */
+    Port_TasTickStart();
     if (loop() >= 0 && s_TickStart >= 0)
     {
         printf("capture: stream tick start at loop %d, the PS1's at %d\n", loop(), s_TickStart);

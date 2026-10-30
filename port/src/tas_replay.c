@@ -10,13 +10,17 @@
  * command at a codec's end, with STATE_PADRELEASE cleared in between), and writing the recorded result at both
  * gave Snake the stick a call early (found with tools/port/tas/redux_replay.lua).
  *
- * With MGS_TAS_TIME too, mgs_tas_time holds 24 bytes per loop from GV_Time 0 (little-endian): the
- * tick the PS1's FS_StreamGetTick returned (s32; 0x80000000: no stream), and the PS1's GM_GameStatus,
- * GM_LoadRequest, GV_PassageTime, rand seed and GV_Clock at the end of the loop. The port's timing then follows the
+ * With MGS_TAS_TIME too, mgs_tas_time holds 36 bytes per loop from GV_Time 0 (little-endian): the
+ * tick the PS1's FS_StreamGetTick returned (s32; 0x80000000: its stream clock not started, so it returned
+ * mts_time + 1), and the PS1's GM_GameStatus, GM_LoadRequest, GV_PassageTime, rand seed, GV_Clock and how far
+ * its stream's data had come in from the disc (fs_stream_bottom's offset in the stream heap; not used yet: the
+ * port's St* streaming is stubbed) at the end of the loop, the number of streams it had started, and the CD file
+ * read's bytes still to come (FS_LoadFileSync; not used yet: the port's file reads are synchronous). The port's timing then follows the
  * PS1's, so the game loops line up:
  *  - streams (cutscenes, codec voice) run on the PS1's clock (Port_TasTick, from capture_ps2.c's
  *    Capture_Tick) and start in the loop the PS1's did, not when the port's CD has the data
- *    (Port_TasStreamMayStart, from Capture_StreamMayStart);
+ *    (Port_TasStreamMayStart, from Capture_StreamMayStart: no start while the port has started as many as the
+ *    PS1; GM_GameStatus's STATE_VOX_STREAM comes earlier, when strctrl.c's actor is made);
  *  - the game loop runs during loads, and they take a different number of loops here: when a load has
  *    ended (GM_LoadRequest back to 0 at the end of a loop), GV_Time becomes the loop the PS1's matching
  *    load ended in (the same count of load ends since boot), with the PS1's GV_Clock (the double buffer's
@@ -65,9 +69,7 @@ extern void         srand(unsigned int seed);
 
 #define RECORD 68
 #define NO_TICK 0x80000000u
-#define STATE_VOX_STREAM 0x20
-
-#define TIME_RECORD 24
+#define TIME_RECORD 36
 #define MAX_LOADS 4096
 
 /** A host: file into the heap (NULL if missing). */
@@ -119,7 +121,8 @@ static void hex(FILE* f, const void* data, int n)
 #endif
 
 #ifdef MGS_TAS
-static int s_LoadEnded; /* a load started or ended in this loop: the seed becomes the PS1's at its end */
+static int          s_LoadEnded;    /* a load started or ended in this loop: the seed becomes the PS1's at its end */
+static unsigned int s_StreamStarts; /* the streams started (FS_StreamTickStart), against the PS1's count */
 
 /** The PS1's record for loop `time`, or NULL without one. */
 static const unsigned char* time_record_at(int time)
@@ -141,11 +144,11 @@ int Port_TasTick(int* tick)
 {
 #ifdef MGS_TAS
     const unsigned char* r = time_record();
-    if (!r || read_u32(r) == NO_TICK)
+    if (!r)
     {
         return 0;
     }
-    *tick = (int)read_u32(r);
+    *tick = read_u32(r) == NO_TICK ? mts_get_tick_count() + 1 : (int)read_u32(r); /* last_time -1: now - -1 */
     return 1;
 #else
     (void)tick;
@@ -162,9 +165,17 @@ int Port_TasStreamMayStart(void)
     {
         return -1;
     }
-    return r && (read_u32(r + 4) & STATE_VOX_STREAM) ? 1 : 0;
+    return r && s_StreamStarts < read_u32(r + 28) ? 1 : 0;
 #else
     return -1;
+#endif
+}
+
+/** FS_StreamTickStart (Capture_TickStart): a stream has started. */
+void Port_TasTickStart(void)
+{
+#ifdef MGS_TAS
+    s_StreamStarts++;
 #endif
 }
 
@@ -337,9 +348,9 @@ void Port_TasTrace(void)
     hex(f, GM_PlayerPosition, 8);
     fprintf(f, "%d %d %d ", GM_AlertMode, GM_LoadRequest, DG_UnDrawFrameCount);
     hex(f, linkvarbuf, 192);
-    /* the 5 BizHawk-only fields (stream clock, pad states, the game task's wait) as "-", then
+    /* the 7 BizHawk-only fields (stream clock, pad states, the game task's wait, stream data, file read) as "-", then
        trace_debug.lua's: GM_PlayerStatus, Snake's CONTROL (124 bytes) and his work from 0x9B0 (192 bytes) */
-    fprintf(f, "- - - - - %08x ", GM_PlayerStatus);
+    fprintf(f, "- - - - - - - %08x ", GM_PlayerStatus);
     if (GM_PlayerControl)
     {
         hex(f, GM_PlayerControl, 124);

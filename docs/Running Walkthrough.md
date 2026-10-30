@@ -561,3 +561,8 @@ starts the turn a loop earlier because it was given loop 1011's pads with the ne
 reference's pads for a loop are on line N or N+1 differs between the dock and the title. Tried: a rule from the
 game task's wait (`mts_tasks_800C0C30[3].intr`, now field 18): dock fixed to loop 1040, intro's loading loops
 broken; reverted. BizHawk 1.11.4's execute and write callbacks don't fire for PSX. Next: DuckStation's GDB.
+
+**Control run in PCSX-Redux** (2026-10-30): `tools/port/tas/redux_replay.lua` runs the PS1 game under the port's
+harness (execute breakpoints at the same hooks, the same tables). The real PS1 code shows the same loop-1012 turn,
+so that's the harness; the port against it: Snake identical through the dock. Port differences left: the intro's
+demo stream (`DG_UnDrawFrameCount` 7 loops early), the seed at 809, `GM_GameStatus` bit `0x40` at loop 1,164.

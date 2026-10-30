@@ -126,6 +126,28 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       came a loop late: `target` is set by every `mts_wait_vbl` call, and a loop makes more than `dgd.c`'s.
 - [ ] Load end 4 (after the dock's alert): the port's at loop 5635, the PS1's 5457: after the divergence above.
 
+## Control run in PCSX-Redux
+
+- [x] `tools/port/tas/redux_replay.lua` (2026-10-30): the PS1 game in PCSX-Redux (Linux build from distrib.app,
+      `~/emu/pcsx-redux`; the user approved the site) under the port's harness, from the same tables, with execute
+      breakpoints at the port's hooks: `GV_UpdatePadSystem`'s return (pads), `do_control`'s (raw pads), the
+      `FS_StreamGetTick` return (`v0`), `NewLoader` and the loader's `Die` (seed), `gvd.c`'s `Act` return (realign,
+      passage time, seed, the trace). No stream start gate (it needs a code patch). About 50 loops a second:
+      ```
+      cd ~/emu/pcsx-redux && ./PCSX-Redux-HEAD-x86_64.AppImage -no-ui -debugger -run -noupdate -safe -interpreter \
+        -fastboot -bios=<ps-10j.bin> -memcard1=card1.mcd -memcard2=card2.mcd -iso=disc1.cue \
+        -dofile=tools/port/tas/redux_replay.lua     # TAS_LAST (loop to stop at), TAS_DIR, TAS_OUT
+      ```
+      `card1.mcd` is the first 128 KB of the movie's `MovieSaveRam.bin` (Redux saves the cards on exit: recreate
+      them). Failed first: the breakpoint handles in a local table (Redux drops a breakpoint when its handle is
+      garbage-collected), the BIOS shell without `-fastboot`.
+- [x] Result (dock, to loop 1,300): the control run (real PS1 code) shows Snake's turn a loop early at 1012
+      like the port, so that's the harness's pad timing; port against the control run: Snake identical to loop
+      1,300. Port differences left: `DG_UnDrawFrameCount` at loop 497 (the control: 504; the intro's demo stream),
+      the seed at 809, `GM_GameStatus` bit `0x40` at 1,164.
+- [ ] Use the control run to settle the pad timing (try mapping rules against BizHawk with real PS1 code, two
+      minutes a run), and compare the port with the control run rather than BizHawk.
+
 ## Phase 4: segments, so one bug doesn't stop the whole run
 
 - [ ] Run each stage visit as its own segment: boot the port straight into the stage with the game state the

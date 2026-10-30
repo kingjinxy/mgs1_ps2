@@ -7982,3 +7982,174 @@ No game sources changed since the last matching build, so it doesn't need rerunn
 
 - tool `Bash`: Update docs, archive and commit
 
+## Claude
+
+Committed as `185082fa2`. Now the DuckStation check. There are already GDB scripts for DuckStation (`capture_ps1.py`, `snake_ps1.py`); checking how they drive the game and reach the dock:
+
+- tool `Bash`: Read the existing DuckStation Snake GDB script
+
+- tool `Bash`: Read rest of snake script and launcher
+
+- tool `Bash`: Read DuckStation launch code
+
+## Claude
+
+Writing the GDB script and a small launcher that reuses that pattern:
+
+- tool `Bash`: Write DuckStation Snake turn-latency script
+
+## Claude
+
+Fixing two mistakes before running: a leftover junk loop, and the `turn.vy` offset. `turn` is at 76 in `CONTROL`, so `.vy` is at `0x4E`, not `0x4A`.
+
+- tool `Bash`: Run DuckStation turn-latency check
+
+- tool `Bash`: Test refined per-line pad rule
+
+- tool `Bash`: Find where mts updates wait last/target
+
+- tool `Bash`: Find where mts updates wait last/target
+
+- tool `Bash`: Read vblank handler and wait completion
+
+- tool `Bash`: Restore N+1 rule; commit DuckStation script
+
+## Claude
+
+The DuckStation check settled one thing. In the PS1 game, Snake uses a stick press in the same loop whose pad update read it: pressed at loop 4384, he set his turn within that loop. The port does the same. So the loop-1012 difference isn't a port bug. The test harness gave the port the dock's pad input one loop early.
+
+**What's still wrong:** each pad update has to be matched to the right game loop, and BizHawk's trace makes that hard.
+- **The cause:** BizHawk can only sample at the end of each video frame. Where that falls within a game loop varies by scene. At the title, the sample comes before that loop's pad update. In the dock it comes after.
+- **What I tried:** picking the right line from the game task's wait timing (a new trace field). It fixed the dock, with Snake matching through loop 1040. But the intro's skip press, which shows the same timing pattern, then arrived a loop late. A loop waits for more than just the frame wait, so those fields can't place the pad update reliably.
+- **What I kept:** the rule that's exact at the title and the intro's end. The dock is one loop early for Snake's input until this is solved.
+
+Everything is committed (`185082fa2`, `3d46778a4`), including the DuckStation script (`tools/port/gdb/snake_turn_ps1.py`) and the findings in the plan.
+
+**Options for the pad timing:**
+1. **Replay the raw controller input per vertical blank** instead of the game's processed pad data per loop. The port's own pad code would then compute the pads, so there's nothing to pin down. But it only works if the port's loops start on the same vertical blanks as the PS1's, which is a bigger change to the replay timing.
+2. **Find another signal in the reference** that marks whether the pad update has run, from fields the game writes there. It's cheap to try, but may hit the same ambiguity.
+3. **Live with it for now:** treat a one-loop input offset in some scenes as a known limitation and move on to the stubbed streams.
+
+I'd go with 3: the streaming gap blocks the TAS much more, since cutscenes and codec calls break without it. Then come back to 1 once streams work. Which would you like?
+
+## User
+
+What do you think about trying to make the TAS work in DuckStation? I don’t know if we can get more useful info out of it
+
+## Claude
+
+Yes, but not as a straight movie replay. Here's what I think it can and can't give us.
+
+**Playing the movie itself in DuckStation won't work.** DuckStation has no movie playback. Even if we fed it the inputs frame by frame, the run would fall out of sync within seconds. A TAS only plays back on an emulator whose timing matches the one it was made on. This run relies on luck manipulation and glitches, and its own notes say BizHawk's load times differ from other emulators. So it would desync, as the port would.
+
+**What DuckStation (or another PS1 emulator) could do is act as a control.**
+- **The setup:** run the PS1 game in an emulator under the same harness the port uses: the same loop-by-loop pads, stream clock and load realignment. Then compare that run with BizHawk's trace, the way the port's run is compared.
+- **Differences in both runs:** the harness causes those, like the pad-timing issue. We'd see exactly where it goes wrong and could fix it without guessing.
+- **Differences only in the port's run:** those are port bugs, with a PS1 run that has the same inputs and timing to compare against.
+- **Exact sample point:** the emulator can also stop exactly where we choose, such as right after `GV_UpdatePadSystem`. So that run's trace has no sample-point ambiguity, which BizHawk can't offer.
+
+That's the most useful thing it could tell us. The harness becomes testable on its own, so any difference the port shows is a port bug.
+
+**The catch with DuckStation:** its only hook is the GDB stub, so the harness would need a breakpoint on every game loop (two, counting the trace). That's slow, a few hundred loops per second at best, so maybe an hour or more for the full run. It also goes against CLAUDE.md's "keep gdb stops rare (no per-frame breakpoints)".
+
+**A better fit may be PCSX-Redux.** It's a PS1 emulator with built-in Lua scripting and execute breakpoints, so the harness hooks run inside the emulator at near full speed with no GDB round trips. The Planning Doc already mentions PCSX-Redux scripts for checking vertex transforms. It's on GitHub, so I can download it without asking. I haven't checked whether its Linux build runs here.
+
+My suggestion: try PCSX-Redux first, as a control run of the harness on the dock section, which already has known differences. If it can't run here, use DuckStation over GDB for just that short section (a few thousand loops, as a one-off exception to the rare-stops rule). Should I try that, or go to the streams first?
+
+## User
+
+Do I have PCSX Redux installed?
+
+- tool `Bash`: Search for a PCSX-Redux installation
+
+- tool `Bash`: Check redux scripts and PSX.Dev extension
+
+## Claude
+
+No, PCSX-Redux isn't installed. I found two related things:
+
+- **The PSX.Dev extension for VS Code** (`grumpycoders.psx-dev`). It can download and install PCSX-Redux for you, but it hasn't done so: there's no emulator binary or download folder from it.
+- **`build/pcsx-redux_scripts/`** in this repo, from the upstream decomp: two PCSX-Redux Lua scripts (`actor-list.lua`, `force-overlay-load-on-boot.lua`). The decomp's authors used PCSX-Redux with Lua for this game, which is a good sign that the control-run idea is practical.
+
+Getting it would mean downloading a Linux build from PCSX-Redux's GitHub releases (allowed without asking) into its own folder under `~/emu`, as I did for BizHawk. Or you can install it through the PSX.Dev extension. Should I download it and try a control run on the dock section?
+
+## User
+
+Download from GitHub and try the control run
+
+- tool `Bash`: List PCSX-Redux GitHub releases
+
+- tool `Bash`: List PCSX-Redux releases via redirect
+
+- tool `Bash`: Find official download URL; check build deps
+
+- tool `AskUserQuestion`: 
+
+- tool `Bash`: Fetch PCSX-Redux distrib manifest
+
+- tool `Bash`: Read build manifest for latest build
+
+- tool `Bash`: Download, verify and inspect PCSX-Redux
+
+## Claude
+
+Downloaded, its SHA-1 checks out, and the AppImage runs. The rest of the options:
+
+- tool `Bash`: List remaining PCSX-Redux CLI options
+
+- tool `Bash`: Look up function addresses in the map
+
+- tool `Bash`: Find return addresses and delay slots
+
+- tool `Bash`: Find neighbouring symbols for range ends
+
+- tool `Bash`: Inspect FS_StreamGetTick tail
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/tools/port/tas/redux_replay.lua
+
+- tool `Bash`: Run the control harness in PCSX-Redux
+
+- tool `Bash`: Check control run progress
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Retry control run with fastboot for 2 min
+
+- tool `Bash`: List leftover PCSX-Redux processes
+
+- tool `Bash`: Retry control run with fastboot for 2 min
+
+- tool `Bash`: Rerun control harness with flushing, 5 min
+
+- tool `Bash`: Diagnose Redux breakpoints and progress
+
+## Claude
+
+No output at all this time, probably because the pipe lost the buffer when the timeout killed it. Redirecting to a file, as in the earlier runs:
+
+- tool `Bash`: Diagnose with output to file
+
+- tool `Bash`: Look for Lua errors in control run log
+
+- tool `Bash`: Test control run without raw pad hook
+
+## Claude
+
+Still nothing, so it isn't the raw hook. Adding the diagnostic's heartbeat (`GV_Time` and PC every 300 vertical blanks) to the harness, to see where it stops:
+
+- tool `Bash`: Heartbeat to locate stall
+
+- tool `Bash`: Count breakpoint hits and catch errors
+
+- tool `Bash`: Keep breakpoints global; rerun
+
+## Claude
+
+The control run works: 1,199 loops traced, all hooks firing, and load realignment active. Comparing it with BizHawk's debug trace, then with the port:
+
+- tool `Bash`: Compare control run with BizHawk and port
+
+- tool `Bash`: Rerun port and compare against Redux control
+
+- tool `Bash`: Document control run and commit
+

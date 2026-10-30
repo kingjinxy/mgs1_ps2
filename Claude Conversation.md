@@ -7851,3 +7851,134 @@ Before the commit, CLAUDE.md asks for the matching build check (game files chang
 
 - tool `Bash`: Walkthrough entry, conversation archive, status
 
+- tool `Bash`: Commit harness fixes
+
+## Claude
+
+Committed as `920b8feec`. Now Snake's turn code. Finding where his `CONTROL.turn` gets the pad's direction:
+
+- tool `Bash`: Find Snake code setting turn.vy
+
+## Claude
+
+Many places. Most take `gSnaMoveDir_800ABBA4`, the global move direction. Finding where it's computed from the pad, and when within the loop:
+
+- tool `Bash`: Find where Snake move direction is set
+
+- tool `Bash`: Read Snake's per-loop pad handling
+
+- tool `Bash`: Read Snake turn logic around dir
+
+## Claude
+
+Not this one. The idle-to-walk states use `gSnaMoveDir` at lines 2975 and 3038:
+
+- tool `Bash`: Read Snake stand/walk state turn logic
+
+- tool `Bash`: Trace Snake work bytes in both games
+
+- tool `Bash`: Compare Snake turn countdown per loop
+
+- tool `Bash`: Read mts_wait_vbl implementation
+
+- tool `Bash`: Locate and read mts_wait_vbl
+
+- tool `Bash`: Read mts task structs and symbols
+
+- tool `Bash`: Read MTS_TASK layout and array size
+
+- tool `Bash`: Log vblank wait state of mts tasks
+
+- tool `Bash`: Check daemon start order and actor list insertion
+
+- tool `Bash`: Find Snake's current state function field
+
+## Claude
+
+The state function is `field_9B8_fn_anim`, with its frame counter at `0x9BC`. Widening the work dump to cover `0x9B0` to `0xA70` in both traces:
+
+- tool `Bash`: Widen Snake work dump in both traces
+
+- tool `Bash`: Compare Snake state function per loop
+
+- tool `Bash`: Read where Snake's pad pointer is chosen
+
+## Claude
+
+Snake reads `GV_PadData[0]` directly, so the pointer isn't it. Reading `sna_anim_idle_8005275C` for other inputs:
+
+- tool `Bash`: Read Snake idle state function
+
+## Claude
+
+The turn logic is in `field_9C8_anim_update_fn_3p` (`sna_fn_80052E58`, the code I read at line 2940). Finding where Snake's main logic calls it, and under what conditions:
+
+- tool `Bash`: Find call site of Snake's update function
+
+- tool `Bash`: Compare wait phase at title vs dock
+
+- tool `Bash`: Add game task wait field to trace scripts
+
+## Claude
+
+Now the port's trace (a `-` at field 18, debug fields one later), `compare_trace.py`'s field numbers, and the per-line pad rule in `trace_to_pads.py`:
+
+- tool `Bash`: Per-line pad rule; rerun debug trace
+
+- tool `Bash`: Test per-line pad rule on dock section
+
+- tool `Bash`: Show wait phase around long loops
+
+- tool `Bash`: Restore N+1 pad rule; document open question
+
+- tool `Bash`: Test memory write callbacks in BizHawk
+
+## Claude
+
+Write callbacks don't fire for the PlayStation core in 1.11.4 either, so BizHawk can't give the exact pad-update moment. Recording all of this in the plan:
+
+- tool `Bash`: Record the open pad-timing question in plan
+
+## Claude
+
+I committed the earlier work as `920b8feec`. The Snake investigation hasn't found the cause yet. It narrowed things down, but it ended on a question about the test harness rather than a bug in Snake's code.
+
+**What's established:**
+- **Snake's state matches up to loop 1011** (0:48.5 in the movie). In both games he's in the same standing state (`sna_anim_idle_8005275C`), at the same animation frame, with the same turn countdown (0).
+- **He then turns one loop earlier in the port.** The port's Snake starts turning in loop 1011, the PS1's in loop 1012.
+- **The cause is the input he sees.** Snake reads the pad data directly. The port's Snake turned because in loop 1011 it was given the PS1's pad data with the new stick direction. So in loop 1011 the PS1's Snake was still seeing "no direction". That means the reference's pads for that loop are on the same trace line, not the next.
+
+**The contradiction:**
+- **Title and intro say "next line":** with that rule, the title reaches New Game on the same loop as the PS1 and the intro ends on the same loop. With "same line" they're both late.
+- **The dock says "same line":** with that rule Snake matches.
+- **So it's one of two things:**
+  1. BizHawk's sampling point within a loop shifts between scenes, so in the dock the harness feeds pads one loop early.
+  2. The port's Snake really does react one loop sooner.
+
+**What I tried:**
+- **A rule based on the game's wait state:** I picked the rule per line from the game task's vertical-blank wait, now recorded in both traces as field 18. Snake then matched through loop 1040, but the intro's long loading loops broke, because waits other than the frame wait muddy the signal. I put the "next line" rule back.
+- **Watching the pad update directly:** BizHawk 1.11.4 can't do it. Its execute and write callbacks register without error, but never fire for the PlayStation core.
+
+**Proposed next step:** get the exact timing from DuckStation's GDB stub. A breakpoint on `GV_UpdatePadSystem`'s return, for a few loops at the title and a few in the dock (a few dozen stops), would show where that update falls relative to the vertical blank in each scene. That settles whether the harness or the port is wrong. It's more GDB stops than CLAUDE.md's "keep gdb stops rare" usually allows, but it's a one-off, so I'm asking first.
+
+Not committed since `920b8feec`:
+- the wait field (18) in `trace.lua` and `trace_debug.lua`, plus the debug fields;
+- the matching changes in the port's trace and the compare tool;
+- the plan update.
+
+The saved reference trace doesn't have field 18 yet. That only matters if we use it, so I haven't rerun it.
+
+Shall I go ahead with the DuckStation check, or switch to the streaming functions and come back to this?
+
+## User
+
+Commit the changes and then go ahead with the DuckStation check
+
+- tool `Bash`: Check what changed since last commit
+
+## Claude
+
+No game sources changed since the last matching build, so it doesn't need rerunning. Updating the archive and committing:
+
+- tool `Bash`: Update docs, archive and commit
+

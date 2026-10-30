@@ -554,3 +554,10 @@ links as 24-bit PS1 addresses. Small tables: no misses. Tried: a `.tasdata` sect
 `CONTROL`. Loop 1012 (0:00:48.50 in the movie): same `GV_PadData` (dir 2951) and status, but the port's
 `CONTROL.turn` takes 2951 a loop before the PS1's; rotation and position follow a loop early. `compare_trace.py`
 prints movie timestamps. Matching build: 80 OK, VR 2 OK.
+
+**Snake's turn, continued** (2026-10-30): Snake's state function and turn countdown (`trace_debug.lua`: his work
+from `0x9B0`, the function pointer resolved through each side's symbols) are identical to loop 1011; the port's
+starts the turn a loop earlier because it was given loop 1011's pads with the new direction. Whether the
+reference's pads for a loop are on line N or N+1 differs between the dock and the title. Tried: a rule from the
+game task's wait (`mts_tasks_800C0C30[3].intr`, now field 18): dock fixed to loop 1040, intro's loading loops
+broken; reverted. BizHawk 1.11.4's execute and write callbacks don't fire for PSX. Next: DuckStation's GDB.

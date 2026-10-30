@@ -109,9 +109,17 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       embedded, they pushed `.bss` past 16 MB, and the HAL's ordering tables keep 24-bit links (TLB misses in
       `DrawOTagImpl` at boot). `port/linkfile` now asserts `_end_bss <= 0x1000000`. Placing them after `.bss`
       fails: ps2sdk's `crt0` zeroes up to `_end` and starts the heap there.
-- [ ] Loop 1012 (0:00:48.50 in the movie): Snake's `CONTROL.turn` takes the stick's direction (2951) a loop
-      earlier than on the PS1, with the same `GV_PadData` (dir 2951) and `GM_PlayerStatus`; his rotation and,
-      from loop 1016, his position follow a loop early. A port difference in Snake's control code.
+- [ ] Loop 1012 (0:00:48.50 in the movie): Snake turns a loop early in the port. Snake's work (`trace_debug.lua`
+      field 21: his state function, resolved through each side's symbols, and `field_A38_local_data`) is identical
+      up to loop 1011: both in `sna_anim_idle_8005275C` frame 1 with the countdown at 0, and the port's
+      `sna_fn_80052E58` starts the turn in loop 1011, the PS1's in 1012. Snake reads `GV_PadData` directly, so in
+      loop 1011 the PS1's still had dir -1: the pads of the line N, not N+1, which the title and the intro's end
+      contradict. Not settled whether BizHawk's sample point moves (then the harness feeds the dock's pads a
+      loop early) or the port differs. Tried: a rule from the game task's wait (`mts_tasks_800C0C30[3].intr`
+      last/target, now field 18 of both traces): the dock matched to loop 1040, but the intro's long loading
+      loops broke (other waits than `dgd.c`'s), so the N+1 rule stays. BizHawk 1.11.4's execute and write
+      callbacks don't fire for PSX (registered, no hits). Next: the exact moment of `GV_UpdatePadSystem` in a few
+      dock and title loops from DuckStation's GDB (a breakpoint on its return, a few dozen stops).
 - [ ] Load end 4 (after the dock's alert): the port's at loop 5635, the PS1's 5457: after the divergence above.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

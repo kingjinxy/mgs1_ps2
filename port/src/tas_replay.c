@@ -317,16 +317,17 @@ void Port_TasTrace(void)
     hex(f, GM_PlayerPosition, 8);
     fprintf(f, "%d %d %d ", GM_AlertMode, GM_LoadRequest, DG_UnDrawFrameCount);
     hex(f, linkvarbuf, 192);
-    /* trace_debug.lua's fields: the 4 BizHawk-only ones (stream clock, pad states) as "-", then
-       GM_PlayerStatus and Snake's CONTROL (124 bytes) */
-    fprintf(f, "- - - - %08x ", GM_PlayerStatus);
+    /* the 5 BizHawk-only fields (stream clock, pad states, the game task's wait) as "-", then
+       trace_debug.lua's: GM_PlayerStatus, Snake's CONTROL (124 bytes) and his work from 0x9B0 (192 bytes) */
+    fprintf(f, "- - - - - %08x ", GM_PlayerStatus);
     if (GM_PlayerControl)
     {
         hex(f, GM_PlayerControl, 124);
+        hex(f, (char*)GM_PlayerControl - 0x20 + 0x9B0, 192); /* Snake's work from 0x9B0 (sna_init.c) */
     }
     else
     {
-        fputs("- ", f);
+        fputs("- - ", f);
     }
     fputc('\n', f);
     if ((GV_Time & 63) == 0)

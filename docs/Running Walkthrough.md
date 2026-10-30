@@ -566,3 +566,9 @@ broken; reverted. BizHawk 1.11.4's execute and write callbacks don't fire for PS
 harness (execute breakpoints at the same hooks, the same tables). The real PS1 code shows the same loop-1012 turn,
 so that's the harness; the port against it: Snake identical through the dock. Port differences left: the intro's
 demo stream (`DG_UnDrawFrameCount` 7 loops early), the seed at 809, `GM_GameStatus` bit `0x40` at loop 1,164.
+
+**Pad timing settled** (2026-10-30): with `GV_LastTickCount` in the trace every BizHawk line is taken before its
+loop's pad update. Snake's early turn: at the codec's end a loop updates the pads twice (`dgd.c` with
+`STATE_PADRELEASE`, then the codec script's pad command), and the harness wrote the final recorded `GV_PadData` at
+both. Now it rebuilds the raw pads at `GV_UpdatePadSystem`'s entry and the game computes `GV_PadData` (identical
+to BizHawk's in the control run). Snake matches to loop 1,078 in both runs. Matching build: 80 OK, VR 2 OK.

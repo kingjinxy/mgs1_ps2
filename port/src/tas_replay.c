@@ -4,9 +4,11 @@
  * copied next to the disc image as tas_pads.bin, and Port_TasInit reads it from host: (likewise MGS_TAS_RAW,
  * MGS_TAS_TIME: tas_raw.bin, tas_time.bin) into the heap: embedded, the 5.6 MB of tables pushed the game's
  * .bss past 16 MB (see port/linkfile). mgs_tas_pads holds records of a little-endian u32 GV_Time and the 64 bytes of GV_PadData[0..3] the PS1
- * game had after GV_UpdatePadSystem in that loop, one record each time they change. Port_TasPads (end of
- * libgv/pad.c's GV_UpdatePadSystem) overwrites GV_PadData with the record for the current GV_Time, so the
- * game sees the PS1's pads however the port's pad and timing differ.
+ * game had after GV_UpdatePadSystem in that loop, one record each time they change. Port_TasPads (the start of
+ * libgv/pad.c's GV_UpdatePadSystem) rebuilds mts's raw pads (pad_800C14E0) from the record for the current
+ * GV_Time, and the game computes GV_PadData itself: a loop can update the pads twice (dgd.c's, then a script's pad
+ * command at a codec's end, with STATE_PADRELEASE cleared in between), and writing the recorded result at both
+ * gave Snake the stick a call early (found with tools/port/tas/redux_replay.lua).
  *
  * With MGS_TAS_TIME too, mgs_tas_time holds 24 bytes per loop from GV_Time 0 (little-endian): the
  * tick the PS1's FS_StreamGetTick returned (s32; 0x80000000: no stream), and the PS1's GM_GameStatus,
@@ -236,7 +238,25 @@ void Port_TasPads(void)
     {
         next--;
     }
-    memcpy(GV_PadData, mgs_tas_pads + next * RECORD + 4, 64);
+    {
+        /* mts's raw pads as the PS1's controller this loop: [2]/[3].status are mts_PadRead's buttons (plus the
+           stick's d-pad bits when the pad is in analog mode: cleared then), [0]/[1] hold the sticks */
+        const unsigned char* r = mgs_tas_pads + next * RECORD + 4;
+        int                  port;
+        for (port = 0; port < 2; port++)
+        {
+            unsigned int   buttons = r[(2 + port) * 16] | r[(2 + port) * 16 + 1] << 8;
+            short          analog  = (short)(r[port * 16 + 10] | r[port * 16 + 11] << 8);
+            unsigned char* p       = pad_800C14E0 + port * 8;
+            if (analog > 0)
+            {
+                buttons &= 0x0FFF;
+                memcpy(p + 4, r + port * 16 + 12, 4);
+            }
+            p[2] = (unsigned char)~buttons;
+            p[3] = (unsigned char)(~buttons >> 8);
+        }
+    }
 #endif
 }
 

@@ -47,6 +47,10 @@ local load_ends, prev = {}, 0
 for t = 0, #TIME / 24 - 1 do local r = le(TIME, t * 24 + 8); if prev ~= 0 and r == 0 then load_ends[#load_ends + 1] = t end; prev = r end
 
 local out = assert(io.open(OUT, "w"))
+-- per loop, whether its pad update ran in the video frame in which GV_Time became N (then BizHawk's line N, taken
+-- at that frame's end, has loop N's pads) or after a vertical blank (line N has loop N-1's): "t same|later"
+local phase = assert(io.open(os.getenv("TAS_PHASE") or (dir .. "/redux_phase.txt"), "w"))
+local act_vbl, act_time = -1, -1
 local loads, prev_request, load_flag, traced = 1, 0, false, -1
 TAS_BREAKPOINTS = {}  -- global: Redux drops a breakpoint when its handle is garbage-collected
 local hits, errors = {}, 0
@@ -59,9 +63,28 @@ local function bp(addr, name, fn)
   end)
 end
 
-bp(0x80016C70, "tas pads", function()            -- GV_UpdatePadSystem's return
+-- The pads: at GV_UpdatePadSystem's entry, mts's raw pads (pad_800C14E0) become the controller the PS1 game read in
+-- this loop, rebuilt from the recorded GV_PadData: [2]/[3].status are mts_PadRead's buttons (with the stick's d-pad
+-- bits added when the pad is in analog mode: cleared then), [0]/[1] hold the sticks. The game then computes
+-- GV_PadData itself: a loop can update the pads twice (dgd.c, then a script's pad command at a codec's end, with
+-- STATE_PADRELEASE cleared in between), and writing the recorded result at both gave Snake the stick a call early.
+local function s16(s, o) local v = s:byte(o + 1) + s:byte(o + 2) * 256; return v >= 0x8000 and v - 0x10000 or v end
+bp(0x8001682C, "tas pads", function()            -- GV_UpdatePadSystem's entry
+  if u32(GV_TIME) == act_time then
+    phase:write(string.format("%d %s\n", act_time, u32(MTS_TIME) == act_vbl and "same" or "later"))
+    act_time = -1
+  end
   local o = lookup(PADS, 68, u32(GV_TIME))
-  if o then for i = 0, 63 do mem[a(GV_PADDATA) + i] = PADS:byte(o + i + 1) end end
+  if not o then return end
+  for port = 0, 1 do
+    local buttons = s16(PADS, o + (2 + port) * 16) % 0x10000
+    local analog = s16(PADS, o + port * 16 + 10)
+    if analog > 0 then buttons = bit.band(buttons, 0x0FFF) end
+    local p = a(PAD_RAW) + port * 8
+    local active = bit.band(bit.bnot(buttons), 0xFFFF)
+    mem[p + 2] = active % 256; mem[p + 3] = math.floor(active / 256)
+    if analog > 0 then for i = 0, 3 do mem[p + 4 + i] = PADS:byte(o + port * 16 + 12 + i + 1) end end
+  end
 end)
 if os.getenv("TAS_NO_RAW") == nil then bp(0x8008C090, "tas raw pads", function()        -- do_control's return (vertical blank)
   local o = lookup(RAW, 28, u32(GV_TIME))
@@ -81,6 +104,7 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
   local r = time_rec(t)
   if r then w32(GV_PASSAGE, le(TIME, r + 12)) end
   if t == traced then return end
+  act_vbl = u32(MTS_TIME)
   local request = u32(LOADREQ)
   if prev_request ~= 0 and request == 0 and loads <= #load_ends then
     if t ~= load_ends[loads] then
@@ -95,6 +119,7 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
   if load_flag and r then w32(SEED, le(TIME, r + 16)) end
   load_flag = false
   traced = t
+  act_time = t                                    -- after a realign: the loop's number as the PS1's
   local stage = ""
   for i = 0, 7 do local c = u8(STAGE + i); if c == 0 then break end; stage = stage .. string.char(c) end
   local ctrl = u32(PCTRL)
@@ -104,7 +129,8 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
     hex(GV_PADDATA, 64), hex(PAD_RAW, 16), hex(POS, 8), s32(ALERT), s32(LOADREQ), s32(UNDRAW), hex(LINKVAR, 192),
     u32(PSTATUS), okc and hex(ctrl, 124) or "-", okc and hex(ctrl - 0x20 + 0x9B0, 192) or "-"))
   if t % 64 == 0 then out:flush(); print(string.format("tas: loop %d %s", t, stage)) end
-  if t >= LAST then out:write("END\n"); out:close(); PCSX.quit(0) end
+  if t % 64 == 0 then phase:flush() end
+  if t >= LAST then out:write("END\n"); out:close(); phase:close(); PCSX.quit(0) end
 end)
 print(string.format("tas: control run, %d PS1 load ends, trace to %s", #load_ends, OUT))
 local vs = 0

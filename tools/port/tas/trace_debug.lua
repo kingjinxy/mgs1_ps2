@@ -8,8 +8,9 @@
 --   mts_time (the vertical blank count), fs_stream_last_time, fs_stream_next_time (libfs/stream.c's statics:
 --   with mts_time, what FS_StreamGetTick returned this loop; BizHawk 1.11.4 has no execute callbacks for PSX),
 --   pad_state_800C14F0[0..1] (hex, 2 ints: mts's pad init states, behind mts_get_pad_vibration_type),
---   the game task's (mts task 3, dgd.c's mts_wait_vbl) last wake and target vertical blank, "last:target": with
---   mts_time, whether this line is from before or after the loop's pad update (tools/port/tas/trace_to_pads.py)
+--   the game task's (mts task 3, dgd.c's mts_wait_vbl) last wake and target vertical blank and GV_LastTickCount (the
+--   vertical blank of this loop's GV_Time++), "last:target:tick": with mts_time, whether this line is from before
+--   or after the loop's pad update (tools/port/tas/trace_to_pads.py)
 -- Addresses: obj/asm.map of the matching build (SLPM-86247). Ends with END at the movie's last frame.
 local OUT   = "Z:\\home\\alex\\emu\\tas\\trace_debug.log"
 local LAST  = (os and os.getenv and tonumber(os.getenv("TAS_LAST") or "")) or 3300
@@ -38,7 +39,7 @@ end
 local function wait()
   local intr = u32(0x800C0C30 + 3 * 32 + 4)
   if intr < 0x80000000 or intr >= 0x80200000 then return "-" end
-  return string.format("%d:%d", u32(intr + 8), u32(intr + 12))
+  return string.format("%d:%d:%d", u32(intr + 8), u32(intr + 12), u32(0x800AB334))
 end
 
 -- Snake's CONTROL (124 bytes; pointer fields differ between the PS1 and the port)

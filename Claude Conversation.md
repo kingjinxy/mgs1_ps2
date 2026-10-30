@@ -8153,3 +8153,59 @@ The control run works: 1,199 loops traced, all hooks firing, and load realignmen
 
 - tool `Bash`: Document control run and commit
 
+## Claude
+
+The PCSX-Redux control run worked, and it changed the picture.
+
+**What it is:** the original PS1 game in PCSX-Redux under the same replay harness as the port: the same tables, with breakpoints at the same points (`tools/port/tas/redux_replay.lua`). It plays the dock section, to loop 1,300, in about two minutes. That gives us two comparisons:
+- **Control run against BizHawk:** differences come from the harness.
+- **Port against the control run:** differences come from the port, because the inputs and timing are identical.
+
+**Results:**
+- **Snake's early turn is the harness.** The real PS1 code under the harness also turns at loop 1012, identically. Port against the control run, Snake matches all the way through the dock. So the port's Snake is right, which the DuckStation check had also shown.
+- **Remaining port differences**, in loop order:
+  1. The intro's demo stream: `DG_UnDrawFrameCount` reaches 3 seven loops earlier in the port (loop 497 against 504). That's the stubbed streaming.
+  2. The random seed at loop 809, probably the same cause.
+  3. `GM_GameStatus` bit `0x40` (`STATE_CUT_IN`) at loop 1,164 (0:53.6 in the movie): the port starts a cut-in that the PS1 doesn't.
+
+**How I got it:**
+- PCSX-Redux came from distrib.app as you approved. Its SHA-1 matched, and it's in `~/emu/pcsx-redux`.
+- Two problems on the way. Redux silently drops breakpoints whose handles get garbage-collected, so they're now kept in a global. And the v1.0J BIOS shell needs `-fastboot`.
+
+Committed as `cd679a577`, with the plan and walkthrough updated.
+
+**Next steps:**
+1. **Settle the harness's pad timing using Redux.** Each try is a two-minute run with real PS1 code, so I can test mapping rules until the control run matches BizHawk, instead of reasoning about sample points.
+2. **Make the control run the port's main reference.** Port differences would then be exact.
+3. **Then the port's own differences:** the streams, then the cut-in at loop 1,164.
+
+Should I start with 1?
+
+## User
+
+Yes
+
+## Claude
+
+The control run gives a better way to get the pad timing than guessing from BizHawk's samples. Redux runs the same PS1 code with nearly the same timing inside a loop. So for every loop it can record two vertical blank counts: when `GV_Time` was incremented, and when the pad update ran.
+- **Same count:** the pad update finished within the video frame where `GV_Time` became N. BizHawk's sample at that frame's end therefore already has loop N's pads (the dock case).
+- **Later count:** the update came after a vertical blank, so BizHawk's line N has loop N-1's pads (the title case).
+
+The table builder then takes each loop's case from that file. Load times differ between the emulators, but each load end realigns the loops. Adding the measurement:
+
+- tool `Bash`: Measure per-loop pad phase in Redux
+
+- tool `Bash`: Find GV_LastTickCount address
+
+- tool `Bash`: Record GV_LastTickCount; test the rule
+
+- tool `Bash`: Check pad port indices and flag values
+
+- tool `Bash`: Replay raw controller in Redux; compare to BizHawk
+
+- tool `Bash`: Read current Port_TasPads
+
+- tool `Bash`: Port: replay raw controller; compare both
+
+- tool `Bash`: Matching build, docs, archive before commit
+

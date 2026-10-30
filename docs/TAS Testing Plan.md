@@ -145,8 +145,19 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       like the port, so that's the harness's pad timing; port against the control run: Snake identical to loop
       1,300. Port differences left: `DG_UnDrawFrameCount` at loop 497 (the control: 504; the intro's demo stream),
       the seed at 809, `GM_GameStatus` bit `0x40` at 1,164.
-- [ ] Use the control run to settle the pad timing (try mapping rules against BizHawk with real PS1 code, two
-      minutes a run), and compare the port with the control run rather than BizHawk.
+- [x] Pad timing settled (2026-10-30): `GV_LastTickCount` (now in field 18, `last:target:tick`) equals the line's
+      `mts_time` on every line, so every line is taken before its loop's pad update and the N+1 rule holds. Snake's
+      loop-1012 turn came from the codec's end: in loop 1011 `dgd.c`'s pad update ran with `STATE_PADRELEASE`
+      (no direction for Snake), then the codec script cleared it and updated the pads again; writing the recorded
+      final `GV_PadData` at both gave Snake the stick a call early. Now the harness rebuilds mts's raw pads at
+      `GV_UpdatePadSystem`'s entry from the record (`[2]/[3].status` buttons, the d-pad bits cleared in analog
+      mode; `[0]/[1]` sticks) and the game computes `GV_PadData`: identical to BizHawk's on every loop (control
+      run). Snake now matches BizHawk to loop 1,078 in the control run and the port; port against control: Snake
+      identical. Redux's own phase measurement (pad update in the same video frame as `GV_Time++`): "later"
+      everywhere, but its CPU timing isn't BizHawk's.
+- [ ] Harness, both runs: the intro's stream (`DG_UnDrawFrameCount` at 504, the seed at 821; Redux has no
+      stream start gate), Snake's `CONTROL.vecs` at 1,079. Port only: `DG_UnDrawFrameCount` at 497 (the
+      control: 504), `STATE_CUT_IN` at 1,164.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

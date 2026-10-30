@@ -32,9 +32,10 @@ def stream_tick(now, last, nxt):
 # trace.lua samples at the end of the video frame in which GV_Time became N: after gvd.c's Act (GV_Time, GV_Clock,
 # GV_PassageTime of loop N), during dgd.c's wait for the vertical blank, before loop N's pad update and actors.
 # So line N's game state is loop N-1's result, and loop N's pads are on line N+1. Checked at the title (line N's
-# pads: New Game a loop late) and the intro's end; but in the dock Snake then turns a loop early (loop 1012), and
-# a rule from the game task's wait (field 18: woken at the line's own vertical blank or earlier) fixed the dock and
-# broke the intro's long loading loops: not settled (docs/TAS Testing Plan.md).
+# pads: New Game a loop late) and the intro's end. In the dock it's wrong: DuckStation shows Snake uses a press in
+# the loop that read it (tools/port/gdb/snake_turn_ps1.py), so the PS1's line 1012 held loop 1012's pads and the
+# port's Snake, given them in loop 1011, turned a loop early. The game task's wait (field 18) doesn't tell the
+# cases apart (other waits than dgd.c's within a loop): not settled (docs/TAS Testing Plan.md).
 rows = []
 for line in (lzma.open(src, "rt") if src.endswith(".xz") else open(src)):
     f = line.split()

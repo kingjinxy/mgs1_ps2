@@ -118,8 +118,12 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       loop early) or the port differs. Tried: a rule from the game task's wait (`mts_tasks_800C0C30[3].intr`
       last/target, now field 18 of both traces): the dock matched to loop 1040, but the intro's long loading
       loops broke (other waits than `dgd.c`'s), so the N+1 rule stays. BizHawk 1.11.4's execute and write
-      callbacks don't fire for PSX (registered, no hits). Next: the exact moment of `GV_UpdatePadSystem` in a few
-      dock and title loops from DuckStation's GDB (a breakpoint on its return, a few dozen stops).
+      callbacks don't fire for PSX (registered, no hits). DuckStation (`tools/port/gdb/snake_turn_ps1.py`, a
+      press written at loop L's pad update): the PS1's Snake sets his turn in loop L, as the port's does. So the
+      port is right and the harness gave the dock's pads a loop early: BizHawk's line N holds loop N's pads in
+      the dock but loop N-1's at the title. A rule from the wait pattern (last = mts-1, target = mts+1: loop
+      N's) fixed the dock (Snake equal to loop 1040) but the intro's skip press (line 517, same pattern) then
+      came a loop late: `target` is set by every `mts_wait_vbl` call, and a loop makes more than `dgd.c`'s.
 - [ ] Load end 4 (after the dock's alert): the port's at loop 5635, the PS1's 5457: after the divergence above.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

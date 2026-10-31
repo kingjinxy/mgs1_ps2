@@ -1930,7 +1930,50 @@ void s03d_800D0958(Work *work, int arg1)
         work->control.turn.vx = 0;
     }
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D09D8.s")
+void s03d_800CED94(Work *work, int arg);
+void AN_Sleep(SVECTOR *pos);
+
+void s03d_800D09D8(Work *work, int arg)
+{
+    SVECTOR pos;
+
+    work->field_B24 = 0;
+
+    if (arg == 0)
+    {
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[18], 0, 4, 0x3FE);
+
+        if (work->control.map->index == GM_PlayerMap && GV_RandU(12) >= 5)
+        {
+            work->field_AE8 = 240;
+        }
+    }
+
+    if (arg == 20)
+    {
+        pos = work->control.mov;
+        pos.vy += 500;
+        AN_Sleep(&pos);
+    }
+
+    if (work->field_AD8 & 0x1000)
+    {
+        SetMode(work, s03d_800CED94);
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[0], 0, 4, 0);
+        work->field_8EC = 0;
+        work->field_8F4 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+    }
+    else if (arg == 130)
+    {
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[0], 0, 4, 0);
+        work->field_8EC = 0;
+        work->field_8F4 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+    }
+}
 void Zako_800D0B18(Work *work, int index, int count)
 {
     MATRIX m;

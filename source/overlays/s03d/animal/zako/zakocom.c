@@ -926,4 +926,131 @@ int s03d_800D5538(void)
 
     return i;
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D55C8.s")
+typedef struct
+{
+    int mode;
+    int alert;
+} TopCommand;
+#define TOPCOMMAND ((TopCommand *)&s03d_dword_800DC2E8)
+
+extern int        s03d_dword_800DC2F0;
+extern int        s03d_dword_800DC454;
+extern const char s03d_dword_800DBC70[]; /* "zone=%d " */
+extern const char s03d_dword_800DBC7C[]; /* "zakocom.c" */
+void GM_InitHomingSystem(void);
+
+void s03d_800D55C8(GV_ACT *work, int name, int where)
+{
+    int   i;
+    char *opt;
+
+    s03d_dword_800DC2E0 = 0;
+    s03d_dword_800DC2F8 = 0;
+    ZAKOCOM_MGR->field_20 = 0;
+    ZAKOCOM_MGR->field_18 = 0;
+    s03d_dword_800DC2F4 = 0;
+    ZAKOCOM_MGR->field_60 = 0;
+    ZAKOCOM_MGR->field_10 = 0;
+    ZakoCom_800D54DC();
+    GM_InitHomingSystem();
+
+    for (i = 0; i < 8; i++)
+    {
+        ZAKOCOM_MGR->entries[i].field_0 = 0;
+        ZAKOCOM_MGR->entries[i].field_4 = 0;
+        ZAKOCOM_MGR->entries[i].field_8 = 0;
+        ZAKOCOM_MGR->entries[i].field_C = NULL;
+    }
+
+    for (i = 7; i >= 0; i--)
+    {
+        ZAKOCOM_MGR->field_40[i] = i;
+    }
+
+    ZAKOCOM_MGR->field_0C = 0;
+    ZAKOCOM_MGR->field_1C = 0;
+    TOPCOMMAND->mode = 0; /* s03d_dword_800DC2E8, and s03d_dword_800DC2EC */
+    TOPCOMMAND->alert = 0;
+
+    ZAKOCOM_MGR->field_64 = GM_GetMap(where);
+
+    opt = GCL_GetOption('e');
+    if (opt)
+    {
+        ZAKOCOM_MGR->field_120 = GCL_StrToInt(GCL_NextStr());
+    }
+    else
+    {
+        ZAKOCOM_MGR->field_120 = -1;
+    }
+
+    s03d_800D5538();
+
+    opt = GCL_GetOption('b');
+    if (opt)
+    {
+        s03d_dword_800DC454 = GCL_StrToInt(GCL_NextStr());
+    }
+    else
+    {
+        s03d_dword_800DC454 = -1;
+    }
+
+    opt = GCL_GetOption('v');
+    if (opt)
+    {
+        ZAKOCOM_MGR->field_34 = ZakoCom_800D4284((int)opt, ZAKOCOM_MGR->field_38);
+    }
+    else
+    {
+        ZAKOCOM_MGR->field_34 = 1;
+        ZAKOCOM_MGR->field_38[0] = 0;
+    }
+
+    for (i = 0; i < ZAKOCOM_MGR->field_34; i++)
+    {
+        fprintf(1, (char *)s03d_dword_800DBC70, ZAKOCOM_MGR->field_38[i]);
+    }
+
+    ZAKOCOM_MGR->field_36 = 0;
+    s03d_dword_800DC2F0 = 0;
+
+    opt = GCL_GetOption('j');
+    if (opt)
+    {
+        ZAKOCOM_MGR->field_68.n_entry = ZakoCom_800D4224((int)opt, (short *)&ZAKOCOM_MGR->field_68);
+    }
+    else
+    {
+        ZAKOCOM_MGR->field_68.n_entry = 1;
+        ZAKOCOM_MGR->field_68.field_04[0].field_00 = 0;
+        ZAKOCOM_MGR->field_68.field_04[0].field_02 = 0;
+    }
+
+    ZAKOCOM_MGR->field_68.map_id = where;
+    ZAKOCOM_MGR->count = 0;
+
+    opt = GCL_GetOption('n');
+    if (opt)
+    {
+        ZAKOCOM_MGR->count = ZakoCom_800D4E48(opt);
+    }
+
+    ZAKOCOM_MGR->field_0 = 0;
+    ZAKOCOM_MGR->field_4 = 0;
+    ZAKOCOM_MGR->field_110 = 0;
+}
+
+void *NewZakoCommander_800D580C(int name, int where)
+{
+    GV_ACT *work;
+
+    work = GV_NewActor(4, 36);
+    if (work != NULL)
+    {
+        GV_SetNamedActor(work, (GV_ACTFUNC)s03d_800D53EC, (GV_ACTFUNC)s03d_800D5458, (char *)s03d_dword_800DBC7C);
+        s03d_800D55C8(work, name, where);
+    }
+
+    return (void *)work;
+}

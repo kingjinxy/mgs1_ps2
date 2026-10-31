@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "mgstype.h"
 
 extern const char s03d_dword_800DB5CC[];
@@ -24,25 +25,25 @@ int s03d_dword_800C39D8 = 0x00000000;
 int s03d_dword_800C39DC = 0x00000000;
 int s03d_dword_800C39E0 = 0x00140013;
 int s03d_dword_800C39E4 = 0x0016000A;
-short s03d_word_800C39E8[2] = {0x0009, 0x0022};
-short s03d_word_800C39EC[2] = {0x0023, 0x0024};
-short s03d_word_800C39F0[2] = {0x002D, 0x000D};
+short s03d_word_800C39E8[2] PS1_ALIGN(2) = {0x0009, 0x0022};
+short s03d_word_800C39EC[2] PS1_ALIGN(2) = {0x0023, 0x0024};
+short s03d_word_800C39F0[2] PS1_ALIGN(2) = {0x002D, 0x000D};
 int s03d_dword_800C39F4 = 0x001A000C;
 int s03d_dword_800C39F8 = 0x000E000F;
 int s03d_dword_800C39FC = 0x001B0010;
-short s03d_word_800C3A00[2] = {0x0008, 0x0015};
+short s03d_word_800C3A00[2] PS1_ALIGN(2) = {0x0008, 0x0015};
 int s03d_dword_800C3A04 = 0x001F001E;
 int s03d_dword_800C3A08 = 0x00210020;
 int s03d_dword_800C3A0C = 0x00190025;
 
-short s03d_word_800C3A10[20] = {
+short s03d_word_800C3A10[20] PS1_ALIGN(2) = {
     0x0005, 0x0002, 0x002A, 0x0004, 0x0027, 0x0028, 0x0006, 0x0007,
     0x0026, 0x0003, 0x0029, 0x0011, 0x0012, 0x002B, 0x0017, 0x0018,
     0x001C, 0x001D, 0x0000, 0x0001,
 };
 
-short s03d_word_800C3A38[2] = {0x0033, 0x0011};
-short s03d_word_800C3A3C[2] = {0x0012, 0x002B};
+short s03d_word_800C3A38[2] PS1_ALIGN(2) = {0x0033, 0x0011};
+short s03d_word_800C3A3C[2] PS1_ALIGN(2) = {0x0012, 0x002B};
 
 int s03d_dword_800C3A40 = 0x00000016;
 int s03d_dword_800C3A44 = 0x00FA109A;
@@ -75,63 +76,63 @@ int s03d_dword_800C3AAC = 0x00000000;
 int s03d_dword_800C3AB0 = 0x00001F40;
 int s03d_dword_800C3AB4 = 0x0000FC18;
 
-const char s03d_dword_800DB3C4[] = {'i', 'p', 'p', 'a'};
-const char s03d_dword_800DB3C8[] = {'n', 'h', 'e', 'i'};
-const char s03d_dword_800DB3CC[] = {0x0, 0x0, 0x0, 0x0};
+const char s03d_dword_800DB3C4[] STR_PIECE = {'i', 'p', 'p', 'a'};
+const char s03d_dword_800DB3C8[] STR_PIECE = {'n', 'h', 'e', 'i'};
+const char s03d_dword_800DB3CC[] STR_PIECE = {0x0, 0x0, 0x0, 0x0};
 
-const char s03d_dword_800DB3D0[] = {'e', 'n', 'e', 'm'};
-const char s03d_dword_800DB3D4[] = {'y', 0x0, 0x0, 0x0};
+const char s03d_dword_800DB3D0[] STR_PIECE = {'e', 'n', 'e', 'm'};
+const char s03d_dword_800DB3D4[] STR_PIECE = {'y', 0x0, 0x0, 0x0};
 
-const char s03d_dword_800DB3D8[] = {'f', 'a', 'm', 'a'};
-const char s03d_dword_800DB3DC[] = {'s', 0x0, 0x0, 0x0};
+const char s03d_dword_800DB3D8[] STR_PIECE = {'f', 'a', 'm', 'a'};
+const char s03d_dword_800DB3DC[] STR_PIECE = {'s', 0x0, 0x0, 0x0};
 
-const char s03d_dword_800DB3E0[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB3E4[] = {'n', 'o', 't', ' '};
-const char s03d_dword_800DB3E8[] = {'e', 'n', 'o', 'u'};
-const char s03d_dword_800DB3EC[] = {'g', 'h', ' ', 'w'};
-const char s03d_dword_800DB3F0[] = {'o', 'r', 'k', ' '};
-const char s03d_dword_800DB3F4[] = {'!', '!', '\n', 0x0};
+const char s03d_dword_800DB3E0[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB3E4[] STR_PIECE = {'n', 'o', 't', ' '};
+const char s03d_dword_800DB3E8[] STR_PIECE = {'e', 'n', 'o', 'u'};
+const char s03d_dword_800DB3EC[] STR_PIECE = {'g', 'h', ' ', 'w'};
+const char s03d_dword_800DB3F0[] STR_PIECE = {'o', 'r', 'k', ' '};
+const char s03d_dword_800DB3F4[] STR_PIECE = {'!', '!', '\n', 0x0};
 
-const char s03d_dword_800DB3F8[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB3FC[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB400[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB404[] = {'C', 'h', 'a', 'n'};
-const char s03d_dword_800DB408[] = {'g', 'e', ' ', 'R'};
-const char s03d_dword_800DB40C[] = {'o', 'o', 't', ' '};
-const char s03d_dword_800DB410[] = {'N', 'u', 'm', ' '};
-const char s03d_dword_800DB414[] = {'O', 'v', 'e', 'r'};
-const char s03d_dword_800DB418[] = {' ', '!', '!', '\n'};
-const char s03d_dword_800DB41C[] = {0x0, 0x0, 0x0, 0x0};
+const char s03d_dword_800DB3F8[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB3FC[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB400[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB404[] STR_PIECE = {'C', 'h', 'a', 'n'};
+const char s03d_dword_800DB408[] STR_PIECE = {'g', 'e', ' ', 'R'};
+const char s03d_dword_800DB40C[] STR_PIECE = {'o', 'o', 't', ' '};
+const char s03d_dword_800DB410[] STR_PIECE = {'N', 'u', 'm', ' '};
+const char s03d_dword_800DB414[] STR_PIECE = {'O', 'v', 'e', 'r'};
+const char s03d_dword_800DB418[] STR_PIECE = {' ', '!', '!', '\n'};
+const char s03d_dword_800DB41C[] STR_PIECE = {0x0, 0x0, 0x0, 0x0};
 
-const char s03d_dword_800DB420[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB424[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB428[] = {'E', 'r', 'r', ' '};
-const char s03d_dword_800DB42C[] = {'C', 'h', 'a', 'n'};
-const char s03d_dword_800DB430[] = {'g', 'e', ' ', 'D'};
-const char s03d_dword_800DB434[] = {'e', 'f', 'e', 'n'};
-const char s03d_dword_800DB438[] = {'d', ' ', 'N', 'u'};
-const char s03d_dword_800DB43C[] = {'m', ' ', 'O', 'v'};
-const char s03d_dword_800DB440[] = {'e', 'r', ' ', '!'};
-const char s03d_dword_800DB444[] = {'!', '\n', 0x0, 0x0};
+const char s03d_dword_800DB420[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB424[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB428[] STR_PIECE = {'E', 'r', 'r', ' '};
+const char s03d_dword_800DB42C[] STR_PIECE = {'C', 'h', 'a', 'n'};
+const char s03d_dword_800DB430[] STR_PIECE = {'g', 'e', ' ', 'D'};
+const char s03d_dword_800DB434[] STR_PIECE = {'e', 'f', 'e', 'n'};
+const char s03d_dword_800DB438[] STR_PIECE = {'d', ' ', 'N', 'u'};
+const char s03d_dword_800DB43C[] STR_PIECE = {'m', ' ', 'O', 'v'};
+const char s03d_dword_800DB440[] STR_PIECE = {'e', 'r', ' ', '!'};
+const char s03d_dword_800DB444[] STR_PIECE = {'!', '\n', 0x0, 0x0};
 
-const char s03d_dword_800DB448[] = {'L', 'i', 'f', 'e'};
-const char s03d_dword_800DB44C[] = {'=', '%', 'd', ' '};
-const char s03d_dword_800DB450[] = {'F', 'a', 'i', 'n'};
-const char s03d_dword_800DB454[] = {'t', '=', '%', 'd'};
-const char s03d_dword_800DB458[] = {' ', 'B', 'l', 'o'};
-const char s03d_dword_800DB45C[] = {'o', 'd', '=', '%'};
-const char s03d_dword_800DB460[] = {'c', ' ', 'A', 'r'};
-const char s03d_dword_800DB464[] = {'e', 'a', '=', '%'};
-const char s03d_dword_800DB468[] = {'c', ' ', '\n', 0x0};
+const char s03d_dword_800DB448[] STR_PIECE = {'L', 'i', 'f', 'e'};
+const char s03d_dword_800DB44C[] STR_PIECE = {'=', '%', 'd', ' '};
+const char s03d_dword_800DB450[] STR_PIECE = {'F', 'a', 'i', 'n'};
+const char s03d_dword_800DB454[] STR_PIECE = {'t', '=', '%', 'd'};
+const char s03d_dword_800DB458[] STR_PIECE = {' ', 'B', 'l', 'o'};
+const char s03d_dword_800DB45C[] STR_PIECE = {'o', 'd', '=', '%'};
+const char s03d_dword_800DB460[] STR_PIECE = {'c', ' ', 'A', 'r'};
+const char s03d_dword_800DB464[] STR_PIECE = {'e', 'a', '=', '%'};
+const char s03d_dword_800DB468[] STR_PIECE = {'c', ' ', '\n', 0x0};
 
-const char s03d_dword_800DB46C[] = {'w', 'a', 't', 'c'};
-const char s03d_dword_800DB470[] = {'h', 'a', 'r', '.'};
-const char s03d_dword_800DB474[] = {'c', ' ', ':', ' '};
-const char s03d_dword_800DB478[] = {'a', 'c', 't', 'i'};
-const char s03d_dword_800DB47C[] = {'o', 'n', ' ', 'p'};
-const char s03d_dword_800DB480[] = {'o', 'i', 'n', 't'};
-const char s03d_dword_800DB484[] = {' ', 'E', 'r', 'r'};
-const char s03d_dword_800DB488[] = {'\n', 0x0, 0x0, 0x0};
+const char s03d_dword_800DB46C[] STR_PIECE = {'w', 'a', 't', 'c'};
+const char s03d_dword_800DB470[] STR_PIECE = {'h', 'a', 'r', '.'};
+const char s03d_dword_800DB474[] STR_PIECE = {'c', ' ', ':', ' '};
+const char s03d_dword_800DB478[] STR_PIECE = {'a', 'c', 't', 'i'};
+const char s03d_dword_800DB47C[] STR_PIECE = {'o', 'n', ' ', 'p'};
+const char s03d_dword_800DB480[] STR_PIECE = {'o', 'i', 'n', 't'};
+const char s03d_dword_800DB484[] STR_PIECE = {' ', 'E', 'r', 'r'};
+const char s03d_dword_800DB488[] STR_PIECE = {'\n', 0x0, 0x0, 0x0};
 
 
 

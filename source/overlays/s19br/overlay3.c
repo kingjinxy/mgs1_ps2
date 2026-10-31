@@ -1,12 +1,13 @@
+#include "ps1align.h"
 #include "mgstype.h"
 
-const char s19b_dword_800DDD4C[] = {0xe4, 0xfd, 0xbe, 0x4};
-const char s19b_dword_800DDD50[] = {'=', 0xfc, 0x0, 0x0};
-const char s19b_dword_800DDD54[] = {0xac, 0x1, 'U', 0x2};
-const char s19b_dword_800DDD58[] = {0xb6, 0x6, 0x0, 0x0};
-const char s19b_dword_800DDD5C[] = {'O', 0xfd, 0xde, 0x3};
-const char s19b_dword_800DDD60[] = {'Q', 0xfe, 0x0, 0x0};
-const char s19b_dword_800DDD64[] = {0xcb, 0x1, 'o', 0x3};
+const char s19b_dword_800DDD4C[] STR_PIECE = {0xe4, 0xfd, 0xbe, 0x4};
+const char s19b_dword_800DDD50[] STR_PIECE = {'=', 0xfc, 0x0, 0x0};
+const char s19b_dword_800DDD54[] STR_PIECE = {0xac, 0x1, 'U', 0x2};
+const char s19b_dword_800DDD58[] STR_PIECE = {0xb6, 0x6, 0x0, 0x0};
+const char s19b_dword_800DDD5C[] STR_PIECE = {'O', 0xfd, 0xde, 0x3};
+const char s19b_dword_800DDD60[] STR_PIECE = {'Q', 0xfe, 0x0, 0x0};
+const char s19b_dword_800DDD64[] STR_PIECE = {0xcb, 0x1, 'o', 0x3};
 const char s19b_a_800DDD68[] = ";";
 
 int SECTION(".bss") s19b_dword_800DE5B0;

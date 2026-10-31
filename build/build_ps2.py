@@ -87,7 +87,10 @@ def compile_one(src):
     obj = os.path.join(OUT, src[len("source/"):-2] + ".o")
     log = obj[:-2] + ".log"
     os.makedirs(os.path.dirname(obj), exist_ok=True)
-    cmd = [CC, "-c", *CFLAGS, *["-I" + i for i in INCLUDES], os.path.join(ROOT, src), "-o", obj]
+    # overlay data keeps the PS1's layout (some code reaches variables through others' addresses, e.g. s03d's
+    # action table): explicit zeros stay in .data between their neighbours (and arrays: ps1align.h)
+    ovl = ["-fno-zero-initialized-in-bss"] if src.startswith("source/overlays/") else []
+    cmd = [CC, "-c", *CFLAGS, *ovl, *["-I" + i for i in INCLUDES], os.path.join(ROOT, src), "-o", obj]
     rc, err, compiled = compile_cached(cmd, obj)
     if compiled:
         open(log, "w").write(err)

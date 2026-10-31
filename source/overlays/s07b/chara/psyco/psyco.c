@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "chara/psyco/psyco.h"
 
 #include <stdio.h>
@@ -113,7 +114,7 @@ const char s07b_dword_800E4FB4[] = "attack end\n";
 const char s07b_dword_800E4FC0[] = "胸像１";
 const char s07b_dword_800E4FC8[] = "胸像２";
 
-const char s07b_dword_800E4FD0[] = {0x0, 0x0, 0x0, 0x0};
+const char s07b_dword_800E4FD0[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 
 const int s07b_dword_800E4FD4 = 0x800CD040;
 const int s07b_dword_800E4FD8 = 0x800CD1BC;

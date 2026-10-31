@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "mgstype.h"
 
 int rank_dword_800CBB8C = 0x001A7350;
@@ -58,7 +59,7 @@ const int rank_dword_800E0EB0 = 0x800DE018;
 const int rank_dword_800E0EB4 = 0x800DE028;
 const int rank_dword_800E0EB8 = 0x800DE038;
 const int rank_dword_800E0EBC = 0x800DE06C;
-const char rank_dword_800E0EC0[] = {0x0, 0x0, 0x0, 0x0};
+const char rank_dword_800E0EC0[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 const int rank_dword_800E0EC4 = 0x800DEC6C;
 const int rank_dword_800E0EC8 = 0x800DECAC;
 const int rank_dword_800E0ECC = 0x800DEC74;
@@ -84,7 +85,7 @@ const int rank_dword_800E0F18 = 0x800DF7E0;
 const int rank_dword_800E0F1C = 0x800DF7E0;
 const int rank_dword_800E0F20 = 0x800DF7E0;
 const int rank_dword_800E0F24 = 0x800DF7CC;
-const char rank_dword_800E0F28[] = {0x0, 0x0, 0x0, 0x0};
+const char rank_dword_800E0F28[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 const int rank_dword_800E0F2C = 0x800DFF08;
 const int rank_dword_800E0F30 = 0x800DFF1C;
 const int rank_dword_800E0F34 = 0x800DFF88;

@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include <rand.h>
 
 #include "strcode.h"
@@ -71,7 +72,7 @@ typedef struct _Work
 } Work;
 
 /* unused */
-u_short s19b_dword_800C32BC[] = {0x3201, 0x0143};
+u_short s19b_dword_800C32BC[] PS1_ALIGN(2) = {0x3201, 0x0143};
 
 static short s19b_dword_800C32C0[] =
 {

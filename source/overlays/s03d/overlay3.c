@@ -1,5 +1,12 @@
 #include "mgstype.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): zakocom.c's ZakoComMgr is
+   s03d_dword_800DC310 and the words after it. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s03d_overlay3")))
+#endif
+
 int SECTION(".bss") s03d_dword_800DC2E0;
 int SECTION(".bss") s03d_dword_800DC2E4;
 int SECTION(".bss") s03d_dword_800DC2E8;

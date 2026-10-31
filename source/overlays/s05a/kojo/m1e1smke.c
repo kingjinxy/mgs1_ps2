@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 #include "bullet/blast.h"
 #include "okajima/splash2.h"
@@ -18,7 +19,7 @@ typedef struct
     int     field_3c;   /* 0x3C */
 } Work;
 
-const char s05a_dword_800E34E8[] = {'m', '1', 'e', '1', 's', 'm', 'k', 'e', '.', 'c', 0x0, 'O'}; /* "m1e1smke.c" + linker pad byte */
+const char s05a_dword_800E34E8[] STR_PIECE = {'m', '1', 'e', '1', 's', 'm', 'k', 'e', '.', 'c', 0x0, 'O'}; /* "m1e1smke.c" + linker pad byte */
 
 void s05a_800DC058(Work *work);
 void s05a_800DC224(void *work);

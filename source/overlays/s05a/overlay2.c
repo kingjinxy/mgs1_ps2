@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 
 int s05a_dword_800C362C = 0x00000000;
@@ -5,29 +6,29 @@ int s05a_dword_800C3630 = 0x00000000;
 int s05a_dword_800C3634 = 0x00000000;
 int s05a_dword_800C3638 = 0x00000000;
 
-const char s05a_dword_800E340C[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3410[] = {'.', 'c', 0x0, 0x0};
-const char s05a_dword_800E3414[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3418[] = {0x0, 0x0, 0x0, 0x0};
-const char s05a_dword_800E341C[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3420[] = {'c', 'l', '1', 0x0};
-const char s05a_dword_800E3424[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3428[] = {'c', 'l', '2', 0x0};
-const char s05a_dword_800E342C[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3430[] = {'c', 'l', '3', 0x0};
-const char s05a_dword_800E3434[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3438[] = {'c', 'r', '1', 0x0};
-const char s05a_dword_800E343C[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3440[] = {'c', 'r', '2', 0x0};
-const char s05a_dword_800E3444[] = {'m', '1', 'e', '1'};
-const char s05a_dword_800E3448[] = {'c', 'r', '3', 0x0};
-const char s05a_dword_800E344C[] = {'t', 'h', 'r', 'o'};
-const char s05a_dword_800E3450[] = {'w', 0x0, 0x0, 0x0};
-const char s05a_dword_800E3454[] = {'G', 'U', 'N', 'N'};
-const char s05a_dword_800E3458[] = {'E', 'R', 0x0, '0'};
-const char s05a_dword_800E345C[] = {'m', '1', 't', 'h'};
-const char s05a_dword_800E3460[] = {'r', 'o', 'w', '.'};
-const char s05a_dword_800E3464[] = {'c', 0x0, 'S', 't'};
+const char s05a_dword_800E340C[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3410[] STR_PIECE = {'.', 'c', 0x0, 0x0};
+const char s05a_dword_800E3414[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3418[] STR_PIECE = {0x0, 0x0, 0x0, 0x0};
+const char s05a_dword_800E341C[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3420[] STR_PIECE = {'c', 'l', '1', 0x0};
+const char s05a_dword_800E3424[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3428[] STR_PIECE = {'c', 'l', '2', 0x0};
+const char s05a_dword_800E342C[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3430[] STR_PIECE = {'c', 'l', '3', 0x0};
+const char s05a_dword_800E3434[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3438[] STR_PIECE = {'c', 'r', '1', 0x0};
+const char s05a_dword_800E343C[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3440[] STR_PIECE = {'c', 'r', '2', 0x0};
+const char s05a_dword_800E3444[] STR_PIECE = {'m', '1', 'e', '1'};
+const char s05a_dword_800E3448[] STR_PIECE = {'c', 'r', '3', 0x0};
+const char s05a_dword_800E344C[] STR_PIECE = {'t', 'h', 'r', 'o'};
+const char s05a_dword_800E3450[] STR_PIECE = {'w', 0x0, 0x0, 0x0};
+const char s05a_dword_800E3454[] STR_PIECE = {'G', 'U', 'N', 'N'};
+const char s05a_dword_800E3458[] STR_PIECE = {'E', 'R', 0x0, '0'};
+const char s05a_dword_800E345C[] STR_PIECE = {'m', '1', 't', 'h'};
+const char s05a_dword_800E3460[] STR_PIECE = {'r', 'o', 'w', '.'};
+const char s05a_dword_800E3464[] STR_PIECE = {'c', 0x0, 'S', 't'};
 
 int SECTION(".bss") s05a_dword_800E3800;
 int SECTION(".bss") s05a_dword_800E3804;

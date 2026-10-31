@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 #include "libgcl/libgcl.h"
 
@@ -85,7 +86,7 @@ void s05a_800E1C14(void);
 void s05a_800E1D7C(void);
 void s05a_800E1F0C(void);
 const char s05a_dword_800E35D8[] = "m1e1came.c";
-const char s05a_dword_800E35E4[] = {'n', 'o', 's', 'u', 'b', 'j', 'e', 'c', 't', 0x0, 'E', 'N'};
+const char s05a_dword_800E35E4[] STR_PIECE = {'n', 'o', 's', 'u', 'b', 'j', 'e', 'c', 't', 0x0, 'E', 'N'};
 
 void *NewCinemaScreen(int time, int type);
 void *NewCinemaScreenClose(void *addr);

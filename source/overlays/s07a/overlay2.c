@@ -1,7 +1,8 @@
+#include "ps1align.h"
 #include "game/game.h"
 
-int s07a_dword_800C35F8[8] = { 2500, 3500, 4000, 5000, 5500, 5600, 5700, 5800 };
-unsigned short s07a_dword_800C3618[8] = { 450, 15, 30, 60, 90, 0, 32001, 30000 };
+int s07a_dword_800C35F8[8] PS1_ALIGN(4) = { 2500, 3500, 4000, 5000, 5500, 5600, 5700, 5800 };
+unsigned short s07a_dword_800C3618[8] PS1_ALIGN(2) = { 450, 15, 30, 60, 90, 0, 32001, 30000 };
 
 short ActTable_800C3628[54] =
 {
@@ -37,7 +38,7 @@ void *s07a_dword_800C36C8[] =
 SVECTOR s07a_dword_800C36D8 = {5, -500, 80};
 SVECTOR s07a_dword_800C36E0 = {0, -550, 950};
 
-u_short s07a_dword_800C36E8[] = {100, 50, 25, 10};
+u_short s07a_dword_800C36E8[] PS1_ALIGN(2) = {100, 50, 25, 10};
 
 int s07a_dword_800C36F0[32] =
 {

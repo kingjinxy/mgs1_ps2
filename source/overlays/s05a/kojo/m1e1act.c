@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 #include "kojo/m1e1.h"
 #include "libgcl/libgcl.h"
@@ -1258,7 +1259,7 @@ const char s05a_dword_800E34AC[] = "drive6";
 const char s05a_dword_800E34B4[] = "drive7";
 const char s05a_dword_800E34BC[] = "drive1";
 const char s05a_dword_800E34C4[] = "drive2";
-const char s05a_dword_800E34CC[] = {'d', 'r', 'i', 'v', 'e', '3', 0x0, 'U'}; /* linker pad byte */
+const char s05a_dword_800E34CC[] STR_PIECE = {'d', 'r', 'i', 'v', 'e', '3', 0x0, 'U'}; /* linker pad byte */
 void s05a_800D797C(Work *work)
 {
     MATRIX   mtx;

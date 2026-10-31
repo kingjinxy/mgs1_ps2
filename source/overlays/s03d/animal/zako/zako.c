@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "zako.h"
 
 #include <stdio.h>
@@ -491,18 +492,18 @@ void s03d_800CD1C4(Work *work, int name, int where)
 }
 
 /* rodata after this function's jump table (0x800DB48C), from overlay2.c */
-const char s03d_dword_800DB4AC[] = {'z', 'a', 'k', 'o'};
-const char s03d_dword_800DB4B0[] = {'.', 'c', 0x0, 0x8f};
-const char s03d_dword_800DB4B4[] = {' ', 'm', 'e', 'r'};
-const char s03d_dword_800DB4B8[] = {'y', 'l', ' ', 'K'};
-const char s03d_dword_800DB4BC[] = {'I', 'L', 'L', 'E'};
-const char s03d_dword_800DB4C0[] = {'D', ' ', '!', '!'};
-const char s03d_dword_800DB4C4[] = {'!', ' ', '\n', 0x0};
-const char s03d_dword_800DB4C8[] = {' ', 'S', 'N', 'A'};
-const char s03d_dword_800DB4CC[] = {'K', 'E', ' ', 'K'};
-const char s03d_dword_800DB4D0[] = {'I', 'L', 'L', 'E'};
-const char s03d_dword_800DB4D4[] = {'D', ' ', '!', '!'};
-const char s03d_dword_800DB4D8[] = {'!', ' ', '\n', 0x0};
+const char s03d_dword_800DB4AC[] STR_PIECE = {'z', 'a', 'k', 'o'};
+const char s03d_dword_800DB4B0[] STR_PIECE = {'.', 'c', 0x0, 0x8f};
+const char s03d_dword_800DB4B4[] STR_PIECE = {' ', 'm', 'e', 'r'};
+const char s03d_dword_800DB4B8[] STR_PIECE = {'y', 'l', ' ', 'K'};
+const char s03d_dword_800DB4BC[] STR_PIECE = {'I', 'L', 'L', 'E'};
+const char s03d_dword_800DB4C0[] STR_PIECE = {'D', ' ', '!', '!'};
+const char s03d_dword_800DB4C4[] STR_PIECE = {'!', ' ', '\n', 0x0};
+const char s03d_dword_800DB4C8[] STR_PIECE = {' ', 'S', 'N', 'A'};
+const char s03d_dword_800DB4CC[] STR_PIECE = {'K', 'E', ' ', 'K'};
+const char s03d_dword_800DB4D0[] STR_PIECE = {'I', 'L', 'L', 'E'};
+const char s03d_dword_800DB4D4[] STR_PIECE = {'D', ' ', '!', '!'};
+const char s03d_dword_800DB4D8[] STR_PIECE = {'!', ' ', '\n', 0x0};
 
 void *NewZako_800CD5A0(int name, int where)
 {
@@ -2147,33 +2148,33 @@ void s03d_800D01C4(Work *work, int arg)
     }
 }
 
-const char s03d_dword_800DB5A4[] = {'F', 'A', '-', 'M'};
-const char s03d_dword_800DB5A8[] = {'A', 'S', '/', 'B'};
-const char s03d_dword_800DB5AC[] = {'U', 'L', 'L', 'E'};
-const char s03d_dword_800DB5B0[] = {'T', ' ', '*', ' '};
-const char s03d_dword_800DB5B4[] = {'2', '5', 0x0, 0x0};
+const char s03d_dword_800DB5A4[] STR_PIECE = {'F', 'A', '-', 'M'};
+const char s03d_dword_800DB5A8[] STR_PIECE = {'A', 'S', '/', 'B'};
+const char s03d_dword_800DB5AC[] STR_PIECE = {'U', 'L', 'L', 'E'};
+const char s03d_dword_800DB5B0[] STR_PIECE = {'T', ' ', '*', ' '};
+const char s03d_dword_800DB5B4[] STR_PIECE = {'2', '5', 0x0, 0x0};
 
-const char s03d_dword_800DB5B8[] = {'S', 'O', 'C', 'O'};
-const char s03d_dword_800DB5BC[] = {'M', '/', 'B', 'U'};
-const char s03d_dword_800DB5C0[] = {'L', 'L', 'E', 'T'};
-const char s03d_dword_800DB5C4[] = {' ', '*', ' ', '1'};
-const char s03d_dword_800DB5C8[] = {'2', 0x0, 0x0, 0x0};
+const char s03d_dword_800DB5B8[] STR_PIECE = {'S', 'O', 'C', 'O'};
+const char s03d_dword_800DB5BC[] STR_PIECE = {'M', '/', 'B', 'U'};
+const char s03d_dword_800DB5C0[] STR_PIECE = {'L', 'L', 'E', 'T'};
+const char s03d_dword_800DB5C4[] STR_PIECE = {' ', '*', ' ', '1'};
+const char s03d_dword_800DB5C8[] STR_PIECE = {'2', 0x0, 0x0, 0x0};
 
-const char s03d_dword_800DB5CC[] = {'R', 'A', 'T', 'I'};
-const char s03d_dword_800DB5D0[] = {'O', 'N', 0x0, 0x0};
+const char s03d_dword_800DB5CC[] STR_PIECE = {'R', 'A', 'T', 'I'};
+const char s03d_dword_800DB5D0[] STR_PIECE = {'O', 'N', 0x0, 0x0};
 
-const char s03d_dword_800DB5D4[] = {'n', 'o', 'i', 's'};
-const char s03d_dword_800DB5D8[] = {'e', ' ', 'd', 'i'};
-const char s03d_dword_800DB5DC[] = {'s', ' ', ' ', '='};
-const char s03d_dword_800DB5E0[] = {'%', 'd', ',', '\n'};
-const char s03d_dword_800DB5E4[] = {0x0, 0x0, 0x0, 0x0};
+const char s03d_dword_800DB5D4[] STR_PIECE = {'n', 'o', 'i', 's'};
+const char s03d_dword_800DB5D8[] STR_PIECE = {'e', ' ', 'd', 'i'};
+const char s03d_dword_800DB5DC[] STR_PIECE = {'s', ' ', ' ', '='};
+const char s03d_dword_800DB5E0[] STR_PIECE = {'%', 'd', ',', '\n'};
+const char s03d_dword_800DB5E4[] STR_PIECE = {0x0, 0x0, 0x0, 0x0};
 
-const char s03d_dword_800DB5E8[] = {' ', 'A', 's', 'i'};
-const char s03d_dword_800DB5EC[] = {'a', 't', 'o', ' '};
-const char s03d_dword_800DB5F0[] = {'m', 'i', 'k', 'k'};
-const char s03d_dword_800DB5F4[] = {'e', '!', '!', ' '};
-const char s03d_dword_800DB5F8[] = {'[', '%', 'd', ']'};
-const char s03d_dword_800DB5FC[] = {'\n', 0x0, 0xa9, ','};
+const char s03d_dword_800DB5E8[] STR_PIECE = {' ', 'A', 's', 'i'};
+const char s03d_dword_800DB5EC[] STR_PIECE = {'a', 't', 'o', ' '};
+const char s03d_dword_800DB5F0[] STR_PIECE = {'m', 'i', 'k', 'k'};
+const char s03d_dword_800DB5F4[] STR_PIECE = {'e', '!', '!', ' '};
+const char s03d_dword_800DB5F8[] STR_PIECE = {'[', '%', 'd', ']'};
+const char s03d_dword_800DB5FC[] STR_PIECE = {'\n', 0x0, 0xa9, ','};
 
 
 void s03d_800D0324(Work *work, int arg)

@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "zako.h"
 
 #include "mgstype.h"
@@ -10,8 +11,8 @@ SVECTOR s03d_dword_800C3B88 = {30000, 30000, 30000};
 
 int s03d_dword_800C3B90 = 0x00001F40;
 int s03d_dword_800C3B94 = 0x000003E8;
-unsigned char s03d_dword_800C3B98[4] = { 1, 1, 0, 0 };
-unsigned char s03d_dword_800C3B9C[4] = { 255, 1, 0, 0 };
+unsigned char s03d_dword_800C3B98[4] PS1_ALIGN(4) = { 1, 1, 0, 0 };
+unsigned char s03d_dword_800C3B9C[4] PS1_ALIGN(4) = { 255, 1, 0, 0 };
 int s03d_dword_800C3BA0 = 0x00000BB8;
 int s03d_dword_800C3BA4 = 0x00000FA0;
 int s03d_dword_800C3BA8 = 0x00001B58;
@@ -862,12 +863,12 @@ void s03d_800D5458(GV_ACT *work)
 
 /* the rest of the rodata, after this file's second jump table (0x800DBC10) */
 const char s03d_dword_800DBC50[32] = "Err Err Err Sound Buff Over !!\n";
-const char s03d_dword_800DBC70[] = {'z', 'o', 'n', 'e'};
-const char s03d_dword_800DBC74[] = {'=', '%', 'd', ' '};
-const char s03d_dword_800DBC78[] = {0x0, 0x0, 0x0, 0x0};
-const char s03d_dword_800DBC7C[] = {'z', 'a', 'k', 'o'};
-const char s03d_dword_800DBC80[] = {'c', 'o', 'm', '.'};
-const char s03d_dword_800DBC84[] = {'c', 0x0, 0x0, 0xf};
+const char s03d_dword_800DBC70[] STR_PIECE = {'z', 'o', 'n', 'e'};
+const char s03d_dword_800DBC74[] STR_PIECE = {'=', '%', 'd', ' '};
+const char s03d_dword_800DBC78[] STR_PIECE = {0x0, 0x0, 0x0, 0x0};
+const char s03d_dword_800DBC7C[] STR_PIECE = {'z', 'a', 'k', 'o'};
+const char s03d_dword_800DBC80[] STR_PIECE = {'c', 'o', 'm', '.'};
+const char s03d_dword_800DBC84[] STR_PIECE = {'c', 0x0, 0x0, 0xf};
 int ZakoCom_800D5484(int arg0, int *out)
 {
     int *p = out;

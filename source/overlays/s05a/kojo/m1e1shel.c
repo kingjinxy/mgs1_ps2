@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 
 typedef struct _Work
@@ -41,7 +42,7 @@ typedef struct _Smoke
 } Smoke;
 
 const char s05a_dword_800E34D4[] = "m1e1shel.c";
-const char s05a_dword_800E34E0[] = {'n', 'o', 'n', 'e', 0x0, '7', 'C', ' '}; /* "none" + linker pad bytes */
+const char s05a_dword_800E34E0[] STR_PIECE = {'n', 'o', 'n', 'e', 0x0, '7', 'C', ' '}; /* "none" + linker pad bytes */
 
 extern void *s05a_800DBF58(int arg0, SVECTOR *arg1, SVECTOR *arg2);
 void s05a_800DBED0(Smoke *work);

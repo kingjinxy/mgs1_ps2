@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "mgstype.h"
 
 int s14e_dword_800C3838 = 0x800D8848;
@@ -36,8 +37,8 @@ int s14e_dword_800C38B8 = 0x00000000;
 int s14e_dword_800C38BC = 0x00000000;
 int s14e_dword_800C38C0 = 0x00000000;
 
-const char s14e_dword_800DD468[] = {'f', 'o', 'g', '.'};
-const char s14e_dword_800DD46C[] = {'c', 0x0, 0x4, '$'};
+const char s14e_dword_800DD468[] STR_PIECE = {'f', 'o', 'g', '.'};
+const char s14e_dword_800DD46C[] STR_PIECE = {'c', 0x0, 0x4, '$'};
 
 int SECTION(".bss") s14e_dword_800DD828;
 int SECTION(".bss") s14e_dword_800DD82C;

@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 
 /*---------------------------------------------------------------------------*/
@@ -28,7 +29,7 @@ const char s07b_dword_800E4B64[] = "stance";
 const char s07b_dword_800E4B6C[] = "run_move";
 const char s07b_dword_800E4B78[] = "set voice %d\n";
 
-const char s07b_dword_800E4B88[] = {0x0, 0x0, 0x0, 0x0};
+const char s07b_dword_800E4B88[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 
 const int s07b_dword_800E4B8C = 0x800C531C;
 const int s07b_dword_800E4B90 = 0x800C531C;
@@ -38,7 +39,7 @@ const int s07b_dword_800E4B9C = 0x800C531C;
 
 const char s07b_dword_800E4BA0[] = "MERYL";
 
-const char s07b_dword_800E4BA8[] = {0x0, 0x0, 0x0, 0x0};
+const char s07b_dword_800E4BA8[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 
 const int s07b_dword_800E4BAC = 0x800C81EC;
 const int s07b_dword_800E4BB0 = 0x800C8338;
@@ -46,7 +47,7 @@ const int s07b_dword_800E4BB4 = 0x800C8368;
 const int s07b_dword_800E4BB8 = 0x800C842C;
 const int s07b_dword_800E4BBC = 0x800C846C;
 
-const char s07b_dword_800E4BC0[] = {0x0, 0x0, 0x0, 0x0};
+const char s07b_dword_800E4BC0[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 
 const int s07b_dword_800E4BC4 = 0x800C9DC4;
 const int s07b_dword_800E4BC8 = 0x800C9DD4;

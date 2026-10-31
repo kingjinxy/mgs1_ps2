@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 
 int s14e_dword_800C3350 = 0x00140013;
@@ -60,14 +61,14 @@ const int s14e_dword_800DC9BC = 0x800C6D00;
 const int s14e_dword_800DC9C0 = 0x800C6D00;
 const int s14e_dword_800DC9C4 = 0x800C6CC8;
 const int s14e_dword_800DC9C8 = 0x800C6CDC;
-const char s14e_dword_800DC9CC[] = {'8', 0xff, 0xe8, 0x3};
-const char s14e_dword_800DC9D0[] = {'X', 0x2, 0x0, 0x0};
-const char s14e_dword_800DC9D4[] = {0x5, 0x0, 0x0, 0x0};
+const char s14e_dword_800DC9CC[] STR_PIECE = {'8', 0xff, 0xe8, 0x3};
+const char s14e_dword_800DC9D0[] STR_PIECE = {'X', 0x2, 0x0, 0x0};
+const char s14e_dword_800DC9D4[] STR_PIECE = {0x5, 0x0, 0x0, 0x0};
 const char s14e_dword_800DC9D8[] = "d";
-const char s14e_dword_800DC9DC[] = {0x90, 0x1, 0xe8, 0x3};
-const char s14e_dword_800DC9E0[] = {0x90, 0x1, 0x0, 0x0};
+const char s14e_dword_800DC9DC[] STR_PIECE = {0x90, 0x1, 0xe8, 0x3};
+const char s14e_dword_800DC9E0[] STR_PIECE = {0x90, 0x1, 0x0, 0x0};
 const char s14e_dword_800DC9E4[] = " vx=%d vy=%d vz=%d \n";
-const char s14e_dword_800DC9FC[] = {0x0, 0x0, 0x0, 0x0};
+const char s14e_dword_800DC9FC[] STR_PIECE = {0x0, 0x0, 0x0, 0x0};
 const int s14e_dword_800DCA00 = 0x800C8DA4;
 const int s14e_dword_800DCA04 = 0x800C8DF4;
 const int s14e_dword_800DCA08 = 0x800C8EBC;

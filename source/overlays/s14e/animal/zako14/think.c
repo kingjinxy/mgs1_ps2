@@ -1,3 +1,4 @@
+#include "ps1align.h"
 #include "game/game.h"
 
 int s14e_dword_800C34D8 = 0x00001676;
@@ -136,7 +137,7 @@ int s14e_dword_800C36E8 = 0x00000000;
 int s14e_dword_800C36EC = 0x00000000;
 
 const char s14e_dword_800DCF30[] = "kirari01";
-const char s14e_dword_800DCF3C[] = {0x0, 0x0, 0x0, 0x0};
+const char s14e_dword_800DCF3C[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 const int s14e_dword_800DCF40 = 0x800CD320;
 const int s14e_dword_800DCF44 = 0x800CD350;
 const int s14e_dword_800DCF48 = 0x800CD340;
@@ -170,13 +171,13 @@ const int s14e_dword_800DCFB4 = 0x800CD360;
 const int s14e_dword_800DCFB8 = 0x800CD360;
 const int s14e_dword_800DCFBC = 0x800CD360;
 const int s14e_dword_800DCFC0 = 0x800CD348;
-const char s14e_dword_800DCFC4[] = {0x0, 0x0, 0x0, 0x0};
+const char s14e_dword_800DCFC4[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 const int s14e_dword_800DCFC8 = 0x800CD654;
 const int s14e_dword_800DCFCC = 0x800CD69C;
 const int s14e_dword_800DCFD0 = 0x800CD684;
 const int s14e_dword_800DCFD4 = 0x800CD68C;
 const int s14e_dword_800DCFD8 = 0x800CD694;
-const char s14e_dword_800DCFDC[] = {0x0, 0x0, 0x0, 0x0};
+const char s14e_dword_800DCFDC[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 const int s14e_dword_800DCFE0 = 0x800CD8A4;
 const int s14e_dword_800DCFE4 = 0x800CD8BC;
 const int s14e_dword_800DCFE8 = 0x800CD9AC;

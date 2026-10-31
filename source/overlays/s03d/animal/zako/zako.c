@@ -390,7 +390,67 @@ void Zako_800CDA70(Work *work)
     GM_SetTarget(&work->field_900, 4, 1, (SVECTOR *)&s03d_dword_800C39C0);
     GM_SetPowerTarget(&work->field_900, 7, 5, 0, 3, (SVECTOR *)&s03d_dword_800C39C8);
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CDB5C.s")
+extern const char s03d_dword_800DB500[]; /* "aaa reset wait zone id = %d z=%d\n" */
+extern const char s03d_dword_800DB524[]; /* "bbb reset fight zone id = %d z=%d\n" */
+int ZakoCom_800D4038(void);
+
+void s03d_800CDB5C(Work *work)
+{
+    CONTROL *control;
+    HZD_ZON *zone;
+    int      z;
+    short    zz;
+
+    control = &work->control;
+
+    work->field_B04 = ZakoCom_800D4038();
+    work->field_B00 = 1;
+    GM_ConfigControlAttribute(control, RADAR_VISIBLE | RADAR_SIGHT | RADAR_ALL_MAP);
+    Zako_800CDA70(work);
+
+    if (s03d_dword_800DC2F8 < 4)
+    {
+        z = work->param.fAF8 * 2 + 25;
+        printf((char *)s03d_dword_800DB500, work->param.fAF8, z);
+    }
+    else
+    {
+        z = ZAKOCOM_MGR->field_38[work->param.fAF8 % 2];
+        printf((char *)s03d_dword_800DB524, work->param.fAF8, z);
+    }
+
+    zone = &control->map->hzd->def->zones[z];
+    control->mov.vx = zone->x;
+    control->mov.vy = zone->y + 1000;
+    zz = zone->z;
+    control->mov.vz = zz;
+
+    if (work->param.fAF8 == 2)
+    {
+        control->mov.vz = zz + 500;
+    }
+
+    control->map = GM_GetMap(work->field_B54);
+
+    work->field_AC8 = 0;
+    work->field_ACA = 0;
+    work->field_ACC = 0;
+    work->field_ACE = 0;
+    work->field_AD0 = 0;
+    work->field_AD4 = work->n_nodes - 1;
+    work->field_B5C = work->field_B50;
+    work->field_B48 = work->field_B40;
+    work->field_B22 = 512;
+    work->field_B24 = 4000;
+    work->field_B28 = 0;
+    work->field_B20 = 0;
+    work->field_AE8 = 0;
+    work->field_ADC = 1;
+    work->field_BA0 = 0;
+    work->field_B60 = work->field_B54;
+    work->field_B80 = work->field_B40;
+    work->field_B58 = work->field_B74 = work->field_B50;
+}
 int Zako_800CDD40(int from, int to)
 {
     int dir;

@@ -83,9 +83,9 @@ typedef struct _Work
     short           field_AC8;      /* 0xAC8 */
     short           field_ACA;      /* 0xACA */
     short           field_ACC;      /* 0xACC */
-    char            pad_ACE[0xAD0 - 0xACE];
+    short           field_ACE;      /* 0xACE */
     int             field_AD0;      /* 0xAD0 */
-    char            pad_AD4[0xAD8 - 0xAD4];
+    int             field_AD4;      /* 0xAD4 */
     int             field_AD8;      /* 0xAD8 */
     int             field_ADC;      /* 0xADC */
     int             field_AE0;      /* 0xAE0 */
@@ -110,9 +110,10 @@ typedef struct _Work
     char            pad_B2C[0xB32 - 0xB2C];
     unsigned char   field_B32;      /* 0xB32 */
     unsigned char   field_B33;      /* 0xB33 */
-    char            pad_B34[0xB48 - 0xB34];
+    char            pad_B34[0xB40 - 0xB34];
+    SVECTOR         field_B40;      /* 0xB40 */
     SVECTOR         field_B48;      /* 0xB48 */
-    char            pad_B50[0xB54 - 0xB50];
+    int             field_B50;      /* 0xB50 */
     int             field_B54;      /* 0xB54*/
     int             field_B58;      /* 0xB58 */
     int             field_B5C;      /* 0xB5C */

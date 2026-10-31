@@ -12545,3 +12545,1064 @@ No more TLB misses, and the replay still reaches the same point: in sync to loop
 
 - tool `Bash`: Docs, archive, commit
 
+## Claude
+
+The commit went in, but the TAS plan edit failed again: that entry's text had changed in an earlier edit. Fixing it:
+
+- tool `Bash`: Fix the TAS plan entry; commit
+
+- tool `PushNotification`: 
+
+## Claude
+
+`s03d` is now fully decompiled and linked into the port, and the TAS replay continues through it: in sync to loop 12,101 (0:06:42.1), up from 11,443. Everything is committed (last commit `32e79c5e6`); nothing is pushed. The matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`), and the replay ran with no TLB misses.
+
+**Decompilation:**
+- **All 10 remaining stubs are done,** and all match the PS1's bytes exactly except two:
+  - `zako.c`: the damage check, the reset, the per-frame action update, the grenade throw, five small functions (head mark, footsteps, breath, laser sight, gunshot), `GetResources` and the guard's constructor.
+  - `zakocom.c`: the commander's 16-state cutscene sequence with its `Act`/`Die`, its setup and its constructor.
+- **Two differ only in which registers the compiler picked:** `800D1054` (with three more of the guard's senses) and `800D14AC`. I couldn't get the compiler to choose the PS1's registers, but the code does the same thing. Under `#ifdef MGS_PORT` the port uses the C and the matching build keeps the original assembly, and the overlay survey (`overlay_survey.py`) now ignores that assembly branch.
+- **Stage table and data:** `s03d`'s stage table and seven data words referred to functions by raw address; they now use symbol names, which the port needs.
+
+**A real port bug fixed:** with `s03d` running, the chaff grenade's particle tiles read through a NULL pointer. The code has always done this: on the PS1 it reads RAM address 0, which holds 3 and 0, as I confirmed in BizHawk. In PCSX2 that showed up as TLB misses; a real PS2 would crash. The port now uses those same two values (`libdg/prim.c`).
+
+**Lessons recorded in the docs, for future stages:**
+- Jump tables in the middle of a data file have to move together with the constants after them.
+- GCC 2.x reverses ascending loops, so a loop that counts down in the assembly was written counting up.
+- `fdiff.py --loose` compares instruction shapes only, and `fdiff.py` now warns when the build is stale.
+
+**Next desync:** loop 12,102 (0:06:42.12), where the PS1 has game status bit 0x20 set and the port doesn't.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. **Primary Request and Intent:**
+   - **Overall goal:** use TASVideos #5139 as a regression/accuracy test for the PS2 port in `/home/alex/Documents/mgs1_ps2`, branch `ps2-port`.
+   - **User requests this session, in order:**
+     - "Continue".
+     - Proceed with the next desyncs.
+     - Speed up TAS testing (items 1–3 approved).
+     - Emulate PS1 speeds in the port so stream/file desyncs aren't fixed one by one.
+     - Keep lockstep while accounting for faster loads.
+     - Fix the crash after loop 6,732.
+     - "Let's proceed with the next desync".
+     - At `s03d`, chose "Decompile the 21 functions"; then "Yes" to doing the 12 with counterparts first.
+     - Last: "Commit changes and then continue".
+   - **Standing constraints (CLAUDE.md and memory):**
+     - GitHub only without asking.
+     - "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run the matching build after port changes: from `build/`, `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py`. Expect 80 OK; with `--variant=vr_exe`, 2 OK.
+     - Before commits, update `docs/Running Walkthrough.md`, `docs/Planning Doc.md`, `docs/TAS Testing Plan.md` and `Claude Conversation.md`.
+       - Archive: concatenate all session `.jsonl` (`ls -tr`), then run `tools/port/archive_conversation.py`.
+       - Check that `git diff` shows no removed lines.
+     - "No `pkill -f <pattern>`" in a command containing the pattern.
+     - TAS loops always come with their movie timestamp.
+     - Check `docs/` before planning a debugging technique.
+     - Notify at stopping points.
+     - Never dismiss TLB misses.
+     - Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+     - New memory (`progress-during-headless-runs.md`): print a status line every 5 minutes during runs without a desktop window.
+     - A safety check blocks `rm -f $V/*.c`. Use literal paths, or `"${V:?}"`.
+
+2. **Key Technical Concepts:**
+   - **TAS harness (`port/src/tas_replay.c`):**
+     - `time.bin` record of 40 bytes. Fields: tick +0, status +4, load request +8, passage +12, seed +16, clock +20, stream bottom +24, starts +28, file bytes left +32, total frame time +36.
+     - `loads.bin`: per PS1 load end, u32 loop plus 64 bytes of GV_PadData.
+     - File reads: `Port_TasFileStart(size)` matches the PS1's read of the same size; `Port_TasFileAhead` gates sectors.
+     - Streams: `Port_TasStreamHold` holds the first read until PS1 data arrives; `Port_TasStreamAhead` gates per vertical blank (start value minus 5,120 bytes per blank since `s_LoopTick`, down to the end value).
+     - Pads:
+       - `Port_TasPadsDone` restores raw pads after `GV_UpdatePadSystem`.
+       - `pads_time()` uses the PS1's last load loop pads once `GM_LoadComplete == -1`.
+       - Load-end realign sets GV_PadData, `dword_800AB950` and `dword_800AB954` from `loads.bin`.
+       - `trace_to_pads.py` rebuilds pads under PADRELEASE from line t raw (`f[8]`).
+     - `cdbios_ps2.c` seek model is now only a fallback, used when `!Port_TasFileMatched()`.
+   - **Build speedups:**
+     - `build_ps2.compile_cached` (`.d`/`.cmd`); parallel overlays/HAL/`port`.
+     - Runtime `host:tas_shot.txt`; Redux shot cache in `obj_ps2/shots/cache/`.
+     - `run_port.py` waits 3 s before closing when dumping a shot.
+   - **Decomp techniques (s03d):**
+     - Jump tables move out of rodata files (`overlay2.c`, `zakocom.c` blocks), and the constants after them move below the function.
+     - Inline helpers `SetAction`/`SetMode`/`SetMode2`/`SetModeFields` (now near the top of `zako.c`).
+     - An empty `for (i=0;i<0;i++)` loop changes block layout.
+     - GCC2 reverses ascending loops.
+     - Stack slot order follows declaration order.
+     - Struct casts (`TopCommand`) change scheduling.
+     - `#ifdef MGS_PORT` C with `#else INCLUDE_ASM` for non-matching code; `overlay_survey.strip_comments` drops that `#else`.
+   - **Tools:**
+     - `tools/port/match_asm_funcs.py OVL`: finds decompiled counterparts by call sequence.
+     - `tools/port/disasm_s.py OVL FUNC`: disassembles a stub with calls named.
+     - `tools/port/fdiff.py OVL FUNC [--loose]`: instruction diff against the matching binary; warns of a stale build.
+     - BizHawk Lua scripts (run via `tools/port/tas/run_bizhawk.sh`): per-frame memory logs, `client.screenshot`, actor list walk (`ActorList` at 0x800ACC18).
+
+3. **Files and Code Sections (main changes, all committed):**
+   - **`port/src/cdbios_ps2.c`:** pacing with `MgsCd_Paced`, `seek_fifths` table, `MgsCd_Head`.
+   - **`source/libfs/cdbios.c`:**
+     - `Port_TasFileStart` call in `CDBIOS_ReadRequest`.
+     - Per-sector gate: `(remaining*4 >= 0x7F000000 && Port_TasStreamAhead(...)) || (!callback && Port_TasFileAhead(...))`.
+   - **`source/libfs/stream.c`:** `fs_stream_held`, held `StartRead` path.
+   - **`source/libgv/pad.c`:** `Port_TasPadsDone()` at the end.
+   - **`source/takabe/lit_mdl.c`:** MGS_PORT struct `{DG_DEF def; DG_MDL mdl[1];}` for `litmdl_dg_def`.
+   - **`source/libdg/prim.c`:** in `_MakeXYZRectangleSingle`, under MGS_PORT, a NULL rect uses `static RECT ps1_ram0 = {3,0,0,0}` (PS1 RAM at 0, read in BizHawk).
+   - **`source/overlays/s03d/animal/zako/`:**
+     - `zako.c`, `zakocom.c`: all 21 INCLUDE_ASM decompiled. `800D1054`(+3) and `800D14AC` are under MGS_PORT only.
+     - `zako.h`:
+       - `Work` struct: many fields added; it ends at 0xBA4.
+       - `field_B2C[8]` with macros for `field_B32`/`field_B33`.
+       - `PARAM`: `faint` at 0xB16, `field_B18`; `fAF9`/`fAFA` are signed.
+       - `ZakoComMgr` fields named.
+   - **`source/overlays/s03d/overlay2.c`:** tables removed; pointers use `(int)sym`.
+   - **`source/stage/s03d.c`:** symbols/macros. Direct entries for `NewMeryl3`, `NewZakoCommander_800D580C`, `NewZako_800CD5A0`.
+   - **Other:** `tools/port/overlay_survey.py`, `build/link_ps2.py` (copies `loads.bin`), `tools/port/tas/trace_to_pads.py`, `tools/port/tas/run_port.py`.
+
+4. **Errors and fixes:**
+   - **Stale builds** made `fdiff` report false matches; `fdiff` now warns of a stale build.
+   - **Text replacement bugs:**
+     - A replacement produced `body = body;`.
+     - Docs `sed` edits silently missed; the paragraph was rewritten.
+   - **Wrong address arithmetic:** `field_20` was used where `field_10` was meant.
+   - **Doc python asserts failed** because text had changed; re-applied with regex.
+
+5. **Problem Solving:**
+   - **TAS progress:** 5,808 → 6,276 → 6,662 → 6,732 → 7,596 → 9,252 → 11,443 → (s03d decompiled and linked) → 12,101.
+   - **TLB misses:** now 0.
+
+6. **All user messages:**
+   - "Continue"
+   - "I want to see if there is a way to speed up TAS testing"
+   - "yes"
+   - "I'm putting this on pause"
+   - "Continue"
+   - "I don't think either of these will help much at this point. Let's just continue fixing the desyncs"
+   - "Can we somehow emulate slower speeds in the port, at least while running the TAS, so we don't have to address each individual stream desync? That seems like a much smarter way to do it"
+   - "Since we struggled with this in the SH1 port, I think it’d be worth looking at that too. I know we want to keep the port in lockstep with the PS1 game, but given that one of the benefits of the port is faster load times, is there any way we can keep things in lockstep while accounting for different load times?"
+   - "Is it still running? I don't see its window"
+   - "Commit these changes" (twice)
+   - "Let's fix the next loop"
+   - "Is there a script I can use to run the TAS in PCSX2 on my own?"
+   - "Alright, let's try to fix that crash after loop 6732"
+   - "Have you already seen the error that popped up saying: "R5900 exception - Jump to unaligned address (PC: 0xff70fee6)"?"
+   - "Has it finished?"
+   - "Let’s proceed with the next de sync"
+   - "Is it still running? From now on, print every 5 minutes while runs are going, if they don't have a desktop window"
+   - "Resume"
+   - "Let's continue with the next desync"
+   - Answered the question: "Decompile the 21 functions"
+   - "Yes"
+   - "Commit changes and then continue"
+
+7. **Pending Tasks:**
+   - Continue fixing TAS desyncs; the next is loop 12,102.
+   - Optional later: make `800D1054` and `800D14AC` match (they are port-only C now).
+
+8. **Current Work:**
+   - Just finished: `s03d` fully decompiled and in the port, and the chaff NULL rect fixed.
+   - The TAS replays in sync to loop 12,101 (0:06:42.1). Next desync: `GM_GameStatus` at loop 12,102 (0:06:42.12, `s03d`): port 00000010, PS1 00000030 (bit 0x20 missing in the port).
+   - Everything is committed (last commit 32e79c5e6); matching builds 80/2 OK; notification sent.
+
+9. **Optional Next Step:**
+   - Report the completion to the user (the final text summary wasn't yet given).
+   - Then, per "Commit changes and then continue" and the ongoing desync work, investigate the loop 12,102 `GM_GameStatus` 0x20 desync using BizHawk logs, since Redux is unreliable that far in.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Continue  with the next desync
+
+- tool `Bash`: Find notes on the next desync and status bit 0x20
+
+- tool `Bash`: Look up status flag names
+
+- tool `Bash`: Show status flag definitions
+
+## Claude
+
+Bit 0x20 is `STATE_VOX_STREAM`: the PS1 has started a voice stream at loop 12,102 and the port hasn't. Let me find who sets it.
+
+- tool `Bash`: Find writers of STATE_VOX_STREAM
+
+- tool `Bash`: Read strctrl.c stream control
+
+## Claude
+
+Bit 0x20 is set by `GM_VoxStream`/`GM_DemoStream`, or in `strctrl` state 2. I'll compare the traces around the loop to see which one runs.
+
+- tool `Bash`: List TAS tools and recent outputs
+
+- tool `Bash`: Check last replay log for stream events
+
+## Claude
+
+The port logs "StreamPlay end" at loop 12,101, so the port's stream ended while the PS1's was still running (or the PS1 started another). Next I'll find out when the PS1 clears the bit.
+
+- tool `Bash`: See compare_trace inputs
+
+- tool `Bash`: Read compare_trace header and references
+
+- tool `Bash`: Status changes around 12,102 on PS1 and port
+
+## Claude
+
+The PS1 clears the bit at loop 12,103 (0:06:42.15) and the port at 12,102, one loop early: the port sees the voice stream end too soon. Let me look at how the replay gates stream ends.
+
+- tool `Bash`: Find stream gating in tas_replay.c
+
+- tool `Bash`: Read stream gating code
+
+## Claude
+
+Next, the PS1's time records for those loops, and what `FS_StreamIsEnd`/`FS_StreamSync` test.
+
+- tool `Bash`: Dump PS1 time records and stream end functions
+
+- tool `Bash`: Search docs for stream end timing work
+
+- tool `Bash`: Read stream notes and find ref_count users
+
+- tool `Bash`: Read FS_StreamClear and run_port usage
+
+## Claude
+
+The counter is `FS_StreamOpen`/`FS_StreamClose`. I'll log each close with its caller and loop.
+
+- tool `Bash`: Find stream open/close callers
+
+- tool `Bash`: Read sd_str open/close sites
+
+- tool `Bash`: Map sd_str state machine
+
+- tool `Bash`: Read sd_str end states and sd_main check
+
+- tool `Bash`: Read Capture_StreamMayStart
+
+## Claude
+
+Now I'll add `Port_TasStreamMayEnd` and the strctrl check.
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/source/game/strctrl.c
+
+## Claude
+
+Next I'll run the replay, which builds and links first.
+
+- tool `Bash`: Build and run the TAS replay in PCSX2
+
+- tool `Bash`: Run matching build regression check
+
+## Claude
+
+The matching build still passes (80 OK). The replay is running in a PCSX2 window and needs about 2 minutes to reach loop 12,102.
+
+- tool `ToolSearch`: 
+
+## Claude
+
+I'll wait for the replay to finish; it notifies on completion.
+
+- tool `Bash`: Wait for the replay to end and show its result
+
+- tool `Bash`: Compare status and UnDraw around loop 519
+
+- tool `Bash`: Move the hold to Act2 and rerun the replay
+
+- tool `Bash`: Check whether actor destroy is deferred
+
+## Claude
+
+Confirmed: `Die` runs on the next loop's act. So the check should read the next loop's record.
+
+- tool `Bash`: Use next loop's record and rerun replay
+
+## Claude
+
+The replay has run for over 10 minutes, so it's well past loop 12,102. Here's where it is now:
+
+- tool `Bash`: Show replay progress
+
+- tool `Bash`: Compare streams around loop 11,483
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Bound the destroy hold to 8 loops
+
+## Claude
+
+Running the replay again, in the background this time.
+
+- tool `Bash`: Rerun the TAS replay with the bounded hold
+
+- tool `Monitor`: TAS replay progress every 5 minutes
+
+## Claude
+
+The replay is running in a PCSX2 window; I'll post its progress every 5 minutes.
+
+- tool `Bash`: Show replay result
+
+## Claude
+
+It's past loop 12,102 and in sync to 12,652, where PCSX2 stopped. Next I'll check why.
+
+- tool `Bash`: Look for crash cause in PCSX2 log
+
+## Claude
+
+A crash at 12,652. I'll map the TLB-miss PCs to functions.
+
+- tool `Bash`: Map TLB miss PCs to functions
+
+## Claude
+
+The first miss is at 0x125e30; the 0x35xxxx PCs are in the `s03d` overlay. I'll name them all.
+
+- tool `Bash`: Name main-ELF PCs and list unique miss PCs
+
+- tool `Bash`: Show the log just before the crash
+
+## Claude
+
+A cutscene ended and the next scenario started its actors at loop 12,652 (0:06:57.05?). Next, what the PS1 does there.
+
+- tool `Bash`: PS1 status and stage after 12,645
+
+## Claude
+
+The PS1 does the same here: load request 192, then the scenario's actors start at loop 12,653. So it's the port's `s03d` actors that crash. What runs after "exec scenario"?
+
+- tool `Bash`: Show scenario log lines near the crash
+
+## Claude
+
+I'll find who calls `DG_MakeObjs` with a NULL model by logging the return address. This is temporary.
+
+- tool `Bash`: Locate DG_MakeObjs definition
+
+- tool `Bash`: Read the start of DG_MakeObjs
+
+- tool `Bash`: Log the caller passing a NULL model, rerun
+
+- tool `Bash`: Check result of the debug run
+
+## Claude
+
+No NULL `def`: the definition pointer is valid, but what it points to is bad. I'll log every `DG_MakeObjs` call from loop 12,650 on, with its caller and the definition's fields.
+
+- tool `Bash`: Widen the temporary log
+
+- tool `Bash`: Find the DG_DEF field names
+
+- tool `Bash`: Rerun with the DG_MakeObjs log
+
+## Claude
+
+NULL definitions do show up, all through 0x12a064. I'll name it.
+
+- tool `Bash`: Name the DG_MakeObjs caller
+
+- tool `Bash`: Read GM_ConfigObjectModel
+
+## Claude
+
+A model swap (`GM_ConfigObjectModel`) asks for a model that isn't in the cache. Next I'll log the model hash and the caller.
+
+- tool `Bash`: Log missing model hash and caller, rerun
+
+## Claude
+
+Nothing was logged. I'll check that the run rebuilt and crashed the same way.
+
+- tool `Bash`: Check rebuild and crash state
+
+## Claude
+
+It did rebuild. The log lines are probably lost when PCSX2 crashes right after them. I'll have the debug path return early as well, so the game survives long enough for the log to flush.
+
+- tool `Bash`: Make the debug path non-crashing and rerun
+
+## Claude
+
+The calls come from the `s03d` overlay, three times each (three guards?), asking for models 0x4e97 and 0x9235. I'll find the function.
+
+- tool `Bash`: Find the overlay ELF and model hashes
+
+- tool `Bash`: Find overlay link outputs and model-swap users
+
+## Claude
+
+No `s03d` file calls it directly. I'll find where the overlay loads, to turn the address into a function.
+
+- tool `Bash`: Find s03d overlay load address
+
+- tool `Bash`: See how overlays are linked
+
+## Claude
+
+The overlays are linked into `mgs.elf`, so the symbol table can name the address.
+
+- tool `Bash`: Map the overlay addresses to symbols
+
+- tool `Bash`: Map the overlay addresses to symbols
+
+## Claude
+
+Both are in `s03d_800CCE3C`, the first call in the guard's `GetResources`. Let me read it.
+
+- tool `Bash`: Read s03d_800CCE3C
+
+- tool `Bash`: Find the model name definitions
+
+## Claude
+
+That's the bug: the names are split into 4-byte pieces that only spell "ippanhei", "enemy" and "famas" when laid out back to back. In the port's build they don't have to be adjacent.
+
+- tool `Bash`: Read the split name arrays and other overlays' handling
+
+## Claude
+
+Do other overlays already deal with split strings?
+
+- tool `Bash`: Look for prior handling of split strings
+
+## Claude
+
+None of the other overlays handle this yet. Let me see which split arrays `s03d` code actually uses as strings.
+
+- tool `Bash`: List used split-string arrays and port CFLAGS
+
+## Claude
+
+The port already builds with `-fno-toplevel-reorder`, so I'll look at where the pieces actually land.
+
+- tool `Bash`: Check where the split arrays land
+
+## Claude
+
+The pieces are in order, but EE GCC aligns each array to 8 bytes, which leaves 4-byte gaps between them. Every overlay with split strings would hit this, so I'll check how widespread it is.
+
+- tool `Bash`: Count files with split string arrays
+
+- tool `Bash`: See which headers those files include
+
+- tool `Bash`: Read port CFLAGS
+
+## Claude
+
+I'll define the macro in `mgstype.h`, which these files probably all include one way or another, and annotate the arrays.
+
+- tool `Bash`: Look at the end of mgstype.h
+
+- tool `Bash`: Add STR_PIECE and annotate the split arrays
+
+## Claude
+
+That regex missed pieces that start with a number, like `{0x0, 0x0, 0x0, 0x0}`, and those would still open gaps. I'll annotate every char-array piece in those files.
+
+- tool `Bash`: Annotate remaining pieces and run matching build
+
+- tool `Bash`: Show matching build errors
+
+## Claude
+
+Some files (`s07a/overlay4.c`, `brf/overlay2.c`, …) don't include `mgstype.h`. I'll give the macro its own small header and include it in each annotated file.
+
+- tool `Bash`: Move macro to strpiece.h, include it, run matching build
+
+## Claude
+
+The matching build passes again (80 OK). Next I'll remove the temporary debug code and check the VR build.
+
+- tool `Bash`: Drop debug code and run VR matching build
+
+## Claude
+
+Both matching builds pass (80 and 2). I'll remove the screenshots from the failed tries and start the replay.
+
+- tool `Bash`: Delete stale screenshots
+
+- tool `Bash`: Run TAS replay with the string fix
+
+- tool `Monitor`: TAS replay progress every 5 minutes
+
+## Claude
+
+The replay is running with the split-string fix, in a PCSX2 window. I'll post its progress every 5 minutes.
+
+## Claude
+
+The replay has passed the old crash point and is now at loop 13,031.
+
+## Claude
+
+The replay hasn't moved from loop 13,031 in 5 minutes. Let me check whether it's stuck or taking desync screenshots.
+
+- tool `Bash`: Show replay output so far
+
+- tool `Bash`: Compare seeds around 12,654
+
+- tool `Bash`: Unique TLB miss PCs in the current log
+
+- tool `Bash`: Name the new TLB miss PCs
+
+## Claude
+
+The misses are in the `zakocom.c` functions I decompiled. They read Work fields (0xb90, 0xb64, …) through a NULL guard pointer. Let me read them.
+
+- tool `Bash`: Read the faulting zakocom functions
+
+## Claude
+
+Some entry has `field_4 == 2` but a NULL `field_C`. Next I'll check the `ZakoComMgr` layout against the assembly.
+
+- tool `Bash`: Read the commander struct definitions
+
+- tool `Bash`: Find definitions in the commander's memory range
+
+## Claude
+
+They're declared in order in `overlay3.c`, and ints only need 4-byte alignment, so they may well be contiguous already. I'll check with `nm`.
+
+- tool `Bash`: Check the bss words are laid out like the PS1's
+
+- tool `Bash`: Check the bss words are laid out like the PS1's
+
+- tool `Bash`: Check SECTION macro and docs on bss order
+
+- tool `Bash`: Read why SECTION is empty in the port
+
+- tool `Bash`: Read overlay compile setup
+
+- tool `Bash`: Read overlay build and compile function
+
+## Claude
+
+I'll add `-fno-common` for files under `source/overlays/` and see whether everything still links.
+
+- tool `Bash`: Compile overlays with -fno-common and link the port
+
+## Claude
+
+Linked with no duplicate-definition errors. Next I'll check the layout.
+
+- tool `Bash`: Verify bss layout and no common symbols left
+
+## Claude
+
+The `s03d` words now match the PS1's layout. Other overlays still show common symbols, though, so I'll see what those are.
+
+- tool `Bash`: List remaining common symbols
+
+## Claude
+
+Some overlay sources live outside `source/overlays/` (shared actors like `asiato2`). Next, `s03d`'s 19:
+
+- tool `Bash`: Find where s03d's common symbols are defined
+
+- tool `Bash`: Run TAS replay with ordered overlay bss
+
+- tool `Monitor`: TAS replay progress every 5 minutes
+
+## Claude
+
+Meanwhile, the matching builds, since `build_ps2.py` changed:
+
+- tool `Bash`: Run matching build
+
+## Claude
+
+The matching build still passes (80 OK). The replay is running in its PCSX2 window; I'll post its progress every 5 minutes.
+
+## Claude
+
+That notice is from the previous replay, which was still taking its screenshots and may have overlapped the new run. I'll check the new run is unaffected.
+
+- tool `Bash`: Check the new replay's state
+
+## Claude
+
+The new replay is the only one running now, in its PCSX2 window. I'll post its progress every 5 minutes.
+
+- tool `Bash`: Show replay result and TLB misses
+
+## Claude
+
+Now PCSX2 stops at loop 11,520 (0:06:22.?), earlier than before and with no TLB misses. Let me see how it ended.
+
+- tool `Bash`: Show the end of the PCSX2 log
+
+## Claude
+
+It hangs instead of crashing: no heartbeat after the scenario starts at loop 11,520. Before planning how to find where the EE is stuck, I'll check what the docs say about locating hangs.
+
+- tool `Bash`: Search docs for hang debugging methods
+
+## Claude
+
+Not covered in the docs. The quickest test is to narrow `-fno-common` to `s03d` alone. If the hang goes away, the cause is in another overlay; if it stays, it's in `s03d`.
+
+- tool `Bash`: Limit -fno-common to s03d and replay to 11,700
+
+- tool `Bash`: Inspect overlay3.c contents
+
+## Claude
+
+All 94 are `s03d`'s own words. I'll revert the `build_ps2.py` change and give `overlay3.c` its own section in the port.
+
+- tool `Bash`: Section overlay3.c's words, link, verify layout
+
+## Claude
+
+Contiguous: all 94 words, no gaps. The matching build now, then the full replay:
+
+- tool `Bash`: Run matching build
+
+- tool `Bash`: Run full TAS replay
+
+- tool `TaskStop`: 
+
+- tool `Monitor`: TAS replay progress every 5 minutes
+
+## Claude
+
+The matching build passes (80 OK) and the full replay is running in its PCSX2 window. I'll post its progress every 5 minutes.
+
+- tool `Bash`: Show replay failure
+
+## Claude
+
+The run started in the wrong directory. Restarting it with an absolute path:
+
+- tool `Bash`: Run full TAS replay
+
+- tool `Monitor`: TAS replay progress every 5 minutes
+
+## Claude
+
+The full replay is running in its PCSX2 window. I'll post progress every 5 minutes.
+
+## Claude
+
+That update came from an older monitor that's still running, so I'll stop it to avoid duplicate updates. The replay is at loop 6,336.
+
+- tool `TaskStop`: 
+
+## Claude
+
+The replay is at loop 6,336, and one monitor is left posting its progress.
+
+## Claude
+
+The replay is at loop 11,520, the same loop where the earlier run hung. I'll check whether it's moving.
+
+- tool `Bash`: Check whether the replay advances
+
+## Claude
+
+The real run is past that point. It reached the next desync, the rand seed at loop 12,758 (0:07:05.19, `s03d`), and is now replaying for the screenshots, which is why the trace shows 11,520. I'll wait for it to finish before looking at the desync.
+
+## Claude
+
+The trace has been at loop 11,520 for 5 minutes, so the screenshot run looks stuck. Let me check.
+
+- tool `Bash`: Check running emulators and log tail
+
+- tool `Bash`: Check pcsx2_run options and SH1 hang notes
+
+- tool `Bash`: List pcsx2_run arguments and debugger helpers
+
+- tool `Bash`: Read SH1 overlay data reset notes and check MGS docs
+
+## Claude
+
+The MGS port already has its own plan for this, still open: `docs/Overlay Data Reset.md`.
+
+- tool `Bash`: Read MGS overlay data reset plan
+
+## Claude
+
+Is loop 11,520 a reload of `s03d`, or its first load? Let me check the stage history.
+
+- tool `Bash`: Stage and load-request history up to 11,530
+
+## Claude
+
+`s03d` loads for the first time at 11,187 and finishes at 11,443, and nothing loads at 11,520. So the overlay reset isn't the cause, and the hang is intermittent. Have earlier sessions seen it?
+
+- tool `Bash`: Search docs and archive for this hang
+
+## Claude
+
+Not seen before. Next I'll check what the HAL's heartbeat runs on, which decides what can report the stuck PC.
+
+- tool `Bash`: Find the heartbeat source
+
+- tool `Bash`: Find what pcsx2_run treats as a heartbeat
+
+- tool `Bash`: Read crash detection logic
+
+- tool `Bash`: Find mts_lock_sem implementation
+
+- tool `Bash`: Read mts_lock_sem
+
+- tool `Bash`: Read NewStreamControl
+
+- tool `Bash`: Check if the screenshot job is done
+
+## Claude
+
+Still making the Redux control shots, so I'll wait for that before starting the test runs.
+
+## Claude
+
+The screenshot job is done. Now two replays of the current build to loop 11,600, to see how often it hangs:
+
+- tool `Bash`: Replay to 11,600 twice to check the hang rate
+
+- tool `Bash`: Replay to 12,760 and compare around the desync
+
+## Claude
+
+Alert mode is 3 (combat), and loop 12,757 calls `rand` a different number of times. I'll count the generator steps on each side.
+
+- tool `Bash`: Count rand steps for each side
+
+## Claude
+
+The port calls `rand` once less (4 against 5). The prime suspects are the two functions that are port-only C and not proven to match, `800D1054` (plus three) and `800D14AC`. Do they call `rand`?
+
+- tool `Bash`: List rand calls in the guard code
+
+## Claude
+
+The guard code has only two `rand` calls of its own; in combat, shared code (bullets, sounds and so on) calls it too. Was a per-call `rand` log used for an earlier desync?
+
+- tool `Bash`: Look for an existing rand-caller method
+
+- tool `Bash`: Read trace_debug.lua header and rand notes
+
+## Claude
+
+BizHawk has no execute callbacks for the PS1, and Redux is unreliable this far in, so I'll log the port's `rand` callers for loop 12,757 and work out which call the PS1 makes in addition.
+
+- tool `Bash`: Find the port's rand implementation
+
+- tool `Bash`: Find where rand is defined
+
+- tool `Bash`: Locate rand in the linked ELF
+
+- tool `Bash`: Look at how libc names are handled
+
+- tool `Bash`: Find rand's source file
+
+## Claude
+
+`rand` comes from the PS2 SDK's libc, so I'll wrap it at link time (`--wrap=rand`) with a temporary function that logs each caller. First, where the final link's flags are set:
+
+- tool `Bash`: Find the final link command
+
+- tool `Bash`: Log rand callers for loops 12,755–12,758
+
+- tool `Bash`: Look for PINE IPC use in the tools
+
+- tool `Bash`: Find the HAL heartbeat code
+
+- tool `Bash`: Read HAL heartbeat and hang watch
+
+- tool `Bash`: Read rest of hang_watch and check sio_puts
+
+## Claude
+
+How does the port's `printf` reach the PCSX2 log?
+
+- tool `Bash`: Read the _write wrapper
+
+## Claude
+
+In PCSX2 the output goes to the SDK's real `_write`. I'll add the PC report to `hang_watch` using `sio_puts`; if that doesn't reach the log, a run will show it.
+
+- tool `Bash`: Add EPC report to hang_watch
+
+## Claude
+
+That draft has a leftover I don't want, an unused `Port_HangRa`. I'll simplify it.
+
+- tool `Bash`: Clean up the EPC report
+
+## Claude
+
+`sio_puts` is declared in `<sio.h>`, so I'll add that include. Then I'll repeat the replay until it hangs, which happens about one run in three; the `rand` log stays in for loop 12,758.
+
+- tool `Bash`: Replay until a hang shows the stuck PC
+
+## Claude
+
+No hang in three runs. Each stopped at the loop 12,758 desync, though, so the `rand` log is there. Here are the callers:
+
+- tool `Bash`: Name the rand callers per loop
+
+## Claude
+
+The field parsing was off: the timestamp splits into two fields. Taking the last two fields:
+
+- tool `Bash`: Name the rand callers per loop
+
+## Claude
+
+Per loop: two calls from the radar and one `GV_RandS`. At 12,757 the port adds one `GV_RandU`, and the PS1 adds two calls there. I'll log who calls `GV_RandS`/`GV_RandU`.
+
+- tool `Bash`: Find GV_RandU/S definitions
+
+- tool `Bash`: Log GV_RandU/S callers and name them
+
+## Claude
+
+`s03d_800D3570` calls `GV_RandU` once at 12,757; the PS1 makes two calls there. I'll read it.
+
+- tool `Bash`: Read s03d_800D3570
+
+- tool `Bash`: Find earlier BizHawk Lua scripts
+
+- tool `Bash`: Read the diag Lua and BizHawk runner
+
+## Claude
+
+I'll write a BizHawk Lua script that logs every guard's AI fields at each loop from 12,650 to 12,760, plus the same printf in the port, and compare the two. First, the actor-list and Work layouts:
+
+- tool `Bash`: Read actor list and Work field layouts
+
+## Claude
+
+Now the main loop and frame handling in `trace.lua`, to base the new script on:
+
+- tool `Bash`: See trace.lua's loop structure
+
+- tool `Bash`: Read trace.lua main loop and ActorList address
+
+- tool `Bash`: Find ActorList and guard Act addresses
+
+## Claude
+
+`ActorList` is at 0x800ACC18 (from the earlier session), and the guard's `Act` is `s03d_800CCC54`. Here's the script:
+
+- tool `Bash`: Write the BizHawk guard logger
+
+## Claude
+
+Next, the port side: a temporary `printf` at the start of the guard's `Act`. That's the same state BizHawk logs, since the guards run in list order.
+
+- tool `Bash`: Read the guard Act start
+
+- tool `Bash`: Run BizHawk guard log and port guard log
+
+## Claude
+
+The port's log is done (306 lines). BizHawk is still playing the movie headlessly; I'll wait for its log to finish and post progress every 5 minutes.
+
+- tool `Monitor`: BizHawk guard log progress
+
+## Claude
+
+BizHawk is playing the movie to loop 12,760 without a window, so I'll post its progress every 5 minutes.
+
+- tool `Bash`: Check why BizHawk exited
+
+## Claude
+
+`run_bizhawk.sh` treats 91 s without log output as a stall, and my script writes nothing before loop 12,650. I'll have it write a progress line every 500 loops.
+
+- tool `Bash`: Add progress lines and restart BizHawk
+
+- tool `Monitor`: BizHawk guard log progress
+
+## Claude
+
+BizHawk is running again without a window, and I'll post where it is every 5 minutes.
+
+## Claude
+
+BizHawk is at loop 12,500, close to the window it logs.
+
+- tool `Bash`: Diff PS1 and port guard logs
+
+## Claude
+
+The list indexes differ: the port counts only the guards, the PS1 counts every actor. Ignoring that column:
+
+- tool `Bash`: Diff guard logs ignoring list index
+
+- tool `Bash`: Inspect port log format
+
+## Claude
+
+The port logs from 12,652 with fresh values, while the PS1's first line at 12,653 already shows one update. So PS1 line *t* matches port line *t*+1. Shifting the port's log by one loop:
+
+- tool `Bash`: Diff with the port shifted one loop
+
+- tool `Bash`: Show the shifted port log
+
+## Claude
+
+The shift should go the other way, +1 instead of -1.
+
+- tool `Bash`: Diff with the port shifted the other way
+
+## Claude
+
+The values look the same, so the line endings probably differ (Wine writes CRLF). I'll strip them and diff again.
+
+- tool `Bash`: Diff after stripping CRs
+
+- tool `Bash`: Compare raw bytes of first lines
+
+## Claude
+
+So the -1 shift was right, and the earlier diff only failed on the CRs. Redoing it with the cleaned file:
+
+- tool `Bash`: Diff aligned guard logs
+
+- tool `Bash`: Rest of the diff and log tails
+
+## Claude
+
+The first real difference is at loop 12,701 (0:07:03.29?), on the third guard: its height (y) is 894 on the PS1 and 867 in the port. Everything else matches. Here are the loops before it:
+
+- tool `Bash`: Third guard's values around 12,701
+
+- tool `Bash`: Find floor/height handling in guard code
+
+## Claude
+
+Several states set `hzd_height = -32767`, which turns off the floor check, so the guard can drop off a ledge. Let me read those parts and see which functions they belong to.
+
+- tool `Bash`: Read the fall/height state code
+
+## Claude
+
+That one is a knockdown state. The per-frame height setup at line 2242 (`hzd_height = levels[0] + 750`) is more likely to matter; which function is it in?
+
+- tool `Bash`: Find enclosing functions and read the height setup
+
+- tool `Bash`: Add CONTROL floor fields to both logs
+
+- tool `Bash`: Check CONTROL field offsets
+
+## Claude
+
+The offsets match `compare_trace.py`'s list (hzd_height 52, step 68, grounded 87, levels 120). Running both logs:
+
+- tool `Bash`: Run both logs; show the port's third guard
+
+- tool `Monitor`: BizHawk guard log progress
+
+## Claude
+
+BizHawk is running without a window; I'll post progress every 5 minutes.
+
+- tool `Bash`: Show the PS1's third guard floor fields
+
+- tool `Bash`: Find the grounded logic in GM_ActControl
+
+- tool `Bash`: Read the floor/height update
+
+- tool `Bash`: Find body and OBJECT field offsets
+
+- tool `Bash`: Read OBJECT layout
+
+## Claude
+
+`body` is at 0x9C, so `action` is at 0xAA, `action2` at 0xAC and `height` at 0xB4. I'll add those to both logs.
+
+- tool `Bash`: Log action and body height on both sides
+
+- tool `Monitor`: BizHawk guard log progress and result
+
+## Claude
+
+BizHawk is running without a window; I'll post progress every 5 minutes.
+
+## Claude
+
+The PS1's guard switches to action 34 at loop 12,696 (a crouch with height around 859), but the port's switches to action 0, so a `SetAction` gets the wrong number. Next, which code picks it:
+
+- tool `Bash`: Find where action 34 is set
+
+## Claude
+
+No literal 34, so the action probably comes from a table. Let me look at the `SetAction` calls.
+
+- tool `Bash`: List SetAction calls
+
+- tool `Bash`: Check the action table layout
+
+- tool `Bash`: Count initialized arrays in overlay sources
+
+- tool `Bash`: Generalize the alignment header and mark the arrays
+
+## Claude
+
+The file search missed `s03d` itself, and `unsigned short` got 4 instead of 2. Redoing it over every overlay file, with the sizes fixed:
+
+- tool `Bash`: Mark all initialized arrays in overlay sources
+
+## Claude
+
+That marked 221 arrays. (The PS1's GCC raises only char arrays to a word, so short arrays keep 2.) Next, the zero values for overlay files in `build_ps2.py`:
+
+- tool `Bash`: Keep zeros in .data, link, recheck layout
+
+## Claude
+
+No gaps left: the table now matches the PS1's layout. I'll run the matching builds (the header rename touches them), then the replay.
+
+- tool `Bash`: Run both matching builds
+
+## Claude
+
+Both matching builds pass (80 and 2). Next, the replay to just past loop 12,760, with the debug logs still in:
+
+- tool `Bash`: Replay past the old desync
+
+## Claude
+
+The replay is in sync past the old desync, through loop 12,770. Next I'll remove the temporary debugging code: the guard `printf`s, the `GV_Rand` logging and the `rand` wrap.
+
+- tool `Bash`: Remove temporary debug code
+
+## Claude
+
+`zako.c` shows 71 changed lines, more than the alignment marks should account for, so I'll check that file's diff before going on.
+
+- tool `Bash`: Check zako.c diff beyond alignment marks
+
+- tool `Bash`: Read the end of the walkthrough and TAS plan
+
+## Claude
+
+I'll get the movie timestamps for the loops I'll mention in the docs.
+
+- tool `Bash`: Movie timestamps for the loops mentioned
+
+- tool `Bash`: Update the walkthrough and TAS plan
+
+- tool `Bash`: Update planning doc and conversation archive
+

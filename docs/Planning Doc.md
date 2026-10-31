@@ -172,6 +172,11 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
       `Port_SetStage(id)` (`game/chara.c`): the stage's linked CHARA table by `GV_StrCode(name)`. The
       binary is still read into the arena's overlay area, unused. `GM_ResetChara` switches to an empty table
 - [ ] Reset an overlay's `.data`/`.bss` when its stage loads again (SH1 needed it for a map loaded twice)
+- [x] Overlay data in the PS1's layout (code reaches variables through others' addresses): split strings and
+      initialized arrays `PS1_ALIGN`ed (`source/include/ps1align.h`), explicit zeros kept in `.data`
+      (`-fno-zero-initialized-in-bss` for overlay files), `s03d`'s `overlay3.c` words in their own section
+- [ ] The same for common symbols in shared actor files (`enemy/asiato.c`, `takabe/findtrap.c`, ...): they stay in
+      the linker's order (they must stay common: see Running Walkthrough Step 21)
 - [x] Policy: an overlay is linked in once it has no `INCLUDE_ASM` and no literal addresses of its own
       code/data (`tools/port/overlay_survey.py`); the link prints the rest. Left out now (20): brf, camera,
       d18a/d18ar, s03d, s07b, s08b/s08br, s11d, s11g, s15c, s19b/s19br (stubs); s05a, s07a, s11a, s11e,

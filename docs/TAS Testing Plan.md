@@ -319,7 +319,18 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       `MakePrimsRectangleSingle`: okajima/chafgrnd.c's chaff tiles are a `DG_PRIM_RECTANGLE` with rect NULL (found
       by logging `DG_MakePrim`'s rectangle prims without one), so the PS1 reads its RAM at 0: 3 and 0 (BizHawk).
       The port uses those values for a NULL rect (`libdg/prim.c`, `MGS_PORT`).
-- [ ] `GM_GameStatus` 0x20 at loop 12,102 (0:06:42.12, `s03d`): the PS1 has it, the port not.
+- [x] `GM_GameStatus` 0x20 at loop 12,102 (0:06:42.12, `s03d`): the port's voice stream ended a loop early (the
+      SPU's pace). strctrl.c's `Act2` holds the actor's destroy while the PS1's next record still has the bit
+      (`Port_TasStreamMayEnd`, bounded to 8 loops: a demo can be followed by another stream at once).
+- [x] Crash at loop 12,652 (0:07:00.75): the guards' model names (strings split into 4-byte char arrays, 8-aligned
+      by EE GCC) and zakocom.c's `ZakoComMgr` (`s03d_dword_800DC310` and the words after it, common symbols in the
+      linker's order). `STR_PIECE`, and `overlay3.c`'s words in their own section.
+- [x] Rand seed at loop 12,758 (0:07:05.19): a guard fell with action 0 instead of 34 at loop 12,696 (0:07:02.61);
+      the action table had gaps (zeros in `.bss`, 8-aligned arrays). `-fno-zero-initialized-in-bss` for overlay
+      files, `PS1_ALIGN(n)` on their arrays. Found with `tools/port/tas/zako_log.lua` (each guard's state per loop).
+- [ ] Intermittent hang at loop 11,520 (0:06:22.25), 3 runs in about 12: the hang watch's PC report should show
+      where.
+- [ ] Next desync: past loop 12,770 (0:07:05.59), not yet run.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

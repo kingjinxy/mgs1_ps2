@@ -753,3 +753,35 @@ them; GCC 2.x reverses ascending loops (so the source counts up); `Work` is 0xBA
 TLB misses: chafgrnd.c's chaff tiles have a NULL rect, read from PS1 RAM at 0 (3, 0, read in BizHawk); the port
 now uses those values. PCSX2: in sync to loop 12,101 (0:06:42.1); at 12,102 `GM_GameStatus` 0x20 differs.
 Matching build: 80 OK, VR 2 OK.
+
+## Step 21: stream ends on the PS1's loop, and overlay data laid out as the PS1's (2026-10-31)
+
+- **Loop 12,102 (0:06:42.12), `STATE_VOX_STREAM`:** the port's voice stream ended a loop early. The end waits for
+  the SPU to play the last of the voice (`sd_str.c`'s interrupts), and the port's IOP does that at its own pace.
+  Now strctrl.c's `Act2` holds the actor's destroy (its `Die` clears the bit) while the PS1's record shows the bit
+  for the next loop (`Port_TasStreamMayEnd`; `Die` runs a loop after `GV_DestroyActor`). Tried first: holding
+  `Act`'s end, which broke loop 519 (the PS1 ends the demo at 518 and clears the bit at 520), and reading this
+  loop's record (`Die` ran a loop late, the load at 521 late). A bit still set 8 loops on is the next stream's (the
+  demo at 11,482 is followed by another); the hold is bounded to that.
+- **Crash at loop 12,652 (0:07:00.75):** the guards' `GM_InitObject` hashed "ippa" plus padding: their model
+  names are strings split into 4-byte char arrays, which GCC for the EE aligns to 8 bytes. Found by logging
+  `GM_ConfigObjectModel`'s missing models (hash 0x4e97, 0x9235) with their caller (`s03d_800CCE3C`), and `nm`.
+  Then TLB misses in zakocom.c: `ZakoComMgr` is `s03d_dword_800DC310` and the words after it, which the port
+  had as common symbols in the linker's order. `overlay3.c`'s words now have their own `.bss` section under
+  `MGS_PORT`. Tried first: `-fno-common` for every overlay file, which hung the game at loop 11,520: a common
+  symbol stays global past `overlays_ps2.py`'s `--keep-global-symbol`, so an overlay's tentative definition of a
+  shared variable is the main executable's; out of common it became a private copy.
+- **Loop 12,758 (0:07:05.19), rand seed:** one `GV_RandU` fewer (`--wrap=rand` logging the callers, then
+  `GV_RandU`/`GV_RandS`'s). Comparing the guards' state per loop (`tools/port/tas/zako_log.lua` in BizHawk against
+  a `printf` in the port) showed the third guard falling at loop 12,696 (0:07:02.61): the PS1 played action 34,
+  the port 0. `((short *)&s03d_dword_800C39E0)[36]` reads a table past its first word, and the port had gaps in
+  it: explicit zeros go to `.bss`, and arrays were 8-aligned. Now overlay files compile with
+  `-fno-zero-initialized-in-bss` (`build_ps2.py`), and their initialized arrays carry `PS1_ALIGN(n)`
+  (`source/include/ps1align.h`, empty in the matching build: 2 for short, 4 for int and char arrays, as the PS1's
+  GCC; `STR_PIECE` for the split strings). `nm` then shows `s03d`'s data with no gaps.
+- **Open:** an intermittent hang at loop 11,520 (0:06:22.25, `s03d`, frame 8,812), in 3 of about 12 runs, all
+  after the split-string fix (the guards' first loops). The HAL's hang watch now writes the interrupted PC by SIO
+  once a second while it sees a hang (`libetc_ps2.c`); no hang has come since it was added. Common symbols from
+  shared actor files (`enemy/asiato.c`, `takabe/findtrap.c`, `okajima/blur.c`, ...) still have the linker's order.
+
+PCSX2: in sync to loop 12,770 (0:07:05.59), where the run was stopped (not a desync). Matching build: 80 OK, VR 2 OK.

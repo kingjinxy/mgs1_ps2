@@ -45,6 +45,7 @@ static inline void int_to_loc( int pos, CdlLOC *loc )
 
 extern int                  MgsCd_Init(void);
 extern int                  MgsCd_Paced;
+extern int                  Port_TasStreamAhead(int left); /* port/src/tas_replay.c */
 extern int                  MgsCd_Start(int sector, int count);
 extern int                  MgsCd_Poll(void);
 extern const unsigned char *MgsCd_Sector(int i);
@@ -186,6 +187,11 @@ static void CDBIOS_Main(void)
 
                 for (i = task->sector - chunk_sector; more && i >= 0 && i < chunk_count; i++)
                 {
+                    if (task->remaining * 4 >= 0x7F000000 && Port_TasStreamAhead(task->remaining * 4))
+                    {
+                        status = 1; /* a stream (no size: 0x7FFF0000 left) ahead of the PS1's: the rest later */
+                        break;
+                    }
                     SwEnterCriticalSection();
                     more = CDBIOS_Deliver(MgsCd_Sector(i));
                     SwExitCriticalSection();
@@ -201,7 +207,7 @@ static void CDBIOS_Main(void)
         if (chunk_count == 0 && task->state == CDBIOS_STATE_READ && cdbios_next_state < 0)
         {
             chunk_sector = task->sector;
-            MgsCd_Paced = task->callback == NULL; /* file reads (fscd.c): see cdbios_ps2.c */
+            MgsCd_Paced = task->callback ? 0 : (task->remaining * 4 + 2047) / 2048; /* file reads (fscd.c): cdbios_ps2.c */
             chunk_count = MgsCd_Start(chunk_sector, CDBIOS_CHUNK);
 
             if (chunk_count == 0)

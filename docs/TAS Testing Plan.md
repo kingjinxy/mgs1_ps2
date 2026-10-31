@@ -225,7 +225,26 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       seek made the intro call late, also at 917. The port trace now has the file read's bytes left (field 20,
       not compared), and lines past the PS1's load end while the port still loads are left out (the loop number
       is the PS1's at the load's end).
-- [ ] rand seed at loop 6,277 (0:03:37.57, `s01a`).
+- [x] rand seed at loop 6,277 (0:03:37.57, `s01a`), the port: the drive model's seeks. BizHawk logs of the codec's
+      state (a throwaway Lua like trace_debug.lua: `Work` 0x800BD360, state at +0x210; the call's chara struct
+      pointer at 0x800ABB38) gave the PS1's timeline per call: the face read's end starts a 16-loop countdown to the
+      call's state 5, which draws 2 `rand()` every 4th loop, so one loop off moves the draws. The Redux control run
+      is no reference here (its call reached state 5 at 5,825; the PS1 at 5,834). Fixes: a read is charged only for
+      the sectors it wants, not the whole 16-sector chunk (the 2-sector RADIO.DAT read was charged 16); the seek is
+      a table over sqrt(distance) (0 and 38: 0 blanks, 97: 20.6, 347: 38.6), fitted to the three calls' face read
+      starts and ends; a contiguous chunk goes on from where the last was due (up to 2 blanks back).
+- [x] rand seed at loop 6,497 (0:03:46.01, `s01a`), the port: the second call's RADIO.DAT read took 2 loops, the
+      PS1's 14. The PS1's drive had gone to the last call's voice stream; the port's held stream read (below) never
+      moved the modelled head. A held read now does (`MgsCd_Head`).
+      Also from here: a stream's first read is held while the PS1's stream heap is empty (time.bin's bottom 0;
+      `Port_TasStreamHold`): the PS1's codec voice at 5,827 had no data until 5,950. The held read looks like one in
+      progress (`fs_stream_read` set, task state -1), and `FS_StreamSync` starts it.
+- [ ] `GM_GameStatus` 0x1000 and `DG_UnDrawFrameCount` at loop 6,663 (0:03:52.10, `s01a`), a cutscene's demo
+      stream: its packet is in a loop early. Stream sectors now reach the game only as far as the PS1's had by the
+      loop (time.bin's file read bytes left; `Port_TasStreamAhead`), and the bytes match the PS1's at each loop's
+      end, but a packet is used once its last sector is in, which falls within a loop. Tried: the last loop's
+      value (broke 5,481), the midpoint (broke 5,753), interpolating over the PS1's vertical blanks of the loop
+      (mts_time added to time.bin; 6,663 either way). Screenshot black on both.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

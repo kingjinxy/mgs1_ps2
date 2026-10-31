@@ -256,7 +256,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 6,276 (0:03:37.5,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 6,662 (0:03:52.0,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair
 
 ## Open questions

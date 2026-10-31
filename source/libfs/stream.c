@@ -21,6 +21,9 @@ static char *SECTION(".bss") fs_stream_top;
 static int *SECTION(".bss")  fs_stream_write_ptr;
 static char *SECTION(".bss") fs_stream_bottom;
 static int SECTION(".bss")   fs_stream_task_state;
+#ifdef MGS_PORT
+static int fs_stream_held; /* StartRead held for a TAS replay (Port_TasStreamHold) */
+#endif
 
 static int  fs_stream_last_time = -1;
 static int  fs_stream_next_time = 0;
@@ -199,6 +202,19 @@ static void StartRead( void )
         SwExitCriticalSection();
     }
 
+#ifdef MGS_PORT
+    {
+        extern int Port_TasStreamHold( void ); /* port/src/tas_replay.c: the PS1's data not in yet */
+        if (fs_stream_write_ptr == fs_stream_heap && Port_TasStreamHold())
+        {
+            extern void MgsCd_Head( int sector ); /* port/src/cdbios_ps2.c: the PS1's drive seeks there */
+            MgsCd_Head(fs_stream_sector);
+            fs_stream_held = 1; /* as if reading, with no data yet; FS_StreamSync starts it */
+            fs_stream_read = 1;
+            return;
+        }
+    }
+#endif
     fs_stream_read = 1;
     CDBIOS_ReadRequest(fs_stream_write_ptr, fs_stream_sector, 0, &StreamReadyCallback);
 }
@@ -220,6 +236,9 @@ void FS_StreamTaskStart( int sector )
     fs_stream_top = fs_stream_heap;
     fs_stream_bottom = fs_stream_heap;
     fs_stream_write_ptr = fs_stream_heap;
+#ifdef MGS_PORT
+    fs_stream_held = 0;
+#endif
 
     StartRead();
 }
@@ -243,6 +262,18 @@ int FS_StreamSync( void )
     int   size;
     int   remaining;
 
+#ifdef MGS_PORT
+    if (fs_stream_held && !fs_stream_end && !fs_stream_stop)
+    {
+        extern int Port_TasStreamHold( void );
+        if (!Port_TasStreamHold())
+        {
+            fs_stream_held = 0;
+            fs_stream_read = 0;
+            StartRead();
+        }
+    }
+#endif
     stream_read = fs_stream_read;
     stream_end = fs_stream_end;
 

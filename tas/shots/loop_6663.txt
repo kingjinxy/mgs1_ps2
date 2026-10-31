@@ -1,0 +1,2 @@
+DESYNC GM_GameStatus        at loop 6663 (s01a, movie 0:03:52.10, frame 13912): port 10001020, PS1 10000020
+DESYNC DG_UnDrawFrameCount  at loop 6663 (s01a, movie 0:03:52.10, frame 13912): port 4, PS1 3

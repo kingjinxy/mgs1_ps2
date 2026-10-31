@@ -194,6 +194,34 @@ int Port_TasStreamMayStart(void)
 #endif
 }
 
+/** stream.c's StartRead, a stream's first read: held while the PS1's stream heap had no data yet (time.bin's
+ * bottom 0). The PS1's can take seconds to come (the codec's voice at loop 5,827: at 5,950), the port's is in at
+ * once, and the call runs differently meanwhile (its rand() at loop 5,846). */
+int Port_TasStreamHold(void)
+{
+#ifdef MGS_TAS
+    const unsigned char* r = time_record();
+    return r && read_u32(r + 24) == 0;
+#else
+    return 0;
+#endif
+}
+
+/** cdbios.c, before each sector of a stream read (no size: 0x7FFF0000 bytes left at its start): whether the port
+ * has read as far as the PS1 had by this loop (time.bin's file read bytes left), so the sector waits. The PS1's
+ * drive brings 2.5 sectors a vertical blank, the port's at once, and a cutscene's packets come early (loop 6,660). */
+int Port_TasStreamAhead(int left)
+{
+#ifdef MGS_TAS
+    const unsigned char* r = time_record();
+    int                  v = r ? (int)read_u32(r + 32) : 0;
+    return v >= 0x7F000000 && left <= v;
+#else
+    (void)left;
+    return 0;
+#endif
+}
+
 /** FS_StreamTickStart (Capture_TickStart): a stream has started. */
 void Port_TasTickStart(void)
 {

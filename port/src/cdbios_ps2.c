@@ -18,30 +18,46 @@ static sceCdlFILE    s_Disc;
 static int           s_Ready;
 static unsigned int  s_DiscSectors; /* PS1 sectors in the file */
 static unsigned int  s_Skip;        /* where the chunk's first PS1 sector starts in the bounce buffer */
-int MgsCd_Paced; /* set by libfs/cdbios.c for each read: a file read (no callback) */
+int MgsCd_Paced; /* set by libfs/cdbios.c for each read: a file read's (no callback) sectors still to come, or 0 */
 #ifdef MGS_TAS
 /* TAS replays: file reads (MgsCd_Paced: no callback; streams follow the PS1's clock already, stage loads end at
  * the PS1's loop) take as long as on the PS1's 2x drive, 150 sectors a second (2.5 a vertical blank: the
  * 10,240 bytes a game loop of the codec's face read at loop 5,796), plus a seek when a read doesn't go on
- * from where the last one (any read) ended: 1 + 0.075 * sqrt(distance in sectors) vertical blanks, fitted to the
- * PS1 trace's codec reads (about 3 for 1,415 and 2,046 sectors, 9 for 9,432, 29 for 120,341), a little short: a
- * port read that's early is waited for where it matters (the PS1's stream starts), a late one isn't. Times in
- * fifths of a vertical blank (mts_get_tick_count). */
+ * from where the last one (any read) ended, by distance (seek_fifths: measured from the PS1 trace's codec calls,
+ * the RADIO.DAT read to the face read and the face read's end, against the port's). Both early and late matter: the call draws rand() a number of loops after its face read. Times in fifths of a vertical
+ * blank (mts_get_tick_count). */
 #define PS1_FIFTHS_PER_SECTOR 2
 extern int          mts_get_tick_count(void);
 static int seek_fifths(int from, int to)
 {
-    unsigned int d = (unsigned int)(from > to ? from - to : to - from), r = 0;
+    /* sqrt(distance) -> fifths of a vertical blank, measured: (0, 2 blanks) by guess, (38, 3) the face reads at loops
+       789 and 5,796, (97, 11) and (347, 31) the RADIO.DAT reads at 778 and 5,775; on past it with the last slope */
+    static const int     pts[][2] = {{0, 0}, {38, 0}, {97, 103}, {347, 193}};
+    unsigned int         d = (unsigned int)(from > to ? from - to : to - from), r = 0;
+    int                  i;
     while ((r + 1) * (r + 1) <= d)
     {
         r++;
     }
-    return 5 + (int)r * 3 / 8; /* 0.075 * 5 = 3/8 */
+    for (i = 1; i < 3 && (int)r > pts[i][0]; i++)
+    {
+    }
+    return pts[i - 1][1] + ((int)r - pts[i - 1][0]) * (pts[i][1] - pts[i - 1][1]) / (pts[i][0] - pts[i - 1][0]);
 }
 static int          s_Due;        /* when the read in progress is in */
 static int          s_NextSector; /* where it ends */
 #endif
 static unsigned char s_Bounce[BOUNCE_SECTORS * DVD_SECTOR] __attribute__((aligned(64)));
+
+/** A read that the TAS replay holds (stream.c StartRead): the PS1's drive went there all the same. */
+void MgsCd_Head(int sector)
+{
+#ifdef MGS_TAS
+    s_NextSector = sector;
+#else
+    (void)sector;
+#endif
+}
 
 /** Finds the disc file; 1 when it's ready. */
 int MgsCd_Init(void)
@@ -98,8 +114,10 @@ int MgsCd_Start(int sector, int count)
 #ifdef MGS_TAS
     {
         int now = mts_get_tick_count() * 5;
-        int begin = !MgsCd_Paced ? now - count * PS1_FIFTHS_PER_SECTOR : sector != s_NextSector ? now + seek_fifths(s_NextSector, sector) : s_Due > now ? s_Due : now;
-        s_Due        = begin + count * PS1_FIFTHS_PER_SECTOR;
+        int begin = !MgsCd_Paced ? now - count * PS1_FIFTHS_PER_SECTOR : sector != s_NextSector ? now + seek_fifths(s_NextSector, sector)
+                  : s_Due > now - 10 ? s_Due : now; /* the drive read on while the task polled (up to 2 blanks) */
+        s_Due        = begin + (MgsCd_Paced < count ? MgsCd_Paced : count) * PS1_FIFTHS_PER_SECTOR; /* the sectors
+                                                                       the read wants, not the whole chunk */
         s_NextSector = sector + count;
     }
 #endif

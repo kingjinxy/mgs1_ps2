@@ -673,3 +673,17 @@ counts: the harness waits for a port that's early (stream starts, load ends), no
 errs short. Also: the port trace has the file read's bytes left (field 20; not compared), and lines are left out
 while the port still loads past the PS1's load end. PCSX2: in sync to loop 6,276; at 6,277 (0:03:37.57, `s01a`) the
 rand seed differs. Matching build: 80 OK, VR 2 OK.
+
+## Step 14: seeks fitted to the PS1, stream reads at the PS1's pace (2026-10-31)
+
+Loop 6,277 (0:03:37.57): the codec's states in the PS1, logged by a throwaway BizHawk Lua (BizHawk reaches loop 6,000
+in about 3 minutes), against the port's from a debug print: one loop off at the face read's end shifts the call's
+`rand()` draws (a 16-loop countdown to state 5, two draws every 4th loop). The Redux control run doesn't match the
+PS1 here, so it's no reference for drive timing. The drive model now charges a read only for the sectors it wants,
+and seeks follow a table over sqrt(distance) fitted to the three calls (intro, `d01a`, `s01a`); a chunk that goes
+on from the last one is timed from where that was due. Loop 6,497 (0:03:46.01): the second `s01a` call's
+`RADIO.DAT` seek was near zero, because the port's modelled head never moved to the held voice stream; held stream
+reads now move it. Stream reads: a stream's first read waits for the PS1's first data (the codec's voice at 5,827:
+5,950), and its sectors reach the game only as far as the PS1's had by the loop's end. PCSX2: in sync to loop
+6,662; at 6,663 (0:03:52.10) a cutscene's packet is in a loop early (sub-loop timing; three variants tried, TAS
+plan). Matching build: 80 OK, VR 2 OK.

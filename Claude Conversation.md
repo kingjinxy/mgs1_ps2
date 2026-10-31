@@ -10713,3 +10713,233 @@ Yes, it's still running, just without a window: Redux runs with `-no-ui`. It's t
 
 - tool `Bash`: Archive conversation and commit
 
+## Claude
+
+Committed as `49922f152`. On to loop 6,277: the port's codec opening is behind the PS1's. Comparing the reads leading up to it:
+
+- tool `Bash`: Compare status, seed, reads 6200-6277
+
+- tool `Bash`: Continue chunk timing from the drive's clock; rerun
+
+## Claude
+
+That broke an earlier spot: loop 5,833 (0:03:25.19), the same codec call as 5,809. Comparing that call's reads under the new timing:
+
+- tool `Bash`: Compare d01a codec timeline
+
+- tool `Bash`: Compare intro call radio.dat duration
+
+- tool `Bash`: Raise base seek to 6 vblanks; rerun
+
+## Claude
+
+Loop 917 breaks again. Checking whether the intro call is now late:
+
+- tool `Bash`: Intro call timeline both sides
+
+- tool `Bash`: Interpolated seek table; rerun
+
+- tool `Bash`: Port intro timeline
+
+## Claude
+
+The intro call's face read now ends 2 loops late (808 against 806), and late is what breaks loop 917. Trimming the two short-distance points by about a vertical blank each, then checking both calls:
+
+- tool `Bash`: Adjust short seeks; rerun and compare all three calls
+
+- tool `Bash`: d01a face end, stream start, draw
+
+- tool `Bash`: Check rand sequence relations
+
+- tool `Bash`: PS1 stream fields 5825-5850
+
+## Claude
+
+On the PS1 the stream starts at loop 5,827, but no voice data has arrived even by 5,850 (heap bottom still 0). The port's data arrives at once. When the PS1's data actually arrives:
+
+- tool `Bash`: When PS1 stream data arrives
+
+- tool `Bash`: Read StartRead
+
+- tool `Bash`: Hold a stream's first read until PS1 data arrives; rerun
+
+## Claude
+
+No change at loop 5,837. Checking whether the hold took effect:
+
+- tool `Bash`: Port stream read and PS1 bottom table
+
+## Claude
+
+The hold works: the port's stream read now waits (field 20 stays 0). The draws still start at 5,837, so the voice data doesn't trigger them. Finding the caller of `rand()` at that loop:
+
+- tool `Bash`: Find rand implementation
+
+- tool `Bash`: Read HAL rand
+
+- tool `Bash`: Log rand callers around 5834-5837
+
+- tool `Bash`: Resolve rand caller addresses
+
+- tool `Bash`: Read the rand caller
+
+- tool `Bash`: Read the codec helper around rand
+
+- tool `Bash`: Find codec states after ringing
+
+- tool `Bash`: Read codec states 3-5
+
+- tool `Bash`: PS1 draw pattern after 5840
+
+- tool `Bash`: Keep held stream looking like a pending read
+
+- tool `Bash`: Reset hold on stream start; rerun
+
+## Claude
+
+Still 5,837, so state 5 doesn't wait on the stream. Finding what sets the call's character state to 1, which leads to state 5:
+
+- tool `Bash`: Find where codec chara state becomes 1
+
+- tool `Bash`: Read radiomes state 1 setter
+
+- tool `Bash`: Read FS_StreamGetTick
+
+- tool `Bash`: Rest of GetTick and PS1 ticks in table
+
+- tool `Bash`: Read sub_80037EE0
+
+- tool `Bash`: Read strctrl voice start
+
+## Claude
+
+`sub_80037EE0` doesn't block. Looking at the commands in the codec script's exec block for one that waits:
+
+- tool `Bash`: Outline codec GCL commands
+
+- tool `Bash`: Find waits in radiomes
+
+- tool `Bash`: Read subtitle command waits
+
+- tool `Bash`: Log port codec states and pad releases
+
+- tool `Bash`: Show codec log for d01a call
+
+- tool `Bash`: Show codec log for d01a call
+
+- tool `Bash`: Find MenuWork global address
+
+- tool `Bash`: Find Work address
+
+- tool `Bash`: Log PS1 codec states in Redux
+
+- tool `Bash`: Look for BizHawk run tooling
+
+- tool `Bash`: Read BizHawk runner and debug trace
+
+- tool `Bash`: Read the debug trace loop and runner end
+
+- tool `Bash`: Log codec states in BizHawk (the reference)
+
+- tool `Bash`: Read the vbl wait in radiomes
+
+## Claude
+
+Not obviously. Extending the port's codec log to every change of the character state and exec flag, for the stretch from the face read's end to the voice start:
+
+- tool `Bash`: Port codec chara/exec transitions to 5836
+
+- tool `Bash`: Trim long seek by 2 vblanks; rerun
+
+## Claude
+
+Past `d01a`: the desync is back at loop 6,277 (0:03:37.57), the `s01a` call. Same method there: the BizHawk codec log for loops 6,220–6,280 and the port's own log.
+
+- tool `Bash`: BizHawk and port codec logs for s01a call
+
+- tool `Bash`: Log seek distances for all calls
+
+- tool `Bash`: Log chunk timings of s01a face read
+
+- tool `Bash`: Charge only wanted sectors; retune seeks; rerun
+
+## Claude
+
+That broke `d01a` (5,837) again. I'll compare all three calls side by side: the loop the face read starts (codec state 3) and the loop it ends (character state 0), port against PS1.
+
+- tool `Bash`: Compare face read start/end per call
+
+- tool `Bash`: Check log field layout
+
+- tool `Bash`: Fix the comparison script; run to 6262
+
+- tool `Bash`: Retune seek table; compare calls
+
+## Claude
+
+Close now: `d01a` is exact, `s01a` ends exactly (its start is 1 late), and the intro's face read ends 1 loop early. Running the full replay:
+
+- tool `Bash`: Full replay with retuned seeks
+
+- tool `Bash`: Port s01a call states
+
+- tool `Bash`: Shorter near seeks; compare calls
+
+## Claude
+
+`s01a` now matches the PS1 (voice at 6,269, state 5 at 6,276) and the replay is in sync to 6,280. Full run:
+
+- tool `Bash`: Full replay
+
+## Claude
+
+In sync to loop 6,496 now. The next desync is the rand seed at 6,497 (0:03:46.01), still in `s01a`. Checking whether a disc read is involved:
+
+- tool `Bash`: Status, seed, reads near 6497
+
+- tool `Bash`: Move modeled head on held stream; rerun
+
+- tool `Bash`: Stream fields near 6660
+
+- tool `Bash`: Gate stream sectors on PS1's progress
+
+- tool `Bash`: Full replay with stream gating
+
+## Claude
+
+Three loops later: 6,663 now. Comparing the stream's progress loop by loop:
+
+- tool `Bash`: Side by side stream progress
+
+- tool `Bash`: Gate on previous loop's progress; rerun
+
+- tool `Bash`: Midpoint gating; rerun
+
+- tool `Bash`: Find time.bin record size uses
+
+- tool `Bash`: Add PS1 vblank to time.bin; interpolate gate; rerun
+
+## Claude
+
+Still 5,753. Comparing the stream's progress side by side there:
+
+- tool `Bash`: Side by side at 5738-5755
+
+- tool `Bash`: Count the current vblank; rerun
+
+## Claude
+
+Back at 6,663, where the plain end-of-loop gate failed. Comparing the stream progress there with this build:
+
+- tool `Bash`: Side by side at 6651-6665
+
+- tool `Bash`: Revert interpolation and debug code
+
+- tool `Bash`: Full run with screenshots
+
+- tool `Bash`: Normal link and matching builds
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_6663.png
+
+- tool `Bash`: Update docs, archive, commit
+

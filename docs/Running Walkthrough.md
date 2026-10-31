@@ -741,3 +741,15 @@ zakocom.c's own block, the constants after them moved below the function so the 
 `for (i = 0; i < 0; i++)` loop in the init function for its block layout; `PARAM`'s 0xB16 is the faint, not
 `max_life`; new fields `field_AF8`, `field_B98`. Ten remain (no close counterpart), then `s03d` goes into the
 port. Matching build: 80 OK, VR 2 OK.
+
+## Step 20: s03d complete and in the port (2026-10-31)
+
+The rest of s03d's guard code decompiled (matching): the damage check, reset, action update, grenade, the five
+small functions of `800D0C90`, GetResources and the guard's constructor, and zakocom.c's sequence, setup and
+constructor. Two only for the port (register choice differs, `#ifdef MGS_PORT`, the matching build keeps the
+asm): the senses (`800D1054` + 3) and `800D14AC`. Then the stage table and `overlay2.c`'s pointers by symbol, and
+`s03d` links into the port. New in the decompiling: jump tables inside a rodata file move with the constants after
+them; GCC 2.x reverses ascending loops (so the source counts up); `Work` is 0xBA4 bytes. The replay then showed
+TLB misses: chafgrnd.c's chaff tiles have a NULL rect, read from PS1 RAM at 0 (3, 0, read in BizHawk); the port
+now uses those values. PCSX2: in sync to loop 12,101 (0:06:42.1); at 12,102 `GM_GameStatus` 0x20 differs.
+Matching build: 80 OK, VR 2 OK.

@@ -12041,3 +12041,507 @@ Ten done. The last close match is `s03d_800D09D8` against `meryl72`'s `s07c_mery
 
 - tool `Bash`: Walkthrough, archive, commit
 
+## Claude
+
+All 11 guard functions that had a close counterpart are now decompiled, and each compiles to exactly the PS1's bytes. That leaves 10 of `s03d`'s 21 still assembly-only. The matching builds pass after every one (80 OK, and 2 OK with `--variant=vr_exe`), each function has its own commit, and nothing is pushed. I'd said 12 earlier; it was 11.
+
+**Done:** `s03d_800CF194`, `800CEE3C`, `800CF68C`, `800CFB04`, `800D46F8`, `800CE12C`, `800CDF94`, `800CE720`, `800CE318`, `800CCE3C`, `800D09D8`. Between them they cover grabbed, thrown, knocked down, the stunned wait, standing, walking, ready-gun, pad commands, the dazed state, setup and the command dispatcher.
+
+**What it took beyond translating the counterparts:**
+- **Jump tables.** Functions with a `switch` need their jump tables removed from the read-only data files (`overlay2.c`, and `zakocom.c`'s own block). Any constants that follow a table have to move below the function so the data order stays the same.
+- **Inline helpers.** `SetAction`, `SetMode` and two variants: the PS1's instruction order only comes out when the code goes through them.
+- **An empty loop.** The setup function needed `zako11a`'s `for (i = 0; i < 0; i++)` loop, which generates no code but changes the block layout.
+- **Struct fixes.** `s03d`'s struct had the faint value mislabeled as `max_life` (renamed), and gained two fields, `field_AF8` and `field_B98`.
+
+**New tools in `tools/port/`:** `match_asm_funcs.py` (finds the closest decompiled counterpart), `disasm_s.py` (disassembles a stub with its calls named) and `fdiff.py` (instruction diff of one function against the matching binary).
+
+**What's left:** the 10 remaining functions have no close counterpart, so they'll be written from the assembly, which is slower. Two are long (`800D4EAC` 374 instructions, `800CD1C4` 278); several should be modest (`800D14AC` is 36). Once all 10 match, `s03d` can go into the port and the TAS can continue past loop 11,444 (0:06:19.70).
+
+Should I continue with those 10, shortest first?
+
+## User
+
+Commit changes and then continue
+
+- tool `Bash`: Status and remaining functions by size
+
+## Claude
+
+Everything was already committed, so the tree is clean. Continuing with the 10 remaining functions, shortest first, starting with `s03d_800D14AC` (36 instructions):
+
+- tool `Bash`: Disassemble s03d_800D14AC and context
+
+- tool `Bash`: Write s03d_800D14AC and diff
+
+## Claude
+
+The PS1 keeps `&GM_PlayerPosition` in a saved register (`s0`), which points to a local pointer variable in the original. Adding one:
+
+- tool `Bash`: Add a player pointer local; diff
+
+## Claude
+
+No effect; the compiler folded the local away. I'll try a few variants in one go: a local for the guard's position, the player pointer local, and both:
+
+- tool `Bash`: Try code variants for register allocation
+
+- tool `Bash`: Look at variant b's remaining differences
+
+- tool `Bash`: Generate arrangement variants
+
+## Claude
+
+The safety check stopped that command because of the variable in `rm -f $V/*.c`; nothing in it ran. I'll put the new variants in a fresh directory instead of deleting the old ones:
+
+- tool `Bash`: Generate and try arrangement variants
+
+## Claude
+
+The checkout put the `INCLUDE_ASM` line back, so there's no C definition for the script to swap. Inserting the first variant in its place, then running the search:
+
+- tool `Bash`: Run the variant search
+
+- tool `Bash`: Try more variants
+
+- tool `Bash`: Restore; disassemble s03d_800CEB38
+
+## Claude
+
+A grenade throw (`NewTenage3`). `zako11f` has `ActGrenade_800CAA54`, which should show the structure:
+
+- tool `Bash`: Read zako11f's grenade function
+
+- tool `Bash`: Data symbols and NewTenage3 signature
+
+- tool `Bash`: Write s03d_800CEB38 and diff
+
+## Claude
+
+Close. The PS1 loads the step vector's address after the `GV_DiffVec3` call. Reordering to match:
+
+- tool `Bash`: Reorder the step pointer; diff
+
+## Claude
+
+The stack slots are in a different order: the PS1 has `out` at 32, `rot` at 40 and `diff` at 48. GCC assigns them in declaration order, so reordering the declarations:
+
+- tool `Bash`: Reorder declarations; diff
+
+- tool `Bash`: Commit; disassemble s03d_800D041C
+
+- tool `Bash`: Find the counterpart dispatcher
+
+- tool `Bash`: Read zako11a's dispatcher
+
+- tool `Bash`: Uses of the fields to add
+
+- tool `Bash`: Add fields; write s03d_800D041C; diff
+
+## Claude
+
+Matched on the first try. The struct changed, so the full build is the real check:
+
+- tool `Bash`: Full build; commit; next function
+
+- tool `Bash`: Zone struct, strings, struct gaps
+
+- tool `Bash`: Find the zone struct
+
+- tool `Bash`: Read HZD_ZON
+
+## Claude
+
+The zone record is `x`, `z`, `y` (24 bytes), so the guard goes to (x, y + 1000, z), with z + 500 when `param.fAF8` is 2. Adding the fields and writing the function:
+
+- tool `Bash`: Add fields; write s03d_800CDB5C; diff
+
+## Claude
+
+Most of these are addresses shifted by 16 bytes, which means my version is four instructions longer somewhere. Looking at the rest of the diff:
+
+- tool `Bash`: Rest of the diff
+
+## Claude
+
+The PS1 reuses the zone's `z` from a register for the +500 case, where mine reloads it; the store in between could alias the zone, so the compiler won't reuse it. A local for it:
+
+- tool `Bash`: Use a local for zone z; diff
+
+- tool `Bash`: Full remaining diff
+
+## Claude
+
+Down to the last two stores: the PS1 stores one loaded value twice, and mine copies it to a second register first. A chained assignment usually produces that:
+
+- tool `Bash`: Chain the last assignment; diff
+
+- tool `Bash`: Full build; commit; next function
+
+- tool `Bash`: Read the counterpart damage check
+
+- tool `Bash`: Exact rodata to move
+
+- tool `Bash`: References to the merged halves
+
+## Claude
+
+Nothing else uses them. Writing the function, with the same case order as `zako11e`'s version (it matches the PS1's code layout), and moving the data:
+
+- tool `Bash`: Write s03d_800CD75C and move rodata
+
+## Claude
+
+`SetMode` and the `s03d_800CFB04` prototype are defined further down than this function. I'll move the inline helpers and the prototype up near the file's other declarations:
+
+- tool `Bash`: Move the helpers up; build and diff
+
+## Claude
+
+Matched, and all 80 build, so the moved data landed at the same addresses. Committing:
+
+- tool `Bash`: Commit; next function
+
+## Claude
+
+This `.s` file holds five small functions, not one: a head mark, a footstep sound, breath, a laser sight, and a gunshot. Checking their names in the file and how the rest of `zako.c` refers to them:
+
+- tool `Bash`: Names of the five functions
+
+- tool `Bash`: Signatures and struct offsets
+
+- tool `Bash`: MOTION_INFO layout, AN_Breath, call examples
+
+## Claude
+
+The frame is `m_ctrl.info1.frame`, and `AN_HeadMark` gets the function's second argument passed straight through. Writing all five:
+
+- tool `Bash`: Write the five functions
+
+- tool `Bash`: Build and diff the five
+
+- tool `Bash`: Reorder the footstep function; diff
+
+## Claude
+
+All five match at once. Full build and commit:
+
+- tool `Bash`: Full build; commit; size up the rest
+
+## Claude
+
+Five of the remaining stubs are done; four big ones are left, plus the stuck `800D14AC`. Next is `s03d_800D55C8` in `zakocom.c` (176 instructions):
+
+- tool `Bash`: Disassemble s03d_800D55C8
+
+- tool `Bash`: Read zk11fcom GetResources and constructor
+
+- tool `Bash`: Struct pad uses and existing names
+
+- tool `Bash`: Read zakocom.c tail and references
+
+- tool `Bash`: Split s03d_800D4EAC into functions
+
+- tool `Bash`: First part of s03d_800D4EAC
+
+## Claude
+
+This is the commander's main state machine: a 16-case `switch` on the global state, driving the cutscene screen, voice streams and game status, about 330 instructions. Reading the rest:
+
+- tool `Bash`: Rest of s03d_800D4EAC
+
+- tool `Bash`: Resolve global names
+
+- tool `Bash`: Resolve global names by address
+
+- tool `Bash`: Names for linkvarbuf 11/14/15/17
+
+- tool `Bash`: Existing uses of the mgr pads and names
+
+- tool `Bash`: Name the command manager fields
+
+- tool `Bash`: Write the state machine, Act, Die; build and diff
+
+- tool `Bash`: Verify the build really ran
+
+- tool `Bash`: Fix the type and names; rebuild and diff
+
+- tool `Bash`: Add the empty cases; diff
+
+- tool `Bash`: Add a loose shape diff to fdiff.py
+
+- tool `Bash`: Two increments in states 10/11; loose diff
+
+## Claude
+
+Down to the one scheduling difference after `CloseCinemaScreen`: the PS1 sets up the `GM_GameStatus` address before the state's. Trying the status update before the state change in the source:
+
+- tool `Bash`: Reorder the status update; loose diff
+
+- tool `Bash`: Compare rodata placement
+
+## Claude
+
+The read-only data is now identical, byte for byte. So the 8-byte shift is in the BSS, where the manager lives. Finding the first byte where the two whole binaries differ:
+
+- tool `Bash`: Locate the binary differences
+
+## Claude
+
+Only three words differ in the whole binary. So most of what `--loose` printed was my new loose mode misreporting, not real differences. Running the exact diff:
+
+- tool `Bash`: Exact diff of 4EAC and earlier functions
+
+## Claude
+
+Only three real differences: the stores I wrote to `field_20` go to 0x800DC320, which is the manager's `field_10` (the frame counter); I'd miscalculated the address. Fixing those:
+
+- tool `Bash`: Store to field_10; rebuild
+
+- tool `Bash`: Improve fdiff; commit
+
+- tool `Bash`: Constructor references and extern globals
+
+- tool `Bash`: Find the stage table's reference to it
+
+- tool `Bash`: Look for the stage table entry
+
+- tool `Bash`: Find the s03d character table
+
+- tool `Bash`: How s03d's character table is defined
+
+- tool `Bash`: Locate s03d's stage table source
+
+- tool `Bash`: Read s03d's stage table
+
+- tool `Bash`: Find and read the s03d stage file
+
+- tool `Bash`: Write the setup and constructor; diff
+
+- tool `Bash`: Write the pair via offset; rebuild
+
+## Claude
+
+Closer. The compiler now schedules the first store to the pair ahead of the manager's two stores; on the PS1 they come after. Trying a local pointer for the pair:
+
+- tool `Bash`: Pointer local for the pair; diff
+
+## Claude
+
+Same result. Next: writing the pair as a struct through a cast, `TOPCOMMAND->mode` and `->alert`, which changes how the compiler sees aliasing:
+
+- tool `Bash`: Struct cast for the pair; diff
+
+- tool `Bash`: Full build; commit; count left
+
+## Claude
+
+Matches, and all 80 build. `zakocom.c` is complete. Three left, all in `zako.c`: `800D1054` (229 instructions), `800CD1C4` (278), and the stuck `800D14AC`. Next is `s03d_800D1054`:
+
+- tool `Bash`: Disassemble s03d_800D1054
+
+- tool `Bash`: Find the sense counterparts
+
+- tool `Bash`: Outline zk11aact.c
+
+- tool `Bash`: Read zako11a's sense functions
+
+- tool `Bash`: Locate the two log strings
+
+- tool `Bash`: Read zako.c's rodata block near DB5A4
+
+- tool `Bash`: References, globals and asiato signatures
+
+- tool `Bash`: Write the four sense functions; build and diff
+
+## Claude
+
+Two differences, in the register used for the 4,000 comparison. `fprintf` is also implicitly declared here; `zakocom.c` gets it from `mts/mts.h`. Adding that include first:
+
+- tool `Bash`: Declare fprintf; diff
+
+## Claude
+
+Same. Trying the 4,000 and 300 checks as one combined condition, which gives the compiler a different flow:
+
+- tool `Bash`: Combined condition; diff
+
+## Claude
+
+Still the same. A few shapes at once with the variant script on `s03d_800D10B4`: `dist` scoped to the case block, as `int`, as `long`, and without the `control` local:
+
+- tool `Bash`: Try noise-check variants
+
+- tool `Bash`: Two more noise-check variants
+
+## Claude
+
+Still the same two differences. I'll park this file too, but keep the work. Checking whether the repository has a convention for C that's correct but doesn't match yet (`NON_MATCHING`):
+
+- tool `Bash`: Look for a non-matching convention
+
+- tool `Bash`: Read overlay_survey's comment stripping
+
+- tool `Bash`: Make the survey ignore MGS_PORT's #else
+
+## Claude
+
+The survey now treats that `#else` as absent. Wrapping the four sense functions (C for the port, `INCLUDE_ASM` for the matching build), and the same for `800D14AC`:
+
+- tool `Bash`: Wrap both in MGS_PORT; matching builds
+
+## Claude
+
+The matching builds still pass, since they take the assembly branch. Checking that the port-side C compiles too:
+
+- tool `Bash`: Compile zako.c/zakocom.c for the port
+
+## Claude
+
+Both compile for the port. The survey now shows `s03d` with 1 stub left (`800CD1C4`) and 15 literal addresses, the stage table's. Committing:
+
+- tool `Bash`: Commit; split the last stub into functions
+
+## Claude
+
+The commit went in, but the docs edit failed because the line had changed. Fixing the TAS plan line:
+
+- tool `Bash`: Read the current doc line
+
+## Claude
+
+Two of my earlier `sed` edits to this line had silently missed, so it's out of date. Rewriting the paragraph cleanly:
+
+- tool `Bash`: Rewrite the doc paragraph; read the last stub
+
+- tool `Bash`: Rest of s03d_800CD1C4
+
+## Claude
+
+Reading `zako11a`'s `GetResources` for the structure:
+
+- tool `Bash`: Read zako11a GetResources
+
+- tool `Bash`: overlay2 tail and B32/B33 declarations
+
+- tool `Bash`: Table tail, struct area, and existing names
+
+- tool `Bash`: Names of Act, Die and helpers
+
+- tool `Bash`: Find the function at 0x800CCC54
+
+## Claude
+
+Writing the function and its constructor. The struct also needs `field_AE4` and `field_AF0`:
+
+- tool `Bash`: Write GetResources and its constructor; diff
+
+- tool `Bash`: Signed chars, ascending loop; diff
+
+- tool `Bash`: Show the last 2 differences
+
+- tool `Bash`: Fix the size and the store; full builds
+
+- tool `Bash`: Commit; list the remaining literal addresses
+
+- tool `Bash`: How a converted stage table looks
+
+## Claude
+
+The table uses `CHARA_*` macros from `charalst.h`, which name each constructor. Checking which of `s03d`'s 28 entries already have macros, and which function names they expect:
+
+- tool `Bash`: Check CHARA macros for s03d's entries
+
+- tool `Bash`: Map each table entry to a macro or symbol
+
+- tool `Bash`: Symbolize the stage table and overlay2 pointers; build
+
+## Claude
+
+All 80 still match. Checking that the port now takes `s03d` in:
+
+- tool `Bash`: Survey and port link with s03d
+
+## Claude
+
+`s03d` is in the port now: 60 overlays linked, up from 59. Committing, then running the TAS replay to see how far it gets:
+
+- tool `Bash`: Commit; run the TAS replay
+
+- tool `Bash`: Unique TLB miss PCs
+
+- tool `Bash`: Locate MakePrimsRectangleSingle and context
+
+- tool `Bash`: Read MakePrimsRectangleSingle
+
+## Claude
+
+`prim->pos` is NULL: the function reads the vertex list at address 0. Finding which primitive it is: a temporary check that prints the primitive's type, count and caller when `pos` is NULL:
+
+- tool `Bash`: Identify the NULL-pos primitive
+
+- tool `Bash`: Why did PCSX2 end
+
+- tool `Bash`: Look for the debug output
+
+## Claude
+
+No debug output, so `prim->pos` isn't NULL; the zero pointer is something else. Disassembling around the faulting instruction:
+
+- tool `Bash`: Disassemble around the fault
+
+- tool `Bash`: Read DG_GetPrim
+
+- tool `Bash`: Log MakePrim calls without a rect
+
+## Claude
+
+That would log every non-rectangle primitive too, so I'll limit it to loops from 11,440 on and look at the callers:
+
+- tool `Bash`: Callers of rectless MakePrim
+
+## Claude
+
+Two candidates: a `GetResources` at 0x3455dc creating a type-0x12 primitive (a textured quad, count 1) without a `rect`, and `NewSnake`. Finding which file that `GetResources` is in:
+
+- tool `Bash`: Which GetResources is at 0x3455dc
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Symbols just before 0x345578
+
+## Claude
+
+Those are local symbols, so finding the source file from the functions around it (`Max3`, `d11c_800C42AC`):
+
+- tool `Bash`: Find the file with d11c_800C42AC
+
+- tool `Bash`: How demokage makes its primitive
+
+- tool `Bash`: Find the primitive call in demokage.c
+
+- tool `Bash`: Read demokage GetResources
+
+- tool `Bash`: Read the prim path selection and GM_MakePrim
+
+- tool `Bash`: Log rectangle prims made without a rect
+
+## Claude
+
+A single one, created at port loop 9,224: type 0x409 (a rectangle type), 64 primitives, from the `GetResources` right after `CalcParticlePosition`. Finding that file:
+
+- tool `Bash`: Find the particle file
+
+- tool `Bash`: Read chafgrnd prim setup and rect use
+
+- tool `Bash`: Read _MakeXYZRectangleSingle
+
+- tool `Bash`: Read PS1 RAM at address 0 in BizHawk
+
+- tool `Bash`: Apply the fix; matching build; full replay
+
+## Claude
+
+No more TLB misses, and the replay still reaches the same point: in sync to loop 12,101, with the next desync a game status bit at 12,102. Updating the docs and committing:
+
+- tool `Bash`: Docs, archive, commit
+

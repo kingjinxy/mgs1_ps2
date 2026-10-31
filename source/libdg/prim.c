@@ -337,6 +337,15 @@ STATIC char *_MakeXYZRectangleSingle( DG_PRIM *prim, char *out, int n_prims )
     rect = prim->rect;
     psize = prim->psize;
 
+#ifdef MGS_PORT
+    if ( !rect )
+    {
+        /* okajima/chafgrnd.c's tiles (DG_PRIM_RECTANGLE, rect NULL): the PS1 reads its RAM at 0, which holds 3 and
+           0 (BizHawk, loops 300 and 9,230); the PS2 would fault */
+        static RECT ps1_ram0 = { 3, 0, 0, 0 };
+        rect = &ps1_ram0;
+    }
+#endif
     x = rect->x;
     y = rect->y;
 

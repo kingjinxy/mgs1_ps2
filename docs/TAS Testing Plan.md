@@ -300,10 +300,19 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       `zako11a`/`zako11e`/`zako11f`/`enemy`), `tools/port/fdiff.py s03d <func>` shows the differing instructions
       of one against `build/s03d.matching.bin`. `s03d`'s `Work` is its own layout (target pointer at 0x8FC and a
       TARGET at 0x900, where zako11a has the pointer at 0x900), so fields are mapped from the assembly.
-      Decompiled so far (matching): `s03d_800CF194`, `s03d_800CEE3C`, `s03d_800CF68C`, `s03d_800CFB04`, `s03d_800D46F8`, `s03d_800CE12C`, `s03d_800CDF94`, `s03d_800CE720`, `s03d_800CE318`, `s03d_800CCE3C`, `s03d_800D09D8`, `s03d_800CEB38`, `s03d_800D041C`, `s03d_800CDB5C`, `s03d_800CD75C`, `s03d_800D0C90` with the four after it in its .s (`800D0CD4`, `800D0D6C`, `800D0DF0`, `800D0E2C`) (its jump table sat inside overlay2.c's rodata, so the constants after it moved into zako.c below it; it needed zako11a's empty `for (i = 0; i < 0; i++)` loop for the block layout; an inline `SetAction` gives the PS1's scheduling; their
-      jump tables came out of `overlay2.c`'s rodata: zako.obj's follow it, so they land at the same addresses). `PARAM`'s 0xB16 is the faint
-      (what `Zako_800CCCF4` passes to `GM_SetPowerTarget`), not `max_life`; renamed. `tools/port/disasm_s.py s03d
-      <func>` disassembles a stub with its calls named.
+      Decompiled so far, matching: zako.c `s03d_800CF194`, `800CEE3C`, `800CF68C`, `800CFB04`, `800CE12C`, `800CDF94`,
+      `800CE720`, `800CE318`, `800CCE3C`, `800D09D8`, `800CEB38`, `800D041C`, `800CDB5C`, `800CD75C`, `800D0C90` with
+      the four after it in its .s; zakocom.c `800D46F8`, `800D4EAC` with its Act and Die, `800D55C8` with the
+      commander's constructor (zakocom.c is complete). For the port only (`#ifdef MGS_PORT`; the matching build keeps
+      the INCLUDE_ASM, and `overlay_survey.py` skips that `#else`), C that differs from the PS1 in register choice
+      alone: `800D1054` with three more senses, `800D14AC`. Left: `800CD1C4` (two functions), then the stage table
+      (`source/stage/s03d.c`: constructors as literal addresses, 15 of them by the survey).
+      What it took: jump tables come out of the rodata files (`overlay2.c`, zakocom.c's own block) with any constants
+      after them moved below the function, so the order holds; inline helpers (`SetAction`, `SetMode`, ...) for the
+      PS1's scheduling; zako11a's empty `for (i = 0; i < 0; i++)` loop in the init for its block layout; a struct
+      cast for the top command pair; declaration order for stack slots. `PARAM`'s 0xB16 is the faint (what
+      `Zako_800CCCF4` passes to `GM_SetPowerTarget`), not `max_life`; renamed. Tools: `tools/port/disasm_s.py s03d
+      <func>` (a stub disassembled, calls named), `fdiff.py [--loose]` (also warns of a stale build).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

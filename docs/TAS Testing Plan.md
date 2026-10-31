@@ -289,7 +289,7 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       (`GM_LoadComplete` -1) the port gets the pads of the PS1's last loop of the load (Snake's walk started
       there with down held; anim frame `field_9BC` was a loop ahead). pads.bin's own records won't do: their
       [2]/[3] can be rebuilt (loop 490).
-- [ ] rand seed at loop 11,444 (0:06:19.70, `s03d`; 10 of the 21 INCLUDE_ASM left). Screenshot no use: Redux is at the title screen by here, the
+- [x] rand seed at loop 11,444 (0:06:19.70, `s03d`). Screenshot no use: Redux is at the title screen by here, the
       port's dump black (run_port.py now waits 3 s before closing PCSX2 when dumping: the first was cut).
       Not a desync: `s03d` isn't in the port. Its actors at loop 11,445, PS1 (BizHawk, walking `ActorList`
       0x800ACC18) against port: the port lacks `cinema.c`, `asioto.c`, `evpanel.c`, `uji.c` x2, `lamp.c` x4,
@@ -314,6 +314,12 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       cast for the top command pair; declaration order for stack slots. `PARAM`'s 0xB16 is the faint (what
       `Zako_800CCCF4` passes to `GM_SetPowerTarget`), not `max_life`; renamed. Tools: `tools/port/disasm_s.py s03d
       <func>` (a stub disassembled, calls named), `fdiff.py [--loose]` (also warns of a stale build).
+      Done: no INCLUDE_ASM left, the stage table (`source/stage/s03d.c`) and `overlay2.c`'s pointers by symbol, and
+      `s03d` links into the port (60 overlays). The replay goes on in `s03d`. Its first gameplay had 50 TLB misses in
+      `MakePrimsRectangleSingle`: okajima/chafgrnd.c's chaff tiles are a `DG_PRIM_RECTANGLE` with rect NULL (found
+      by logging `DG_MakePrim`'s rectangle prims without one), so the PS1 reads its RAM at 0: 3 and 0 (BizHawk).
+      The port uses those values for a NULL rect (`libdg/prim.c`, `MGS_PORT`).
+- [ ] `GM_GameStatus` 0x20 at loop 12,102 (0:06:42.12, `s03d`): the PS1 has it, the port not.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

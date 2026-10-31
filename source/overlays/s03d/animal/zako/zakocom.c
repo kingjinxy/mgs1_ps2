@@ -31,38 +31,6 @@ const char s03d_dword_800DBB98[8] = "itazo \n";
 const char s03d_dword_800DBBA0[12] = "kottida!!\n";
 const char s03d_dword_800DBBAC[20] = "haitini modoruzo!!\n";
 const char s03d_dword_800DBBC0[16] = "kottida !!\n";
-const int s03d_dword_800DBBD0 = 0x800D4730;
-const int s03d_dword_800DBBD4 = 0x800D4740;
-const int s03d_dword_800DBBD8 = 0x800D4750;
-const int s03d_dword_800DBBDC = 0x800D4760;
-const int s03d_dword_800DBBE0 = 0x800D4770;
-const int s03d_dword_800DBBE4 = 0x800D4780;
-const int s03d_dword_800DBBE8 = 0x800D4790;
-const int s03d_dword_800DBBEC = 0x800D47A0;
-const char s03d_dword_800DBBF0[32] = "%d reset_enemy_num[%d ]\n";
-const int s03d_dword_800DBC10 = 0x800D4F14;
-const int s03d_dword_800DBC14 = 0x800D4F5C;
-const int s03d_dword_800DBC18 = 0x800D5008;
-const int s03d_dword_800DBC1C = 0x800D5090;
-const int s03d_dword_800DBC20 = 0x800D50D0;
-const int s03d_dword_800DBC24 = 0x800D5164;
-const int s03d_dword_800DBC28 = 0x800D51A8;
-const int s03d_dword_800DBC2C = 0x800D53D8;
-const int s03d_dword_800DBC30 = 0x800D5268;
-const int s03d_dword_800DBC34 = 0x800D52A4;
-const int s03d_dword_800DBC38 = 0x800D52B8;
-const int s03d_dword_800DBC3C = 0x800D52F0;
-const int s03d_dword_800DBC40 = 0x800D5324;
-const int s03d_dword_800DBC44 = 0x800D5344;
-const int s03d_dword_800DBC48 = 0x800D53A8;
-const int s03d_dword_800DBC4C = 0x800D53D8;
-const char s03d_dword_800DBC50[32] = "Err Err Err Sound Buff Over !!\n";
-const char s03d_dword_800DBC70[] = {'z', 'o', 'n', 'e'};
-const char s03d_dword_800DBC74[] = {'=', '%', 'd', ' '};
-const char s03d_dword_800DBC78[] = {0x0, 0x0, 0x0, 0x0};
-const char s03d_dword_800DBC7C[] = {'z', 'a', 'k', 'o'};
-const char s03d_dword_800DBC80[] = {'c', 'o', 'm', '.'};
-const char s03d_dword_800DBC84[] = {'c', 0x0, 0x0, 0xf};
 
 extern int s03d_dword_800DC2E0;
 extern int s03d_dword_800DC2E8;
@@ -358,7 +326,63 @@ void ZakoCom_800D4694(int *out)
         break;
     }
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D46F8.s")
+int s03d_800D46F8(int cmd)
+{
+    switch (cmd)
+    {
+    case 240:
+        ZakoCom_800D440C(&cmd);
+        break;
+    case 241:
+        ZakoCom_800D4460(&cmd);
+        break;
+    case 242:
+        ZakoCom_800D44B4(&cmd);
+        break;
+    case 243:
+        ZakoCom_800D4508(&cmd);
+        break;
+    case 244:
+        ZakoCom_800D455C(&cmd);
+        break;
+    case 245:
+        ZakoCom_800D4640(&cmd);
+        break;
+    case 246:
+        ZakoCom_800D45B0(&cmd);
+        break;
+    case 247:
+        ZakoCom_800D4694(&cmd);
+        break;
+    }
+    return cmd;
+}
+
+/* the rest of the rodata, after this function's jump table (0x800DBBD0) */
+const char s03d_dword_800DBBF0[32] = "%d reset_enemy_num[%d ]\n";
+const int s03d_dword_800DBC10 = 0x800D4F14;
+const int s03d_dword_800DBC14 = 0x800D4F5C;
+const int s03d_dword_800DBC18 = 0x800D5008;
+const int s03d_dword_800DBC1C = 0x800D5090;
+const int s03d_dword_800DBC20 = 0x800D50D0;
+const int s03d_dword_800DBC24 = 0x800D5164;
+const int s03d_dword_800DBC28 = 0x800D51A8;
+const int s03d_dword_800DBC2C = 0x800D53D8;
+const int s03d_dword_800DBC30 = 0x800D5268;
+const int s03d_dword_800DBC34 = 0x800D52A4;
+const int s03d_dword_800DBC38 = 0x800D52B8;
+const int s03d_dword_800DBC3C = 0x800D52F0;
+const int s03d_dword_800DBC40 = 0x800D5324;
+const int s03d_dword_800DBC44 = 0x800D5344;
+const int s03d_dword_800DBC48 = 0x800D53A8;
+const int s03d_dword_800DBC4C = 0x800D53D8;
+const char s03d_dword_800DBC50[32] = "Err Err Err Sound Buff Over !!\n";
+const char s03d_dword_800DBC70[] = {'z', 'o', 'n', 'e'};
+const char s03d_dword_800DBC74[] = {'=', '%', 'd', ' '};
+const char s03d_dword_800DBC78[] = {0x0, 0x0, 0x0, 0x0};
+const char s03d_dword_800DBC7C[] = {'z', 'a', 'k', 'o'};
+const char s03d_dword_800DBC80[] = {'c', 'o', 'm', '.'};
+const char s03d_dword_800DBC84[] = {'c', 0x0, 0x0, 0xf};
 void s03d_800D47BC(ZakoComMgr *mgr)
 {
     int i;

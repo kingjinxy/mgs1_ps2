@@ -11732,3 +11732,312 @@ Now `s03d`'s own struct, to map the fields this function uses:
 
 - tool `Bash`: Keep the two helpers as tools; verify they run
 
+## Claude
+
+Both helpers run from `tools/port/` now. Recording the finding and the plan in the docs, and committing:
+
+- tool `Bash`: Document and commit the finding and helpers
+
+## Claude
+
+The desync at loop 11,444 (0:06:19.70) isn't a desync: the stage `s03d` is missing from the port entirely. I haven't decompiled any of its 21 missing functions yet; this turn went into confirming the cause and setting up the work. That's committed as `60a17c1a1`; nothing is pushed.
+
+**How it showed up:** I read the PS1's actor lists from memory in BizHawk at loop 11,445 and compared them with the port's. The port has only the stage's doors. It lacks the cutscene actor (`cinema.c`), lamps, walls, the elevator panel, `uji.c` and the intro camera, and on the PS1 one of those draws a random number every loop.
+
+**Why the stage is missing:** 21 of `s03d`'s functions, all guard AI (`zako.c` 18, `zakocom.c` 3), exist only as PS1 assembly in the decompilation, so the port leaves the whole overlay out. Upstream has them only as assembly too, so there's nothing to take from there.
+
+**What's in place for the decompilation:**
+- `tools/port/match_asm_funcs.py s03d` finds which already-decompiled function each one resembles, by comparing the sequence of functions it calls. 12 of the 21 have a close counterpart (0.9 or better) in the other guard sets (`zako11a`/`11e`/`11f`) or the generic `enemy` code. Some are nearly identical, like `s03d_800CF194` against `zako11a`'s `s11a_800CBD74`.
+- `tools/port/fdiff.py s03d <function>` lists the instructions where the built function differs from the PS1's, which makes it practical to work one function at a time against the matching build.
+- One complication: `s03d`'s guard data is laid out differently from `zako11a`'s. For example, the target pointer is at 0x8FC instead of 0x900. So the counterpart C can't be copied over; each field has to be mapped from the assembly.
+
+**Expected effort:** the 12 with close counterparts should go fairly quickly. The other 9 are written from the assembly, and some are long (`s03d_800D4EAC` is 374 instructions). All told, I'd expect this to take several sessions. Each function counts as done only when it compiles to exactly the PS1's bytes, which the matching build checks. Once all 21 match, `s03d` goes into the port and the TAS can continue.
+
+Should I start with the 12 that have counterparts?
+
+## User
+
+Yes
+
+## Claude
+
+Starting with `s03d_800CF194`, the closest match. Disassembling the PS1 function to map its field offsets:
+
+- tool `Bash`: Disassemble s03d_800CF194 with call names
+
+- tool `Bash`: Find s03d idioms for mode/action and globals
+
+- tool `Bash`: Read s03d zako.c declarations and idioms
+
+- tool `Bash`: Check names used by the function
+
+## Claude
+
+Writing the C for `s03d_800CF194`, with `field_AF8` added to the struct:
+
+- tool `Bash`: Write the C and check it against the PS1 bytes
+
+- tool `Bash`: Use side 0; rebuild and diff
+
+## Claude
+
+`s03d_800CF194` matches the PS1 byte for byte. Confirming the whole matching build still passes:
+
+- tool `Bash`: Full matching builds
+
+- tool `Bash`: Disassemble s03d_800CEE3C and read its counterpart
+
+- tool `Bash`: Read zako11f counterpart
+
+- tool `Bash`: Read the counterpart's body
+
+- tool `Bash`: How GM_SetNoise is written
+
+## Claude
+
+`GM_SetNoise` is a static inline in `game/g_macro.h`, so calling it produces exactly that inline code. Writing `s03d_800CEE3C`:
+
+- tool `Bash`: Write s03d_800CEE3C and diff
+
+## Claude
+
+`s03d_800CEE3C` matched on the first try. Next, `s03d_800CF68C` against `zako11f`'s `s11i_asiato_800CB678`:
+
+- tool `Bash`: Disassemble s03d_800CF68C and its counterpart
+
+- tool `Bash`: Find the target mode functions' names
+
+- tool `Bash`: Write s03d_800CF68C and diff
+
+## Claude
+
+One instruction off: the PS1 reads the faint value at `Work`+0xB16, while `s03d`'s `PARAM` puts `faint` at 0xB18, with a `max_life` at 0xB16. Checking how `s03d` uses those two fields elsewhere:
+
+- tool `Bash`: Uses of PARAM life fields in s03d
+
+- tool `Bash`: How b14/b16 are used
+
+- tool `Bash`: Correct the PARAM field names; rebuild
+
+## Claude
+
+Three functions done, and the full matching build passes (80 OK). Committing this checkpoint, then continuing:
+
+- tool `Bash`: Commit the first three functions
+
+## Claude
+
+Next, `s03d_800CFB04` against `zako11e`'s `s11e_zk11ecom_800D649C` (0.98). It's the longest of the matched ones, 315 instructions:
+
+- tool `Bash`: Read zako11e's counterpart
+
+- tool `Bash`: Rest of counterpart and s03d disassembly
+
+- tool `Bash`: Where the jump tables live
+
+- tool `Bash`: Read the jump tables in overlay2.c
+
+- tool `Bash`: Read the rest of overlay2.c rodata
+
+- tool `Bash`: Read s03d's link order
+
+- tool `Bash`: Read the linker file header
+
+- tool `Bash`: Check references to the jump table constants
+
+- tool `Bash`: Names for the fall mode and sound effects
+
+- tool `Bash`: Find the function just before 800CFB04
+
+## Claude
+
+0x800D0000 − 16 is 0x800CFFF0, which is `s03d_800CFFF0`; I'd misread the arithmetic. Writing the function and removing the table constants from `overlay2.c`:
+
+- tool `Bash`: Write s03d_800CFB04, drop its tables from overlay2.c; diff
+
+- tool `Bash`: Remove the last table entry; rebuild
+
+## Claude
+
+Four done, with the jump tables in the right place, and all 80 builds match. Committing:
+
+- tool `Bash`: Commit the fourth function
+
+## Claude
+
+Next, `s03d_800D46F8` in `zakocom.c` against `enemy/think.c`'s `s00a_command_800CE530` (0.98). It's short:
+
+- tool `Bash`: Disassemble s03d_800D46F8 and its counterpart
+
+- tool `Bash`: Find the jump table and helper signatures
+
+- tool `Bash`: Read zakocom.c's rodata block
+
+- tool `Bash`: Read the rest of the const block
+
+- tool `Bash`: Write s03d_800D46F8, reorder rodata; build and diff
+
+## Claude
+
+Five done, and all 80 still match, so the read-only data is in the same order. Committing, then `s03d_800CE12C` against `enemy/action.c`'s `ActStandStill_800C5C84` (0.95):
+
+- tool `Bash`: Commit; disassemble next and read counterpart
+
+- tool `Bash`: Uses of field_B20 and related names
+
+- tool `Bash`: Write s03d_800CE12C and diff
+
+- tool `Bash`: How existing code sets action 0
+
+- tool `Bash`: Fix pad mode; try an inline SetAction
+
+## Claude
+
+It matches. The original did use an inline helper, which is useful to know for the rest. Checking the full build and committing:
+
+- tool `Bash`: Full build; commit
+
+## Claude
+
+Six done. Next, `s03d_800CDF94` against `zako11f`'s `CheckPad_800C9EB0` (0.94):
+
+- tool `Bash`: Disassemble s03d_800CDF94 and its counterpart
+
+- tool `Bash`: Names of the target functions
+
+- tool `Bash`: Write s03d_800CDF94 and diff
+
+## Claude
+
+Matched on the first try. Full build and commit:
+
+- tool `Bash`: Full build; commit
+
+## Claude
+
+Seven done. Next, `s03d_800CE720` against `zako11f`'s `ActReadyGun_800CA674`:
+
+- tool `Bash`: Disassemble s03d_800CE720 and its counterpart
+
+- tool `Bash`: Names and the B98 field area
+
+- tool `Bash`: Write s03d_800CE720 and diff
+
+## Claude
+
+Mine is one instruction shorter; the rest is addresses shifting by 4. Looking further down for the actual difference:
+
+- tool `Bash`: Show the end of the diff
+
+## Claude
+
+Only the order of the final if/else differs: the PS1 tests the opposite condition first. Inverting it:
+
+- tool `Bash`: Invert the final condition; rebuild and diff
+
+- tool `Bash`: Commit; disassemble s03d_800CE318
+
+- tool `Bash`: Read zako11a's walk function
+
+- tool `Bash`: Write s03d_800CE318 and diff
+
+## Claude
+
+Matched on the first try. Full build and commit:
+
+- tool `Bash`: Full build; commit
+
+## Claude
+
+Nine done. Next, `s03d_800CCE3C` against `zako11a`'s `InitState` (0.95), the guard's setup:
+
+- tool `Bash`: Disassemble s03d_800CCE3C and InitState
+
+- tool `Bash`: Find the name strings in rodata
+
+## Claude
+
+You've hit your 5-hour limit · resets 2:30pm (America/Chicago)
+
+## User
+
+Resume
+
+- tool `Bash`: Declaration and helper signatures
+
+- tool `Bash`: NewShadow2 signature and includes
+
+## Claude
+
+Writing `s03d_800CCE3C`:
+
+- tool `Bash`: Write s03d_800CCE3C and diff
+
+## Claude
+
+The attribute is 5 (`RADAR_VISIBLE | RADAR_SIGHT`). The register assignment and the early return also differ, but the attribute fix may shift those, so fixing it first:
+
+- tool `Bash`: Fix the attribute; diff again
+
+- tool `Bash`: Use the body and weapon fields directly; diff
+
+## Claude
+
+One `body` reference was left (`GM_ConfigObjectJoint(body)`), so that build failed and the diff shows the old object. Fixing it:
+
+- tool `Bash`: Fix the leftover; rebuild and diff
+
+- tool `Bash`: Try declaration orders for register allocation
+
+## Claude
+
+All 24 orders give exactly 107 differences, which suggests the build is failing every time rather than the order having no effect. Checking the build output:
+
+- tool `Bash`: Check build errors and the current function
+
+## Claude
+
+My text replacement turned the assignments into `body = body;` (uninitialized), so every order compiled the same broken code. Fixing that and rerunning the order search:
+
+- tool `Bash`: Fix the assignments; rerun order search
+
+- tool `Bash`: Match the field access forms; diff
+
+- tool `Bash`: Try without the control local
+
+## Claude
+
+No change. The extra instruction is about the early return, so looking at how the end of my compiled function is laid out compared with the PS1's:
+
+- tool `Bash`: Compare the function's tail
+
+## Claude
+
+The checker only shows the first differences, so dumping the last instructions of both versions directly:
+
+- tool `Bash`: Tail of PS1 vs built function
+
+- tool `Bash`: zako11a InitState compiled prologue/epilogue
+
+- tool `Bash`: Add the no-op loop; diff
+
+## Claude
+
+That matched, with the no-op loop: the original evidently had a loop over zero items there, as `zako11a` does. Full build and commit:
+
+- tool `Bash`: Full build; commit
+
+## Claude
+
+Ten done. The last close match is `s03d_800D09D8` against `meryl72`'s `s07c_meryl72_unk1_800CB1B4` (0.90):
+
+- tool `Bash`: Disassemble s03d_800D09D8 and its counterpart
+
+- tool `Bash`: Names for the last pieces
+
+- tool `Bash`: Write s03d_800D09D8 and diff
+
+- tool `Bash`: Full builds; commit; remaining count
+
+- tool `Bash`: Walkthrough, archive, commit
+

@@ -289,7 +289,7 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       (`GM_LoadComplete` -1) the port gets the pads of the PS1's last loop of the load (Snake's walk started
       there with down held; anim frame `field_9BC` was a loop ahead). pads.bin's own records won't do: their
       [2]/[3] can be rebuilt (loop 490).
-- [ ] rand seed at loop 11,444 (0:06:19.70, `s03d`). Screenshot no use: Redux is at the title screen by here, the
+- [ ] rand seed at loop 11,444 (0:06:19.70, `s03d`; 10 of the 21 INCLUDE_ASM left). Screenshot no use: Redux is at the title screen by here, the
       port's dump black (run_port.py now waits 3 s before closing PCSX2 when dumping: the first was cut).
       Not a desync: `s03d` isn't in the port. Its actors at loop 11,445, PS1 (BizHawk, walking `ActorList`
       0x800ACC18) against port: the port lacks `cinema.c`, `asioto.c`, `evpanel.c`, `uji.c` x2, `lamp.c` x4,

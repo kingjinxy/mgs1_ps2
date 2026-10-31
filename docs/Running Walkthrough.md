@@ -728,3 +728,16 @@ doesn't, because `s03d` is left out of the port for its 21 undecompiled guard fu
 next job (TAS plan). Two helpers for it: `tools/port/match_asm_funcs.py` (which decompiled function an
 INCLUDE_ASM one resembles, by call sequence) and `tools/port/fdiff.py` (instruction diff of one function against
 the matching binary).
+
+## Step 19: s03d's guard functions, the 11 with counterparts (2026-10-31)
+
+Eleven of `s03d`'s 21 INCLUDE_ASM functions decompiled to matching C, each from its closest decompiled counterpart
+(`tools/port/match_asm_funcs.py`) with the fields mapped from the assembly (`tools/port/disasm_s.py`) and checked
+instruction by instruction (`tools/port/fdiff.py`) and with the matching build: `s03d_800CF194`, `800CEE3C`,
+`800CF68C`, `800CFB04`, `800D46F8` (zakocom.c), `800CE12C`, `800CDF94`, `800CE720`, `800CE318`, `800CCE3C`,
+`800D09D8`. What it took beyond the field mapping: jump tables move out of the rodata files (`overlay2.c`,
+zakocom.c's own block, the constants after them moved below the function so the order holds); inline helpers
+(`SetAction`, `SetMode`, `SetMode2`, `SetModeFields`) for the PS1's instruction scheduling; zako11a's empty
+`for (i = 0; i < 0; i++)` loop in the init function for its block layout; `PARAM`'s 0xB16 is the faint, not
+`max_life`; new fields `field_AF8`, `field_B98`. Ten remain (no close counterpart), then `s03d` goes into the
+port. Matching build: 80 OK, VR 2 OK.

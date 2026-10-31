@@ -404,7 +404,70 @@ void Zako_800CDF2C(Work *work)
     GM_PowerTarget(t);
 }
 #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CDF94.s")
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CE12C.s")
+int  s03d_800CDF94(Work *work);
+void s03d_800CE318(Work *work, int arg);
+
+static inline void SetAction(Work *work, int action, int interp)
+{
+    work->field_8E0 = action;
+    GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[action], 0, interp);
+}
+
+void s03d_800CE12C(Work *work, int arg)
+{
+    work->field_8FC->class |= 0x9E;
+
+    if (ZAKOCOM_MGR->field_1C == 0)
+    {
+        work->field_8FC->class |= TARGET_C4;
+    }
+
+    work->field_B24 = 4000;
+
+    if (arg == 0)
+    {
+        SetAction(work, 0, 4);
+    }
+
+    if (Zako_800CDA04(work) || s03d_800CDF94(work))
+    {
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[0], 0, 4, 0);
+        work->field_8EC = 0;
+        work->field_8F4 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        return;
+    }
+
+    if (work->field_AE6 >= 0)
+    {
+        if (GV_DiffDirAbs(work->control.rot.vy, work->field_AE6) < 0x100)
+        {
+            if (work->field_ADC & 0x1)
+            {
+                work->field_8E0 = 2;
+                GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[2], 0, 4);
+            }
+            else
+            {
+                work->field_8E0 = 1;
+                GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[1], 0, 4);
+            }
+
+            work->field_8E8 = s03d_800CE318;
+            work->field_8F0 = 0;
+            work->control.turn.vz = 0;
+            work->control.turn.vx = 0;
+            GM_ConfigMotionAdjust(&work->body, 0);
+        }
+        else
+        {
+            work->control.turn.vy = work->field_AE6;
+        }
+    }
+
+    work->field_B20 = GV_NearExp4P((short)work->field_B20, work->control.rot.vy);
+}
 void s03d_800CE2C0(Work *work, int arg1)
 {
     int dir = GV_DiffDirS(arg1, work->control.rot.vy);

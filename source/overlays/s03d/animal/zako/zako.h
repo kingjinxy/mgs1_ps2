@@ -14,8 +14,8 @@ typedef struct _PARAM
     char        defends[4];
     signed char roots[4];
     short       life;
-    short       max_life; /* for the red damage bar */
-    short       faint;
+    short       faint;  /* the target's faint (Zako_800CCCF4's GM_SetPowerTarget, s03d_800CF68C) */
+    short       field_B18;
 } PARAM;
 
 typedef struct _Work
@@ -93,7 +93,8 @@ typedef struct _Work
     short           field_AE8;      /* 0xAE8 */
     char            pad_AEA[0xAF6 - 0xAEA];
     short           field_AF6;      /* 0xAF6 */
-    char            pad_AF8[0xB00 - 0xAF8];
+    short           field_AF8;      /* 0xAF8 */
+    char            pad_AFA[0xB00 - 0xAFA];
     int             field_B00;      /* 0xB00 */
     int             field_B04;      /* 0xB04 */
     PARAM           param;          /* 0xB08 */

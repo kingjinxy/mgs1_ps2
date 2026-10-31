@@ -40,6 +40,7 @@ extern const SVECTOR s03d_dword_800DB550;
 extern const SVECTOR s03d_dword_800DB558;
 
 extern int s03d_dword_800DC2F8;
+extern int s03d_dword_800DC2F4;
 
 void AN_Fog(SVECTOR *svec);
 
@@ -148,7 +149,7 @@ void Zako_800CCCF4(Work *work)
 {
     TARGET *t = work->field_8FC;
     int     b14 = work->param.life;
-    int     b16 = work->param.max_life;
+    int     b16 = work->param.faint;
 
     GM_SetTarget(t, 0x9E, 2, (SVECTOR *)&s03d_dword_800C39B0);
     GM_SetPowerTarget(t, 1, -1, b14, b16, (SVECTOR *)&s03d_dword_800C39B8);
@@ -322,7 +323,7 @@ void Zako_800CDA70(Work *work)
 {
     TARGET *t = work->field_8FC;
     int     b14 = work->param.life;
-    int     b16 = work->param.max_life;
+    int     b16 = work->param.faint;
 
     GM_SetTarget(t, 0x9E, 2, (SVECTOR *)&s03d_dword_800C39B0);
     GM_SetPowerTarget(t, 1, -1, b14, b16, (SVECTOR *)&s03d_dword_800C39B8);
@@ -589,7 +590,98 @@ void s03d_800CED94(Work *work, int arg)
         GM_ConfigMotionAdjust(&work->body, NULL);
     }
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CEE3C.s")
+void s03d_800CEE3C(Work *work, int arg)
+{
+    TARGET  *target;
+    CONTROL *control;
+
+    target = work->field_8FC;
+    control = &work->control;
+
+    work->field_8E4 = 0;
+
+    if (arg == 0)
+    {
+        work->field_8DC = 6;
+        work->field_8E0 = 27;
+        GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[27], 0, 4);
+    }
+
+    if (arg - 8 < 10u)
+    {
+        Zako_800CDF2C(work);
+    }
+
+    if (work->field_8E0 == 27)
+    {
+        if (arg == 22)
+        {
+            if (control->mov.vy - control->levels[0] < 2000)
+            {
+                GM_SeSet(&control->mov, SE_V_ENE_PUNCHED);
+                GM_SeSet(&control->mov, SE_HIT_FLOOR);
+                Zako_800D0B18(work, 6, 0);
+                GM_SetNoise(100, 4, &work->control.mov);
+            }
+            else if (control->mov.vy - control->levels[0] > 4000)
+            {
+                work->field_8FC->vital = 0;
+                GM_SeSet(&control->mov, SE_V_ENE_THROWN);
+            }
+        }
+
+        if (work->body.is_end)
+        {
+            if (control->grounded == 0)
+            {
+                work->field_8E0 = 36;
+                GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[36], 0, 4);
+            }
+            else
+            {
+                work->field_8E8 = s03d_800CF68C;
+                work->field_8F0 = 0;
+                work->control.turn.vz = 0;
+                work->control.turn.vx = 0;
+                GM_ConfigMotionAdjust(&work->body, 0);
+            }
+        }
+    }
+    else if (control->grounded)
+    {
+        GM_SeSet(&control->mov, SE_V_ENE_PUNCHED);
+        GM_SeSet(&control->mov, SE_HIT_FLOOR);
+        GM_SetNoise(100, 4, &work->control.mov);
+        Zako_800D0B18(work, 6, 1);
+
+        if (work->field_8FC->vital <= 0)
+        {
+            work->field_8E8 = s03d_800D01C4;
+            work->field_8F0 = 0;
+            work->control.turn.vz = 0;
+            work->control.turn.vx = 0;
+            GM_ConfigMotionAdjust(&work->body, 0);
+        }
+        else
+        {
+            work->field_8E8 = s03d_800CF68C;
+            work->field_8F0 = 0;
+            work->control.turn.vz = 0;
+            work->control.turn.vx = 0;
+            GM_ConfigMotionAdjust(&work->body, 0);
+        }
+    }
+
+    if (arg < 24)
+    {
+        control->turn = *target->field_1C;
+    }
+
+    if (arg < 22)
+    {
+        work->control.hzd_height = -32767;
+    }
+}
 void s03d_800CF114(Work *work)
 {
     SVECTOR vec;
@@ -599,7 +691,128 @@ void s03d_800CF114(Work *work)
     DG_PutVector((SVECTOR *)&s03d_dword_800C3A5C, &vec, 1);
     GV_SubVec3(&vec, &work->control.mov, &work->control.step);
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CF194.s")
+void s03d_800CFB04(Work *work, int arg);
+
+void s03d_800CF194(Work *work, int arg)
+{
+    TARGET *target;
+    int     motion;
+    int     a_mode;
+
+    target = work->field_8FC;
+    motion = work->field_8E0;
+
+    work->field_8E4 = 0;
+
+    if (arg == 0)
+    {
+        work->field_AF6 = target->faint;
+        GM_SeSet(&work->control.mov, SE_V_ENE_GRABBED);
+    }
+
+    if (work->field_AF6 != target->faint)
+    {
+        GM_SeSet(&work->control.mov, SE_V_ENE_GRABBED);
+        work->field_AF6 = target->faint;
+    }
+
+    if (target->damaged & TARGET_POWER)
+    {
+        Zako_800D0B18(work, 5, 0);
+        GM_SeSet(&work->control.mov, SE_V_ENE_GRABBED);
+
+        target->force = DG_ZeroVector;
+        target->damage = 0;
+        target->damaged = 0;
+
+        if (target->vital <= 0)
+        {
+            a_mode = target->a_mode;
+            if (a_mode == 1)
+            {
+                work->field_BA0 = a_mode;
+            }
+
+            work->field_8DC = 5;
+            target->side = ENEMY_SIDE;
+            work->field_8E8 = s03d_800CFB04;
+            work->field_8F0 = 0;
+            work->control.turn.vz = 0;
+            work->control.turn.vx = 0;
+            GM_ConfigMotionAdjust(&work->body, 0);
+            target->captured = 0;
+        }
+    }
+
+    switch (GM_PlayerAction)
+    {
+    case 7:
+    case 13:
+        if (motion != 23 && motion != 44)
+        {
+            target->side = NO_SIDE;
+            work->field_8E0 = 23;
+            GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[23], 0, 4);
+            work->field_AF8 = 0;
+        }
+
+        if (work->field_AF8 == 50 && target->faint > 0)
+        {
+            work->field_8E0 = 44;
+            GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[44], 0, 4);
+        }
+
+        if (motion == 44 && !(work->field_AF8 & 7))
+        {
+            s03d_dword_800DC2F4 = 4;
+        }
+
+        work->control.turn = GM_PlayerControl->rot;
+        s03d_800CF114(work);
+        work->field_AF8++;
+        break;
+
+    case 38:
+        if (motion != 24)
+        {
+            target->side = NO_SIDE;
+            work->field_8E0 = 24;
+            GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[24], 0, 4);
+        }
+
+        work->control.turn = GM_PlayerControl->rot;
+        s03d_800CF114(work);
+        break;
+
+    case 39:
+        work->field_8DC = 4;
+        target->side = ENEMY_SIDE;
+        target->vital = 0;
+        work->field_8E8 = s03d_800CFB04;
+        work->field_8F0 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        GM_ConfigMotionAdjust(&work->body, 0);
+        return;
+
+    default:
+        work->field_8DC = 5;
+        target->side = ENEMY_SIDE;
+        work->field_8E8 = s03d_800CFB04;
+        work->field_8F0 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        GM_ConfigMotionAdjust(&work->body, 0);
+        return;
+    }
+
+    if (work->field_B90 > 800)
+    {
+        target->captured = 0;
+    }
+
+    work->field_8FC->class |= TARGET_POWER | TARGET_SEEK;
+}
 void s03d_800CF4D4(Work *work, int arg)
 {
     if (arg == 0)
@@ -660,7 +873,69 @@ void s03d_800CF548(Work *work, int arg)
         GM_ConfigMotionAdjust(&work->body, NULL);
     }
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CF68C.s")
+void s03d_800CF844(Work *work, int arg);
+void s03d_800CF90C(Work *work, int arg);
+
+void s03d_800CF68C(Work *work, int arg)
+{
+    int x;
+
+    if (arg == 0)
+    {
+        if (work->field_8DC < 3)
+        {
+            if (work->field_8DC == 1)
+            {
+                work->field_8E0 = 37;
+                GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[37], 0, 4);
+            }
+            else
+            {
+                work->field_8E0 = 35;
+                GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[35], 0, 4);
+            }
+        }
+        else
+        {
+            work->field_8E0 = 36;
+            GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[36], 0, 4);
+        }
+
+        if (work->field_8FC->faint <= 0)
+        {
+            x = work->control.mov.vx % 90;
+        }
+        else
+        {
+            x = work->control.mov.vx % 30;
+        }
+
+        x = (x < 0) ? -x : x;
+        work->field_AF6 = x + 10;
+    }
+
+    if (Zako_800CD6A8(work))
+    {
+        work->field_8E8 = s03d_800CF844;
+        work->field_8F0 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        GM_ConfigMotionAdjust(&work->body, 0);
+    }
+    else if (work->field_AF6 < arg)
+    {
+        if (work->field_8FC->faint <= 0)
+        {
+            work->field_8FC->faint = work->param.faint;
+        }
+
+        work->field_8E8 = s03d_800CF90C;
+        work->field_8F0 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        GM_ConfigMotionAdjust(&work->body, 0);
+    }
+}
 void s03d_800CF844(Work *work, int arg)
 {
     if (arg == 0)

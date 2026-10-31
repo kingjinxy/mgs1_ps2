@@ -10943,3 +10943,236 @@ Back at 6,663, where the plain end-of-loop gate failed. Comparing the stream pro
 
 - tool `Bash`: Update docs, archive, commit
 
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+Your idea worked: in TAS builds, disc reads now run at the PS1 drive's speed. The replay is in sync to loop 6,662 (0:03:52.0), up from 5,808. That's committed as `2c3e914d3`; nothing is pushed.
+
+**What it does** (TAS builds only):
+- **File reads** (codec portraits and other data files) report done only when the PS1's 2x drive would have finished: 2.5 sectors per vertical blank, plus a seek time. Seek time depends on how far the drive head moves, and the port now tracks where the PS1's head would be, including while it moves to a held voice stream.
+- **Stream reads** (codec voices, cutscenes) follow the PS1's recorded progress. A stream's first data waits until the PS1's had arrived: for the `d01a` codec voice that took 123 loops, about 5 seconds. After that, the game gets data only as far as the PS1 had read by each loop.
+- **Stage loads stay instant.** The existing realign at each load's end keeps them in step.
+
+**How it was calibrated:**
+- Loop-by-loop codec states logged in BizHawk, the emulator the reference trace was recorded in, compared with the port's. The Redux control run doesn't follow the PS1's drive timing here, so it can't serve as a reference for this.
+- A one-loop difference matters because a call's random-number draws happen every 4th loop.
+- Each read is now charged only for the sectors it actually needs; the port had been counting whole 16-sector chunks.
+- The seek times are fitted to the three codec calls so far, so they may need adjusting as later calls come up.
+
+**Desyncs fixed:** 5,809 (0:03:24.39), 6,277 (0:03:37.57) and 6,497 (0:03:46.01).
+
+**Next, not fixed:** loop 6,663 (0:03:52.10), at the start of a cutscene. The port gets one of the cutscene's data packets a loop early, even though the bytes received match the PS1's at the end of every loop. A packet counts as in only once its last sector arrives, and that can happen partway through a loop. The trace has one sample per loop, so it can't show when within a loop that is. I tried three timing rules and none got past it; all three are documented in the TAS plan. The way forward is probably a finer-grained BizHawk log for this spot.
+
+The normal (non-TAS) port links fine, and the matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`).
+
+## User
+
+Commit these changes
+
+- tool `Bash`: Check for uncommitted changes
+
+## Claude
+
+There's nothing new to commit: everything from this work is already in commit `2c3e914d3`, and the working tree is clean. That commit has the code changes, the docs, the conversation archive and the loop 6,663 screenshot. Nothing has been pushed.
+
+## User
+
+Let's fix the next loop
+
+## Claude
+
+Loop 6,663 (0:03:52.10) needs timing within a loop. BizHawk can log every video frame (one per vertical blank), not just every game loop. I'm logging the stream's bytes left, the heap bottom and the game status per frame for loops 6,650–6,666:
+
+- tool `Bash`: Per-frame BizHawk log around 6663
+
+- tool `Bash`: Per-frame BizHawk log at 5481 and 5753
+
+- tool `Bash`: Find where Port_TasTrace runs
+
+- tool `Bash`: Read gvd.c around the trace call
+
+- tool `Bash`: Per-vblank stream gate; full replay
+
+- tool `Bash`: Side by side 6662-6680
+
+- tool `Bash`: Find what sets PADDEMO
+
+- tool `Bash`: Read pad demo setters
+
+- tool `Bash`: Gate one vblank ahead; rerun
+
+- tool `Bash`: Revert +1; read GM_StreamStatus
+
+- tool `Bash`: Find StrctrlWork address
+
+## Claude
+
+`StrctrlWork` is static, so I'll take its address from `GM_StreamStatus`'s code:
+
+- tool `Bash`: Disassemble GM_StreamStatus start
+
+## Claude
+
+`StrctrlWork.field_20_state` is at 0x800B82D0. Logging it per frame on the PS1 with the stream's end and task-state flags:
+
+- tool `Bash`: Per-frame PS1 stream end state 6658-6672
+
+- tool `Bash`: Find UnDrawFrameCount decrement
+
+- tool `Bash`: Read frame.c decrement context
+
+- tool `Bash`: Find pad demo creation
+
+- tool `Bash`: Read rest of pad demo
+
+- tool `Bash`: Log port pad demo calls
+
+- tool `Bash`: Find GV_PauseLevel address
+
+- tool `Bash`: Per-frame PS1 pause level around pad demo
+
+- tool `Bash`: Read GM_GetMap and map struct
+
+- tool `Bash`: Read MAP struct and used setters
+
+- tool `Bash`: Read MAP layout and used logic
+
+## Claude
+
+Each `MAP` record is 20 bytes, with `used` at +6, in the table at 0x800B7910. Logging the PS1's map count and each map's flag per frame:
+
+- tool `Bash`: Per-frame PS1 map used flags
+
+- tool `Bash`: Log pad demo map pointer in port
+
+- tool `Bash`: PS1 raw pads 6655-6672
+
+- tool `Bash`: Log port mts_read_pad and f44
+
+- tool `Bash`: Read Port_TasRawPads
+
+## Claude
+
+The table lookup looks right (loop 6,666 → line 6,666, ✕ held). So the port's `mts_read_pad` must be reading something else. Checking how it gets its value:
+
+- tool `Bash`: Read mts_read_pad and raw pad hook
+
+## Claude
+
+That's all as expected, so the table itself must differ. Checking `raw.bin`'s entries around these loops:
+
+- tool `Bash`: Dump raw.bin entries near 6666
+
+## Claude
+
+`raw.bin` is right: ✕ is released from loop 6,667. So the port must be applying that entry while its pad demo still sees `GV_Time` 6,666. Logging when `Port_TasRawPads` moves to a new entry:
+
+- tool `Bash`: Find where do_control runs
+
+- tool `Bash`: Read raw pad timing notes
+
+## Claude
+
+The notes say the raw pads apply "as at the loop's vertical blank". Logging the tick and loop when the port switches to the ✕-released entry, against the pad demo's call:
+
+- tool `Bash`: Log raw pad switch time vs pad demo
+
+## Claude
+
+At its loop 6,666 call (tick 11,052), the port's pad demo still has the ✕-held entry, yet `mts_read_pad(1)` returns 0. So something else changes `pad_800C14E0`. Printing its raw bytes at that call:
+
+- tool `Bash`: Print raw pad bytes at pad demo
+
+- tool `Bash`: Read do_control and its caller
+
+- tool `Bash`: Find how vsync control func is run
+
+- tool `Bash`: Read mts_VSyncCallback and HAL VSyncCallback
+
+- tool `Bash`: Read HAL VSyncCallback dispatch
+
+- tool `Bash`: Find where the HAL runs the callback
+
+- tool `Bash`: Read vblank handler and pad refresh
+
+- tool `Bash`: Read Port_TasPads
+
+- tool `Bash`: Read GV_UpdatePadSystem around the hook
+
+- tool `Bash`: Find end of GV_UpdatePadSystem
+
+- tool `Bash`: Find end of GV_UpdatePadSystem
+
+- tool `Bash`: Locate function ends
+
+- tool `Bash`: Read function tail
+
+- tool `Bash`: Restore raw pads after pad update; remove debug; rerun
+
+## Claude
+
+Loop 6,667 is fixed. But the replay then stopped at loop 6,732 because PCSX2 ended; that's a crash or a stall, not a desync. Checking its log:
+
+- tool `Bash`: Read PCSX2 end of log
+
+## Claude
+
+A real crash: after "command.c: Where Is Snake ????" lines, a TLB miss at pc 0x1113ac reading 0x8407f6c, then a jump to an unaligned address. That's a port bug. Resolving the PC:
+
+- tool `Bash`: Resolve crash PC
+
+- tool `Bash`: PS1 trace near crash and port log
+
+- tool `Bash`: Read DG_TransChanl and crash disassembly
+
+- tool `Bash`: Read DG_TransChanl source
+
+- tool `Bash`: Find draw queue writers
+
+- tool `Bash`: Read DG_QueueObjs/DG_DequeueObjs
+
+- tool `Bash`: Catch bad draw queue entries and their queuers
+
+## Claude
+
+A 181-model object queued at every loop is just a big model, probably the stage map, so my threshold was too low. Looking only at the entries near the crash:
+
+- tool `Bash`: Show non-map bad entries near crash
+
+- tool `Bash`: Check each model pointer in map objects
+
+- tool `Bash`: Locate this crash
+
+- tool `Bash`: Disassemble the new crash spot
+
+- tool `Bash`: Scratchpad mapping and symbols near 0x410000
+
+- tool `Bash`: Find PSX_ADDR and scratchpad mapping
+
+- tool `Bash`: Find PSX_ADDR definition
+
+- tool `Bash`: Read scratchpad definitions
+
+- tool `Bash`: Find task stack sizes
+
+- tool `Bash`: Read port task stacks
+
+## Claude
+
+The port gives every task a 32 KB stack, so overflow is unlikely. I need the registers at the crash. Checking the docs for what's been used to debug PCSX2 crashes before:
+
+- tool `Bash`: Search docs for PCSX2 debugging methods
+
+- tool `Bash`: Read the Where Is Snake code
+
+- tool `Bash`: Find uses of the Where Is Snake string
+
+- tool `Bash`: Read code around the print
+
+- tool `Bash`: Locate task stacks and thread contexts
+
+- tool `Bash`: Remove debug, normal link, matching builds
+

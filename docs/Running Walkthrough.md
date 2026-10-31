@@ -687,3 +687,12 @@ reads now move it. Stream reads: a stream's first read waits for the PS1's first
 5,950), and its sectors reach the game only as far as the PS1's had by the loop's end. PCSX2: in sync to loop
 6,662; at 6,663 (0:03:52.10) a cutscene's packet is in a loop early (sub-loop timing; three variants tried, TAS
 plan). Matching build: 80 OK, VR 2 OK.
+
+## Step 15: stream data per vertical blank, raw pads after the pad update (2026-10-31)
+
+Loop 6,663 (0:03:52.10): a per-frame BizHawk log (throwaway Lua reading the PS1's memory each frame) showed the
+drive's 2.5 sectors a vertical blank and that a loop's logic uses what had come in at its start; the stream gate
+now follows that within the loop. Loop 6,667: `pad_demo.c` reads the raw pad for the cutscene skip after the pad
+update, and the port's raw pads then held the next trace line's buttons (`Port_TasPads`); they're put back to the
+PS1's at the end of `GV_UpdatePadSystem`. PCSX2: in sync to loop 6,732, then a crash in `DG_TransChanl` (corrupt
+sp; TAS plan). Matching build: 80 OK, VR 2 OK.

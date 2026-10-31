@@ -335,6 +335,10 @@ void GV_UpdatePadSystem( void )
         pad++;
         button = (button >> 16) & 0xFFFF;
     }
+#ifdef MGS_PORT
+    extern void Port_TasPadsDone( void ); /* port/src/tas_replay.c: mts's raw pads back to the PS1's */
+    Port_TasPadsDone();
+#endif
 }
 
 void GV_OriginPadSystem( int org )

@@ -127,6 +127,7 @@ static void hex(FILE* f, const void* data, int n)
 #ifdef MGS_TAS
 static int          s_LoadEnded;    /* a load started or ended in this loop: the seed becomes the PS1's at its end */
 static unsigned int s_StreamStarts; /* the streams started (FS_StreamTickStart), against the PS1's count */
+static int          s_LoopTick;     /* the vertical blank the loop began at (Port_TasTrace) */
 
 /** The PS1's record for loop `time`, or NULL without one. */
 static const unsigned char* time_record_at(int time)
@@ -213,9 +214,24 @@ int Port_TasStreamHold(void)
 int Port_TasStreamAhead(int left)
 {
 #ifdef MGS_TAS
-    const unsigned char* r = time_record();
-    int                  v = r ? (int)read_u32(r + 32) : 0;
-    return v >= 0x7F000000 && left <= v;
+    /* BizHawk per frame (loop 6,663): the PS1's drive brings 2.5 sectors a vertical blank (6,144 and 4,096 bytes
+       by turns), and a loop's logic sees what had come in at its start (a packet complete on the vertical blank
+       that begins loop 6,663 was used by 6,663, not 6,662). So: the loop's start value (trace line t, the last
+       loop's record), less 5,120 bytes a vertical blank since, down to its end value (line t + 1). */
+    const unsigned char* p     = time_record_at(GV_Time - 1);
+    const unsigned char* r     = time_record();
+    int                  start = p ? (int)read_u32(p + 32) : 0;
+    int                  end   = r ? (int)read_u32(r + 32) : 0;
+    int                  v     = start - 5120 * (mts_get_tick_count() - s_LoopTick);
+    if (end < 0x7F000000)
+    {
+        return 0;
+    }
+    if (start < 0x7F000000 || start < end || v < end)
+    {
+        v = end; /* a new read in the loop, or the loop's end reached */
+    }
+    return left <= v;
 #else
     (void)left;
     return 0;
@@ -283,6 +299,29 @@ void Port_TasRawPads(void* pads, void* states)
 #endif
 }
 
+#ifdef MGS_TAS
+static unsigned char s_RawSaved[16]; /* mts's raw pads before Port_TasPads (Port_TasRawPads's: the PS1's) */
+static int           s_RawHeld;
+#endif
+
+/** The end of GV_UpdatePadSystem: mts's raw pads back to the PS1's at the loop's vertical blank, for the code that
+ * reads them directly later in the loop (pad_demo.c's cross to skip at loop 6,666: the record for the loop is the
+ * next trace line's, with the cross already let go). */
+void Port_TasPadsDone(void)
+{
+#ifdef MGS_TAS
+    if (s_RawHeld)
+    {
+        int i;
+        for (i = 0; i < 2; i++)
+        {
+            memcpy(pad_800C14E0 + i * 8 + 2, s_RawSaved + i * 8 + 2, 2); /* the buttons; the sticks as written */
+        }
+        s_RawHeld = 0;
+    }
+#endif
+}
+
 void Port_TasPads(void)
 {
 #ifdef MGS_TAS
@@ -307,6 +346,8 @@ void Port_TasPads(void)
            but the game still copies the sticks (loop 2,462) */
         const unsigned char* r = mgs_tas_pads + next * RECORD + 4;
         int                  port;
+        memcpy(s_RawSaved, pad_800C14E0, 16);
+        s_RawHeld = 1;
         for (port = 0; port < 2; port++)
         {
             unsigned int   buttons = r[(2 + port) * 16] | r[(2 + port) * 16 + 1] << 8;
@@ -415,6 +456,7 @@ void Port_TasTrace(void)
     }
     s_LoadEnded = 0;
     traced      = GV_Time;
+    s_LoopTick  = mts_get_tick_count();
     if (!f || (GM_LoadRequest && loads < s_Ps1Loads && GV_Time >= s_Ps1LoadEnd[loads]))
     {
         return; /* still loading at the PS1's load end (the PS1 drive's pace, cdbios_ps2.c): the loop's number is

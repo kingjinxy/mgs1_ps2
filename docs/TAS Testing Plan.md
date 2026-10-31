@@ -239,12 +239,29 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       Also from here: a stream's first read is held while the PS1's stream heap is empty (time.bin's bottom 0;
       `Port_TasStreamHold`): the PS1's codec voice at 5,827 had no data until 5,950. The held read looks like one in
       progress (`fs_stream_read` set, task state -1), and `FS_StreamSync` starts it.
-- [ ] `GM_GameStatus` 0x1000 and `DG_UnDrawFrameCount` at loop 6,663 (0:03:52.10, `s01a`), a cutscene's demo
+- [x] `GM_GameStatus` 0x1000 and `DG_UnDrawFrameCount` at loop 6,663 (0:03:52.10, `s01a`), a cutscene's demo
       stream: its packet is in a loop early. Stream sectors now reach the game only as far as the PS1's had by the
       loop (time.bin's file read bytes left; `Port_TasStreamAhead`), and the bytes match the PS1's at each loop's
       end, but a packet is used once its last sector is in, which falls within a loop. Tried: the last loop's
       value (broke 5,481), the midpoint (broke 5,753), interpolating over the PS1's vertical blanks of the loop
       (mts_time added to time.bin; 6,663 either way). Screenshot black on both.
+      Fixed with a per-frame BizHawk log (a throwaway Lua reading memory each frame): the drive brings 6,144 and
+      4,096 bytes by turns each vertical blank, and the packet completed on the blank that begins loop 6,663, used
+      by 6,663. The gate is now the loop's start value (the last loop's record) less 5,120 bytes a vertical blank
+      since the loop began (`s_LoopTick`, at Port_TasTrace), down to the loop's end value.
+- [x] `GM_GameStatus` 0x60000000 at loop 6,667 (0:03:52.25, `s01a`), the harness: `pad_demo.c` sets
+      `STATE_PADDEMO | STATE_NOSLOW` at `DG_UnDrawFrameCount` 1, then stops at once if `mts_read_pad(1)` has the
+      cross (the TAS skipping). The PS1 still held it in loop 6,666; the port's raw pads had it let go, because
+      `Port_TasPads` rewrites them from the pad record, which is the next trace line's. Now `Port_TasPadsDone`, at
+      the end of `GV_UpdatePadSystem`, puts the buttons back to `Port_TasRawPads`'s (the PS1's at the loop's
+      vertical blank) for the code that reads them directly later in the loop.
+- [ ] PCSX2 crash after loop 6,732 (0:03:54.4, `s01a`, the first gameplay after the cutscene): TLB miss in
+      `DG_TransChanl`, once loading `obj->model` from a `DG_OBJS` base of 0x8407ee4, once `lw v1, 8(sp)` with sp
+      0x8410e44, then a jump to 0xff70fee6. Both values look like a valid address with 0x08000000 set, but sp isn't
+      near the task stacks (`mts_port_stacks` 0x6715c8, 32 KB each). The draw queue's entries and their models
+      were all in RAM (a debug check with the queuer's return address). Before it: "command.c: Where Is Snake
+      ????" three times (`s00a_command`: Snake's zone 0xFF; only prints). To try: a sentinel on the game task's
+      saved context and stack (SH1's gte.c approach), the HAL's ISR thread switch (`Port_ThreadIsrSwitch`).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

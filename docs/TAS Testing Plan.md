@@ -255,13 +255,22 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       `Port_TasPads` rewrites them from the pad record, which is the next trace line's. Now `Port_TasPadsDone`, at
       the end of `GV_UpdatePadSystem`, puts the buttons back to `Port_TasRawPads`'s (the PS1's at the loop's
       vertical blank) for the code that reads them directly later in the loop.
-- [ ] PCSX2 crash after loop 6,732 (0:03:55.00, `s01a`, the first gameplay after the cutscene): TLB miss in
+- [x] PCSX2 crash after loop 6,732 (0:03:55.00, `s01a`, the first gameplay after the cutscene): TLB miss in
       `DG_TransChanl`, once loading `obj->model` from a `DG_OBJS` base of 0x8407ee4, once `lw v1, 8(sp)` with sp
       0x8410e44, then a jump to 0xff70fee6. Both values look like a valid address with 0x08000000 set, but sp isn't
       near the task stacks (`mts_port_stacks` 0x6715c8, 32 KB each). The draw queue's entries and their models
       were all in RAM (a debug check with the queuer's return address). Before it: "command.c: Where Is Snake
       ????" three times (`s00a_command`: Snake's zone 0xFF; only prints). To try: a sentinel on the game task's
       saved context and stack (SH1's gte.c approach), the HAL's ISR thread switch (`Port_ThreadIsrSwitch`).
+      Found, a port bug: `takabe/lit_mdl.c`'s `litmdl_dg_def` initializes the zero-length `DG_DEF.models[]`, which
+      GCC drops ("excess elements in array initializer"; PSY-Q's kept it), so the global was the 32-byte header and
+      the actor's `memcpy` of header and model took the next data as its model: 2,509,024 vertices. Once visible
+      (loop 6,741; the trace flushes every 64 loops, so it showed 6,732), `DG_TransVertices` wrote them through
+      the scratchpad (`g_PsxScratch`, ordinary memory at 0x91b780) up through the game thread's stack. Found by
+      printing each object `DG_TransChanl` starts on, then who made the one with the bad model (`DG_MakeObjs`'s
+      caller). Fixed with a header-and-model struct under `MGS_PORT`; the only file with that warning.
+- [ ] rand seed at loop 7,597 (0:04:21.14, `s02a`). Its screenshot's PS1 side (the Redux control run) shows GAME OVER
+      and the port a codec call: Redux has drifted from the PS1 by here, so that side is no reference.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

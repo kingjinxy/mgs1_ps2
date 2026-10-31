@@ -43,6 +43,24 @@ typedef struct _Work
     unsigned short field_540_materialOffsets[36];
 } Work;
 
+#ifdef MGS_PORT
+/* GCC drops an initializer for the zero-length models[] ("excess elements in array initializer"), leaving the
+ * 32-byte header, and the memcpy of the header and a model below then took the next data as the model (2.5
+ * million vertices: DG_TransVertices wrote through the scratchpad onto the stack, a crash after loop 6,741) */
+static struct
+{
+    DG_DEF def;
+    DG_MDL mdl[1];
+} litmdl_dg_def = {
+    {
+    1,                      // n_models
+    1,                      // n_x_models
+    -32000, -32000, -32000, // lx, ly, lz
+     32000,  32000,  32000, // ux, uy, uz
+    },
+    {                       // model[]
+        {
+#else
 DG_DEF litmdl_dg_def = {
     1,                      // n_models
     1,                      // n_x_models
@@ -50,6 +68,7 @@ DG_DEF litmdl_dg_def = {
      32000,  32000,  32000, // ux, uy, uz
     {                       // model[]
         {
+#endif
             1027,                   // flags
             36,                     // n_faces
             -32000, -32000, -32000, // lx, ly, lz

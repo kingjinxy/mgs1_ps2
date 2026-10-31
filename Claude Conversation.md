@@ -11176,3 +11176,225 @@ The port gives every task a 32 KB stack, so overflow is unlikely. I need the reg
 
 - tool `Bash`: Remove debug, normal link, matching builds
 
+## Claude
+
+Builds pass. Updating the docs and committing:
+
+- tool `Bash`: Update docs, archive, commit
+
+## Claude
+
+Checking the timestamp I wrote for loop 6,732:
+
+- tool `Bash`: Compute movie time of loop 6732
+
+- tool `Bash`: Fix timestamp and commit
+
+## Claude
+
+I fixed two more desyncs and the replay is now in sync to loop 6,732 (0:03:55.00). Right after that loop the port crashes in PCSX2, and I haven't found the cause yet. The fixes are committed (`357b13c30` and `8db74015c`); nothing is pushed.
+
+**Loop 6,663 (0:03:52.10), a cutscene's data packet one loop early.** I logged BizHawk every frame instead of every loop. That showed the PS1's drive delivers about 2.5 sectors per vertical blank, and that a game loop only uses the data that had arrived when the loop began. The packet in question finished arriving exactly at the start of loop 6,663. The port now hands the game stream data at that same per-blank pace within each loop.
+
+**Loop 6,667 (0:03:52.25), cutscene skip.** The cutscene checks the raw controller for ✕ to skip, later in the loop than the normal pad update. The harness had overwritten the raw controller with the next loop's buttons, so ✕ looked released one loop early. Now the raw buttons go back to the PS1's values once the pad update is done. This was a harness bug, not a port bug.
+
+**The crash after loop 6,732.** This is the first gameplay after the `s01a` cutscene, a stretch the port has never reached before, and the game state matched the PS1's up to the crash.
+- It fails in `DG_TransChanl`, the drawing setup. The stack pointer itself is corrupt (0x8410e44), and a value reloaded from the stack was too.
+- I ruled out a bad draw-queue entry: every queued object and its models were valid in a debug check.
+- The task stacks (32 KB each) are nowhere near those addresses, so it isn't a simple overflow.
+- Just before it, the enemy code prints "Where Is Snake ????" three times. That code path only prints, so it's probably a symptom rather than the cause.
+
+**Next step for the crash:** a software check on the game task's saved registers and stack, the method the Silent Hill port used for stray writes. It would also cover the HAL's thread switch from the vertical-blank interrupt (`Port_ThreadIsrSwitch`). The goal is to find the first loop where the corruption appears. These leads are written up in the TAS plan.
+
+The matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`), and a normal non-TAS port build links.
+
+## User
+
+Commit these changes
+
+- tool `Bash`: Check for uncommitted changes
+
+## Claude
+
+There's nothing left to commit; the working tree is clean. Everything is already in two commits:
+
+- `357b13c30` has the two desync fixes, the docs and the conversation archive.
+- `8db74015c` corrects loop 6,732's movie time in the docs.
+
+Nothing has been pushed.
+
+## User
+
+Is there a script I can use to run the TAS in PCSX2 on my own?
+
+## Claude
+
+Yes. There are two ways, depending on whether you want the check against the PS1 or just to watch it.
+
+**To replay and compare** (what I've been running):
+```
+python3 tools/port/tas/run_port.py --ignore "rand seed@809-916"
+```
+- It links the port with the TAS tables, opens PCSX2 and compares every game loop with the PS1 trace.
+- It closes PCSX2 at the first desync and saves screenshots to `tas/shots/`. Add `--no-shots` to skip them.
+- It runs at unlimited speed, so the window goes by fast.
+- The `--ignore` lets through the one known seed difference at loops 809–916.
+
+**To just watch it play** at normal speed, without stopping at a desync:
+```
+T=~/emu/tas
+MGS_MC_IMAGE=$T/MovieSaveRam.bin MGS_TAS_PADS=$T/pads.bin MGS_TAS_RAW=$T/raw.bin MGS_TAS_TIME=$T/time.bin \
+  python3 build/link_ps2.py
+python3 ../silent-hill-1-ps2-port/tools/port/pcsx2_run.py obj_ps2/mgs_ps2.iso --realtime --seconds 3600
+```
+- The first command links the port with the TAS built in, so it plays the movie's inputs by itself.
+- `pcsx2_run.py` applies the required settings (software renderer and so on) and closes PCSX2 after 15 seconds without a new frame, as `CLAUDE.md` asks. Leave off `--realtime` to run at full speed.
+- The port also writes its trace to `obj_ps2/tas_trace.log` as it goes, so you can compare afterwards with `python3 tools/port/tas/compare_trace.py`.
+
+Things to know:
+- The tables in `~/emu/tas` are current. Rebuild them with `python3 tools/port/tas/trace_to_pads.py` only if the reference trace changes.
+- Right now the replay holds to about 3:55 into the movie, then crashes in PCSX2 at the start of gameplay in `s01a`.
+- A plain `build/link_ps2.py` without those variables builds the normal, playable port again.
+
+## User
+
+Alright, let's try to fix that crash after loop 6732
+
+## Claude
+
+Checking the docs first for any earlier crash like this one, or past work on the thread switch:
+
+- tool `Bash`: Search docs for similar crashes
+
+- tool `Bash`: List scratchpad section contents
+
+- tool `Bash`: Find g_PsxScratch location
+
+## Claude
+
+`g_PsxScratch` is actually in ordinary memory (0x91b780, 1 KB), so an overrun would hit the variables right after it. Listing those:
+
+- tool `Bash`: Variables around g_PsxScratch
+
+- tool `Bash`: Read SCRATCH struct
+
+- tool `Bash`: Find vertex loops in trans.c
+
+- tool `Bash`: Read where transformed vertices are written
+
+- tool `Bash`: Read the call site
+
+- tool `Bash`: Log the largest vertex counts
+
+- tool `Bash`: Outline the HAL thread switch
+
+- tool `Bash`: Read thread stacks and stack_check
+
+- tool `Bash`: Read thread_ps2.c header
+
+- tool `Bash`: Find thread stacks and their size
+
+## Claude
+
+Each EE thread has a 64 KB heap-allocated stack with marks at both ends, and the HAL reports an overrun of them. Checking the crash run's log for those messages:
+
+- tool `Bash`: Look for thread or memory errors
+
+- tool `Bash`: Trace objects transformed before the crash
+
+- tool `Bash`: Disassemble around the fault with source
+
+- tool `Bash`: Find DG_OBJ packs field
+
+- tool `Bash`: Read DG_OBJ and DG_OBJS
+
+- tool `Bash`: Read DG_OBJ/DG_OBJS definitions
+
+- tool `Bash`: Print the crashing object's packets
+
+- tool `Bash`: Show last transformed objects
+
+- tool `Bash`: History of the bad object
+
+- tool `Bash`: Find DG_MakeObjs
+
+- tool `Bash`: Read DG_MakeObjs start
+
+- tool `Bash`: Log object creators near the crash
+
+## Claude
+
+None are created after loop 6,700, so it's older. Logging instead any object created with an implausible vertex count, at any time:
+
+- tool `Bash`: Log creations with garbage vertex counts
+
+- tool `Bash`: Read the runtime model builder
+
+- tool `Bash`: Read lit_mdl.c setup
+
+- tool `Bash`: Find how the def is set up
+
+- tool `Bash`: Read DG_DEF definition
+
+- tool `Bash`: Locate DG_DEF/DG_MDL typedefs
+
+- tool `Bash`: Read fmt_kmd.h
+
+- tool `Bash`: Check litmdl_dg_def size and warnings
+
+- tool `Bash`: Find other dropped initializers
+
+## Claude
+
+Only `lit_mdl.c` has it. Fixing it in the port's style: under `MGS_PORT`, the header and the model live in one struct, so the copy gets the real model. I'm also removing the debug code:
+
+- tool `Bash`: Fix the dropped model initializer
+
+## Claude
+
+The shared closing braces assume two levels, `{ {` … `} }`. That fits an array but not a lone `DG_MDL`, so I'm making the port's member a one-element array:
+
+- tool `Bash`: Rebuild and check the fixed size
+
+## Claude
+
+`litmdl_dg_def` is now 0x78 bytes, header plus model, and the warning is gone. Running the full replay:
+
+- tool `Bash`: Full replay after the fix
+
+- tool `Bash`: Rerun with screenshot of 7597
+
+- tool `Bash`: Matching builds
+
+## Claude
+
+Matching builds pass (80 OK, 2 OK). Updating the docs while the screenshot run finishes:
+
+- tool `Bash`: Update docs for the crash fix
+
+## Claude
+
+I'm also adding this fix to the Planning Doc's list of port bugs found by the TAS:
+
+- tool `Bash`: Read the port bug list
+
+- tool `Bash`: Add the fix to the port bug list
+
+## Claude
+
+The docs are ready. I'll commit once the screenshot run finishes.
+
+## User
+
+Has it finished?
+
+- tool `Bash`: Check screenshot run status
+
+## Claude
+
+Not yet. The port's part is done, and the Redux control run for the screenshot is 3 minutes in. It took about 4½ minutes to reach loop 5,809, and this desync is at 7,597, so expect about 3 more minutes. Once it's done I'll commit the crash fix together with the docs and the screenshot.
+
+- tool `Bash`: Read result
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_7597.png
+

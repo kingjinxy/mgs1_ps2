@@ -696,3 +696,15 @@ now follows that within the loop. Loop 6,667: `pad_demo.c` reads the raw pad for
 update, and the port's raw pads then held the next trace line's buttons (`Port_TasPads`); they're put back to the
 PS1's at the end of `GV_UpdatePadSystem`. PCSX2: in sync to loop 6,732, then a crash in `DG_TransChanl` (corrupt
 sp; TAS plan). Matching build: 80 OK, VR 2 OK.
+
+## Step 16: the crash after loop 6,732, a dropped model initializer (2026-10-31)
+
+The crash in `DG_TransChanl` (corrupt `s0`/`s7`/`sp`, then PCSX2's "Jump to unaligned address") came from
+`takabe/lit_mdl.c`: its static `DG_DEF` initializes the zero-length `models[]`, which modern GCC drops with a
+warning, so the actor's copy of header and model read the next globals as a model of 2.5 million vertices.
+Transforming it wrote through the emulated scratchpad onto the game thread's stack. Ruled out on the way: a
+scratchpad overrun by a real model (largest 126 vertices, the buffer's size), bad draw queue entries, task stack
+overflows (32 KB mts stacks, 64 KB EE thread stacks with marks). Found by printing every object as it's
+transformed, then logging `DG_MakeObjs` calls whose model had an impossible vertex count with their caller.
+No other source file has that warning. PCSX2: in sync to loop 7,596; at 7,597 (0:04:21.14, `s02a`) the rand seed
+differs. Matching build: 80 OK, VR 2 OK.

@@ -2313,7 +2313,91 @@ void Zako_800D0BEC(Work *work, int type)
     info.time = 0x384;
     NewItemPut(pos, &step, &info);
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D0C90.s")
+void *AN_HeadMark(MATRIX *world, int mark);
+void  AN_Breath(MATRIX *world);
+void *NewLSight(SVECTOR *from, SVECTOR *to, int color);
+void *NewBulletEx(int flag, MATRIX *world, int side, int color, int type, int size, int damage, int length, int speed);
+void  AN_BulletSmoke(MATRIX *pMtx, int a2);
+void *AN_FamasFlash(MATRIX *pMtx);
+extern SVECTOR s03d_dword_800C3AA0;
+extern SVECTOR s03d_dword_800C3AA8;
+int   Zako_800D0F38(Work *work, int value);
+
+void s03d_800D0C90(Work *work, int mark)
+{
+    if (work->control.map->index == GM_PlayerMap)
+    {
+        AN_HeadMark(&work->body.objs->objs[6].world, mark);
+    }
+}
+
+void s03d_800D0CD4(Work *work)
+{
+    int se1, se2, motion, frame, index;
+
+    motion = work->field_8E0;
+    frame = work->m_ctrl.info1.frame;
+    index = (work->param.fAF8 % 4) * 2;
+    se1 = index + 160;
+    se2 = index + 161;
+
+    if (motion == 1)
+    {
+        if (frame == 22)
+        {
+            GM_SeSet(&work->control.mov, se2);
+        }
+        else if (frame == 11)
+        {
+            GM_SeSet(&work->control.mov, se1);
+        }
+    }
+    else if (motion == 2)
+    {
+        if (frame == 16)
+        {
+            GM_SeSet(&work->control.mov, se2);
+        }
+        else if (frame == 8)
+        {
+            GM_SeSet(&work->control.mov, se1);
+        }
+    }
+}
+
+void s03d_800D0D6C(Work *work)
+{
+    if (ZAKOCOM_MGR->field_1C != 1 && work->control.map->index == GM_PlayerMap &&
+        GV_Time % 64 == work->param.fAF8 * 16)
+    {
+        AN_Breath(&work->body.objs->objs[6].world);
+    }
+}
+
+void s03d_800D0DF0(Work *work)
+{
+    if (work->field_B26 == 2)
+    {
+        NewLSight(&GM_PlayerPosition, &work->control.mov, 143);
+    }
+}
+
+void s03d_800D0E2C(Work *work)
+{
+    MATRIX *world;
+    MATRIX  mat;
+
+    world = &work->body.objs->objs[4].world;
+    DG_SetPos(world);
+    DG_MovePos(&s03d_dword_800C3AA0);
+    DG_RotatePos(&s03d_dword_800C3AA8);
+    ReadRotMatrix(&mat);
+    NewBulletEx(256, &mat, 2, 1, 0, 10, work->param.field_B18, 10000, 750);
+    GM_SeSet(&work->control.mov, SE_ENEMY_SHOT);
+    AN_BulletSmoke(world, 0);
+    AN_FamasFlash(&mat);
+    Zako_800D0F38(work, (int)s03d_800D0E2C);
+}
 int Zako_800D0EF0(Work *work, int index)
 {
     int i;

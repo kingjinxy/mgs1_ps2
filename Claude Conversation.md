@@ -11627,3 +11627,108 @@ The docs are updated. Waiting for the screenshot run before checking the normal 
 
 - tool `Bash`: Normal link; archive; status
 
+- tool `Bash`: Note screenshot; commit
+
+## Claude
+
+The replay is now in sync to loop 11,443 (0:06:19.7), up from 7,596. That's four desyncs past, all of them harness problems, none port bugs. It's committed as `7d5126089`; nothing is pushed.
+
+**What was fixed:**
+1. **Loop 7,597, a codec call's file read.** The PS1 took 19 vertical blanks to start a read, where a similar distance had taken 4 before. A drive model can't predict that, so file reads no longer rely on it. Each file read now finds the PS1's matching read in the trace and gets no further ahead than the PS1 had read at each point, the same rule streams already used. The old seek model stays only as a fallback for reads the trace doesn't show; none have come up so far.
+2. **Loop 9,253, ○ at the elevator.** Where the game had cleared the pads, the harness rebuilt them from the next loop's raw controller state, in which ○ was already released. It now uses the loop's own raw state, and loop 5,110 still passes. I found this with a BizHawk screenshot and by reading the elevator panel's state from PS1 memory. The panel turned out not to be the cause, which led to the pads.
+3. **Loops 9,633–9,635, the end of a stage load.** The port loads much faster, so when its load ends the harness jumps its loop number ahead to the PS1's. Its pads were still the ones for its own, much earlier, loop number.
+   - A new table, `loads.bin`, holds the PS1's exact pad state at each load end. The harness copies it in at that jump, together with the pad system's memory of the last buttons, from which presses are worked out.
+   - In the loop where the new stage starts, the port now gets the pads of the PS1's last loading loop. Snake starts walking there with ↓ held; I confirmed this with BizHawk's debug trace of his animation frame.
+
+**Also changed:**
+- When a desync's screenshot is taken, the run now waits 3 seconds before closing PCSX2, because one frame dump was cut off mid-write.
+- From now on, while windowless runs are going, I'll post a status line every 5 minutes. That's saved for future sessions too.
+
+**Next:** the rand seed at loop 11,444 (0:06:19.70) in `s03d`. The screenshots won't help with this one: the Redux side shows the title screen, so Redux has drifted far from the PS1 by now, and the port's frame came out black. BizHawk is the only reliable reference from here on.
+
+The matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`), and a normal non-TAS port build links.
+
+## User
+
+Let’s proceed with the next de sync
+
+- tool `Bash`: Compare traces before 11444
+
+- tool `Bash`: PS1 stream values 11441-11451
+
+- tool `Bash`: Find the actor list heads
+
+- tool `Bash`: AList layout and its PS1 address
+
+- tool `Bash`: Disassemble GV_InitActorSystem start
+
+- tool `Bash`: Start BizHawk actor list dump
+
+## Claude
+
+Meanwhile, the same dump on the port side, a temporary print in `Port_TasTrace` at loop 11,445:
+
+- tool `Bash`: Dump the port's actor lists at 11445
+
+## Claude
+
+The port has 13 actors at that loop. BizHawk started at 13:44 and should reach loop 11,445 in about 5 minutes. Waiting for it:
+
+- tool `Bash`: Wait up to 4.5 min for BizHawk
+
+## Claude
+
+Status at 13:50: BizHawk has finished and the actor list is in. Comparing the two lists:
+
+- tool `Bash`: Diff PS1 and port actor lists
+
+- tool `Bash`: Remove debug; why s03d is left out
+
+- tool `Bash`: List s03d's undecompiled functions
+
+- tool `Bash`: List s03d INCLUDE_ASM lines
+
+- tool `AskUserQuestion`: 
+
+- tool `Bash`: Check remotes and similar zako sources
+
+- tool `Bash`: Check upstream for newer s03d decomp
+
+- tool `Bash`: Check upstream's latest and its s03d zako.c
+
+- tool `Bash`: Compare zako implementations
+
+- tool `Bash`: Inspect s03d asm and zako11a objects
+
+- tool `Bash`: Look at compiler asm format
+
+- tool `Bash`: Match s03d asm functions to decompiled ones
+
+- tool `Bash`: Read the s03d stub and its counterpart
+
+- tool `Bash`: Find decomp tooling
+
+- tool `Bash`: Look for asm-differ or similar
+
+- tool `Bash`: Find s03d overlay base address
+
+## Claude
+
+The overlay file isn't laid out in address order from 0x800C3208, so I'll locate each function by its leading bytes in the matching binary and compare the same range in the built one:
+
+- tool `Bash`: Write a per-function diff helper and test it
+
+- tool `Bash`: Compare zako structs and find the grab function
+
+- tool `Bash`: Read zako11a's grabbed function
+
+## Claude
+
+Now `s03d`'s own struct, to map the fields this function uses:
+
+- tool `Bash`: Read s03d zako.h
+
+- tool `Bash`: zako11a Work offsets for comparison
+
+- tool `Bash`: Keep the two helpers as tools; verify they run
+

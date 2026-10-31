@@ -291,6 +291,15 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       [2]/[3] can be rebuilt (loop 490).
 - [ ] rand seed at loop 11,444 (0:06:19.70, `s03d`). Screenshot no use: Redux is at the title screen by here, the
       port's dump black (run_port.py now waits 3 s before closing PCSX2 when dumping: the first was cut).
+      Not a desync: `s03d` isn't in the port. Its actors at loop 11,445, PS1 (BizHawk, walking `ActorList`
+      0x800ACC18) against port: the port lacks `cinema.c`, `asioto.c`, `evpanel.c`, `uji.c` x2, `lamp.c` x4,
+      `wall.c` x2, `intr_cam.c` (the PS1's cutscene draws rand every loop). `overlays_ps2.py` leaves `s03d` out
+      for 21 INCLUDE_ASM: the guards, `overlays/s03d/animal/zako/zako.c` (18) and `zakocom.c` (3); upstream has
+      them as assembly too. Being decompiled (the user's choice over stubs): `tools/port/match_asm_funcs.py s03d`
+      ranks decompiled functions by call sequence (12 of the 21 have a counterpart at 0.9 or better in
+      `zako11a`/`zako11e`/`zako11f`/`enemy`), `tools/port/fdiff.py s03d <func>` shows the differing instructions
+      of one against `build/s03d.matching.bin`. `s03d`'s `Work` is its own layout (target pointer at 0x8FC and a
+      TARGET at 0x900, where zako11a has the pointer at 0x900), so fields are mapped from the assembly.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

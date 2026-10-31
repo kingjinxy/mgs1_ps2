@@ -720,3 +720,11 @@ loop number; now loads.bin carries the PS1's GV_PadData at each load end, and th
 reads the PS1's last load loop's pads. BizHawk's trace_debug.lua (Snake's work) showed the anim frame a loop
 ahead. PCSX2: in sync to loop 11,443; at 11,444 (0:06:19.70, `s03d`) the rand seed differs.
 Matching build: 80 OK, VR 2 OK.
+
+## Step 18: loop 11,444 is a missing overlay, not a desync (2026-10-31)
+
+The PS1's actor list at loop 11,445 (read from its memory in BizHawk) has the `s03d` stage's actors; the port's
+doesn't, because `s03d` is left out of the port for its 21 undecompiled guard functions. Decompiling them is the
+next job (TAS plan). Two helpers for it: `tools/port/match_asm_funcs.py` (which decompiled function an
+INCLUDE_ASM one resembles, by call sequence) and `tools/port/fdiff.py` (instruction diff of one function against
+the matching binary).

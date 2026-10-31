@@ -590,7 +590,111 @@ void s03d_800CE2C0(Work *work, int arg1)
 
     work->control.turn.vz = dir;
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CE318.s")
+void s03d_800CE318(Work *work, int arg)
+{
+    CONTROL *ctrl;
+    SVECTOR *vecs;
+    int      dir, motion, touches, touch, touch2, size;
+
+    work->field_8FC->class |= 0x9E;
+
+    if (ZAKOCOM_MGR->field_1C == 0)
+    {
+        work->field_8FC->class |= TARGET_C4;
+    }
+
+    work->field_B24 = 4000;
+
+    if (Zako_800CDA04(work) || s03d_800CDF94(work))
+    {
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[0], 0, 4, 0);
+        work->field_8EC = 0;
+        work->field_8F4 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        return;
+    }
+
+    ctrl = &work->control;
+    vecs = ctrl->vecs;
+    dir = work->field_AE6;
+    motion = work->field_8E0;
+    touch = -1;
+
+    if ((work->field_ADC & 1) && motion != 2)
+    {
+        SetAction(work, 2, 4);
+    }
+
+    if (dir < 0)
+    {
+        SetMode(work, s03d_800CE12C);
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[0], 0, 4, 0);
+        work->field_8EC = 0;
+        work->field_8F4 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        return;
+    }
+
+    touches = ctrl->n_touches;
+
+    if (touches > 0)
+    {
+        touch = GV_VecDir2(vecs);
+        if (touches > 1)
+        {
+            touch2 = GV_VecDir2(&ctrl->vecs[1]);
+            if (GV_DiffDirAbs(dir, touch2) < GV_DiffDirAbs(dir, touch))
+            {
+                touch = touch2;
+            }
+        }
+    }
+
+    if (dir < 0)
+    {
+        SetMode(work, s03d_800CE12C);
+        GM_ConfigObjectOverride(&work->body, ((short *)&s03d_dword_800C39E0)[0], 0, 4, 0);
+        work->field_8EC = 0;
+        work->field_8F4 = 0;
+        work->control.turn.vz = 0;
+        work->control.turn.vx = 0;
+        return;
+    }
+
+    switch (Zako_800CDD40(dir, touch))
+    {
+    case 1:
+        dir = (touch - 1024) & 4095;
+        break;
+    case 2:
+        dir = (touch + 1024) & 4095;
+        break;
+    }
+
+    if (work->body.objs->bound_mode == 0)
+    {
+        ctrl->rot.vy = dir;
+    }
+    ctrl->turn.vy = dir;
+
+    size = 0;
+    if (motion == 1)
+    {
+        size = 50;
+    }
+    else if (motion == 2)
+    {
+        size = 100;
+    }
+
+    ctrl->step.vx = size * rsin(dir) / 4096;
+    ctrl->step.vz = size * rcos(dir) / 4096;
+
+    s03d_800CE2C0(work, dir);
+    work->field_B20 = GV_NearExp4P((short)work->field_B20, work->control.rot.vy);
+}
 void s03d_800CE5B4(Work *work, int arg)
 {
     if (arg == 0)

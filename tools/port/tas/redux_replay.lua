@@ -6,12 +6,14 @@
 --
 -- pcsx-redux -no-ui -debugger -run -bios=ps-10j.bin -memcard1=card1.mcd -iso=disc1.cue -dofile=redux_replay.lua
 -- Environment: TAS_DIR (the tables, default ~/emu/tas), TAS_OUT (default TAS_DIR/redux_trace.log), TAS_LAST (stop at
--- this GV_Time, default 1300).
+-- this GV_Time, default 1300), TAS_SHOT and TAS_SHOT_DIR (screenshots, tools/port/tas/run_port.py).
 
 local ffi = require("ffi")
 local dir = os.getenv("TAS_DIR") or (os.getenv("HOME") .. "/emu/tas")
 local OUT = os.getenv("TAS_OUT") or (dir .. "/redux_trace.log")
 local LAST = tonumber(os.getenv("TAS_LAST") or "") or 1300
+local SHOT = tonumber(os.getenv("TAS_SHOT") or "")             -- the screen at this loop and the next, raw, to
+local SHOT_DIR = os.getenv("TAS_SHOT_DIR") or dir              -- SHOT_DIR/redux_<loop>.raw (and .txt: w h bpp)
 
 local mem = PCSX.getMemPtr()
 local function a(addr) return bit.band(addr, 0x1FFFFF) end
@@ -196,6 +198,13 @@ bp(0x80014BD0, "tas loop", function()            -- gvd.c's Act return: as Port_
     u32(PSTATUS), okc and hex(ctrl, 124) or "-", okc and hex(ctrl - 0x20 + 0x9B0, 192) or "-"))
   if t % 64 == 0 then out:flush(); print(string.format("tas: loop %d %s", t, stage)) end
   if t % 64 == 0 then phase:flush() end
+  if SHOT and (t == SHOT or t == SHOT + 1) then
+    local ss = PCSX.GPU.takeScreenShot()
+    local f = Support.File.open(string.format("%s/redux_%d.raw", SHOT_DIR, t), "TRUNCATE")
+    f:write(ss.data); f:close()
+    local m = assert(io.open(string.format("%s/redux_%d.txt", SHOT_DIR, t), "w"))
+    m:write(string.format("%d %d %s\n", ss.width, ss.height, tostring(ss.bpp))); m:close()
+  end
   if t >= LAST then out:write("END\n"); out:close(); phase:close(); PCSX.quit(0) end
 end)
 print(string.format("tas: control run, %d PS1 load ends, trace to %s", #load_ends, OUT))

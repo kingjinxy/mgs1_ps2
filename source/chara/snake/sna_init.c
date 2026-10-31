@@ -701,8 +701,15 @@ void sub_8004F454(SnaInitWork *work)
 int sna_8004F544(SnaInitWork *work, SVECTOR param_2, int a3, int a4, int a5)
 {
     MATRIX mtx;
+#ifdef MGS_PORT
+    /* sna_line_check reads the line's end as line[1]: on the PS1 vec2 is next to vec1 on the stack */
+    SVECTOR line[2];
+#define vec1 line[0]
+#define vec2 line[1]
+#else
     SVECTOR vec1;
     SVECTOR vec2;
+#endif
     SVECTOR vec3;
 
     int bVar1;
@@ -736,6 +743,10 @@ int sna_8004F544(SnaInitWork *work, SVECTOR param_2, int a3, int a4, int a5)
 
     return iVar2;
 }
+#ifdef MGS_PORT
+#undef vec1
+#undef vec2
+#endif
 
 int sna_8004F628(SnaInitWork *work, SVECTOR *param_2, int param_3, int param_4, int param_5, int param_6)
 {
@@ -2186,8 +2197,15 @@ void sna_800515BC(SnaInitWork *work, int a2)
 void sna_80051A10(SnaInitWork *work, SVECTOR *pPos, SVECTOR *pOut, SVECTOR *pVec)
 {
     MATRIX rot;
+#ifdef MGS_PORT
+    /* sna_line_check reads the line's end as line[1]: on the PS1 vec2 is next to vec on the stack */
+    SVECTOR line[2];
+#define vec line[0]
+#define vec2 line[1]
+#else
     SVECTOR vec;
     SVECTOR vec2;
+#endif
     SVECTOR vec3;
     SVECTOR vec4;
 
@@ -2221,6 +2239,10 @@ void sna_80051A10(SnaInitWork *work, SVECTOR *pPos, SVECTOR *pOut, SVECTOR *pVec
 
     *pOut = vec3;
 }
+#ifdef MGS_PORT
+#undef vec
+#undef vec2
+#endif
 
 int sna_80051BA4(SnaInitWork *work)
 {

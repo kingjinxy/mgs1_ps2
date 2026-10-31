@@ -68,6 +68,7 @@ extern char*        GM_GetArea(int flag);
 extern int          mts_get_tick_count(void);
 extern unsigned int Hal_RandSeed(void);
 extern void         srand(unsigned int seed);
+extern void         Display_RequestDump(void);
 
 #define RECORD 68
 #define NO_TICK 0x80000000u
@@ -320,6 +321,13 @@ void Port_TasTrace(void)
     {
         return; /* once per loop */
     }
+#ifdef MGS_TAS_SHOT
+    if (GV_Time == MGS_TAS_SHOT)
+    {
+        Display_RequestDump(); /* the frame this loop draws, at its display */
+        printf("tas: frame of loop %d dumped\n", GV_Time);
+    }
+#endif
     if (prev_request && !GM_LoadRequest && loads < s_Ps1Loads)
     {
         if (GV_Time != s_Ps1LoadEnd[loads])

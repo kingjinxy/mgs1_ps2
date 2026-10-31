@@ -51,5 +51,9 @@ and closes PCSX2 at the first differing loop; `--ignore` lets known differences 
 python3 tools/port/tas/run_port.py --ignore "rand seed@809-916"
 ```
 
+At a desync it also writes `tas/shots/loop_<T>.png`: that loop's screen in the Redux control run (the PS1 game),
+the port's, and the pixels differing by more than 24 (`--no-shots` to skip; needs PCSX-Redux as in
+`docs/TAS Testing Plan.md`).
+
 The port writes its trace to `obj_ps2/tas_trace.log` (`host:`). `--from 315` starts at New Game: before it, the
 boot to the title takes a different number of loops on the two.

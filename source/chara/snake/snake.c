@@ -297,7 +297,14 @@ int sub_8004E5E8(SnaInitWork *work, int flag)
 int sna_8004E71C(int a1, HZD_HDL *pHzd, SVECTOR *pVec, int a4)
 {
     int     levels[2];
+#ifdef MGS_PORT
+    /* sna_line_check reads the line's end as line[1]: on the PS1 vec_saved is next to vec on the stack */
+    SVECTOR line[2];
+#define vec line[0]
+#define vec_saved line[1]
+#else
     SVECTOR vec, vec_saved;
+#endif
     MATRIX  mtx;
 
     pVec->vz = a1;
@@ -321,13 +328,24 @@ int sna_8004E71C(int a1, HZD_HDL *pHzd, SVECTOR *pVec, int a4)
     sub_8004E588(pHzd, pVec, levels);
     return (levels[1] - pVec->vy) < a4;
 }
+#ifdef MGS_PORT
+#undef vec
+#undef vec_saved
+#endif
 
 int sna_8004E808(SnaInitWork *work, int a2, int a3, int a4, int a5)
 {
     CONTROL *pCtrl = &work->control;
     int bVar1 = 0;
+#ifdef MGS_PORT
+    /* sna_line_check reads the line's end as line[1]: on the PS1 auStack40 is next to SStack48 on the stack */
+    SVECTOR line[2];
+#define SStack48 line[0]
+#define auStack40 line[1]
+#else
     SVECTOR SStack48;
     SVECTOR auStack40;
+#endif
 
     if (sna_8004E71C(a3, pCtrl->map->hzd, &SStack48, a5))
     {
@@ -361,6 +379,10 @@ int sna_8004E808(SnaInitWork *work, int a2, int a3, int a4, int a5)
 
     return 0;
 }
+#ifdef MGS_PORT
+#undef SStack48
+#undef auStack40
+#endif
 
 int sub_8004E930(SnaInitWork *snake, int arg1)
 {

@@ -196,7 +196,14 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       in the port the stream buffer before the list. `MGS_PORT` reads the PS1's bytes.
 - [x] Sticks at loop 2,462 (0:01:36.88): a held d-pad in analog mode clears `GV_PadData`'s analog but the game
       still copies the sticks; the rebuild now writes them whenever the raw pad (its recorded mode) is analog.
-- [ ] Snake's position at loop 4,221 (0:02:35.57): one unit in z (port `82bc`, PS1 `81bc`).
+- [x] Snake's position at loop 4,221 (0:02:35.57), a port bug: the wall knock at 3,988 found no wall, so no noise,
+      so a guard didn't turn at 3,997 and wasn't in the punch's homing range at 4,219. `sna_8004F544` passed
+      `&vec1` to `sna_line_check`, which reads `line[1]` (`vec2`, next to it only on PSY-Q's stack); now an array
+      under `MGS_PORT`, as in three more callers.
+- [x] Screenshots at each desync (`run_port.py`, `tas/shots/loop_<T>.png`: PS1 from the Redux control run | port |
+      difference over 24).
+- [ ] `GV_PadData` at loop 5,110 (0:03:05.37): release bits 0x4010 missing as `GM_GameStatus` changes; the Redux
+      control run too, so the harness. The screenshot differs over most of the top half.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

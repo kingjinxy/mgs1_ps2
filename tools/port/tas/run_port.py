@@ -9,9 +9,16 @@ Known differences can be let through with --ignore, by field name (compare_trace
 range of loops, and linkvarbuf by index: --ignore "rand seed@809-921" --ignore "linkvarbuf[92]". Every ignored
 difference is still counted and reported at the end.
 
+At a desync it also takes screenshots of that loop for the record (unless --no-shots): the port again to that loop,
+linked with MGS_TAS_SHOT (its frame dumped), and the PS1 game in the PCSX-Redux control run (redux_replay.lua,
+TAS_SHOT) at the same time; tas/shots/loop_<T>.png is PS1 | port | difference (white: differs, both scaled to the
+PS1's 320 wide). The two are a frame apart if the dump and Redux's screen aren't from the same loop's drawing:
+redux_<T+1> is kept in obj_ps2/shots/ to check.
+
 usage: run_port.py [--tables DIR (default ~/emu/tas)] [--ref TRACE] [--from 315] [--last T] [--seconds 900]
-                   [--ignore SPEC]... [--no-link]"""
+                   [--ignore SPEC]... [--no-link] [--no-shots] [--shot T (link with MGS_TAS_SHOT=T)]"""
 import argparse
+import glob
 import lzma
 import os
 import re
@@ -26,6 +33,78 @@ from compare_trace import FIELDS, control_diff, linkvar_diff, same, when  # noqa
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 TRACE = os.path.join(REPO, "obj_ps2", "tas_trace.log")
 PCSX2_RUN = os.path.join(REPO, "..", "silent-hill-1-ps2-port", "tools", "port", "pcsx2_run.py")
+SHOTS = os.path.join(REPO, "obj_ps2", "shots")
+REDUX = os.path.expanduser("~/emu/pcsx-redux/PCSX-Redux-HEAD-x86_64.AppImage")
+BIOS = os.path.expanduser("~/emu/bizhawk-1.11.4/Firmware/ps-10j.bin")
+DISC1 = os.path.expanduser("~/emu/mgs-integral/disc1.cue")
+
+
+def redux(tables, t):
+    """the control run to loop t + 1, its screen at t and t + 1 in SHOTS"""
+    cards = open(os.path.join(tables, "MovieSaveRam.bin"), "rb").read()
+    for i in (0, 1):  # Redux saves the cards on exit: fresh ones each time
+        open(os.path.join(SHOTS, "card%d.mcd" % (i + 1)), "wb").write(cards[i * 131072:(i + 1) * 131072])
+    env = dict(os.environ, TAS_DIR=tables, TAS_LAST=str(t + 1), TAS_SHOT=str(t), TAS_SHOT_DIR=SHOTS,
+               TAS_OUT=os.path.join(SHOTS, "redux_trace.log"))
+    return subprocess.Popen([REDUX, "-no-ui", "-debugger", "-run", "-noupdate", "-safe", "-interpreter", "-fastboot",
+                             "-bios=" + BIOS, "-memcard1=" + os.path.join(SHOTS, "card1.mcd"),
+                             "-memcard2=" + os.path.join(SHOTS, "card2.mcd"), "-iso=" + DISC1,
+                             "-dofile=" + os.path.join(REPO, "tools", "port", "tas", "redux_replay.lua")],
+                            env=env, cwd=os.path.dirname(REDUX), stdout=open(os.path.join(SHOTS, "redux.log"), "w"),
+                            stderr=subprocess.STDOUT)
+
+
+def ps1_image(t):
+    from PIL import Image
+    w, h, *_, bpp = open(os.path.join(SHOTS, "redux_%d.txt" % t)).read().split()  # bpp: "cdata<enum N>: 0"
+    w, h, raw = int(w), int(h), open(os.path.join(SHOTS, "redux_%d.raw" % t), "rb").read()
+    if bpp == "0":  # 15-bit
+        px = bytearray()
+        for i in range(0, w * h * 2, 2):
+            v = raw[i] | raw[i + 1] << 8
+            px += bytes(((v & 31) * 255 // 31, (v >> 5 & 31) * 255 // 31, (v >> 10 & 31) * 255 // 31))
+        return Image.frombytes("RGB", (w, h), bytes(px))
+    return Image.frombytes("RGB", (w, h), raw[:w * h * 3])
+
+
+def take_shots(a, t, desc):
+    """screenshots of loop t: the port rerun and the control run, side by side in tas/shots/loop_<t>.png"""
+    from PIL import Image, ImageChops
+    os.makedirs(SHOTS, exist_ok=True)
+    for f in glob.glob(os.path.join(REPO, "obj_ps2", "frame_*.ppm")) + glob.glob(os.path.join(SHOTS, "redux_*")):
+        os.remove(f)
+    print("screenshots of loop %d: the port again and the Redux control run" % t, flush=True)
+    rx = redux(os.path.expanduser(a.tables), t)
+    cmd = [sys.executable, os.path.abspath(__file__), "--no-shots", "--shot", str(t), "--last", str(t + 2),
+           "--tables", a.tables, "--ref", a.ref, "--from", str(a.start), "--seconds", str(a.seconds)]
+    for spec in a.ignore + ["%s@%d-%d" % (n, t, t + 2) for n in FIELDS.values()]:  # the run's own desync again
+        cmd += ["--ignore", spec]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL)
+    rx.wait(900)
+    compose(t, desc)
+
+
+def compose(t, desc):
+    from PIL import Image, ImageChops
+    dumps = sorted(glob.glob(os.path.join(REPO, "obj_ps2", "frame_*.ppm")))
+    if not dumps or not os.path.exists(os.path.join(SHOTS, "redux_%d.raw" % t)):
+        print("screenshots: missing (port dump %s, Redux %s)" % (bool(dumps), os.path.exists(
+            os.path.join(SHOTS, "redux_%d.raw" % t))))
+        return
+    ps1 = ps1_image(t)
+    port = Image.open(dumps[0]).convert("RGB")
+    port = port.resize((ps1.width, ps1.width * port.height // port.width), Image.NEAREST)
+    h = max(ps1.height, port.height)
+    out = Image.new("RGB", (ps1.width * 3, h))
+    out.paste(ps1, (0, 0))
+    out.paste(port, (ps1.width, 0))
+    diff = ImageChops.difference(ps1.crop((0, 0, ps1.width, h)), port.crop((0, 0, ps1.width, h))).convert("L")
+    out.paste(diff.point(lambda v: 255 if v > 24 else 0).convert("RGB"), (ps1.width * 2, 0))
+    os.makedirs(os.path.join(REPO, "tas", "shots"), exist_ok=True)
+    path = os.path.join(REPO, "tas", "shots", "loop_%d.png" % t)
+    out.save(path)
+    open(path[:-4] + ".txt", "w").write(desc)
+    print("screenshots: %s (PS1 | port | difference over 24)" % os.path.relpath(path, REPO))
 
 
 def parse_ignore(specs):
@@ -70,6 +149,8 @@ def main():
     ap.add_argument("--seconds", type=int, default=900)
     ap.add_argument("--ignore", action="append", default=[])
     ap.add_argument("--no-link", action="store_true")
+    ap.add_argument("--no-shots", action="store_true")
+    ap.add_argument("--shot", type=int, default=0)
     a = ap.parse_args()
     rules = parse_ignore(a.ignore)
     tables = os.path.expanduser(a.tables)
@@ -78,6 +159,8 @@ def main():
         env = dict(os.environ, MGS_MC_IMAGE=os.path.join(tables, "MovieSaveRam.bin"),
                    MGS_TAS_PADS=os.path.join(tables, "pads.bin"), MGS_TAS_RAW=os.path.join(tables, "raw.bin"),
                    MGS_TAS_TIME=os.path.join(tables, "time.bin"))
+        if a.shot:
+            env["MGS_TAS_SHOT"] = str(a.shot)
         if subprocess.run([sys.executable, os.path.join(REPO, "build", "link_ps2.py")], env=env,
                           stdout=subprocess.DEVNULL).returncode:
             sys.exit("link_ps2.py failed")
@@ -139,8 +222,11 @@ def main():
         why = "reached loop %d" % a.last if a.last and last_t >= a.last else "PCSX2 ended (see obj_ps2/run_port.log)"
         print("in sync to loop %d: %s" % (last_t, why))
         return 0 if a.last and last_t >= a.last else 1
-    for name, (t, r, d) in first.items():
-        print("DESYNC %-20s at loop %d (%s, movie %s, frame %s): %s" % (name, t, r[6], when(r[0]), r[0], d))
+    lines = ["DESYNC %-20s at loop %d (%s, movie %s, frame %s): %s" % (name, t, r[6], when(r[0]), r[0], d)
+             for name, (t, r, d) in first.items()]
+    print("\n".join(lines), flush=True)
+    if not a.no_shots:
+        take_shots(a, desync, "\n".join(lines) + "\n")
     return 1
 
 

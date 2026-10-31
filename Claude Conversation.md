@@ -9212,3 +9212,570 @@ Rewrapping the long README line, then the conversation archive:
 
 - tool `Bash`: Rewrap README; archive; status both repos
 
+- tool `Bash`: Commit both repos
+
+## Claude
+
+Everything from this round is committed. Nothing has been pushed.
+
+- **MGS repo, `6828c900b`:** the four desync fixes and the timestamp rule in `CLAUDE.md`. It also has the new reference with the play-time field, which played to the end of the movie (fields 0–20 identical to the previous one), and the docs (TAS plan, Running Walkthrough Step 8, README, conversation archive).
+- **SH1 repo, `a1850841f`:** a small change to the shared `pcsx2_run.py`. Stopping a run early now still prints the PCSX2 log, which `run_port.py` needs. I committed it there because `run_port.py` depends on it; it doesn't change any normal use of the tool.
+
+Matching build is still 80 OK, VR 2 OK. With the full reference, the port stays in sync to loop 4,221 (0:02:35.57), where Snake's position is off by one unit. That's the next thing to look at: Redux first, to see whether it's the harness or the port.
+
+## User
+
+Alright, how far along would you estimate we are with making this project work?
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Ongoing goal: use TASVideos #5139 (the MGS Integral all-bosses BizHawk movie) as a regression and accuracy test for the MGS1 PS2 port (`/home/alex/Documents/mgs1_ps2`, branch `ps2-port`).
+   - Requests this session, in order:
+     - "Proceed to the stream timing next."
+     - The user asked whether the changes only make the TAS work better in the port; they want accuracy testing, not hacks. Answered: harness-only changes, validated in the Redux control run.
+     - The user declined gate logging ("not necessary for now"), asked what to do while the test runs, and said not to run the whole test every time but to stop at the first sync issue.
+     - "Let's start with the live stop."
+     - "Alright, where to next?", then "Yes" to the seed issue at loop 930.
+     - "Add an agent rule: when discussing the loops in the context of the TAS, also provide the timestamp." Done in CLAUDE.md.
+   - Standing constraints (CLAUDE.md, verbatim where it matters):
+     - GitHub only without asking; distrib.app was approved once, for PCSX-Redux.
+     - "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run the matching build after port changes (80 OK; `--variant=vr_exe`: 2 OK).
+     - Update `docs/Running Walkthrough.md`, `docs/Planning Doc.md`, and `Claude Conversation.md` before commits. The archive concatenates all session `.jsonl` files (`ls -tr`) and runs `tools/port/archive_conversation.py`; check that no lines are removed.
+     - "No `pkill -f <pattern>`" in a command whose own command line contains the pattern.
+     - Keep gdb stops rare. Notify at stopping points.
+     - New rule: "TAS loops come with their movie timestamp", e.g. "loop 4,221 (0:02:35.57)".
+
+2. Key Technical Concepts:
+   - Disassembly base: the PS-X EXE base is 0x8000F800 (`--adjust-vma=0x8000F800` on `obj/_mgsi.exe`). The mistaken 0x7FFFF800 put the first gate on the wrong function.
+   - Redux interpreter: a breakpoint on an instruction in a load delay slot sees the old register value.
+   - Redux control-run hooks:
+     - stream start gate at strctrl case 2, 0x80037894, jumping to the break at 0x80037AD0;
+     - `FS_StreamTickStart` 0x800243D8, counting starts;
+     - `FS_StreamGetTick` return 0x800244D4;
+     - `FS_StreamGetData` bottom gate at the `beq` 0x8002411C, setting v1;
+     - `FS_LoadFileSync` 0x80021F48 (opt-in `TAS_FILE_GATE`);
+     - `NewLoader` 0x8002E460, `Die` 0x8002E458, `gvd.c` `Act` return 0x80014BD0;
+     - `rand` 0x8008E6B8, `GV_RandU` 0x80017090, `GV_RandS` 0x800170BC.
+   - Stream statics:
+     - last/next 0x8009D510/0x8009D514;
+     - heap 0x800B52A4, heap size 0x800B52AC, top 0x800B52B4, bottom 0x800B52BC;
+     - `cdbios_task.remaining` 0x800B4E74; `gTotalFrameTime` 0x800AB9E8.
+   - Stream clock: `FS_StreamTaskStart` sets (-1, 0). `FS_StreamTickStart` sets last to a vertical blank, with next still 0: that's how a start is detected. `SoundMode` sets (-1, 1).
+   - `STATE_VOX_STREAM` is set when the strctrl actor is created, earlier than the stream start.
+   - The trace now has 22 fields:
+     - 18 = wait;
+     - 19 = stream bottom offset;
+     - 20 = `cdbios_task.remaining * 4`;
+     - 21 = `gTotalFrameTime`.
+     - `compare_trace` FIELDS: `GM_PlayerStatus` = 22, Snake CONTROL = 23.
+   - `time.bin` is 40 bytes per loop: tick, status (line t+1), load request, passage, seed, clock, bottom (t+1), stream start count, file remaining (t+1), `gTotalFrameTime` (line t).
+
+3. Files and Code Sections (all committed):
+   - **`tools/port/tas/trace.lua`, `trace_debug.lua`:** add `bottom()`, `s32(0x800B4E74)*4` and `s32(0x800AB9E8)`.
+   - **`tools/port/tas/trace_to_pads.py`:**
+     - 40-byte records; requires at least 22 fields;
+     - start count: `if int(f[15]) == -1 and last >= 0 and nxt == 0: starts += 1`;
+     - tick before the loop when the stream has started but no sound yet: `tick = int(f[14]) + 1 - int(f[15])`;
+     - after a reset (NO_TICK), the tick falls back to line t's clock.
+   - **`port/src/tas_replay.c`:**
+     - `TIME_RECORD 40`;
+     - `Port_TasTick`: NO_TICK returns `mts_get_tick_count() + 1`;
+     - `Port_TasStreamMayStart` returns `s_StreamStarts < read_u32(r + 28)`;
+     - new `Port_TasTickStart()` (`s_StreamStarts++`);
+     - `Port_TasTrace`: seed resync on load request rise (`if (!prev_request && GM_LoadRequest) s_LoadEnded = 1;`); at load-end realign, sets `gTotalFrameTime` from r+36 and `linkvarbuf[91] = gTotalFrameTime/60/3600`, `linkvarbuf[92] = gTotalFrameTime/60%3600`;
+     - `Port_TasPads`: sticks written `if (analog > 0 || p[0] > 1)`; UDLR bits cleared only if `analog > 0`;
+     - trace prints 8 "-" BizHawk-only fields.
+   - **`port/src/capture_ps2.c`:** `Capture_TickStart` calls `Port_TasTickStart()`.
+   - **`source/game/camera.c`:** port bug fix (out-of-bounds read of `GM_CameraList[-1]` when there's no camera):
+     ```c
+     #ifdef MGS_PORT
+         if (i < 0 ? ( gUnkCameraStruct2_800B76F0.type >> 16 ) & 1 : GM_CameraList[i].trg.pad & 1)
+     #else
+         if (GM_CameraList[i].trg.pad & 1)
+     #endif
+     ```
+   - **`tools/port/tas/redux_replay.lua`:** `REC = 40`, plus all the gates and hooks above, the load-request seed resync, play time at realign, and the stick rule.
+   - **`tools/port/tas/run_port.py` (new):**
+     - links with the tables (`--tables`, default `~/emu/tas`);
+     - runs `../silent-hill-1-ps2-port/tools/port/pcsx2_run.py` with `-u`, `--stall 15`;
+     - tails `obj_ps2/tas_trace.log` and stops at the first desync;
+     - options: `--ignore "FIELD[idx]@A-B"`, `--from 315`, `--last`, `--seconds`, `--no-link`, `--ref`;
+     - log in `obj_ps2/run_port.log`.
+   - **`compare_trace.py`:** field index shifts.
+   - **SH1 repo `tools/port/pcsx2_run.py`:** SIGTERM now sets a stop flag, so the log still prints. Committed in that repo as a1850841f.
+   - **Data and docs:** `tas/reference/trace.log.xz` (rerun, 22 fields), `tas/README.md`, `docs/TAS Testing Plan.md`, Walkthrough Steps 7 and 8, `CLAUDE.md` rule, `Claude Conversation.md`.
+   - **Commits:** ef3302f84 (stream timing and live stop) and 6828c900b ("TAS: in sync to loop 4,221; camera.c out-of-bounds read fixed").
+
+4. Errors and fixes:
+   - Wrong disassembly base: fixed to 0x8000F800.
+   - Lost the gate breakpoint during a block replace: re-added.
+   - v1 set in the load delay slot: moved to the `beq` and read memory instead.
+   - Field index off by one (`n[18]` should be `n[19]`): fixed.
+   - The file-read gate made things worse: made opt-in.
+   - The `NewLoader` immediate-seed idea was wrong (this load skips `loader.c`): reverted.
+   - `pcsx2_run` log lost on SIGTERM: fixed with the stop flag and `python -u`.
+   - Play seconds stale for one loop at the realign: the derived linkvars are now set too.
+   - The play time couldn't be rebuilt from passage sums: recorded instead (field 21).
+
+5. Problem Solving:
+   - Fixed: intro stream timing; seed at 930 (0:00:45.76); play time from 490/1001; `STATE_CUT_IN` at 1164 (0:00:53.57); sticks at 2462 (0:01:36.88).
+   - Remaining known differences:
+     - the intro codec reaches its call state early (port 808, Redux 820), leaving a seed difference ignored with `--ignore "rand seed@809-916"`; its cause is a CD queue behind the stream's read, not modelled;
+     - `linkvarbuf[92]` at 490 is resolved.
+   - Current first desync: `GM_PlayerPosition` at loop 4,221 (0:02:35.57, s00a, frame 9325): port `1804350482bc0000`, PS1 `1804350481bc0000`.
+
+6. All user messages:
+   - "Proceed to the stream timing next"
+   - "Do these changes work in such a way that only the TAS works better in the port? I just want to make sure that we're not hacking things together just for that; I wanted to use the TAS to test accuracy."
+   - "No, that's not necessary for now. What can we do for now as the test runs? On a side note, I don't think it's necessary to run the whole test from start to finish every single time; we can simply stop when we encounter a sync issue."
+   - "Let's start with the live stop"
+   - "Alright, where to next?"
+   - "Yes"
+   - "Add an agent rule: when discussing the loops in the context of the TAS, also provide the timestamp"
+
+7. Pending Tasks:
+   - Nothing uncommitted. The next desync, Snake's position at loop 4,221 (0:02:35.57), is identified but not investigated or explicitly requested.
+
+8. Current Work:
+   - Just committed 6828c900b (MGS repo) and a1850841f (SH1 repo) after the reference rerun. The live run with the full tables confirmed the port stays in sync to loop 4,221 (0:02:35.57).
+
+9. Optional Next Step:
+   - Report the commits to the user. Then, if they want to continue, investigate the desync at loop 4,221 (0:02:35.57), checking the Redux control run first to tell a harness problem from a port one. My last report said: "Next desync: at loop 4,221, Snake's position differs by one unit. Whether that's the harness or the port isn't checked yet; I'd compare against Redux first."
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+- tool `Bash`: Show planning doc headings and checkbox counts
+
+- tool `Bash`: Read current state and overlay status sections
+
+## Claude
+
+I'd put the project at **roughly 20–25% of a fully playable port**. That's a rough guess, and the remaining work is heavier than what's done.
+
+**What's done:**
+- **Foundations:** the build, the shared hardware layer, threads, fixed addresses, statically linked overlays, and most of the missing PS1 library functions. This was the riskiest part, and it works.
+- **Game start:** the port boots, plays the intro, gets through New Game, the briefing and the dock codec call, and dock gameplay runs.
+- **Accuracy checks:** frame comparison with DuckStation, plus the TAS replay, which matches the PS1 for 4,221 game loops.
+
+**What's left, roughly in order of size:**
+1. **Overlays:** about 20 stages are still left out of the link, and 12 of them contain about 100k instructions of undecompiled assembly. Others are held back by hard-coded addresses or missing source, and a few aren't in the matching build at all. This is the biggest job, and only the dock is playable so far. The heliport is linked in but hasn't been reached.
+2. **Sound:** the game's own sound driver hasn't run yet. Codec voices and FMV movies are still stubs.
+3. **Graphics accuracy:** vertex colours on the sub interior still differ from the PS1, and the GTE checks haven't started.
+4. **Disc and memory card:** disc 2 swap, CD reads for movies and voices, and memory card saves.
+5. **Real hardware and memory:** testing on your console, and cutting overlay memory use by sharing code between overlays.
+
+**TAS progress:** the replay is in sync to loop 4,221 (0:02:35.57) of a 1:27:05 movie, so about 3% of the run. That number will grow unevenly. Each desync is a bug to fix, and the replay can't go further than the stages the port can load. It will stall at the first unlinked overlay no matter how accurate the rest is.
+
+The planning doc has 29 boxes checked against 21 open. That overstates progress, because the open ones (overlays, sound, playable path) are the big ones.
+
+## User
+
+Let’s proceed with Snake’s position being off
+
+- tool `Bash`: List TAS tools and find Redux run instructions
+
+- tool `Bash`: Read Redux control run notes and last trace
+
+## Claude
+
+Running the Redux control run to loop 4,300 first, to see whether the real PS1 code under the same harness shows the same difference.
+
+- tool `Bash`: Read Redux script header and locate files
+
+- tool `Bash`: Run Redux control run to loop 4300
+
+- tool `Bash`: Compare Redux control trace with BizHawk reference
+
+## Claude
+
+The control run (real PS1 code, same harness) matches BizHawk on Snake to loop 4,300 (0:02:38.6 or so), so this is the port's own difference. Comparing the port's last trace against Redux:
+
+- tool `Bash`: Compare port trace against Redux control run
+
+- tool `Bash`: Compare port vs BizHawk and read CONTROL comparison
+
+## Claude
+
+Redux has Snake's CONTROL struct (BizHawk's trace doesn't), and that shows the difference starting earlier, at loop 4,187. Looking at it loop by loop:
+
+- tool `Bash`: Show CONTROL layout and values around loop 4187
+
+- tool `Bash`: Find CONTROL struct definition
+
+## Claude
+
+Snake is standing still here, and on loop 4,187 (0:02:34.3 or so) the PS1 briefly touches a different second wall segment than the port does. Decoding the CONTROL fields properly around both points:
+
+- tool `Bash`: Decode Snake CONTROL fields for port and Redux
+
+- tool `Bash`: Compare pad fields around loop 4219
+
+## Claude
+
+The pads the game read (`GV_PadData`) are identical, so the input matches. Checking Snake's facing (`rot`) and the rest of the struct, since `turn` is computed from it:
+
+- tool `Bash`: Compare Snake rotation and differing CONTROL bytes
+
+## Claude
+
+On the PS1 Snake rotates toward the stick (rot.vy 0 → 128 → 224). In the port he moves in the same direction but never turns. Looking for where Snake's `turn` gets set:
+
+- tool `Bash`: Find code that sets Snake's turn vector
+
+- tool `Bash`: Search all sources for turn.vy
+
+- tool `Bash`: Locate Snake chara source files
+
+- tool `Bash`: List Snake sources and turn references
+
+- tool `Bash`: Read Snake turn code in sna_init.c
+
+- tool `Bash`: Find CONTROL lookup and breakpoint API in Redux script
+
+- tool `Bash`: Read breakpoint helper and Snake addresses
+
+## Claude
+
+The trace already has a second 192-byte dump of Snake's work struct (from offset 0x9B0). Diffing that before adding anything:
+
+- tool `Bash`: Diff Snake work bytes 0x9B0+ between port and Redux
+
+- tool `Bash`: Check field counts in both traces
+
+- tool `Bash`: Diff Snake work bytes 0x9B0+ between port and Redux
+
+- tool `Bash`: Look for existing screenshot and frame dump tooling
+
+- tool `Bash`: Check display server and screenshot tools
+
+- tool `Bash`: Find the frame dump implementation
+
+- tool `Bash`: Read the HAL frame dump code
+
+- tool `Bash`: Read loop-end code in Redux script, port, and linker
+
+## Claude
+
+The dump will be requested from `Port_TasTrace` when `GV_Time` reaches the requested loop. On the Redux side I need its Lua screenshot API. Checking it in the AppImage:
+
+- tool `Bash`: Search Redux binary for screenshot Lua API
+
+- tool `Bash`: Extract Redux AppImage and search for screenshot API
+
+- tool `Bash`: Read Redux takeScreenShot Lua wrapper
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/tas/redux_replay.lua
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/tas/redux_replay.lua
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/tas/redux_replay.lua
+
+## Claude
+
+Quick Redux test to loop 4,222 with the screenshot at 4,221:
+
+- tool `Bash`: Test Redux screenshot at loop 4221
+
+## Claude
+
+The PS1 screen comes out as 320×224 at 16 bpp (PS1 15-bit colour). Now the port side: a `MGS_TAS_SHOT` link option.
+
+- tool `Bash`: Read link options, port includes, dump format
+
+- tool `Bash`: Add MGS_TAS_SHOT option to linker and replay
+
+## Claude
+
+Now `run_port.py`: after a desync at loop T it reruns the port to T with the dump, runs Redux to T at the same time, and writes `tas/shots/loop_T.png` (PS1 | port | difference).
+
+- tool `Bash`: Add screenshot step to run_port.py
+
+## Claude
+
+Running the whole thing now. It's the normal live run to the desync, then the screenshot pass:
+
+- tool `Bash`: Run port to first desync with screenshots
+
+## Claude
+
+While that runs, I'll read where `gSnaMoveDir` (the stick direction Snake turns toward) comes from:
+
+- tool `Bash`: Find writers of gSnaMoveDir and dword_800ABBD0
+
+## Claude
+
+The pad's `dir` is 512 on both, yet the PS1 sets `turn.vy` to 514, so it isn't a plain copy of the direction. Snake's state handlers are in that work dump; the Redux pointers map to PS1 symbols:
+
+- tool `Bash`: Map Snake handler pointers to symbols
+
+## Claude
+
+Snake starts a punch at loop 4,218 on both. The turn comes from the punch's helper. Reading it:
+
+- tool `Bash`: Read Snake punch helper
+
+## Claude
+
+The punch auto-aims at a nearby target (`GM_GetHomingTarget2`: range 2000, ±1024). On the PS1 it finds one at direction 514; in the port it finds nothing. Reading the homing code:
+
+- tool `Bash`: Read GM_GetHomingTarget2 implementation
+
+## Claude
+
+Next step is to see which homing targets each side has at loop 4,218. The structure:
+
+- tool `Bash`: Read HOMING struct and table address
+
+- tool `Bash`: Locate homing function and table addresses
+
+- tool `Bash`: Find objdump for PS1 disassembly
+
+- tool `Bash`: Disassemble GM_GetHomingTarget2 start
+
+- tool `Bash`: Check screenshot run progress
+
+## Claude
+
+The run is in its screenshot pass. Redux has already loaded its script, so I can add the temporary homing log to the Lua side now:
+
+- tool `Bash`: Find GV_Time constant in Redux script
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/tas/redux_replay.lua
+
+- tool `Bash`: Find MAP struct layout
+
+- tool `Bash`: Fix map index offset in debug hook
+
+## Claude
+
+Now the matching temporary printf in the port's `homing.c`. I'll make it after the screenshot run's link, which is already done:
+
+- tool `Bash`: Add temporary homing debug print to port
+
+## Claude
+
+`MGS_TAS` is only defined for `port/src`, so I'll gate the debug on `MGS_PORT` and the loop range alone:
+
+- tool `Bash`: Gate homing debug on MGS_PORT only
+
+## Claude
+
+Line 90 is earlier than `GM_GetHomingTarget2`, so the replace may have hit the other homing function. Checking:
+
+- tool `Bash`: Check which function got the debug block
+
+## Claude
+
+It went into `GM_GetHomingTarget` (the first function). Redoing it in the second one:
+
+- tool `Bash`: Reapply homing debug in GM_GetHomingTarget2
+
+## Claude
+
+Waiting for the screenshot run to finish before building.
+
+- tool `Bash`: Check screenshot run state
+
+## Claude
+
+The screenshot pass is still running (Redux is at loop 1,408 of 4,222). The task will notify me when it finishes.
+
+Snake's position is one unit off at loop 4,221 (0:02:35.57). Where it stands so far:
+- **It's a port difference, not the harness.** The Redux control run (the real PS1 code under the same harness) matches the PS1 reference on Snake through loop 4,300. The port doesn't.
+- **What differs:** at loop 4,219 (about 0:02:35.5) Snake starts a punch on both. On the PS1 he turns toward a target 514 units of angle away. In the port he doesn't turn at all. The pads the game read are identical on both.
+- **The cause is in the punch's auto-aim.** The punch looks for a target within range 2000 (`GM_GetHomingTarget2`). The PS1 finds one; the port finds none.
+- **Next:** I've added a temporary log of the homing targets to both sides. It will show whether the target is missing in the port or sitting at a different position. Its position comes from a world matrix that's updated by the renderer, so that's my first suspect.
+
+For the screenshots, a desync in `run_port.py` will now trigger a second pass:
+- the port is relinked and replayed to the desync loop with a frame dump there;
+- the Redux control run plays to the same loop at the same time and saves its screen;
+- the result is `tas/shots/loop_<T>.png` (PS1 | port | difference), with a text file describing the desync.
+
+The first one, for loop 4,221, is being made now. This is all uncommitted. The homing log will be removed again once it has done its job.
+
+- tool `Bash`: Read screenshot run result
+
+## Claude
+
+The bpp parse broke on Redux's enum text (`cdata<enum 751>: 0`). Fixing that, then building the image from the files that are already there:
+
+- tool `Bash`: Fix bpp parse and compose loop 4221 screenshot
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_4221.png
+
+- tool `Bash`: Threshold the diff and render PS1 loop 4222
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8/scratchpad/p4222.png
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_4221.png
+
+- tool `Bash`: Run port and Redux with homing debug logs
+
+- tool `Bash`: Add target CONTROL position to homing debug
+
+- tool `Bash`: Rerun homing debug with target positions
+
+- tool `Bash`: Add per-loop homing target position logs
+
+- tool `Bash`: Log homing target positions per loop and diff
+
+## Claude
+
+The guard's path first diverges at loop 3,997. On the PS1 it stops at (5518, −22127); in the port it keeps walking. Getting the movie time and the lines before it:
+
+- tool `Bash`: Show guard path around loop 3997 and its time
+
+- tool `Bash`: Find guard work struct and homing registration
+
+- tool `Bash`: Read WatcherWork struct
+
+## Claude
+
+Dumping the guard's AI fields (0x8F4–0xC4C) for target [1] at loops 3,990–3,997:
+
+- tool `Bash`: Dump guard AI fields on both sides
+
+- tool `Bash`: Diff guard AI fields excluding pointers
+
+- tool `Bash`: Find code that sets think3 to 5
+
+- tool `Bash`: Read think.c around think3=5
+
+- tool `Bash`: Find where think2 becomes 1
+
+- tool `Bash`: Read the noise reaction function
+
+- tool `Bash`: Find noise hearing checks for guards
+
+- tool `Bash`: Read callers of the noise reaction and BA1 setters
+
+- tool `Bash`: Read guard noise hearing check
+
+- tool `Bash`: Find noise global addresses
+
+- tool `Bash`: Read nearest-guard noise selection
+
+## Claude
+
+I'll log the noise globals at the end of each loop on both sides. In the port I'll also log, from `command.c`, each guard's route distance to the noise and the guard it picks:
+
+- tool `Bash`: Read function header and loop end in command.c
+
+- tool `Bash`: Add noise debug logs to port and Redux
+
+- tool `Bash`: Check noise globals are declared for homing.c
+
+- tool `Bash`: Rerun with noise logs on both sides
+
+- tool `Bash`: Snake position and power-100 noise sources
+
+- tool `Bash`: Read GM_SetNoise and Snake positions
+
+- tool `Bash`: Snake position field and GM_SetNoise location
+
+- tool `Bash`: Read GM_SetNoise and Snake positions
+
+- tool `Bash`: Print port trace line for loop 3994
+
+## Claude
+
+Snake is at (5292, 1116, −16596), the PS1 noise's position, so it's Snake's noise. Looking at Snake's `GM_SetNoise` calls:
+
+- tool `Bash`: List GM_SetNoise calls in Snake/game code
+
+- tool `Bash`: Read both power-100 length-16 noise sources
+
+## Claude
+
+Two candidates: Snake's sneeze (`sna_init.c:4218`), and `afterse.c`, a delayed sound with a noise. Finding who creates an `afterse` actor:
+
+- tool `Bash`: Find NewAfterSe callers
+
+- tool `Bash`: Read Snake knock code
+
+- tool `Bash`: Find addresses and read wall check function
+
+- tool `Bash`: Add knock wall-check debug logs
+
+- tool `Bash`: Run knock debug on both sides
+
+- tool `Bash`: Read sna_8004F544
+
+- tool `Bash`: Read rest of sna_8004F544 and sna_line_check
+
+- tool `Bash`: Fix vec1/vec2 stack layout dependency
+
+## Claude
+
+The other `sna_line_check` callers may have the same pattern. Checking how each declares its line:
+
+- tool `Bash`: Check other sna_line_check callers' locals
+
+- tool `Bash`: Read SStack48 declarations and sna_8004E71C
+
+- tool `Bash`: Apply line array fix to the other callers
+
+## Claude
+
+Now removing all the temporary debug code (homing.c, command.c, the knock log, the `tas_replay.c` hook, the Redux hooks) and rebuilding:
+
+- tool `Bash`: Remove temporary debug code
+
+- tool `Bash`: Build port and run matching builds
+
+## Claude
+
+Port build clean, matching build still 80 OK and VR 2 OK. Running the live check from the start, with screenshots at the next desync:
+
+- tool `Bash`: Run port to next desync with screenshots
+
+## Claude
+
+I found and fixed the cause of Snake's position desync. The check run with the fix is still going, so whether the port now gets past loop 4,221 isn't confirmed yet.
+
+**Screenshots:** you were right. I'd said Snake was missing from the port's frame, but it was the guard. I'll only state what the logs or a pixel check show.
+
+**What went wrong, working back from the symptom:**
+1. At loop 4,219 Snake's punch auto-aims at the nearest guard. In the port, that guard was about 9,000 units away, out of the punch's range, so Snake didn't turn. On the PS1 he was next to Snake.
+2. That guard's path split at loop 3,997 (0:02:28.10). The PS1 guard turned toward a noise he'd heard on loop 3,995; the port's guard kept walking.
+3. The noise came from Snake knocking on a wall at loop 3,988 (0:02:27.8 or so). The inputs were identical, but the port's wall check found no wall, so there was no knock sound.
+4. **The root cause is a port bug.** The wall check passes a line as two separate local variables. The function receiving it assumes the second sits right after the first in memory. The PS1 compiler happened to lay them out that way; GCC doesn't. So the port read whatever else was there.
+
+**The fix:** in the port build (`MGS_PORT`), the two variables are now a real two-element array. Three other wall checks in Snake's code (`snake.c`, `sna_init.c`) had the same pattern, so I fixed those too; this point in the TAS only hit one of them. The matching build is still 80 OK, VR 2 OK. All the temporary logging is removed.
+
+**Screenshot tool:** when `run_port.py` hits a desync, it now replays the port to that loop and saves its frame. At the same time the Redux control run saves the PS1's screen at the same loop. The result goes in `tas/shots/loop_<T>.png` as PS1 | port | pixels differing by more than 24, with a text file describing the desync. Two caveats:
+- the first image, for loop 4,221, has the guard missing from the port's side because of this bug;
+- the port side may be one display frame off from the PS1 side; I haven't checked that yet.
+
+The check run will stop at the next desync and save its screenshots. Nothing is committed yet. The Running Walkthrough and plan updates will go in with the commit once that run's result is in.
+
+- tool `Bash`: Read check run result
+
+## Claude
+
+Synced through loop 5,109 now, past the old desync at 4,221. The next desync is at loop 5,110 (0:03:05.37), in `GV_PadData`. Here's the screenshot:
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_5110.png
+
+- tool `Bash`: Check whether control run reproduces pad desync
+
+- tool `Bash`: Read end of Running Walkthrough
+
+- tool `Bash`: Update walkthrough, TAS plan, README
+
+- tool `Bash`: Read TAS line in planning doc
+
+- tool `Bash`: Update planning doc and conversation archive
+

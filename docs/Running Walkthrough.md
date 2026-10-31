@@ -598,3 +598,23 @@ field 21, synced at load ends); `STATE_CUT_IN` at 1,164 (0:00:53.57), a port bug
 Redux control run. Tried and dropped: setting the seed at `NewLoader` (this load doesn't use it). The full
 reference was rerun with field 21. In PCSX2 the replay is now in sync to loop 4,221 (0:02:35.57), Snake's position
 off by one there. Matching build: 80 OK, VR 2 OK.
+
+## Step 9: wall knock line check, desync screenshots (2026-10-30)
+
+Snake's position at loop 4,221 (0:02:35.57) was traced back in four steps, each by logging the same values in the
+port and the Redux control run (which matched the PS1 there): Snake's punch at 4,219 homes on a guard
+(`GM_GetHomingTarget2`) the port had elsewhere; that guard's path split at 3,997 (0:02:28.10) when the PS1's heard a
+noise at 3,994; the noise was Snake's wall knock at 3,988, whose `afterse.c` actor the port never made because its
+wall check found no wall. Cause, a port bug: `sna_8004F544` passes `&vec1` to `sna_line_check`, which reads the
+line's end as `line[1]`, i.e. `vec2`, next to `vec1` on PSY-Q's stack but not GCC's. Under `MGS_PORT` the pair is
+an array; three more `sna_line_check` callers in `snake.c` and `sna_init.c` had the same pattern and were changed
+too.
+
+New: at a desync `run_port.py` reruns the port to that loop with its frame dumped (`MGS_TAS_SHOT`) while the Redux
+control run saves its screen there (`TAS_SHOT`), and writes `tas/shots/loop_<T>.png` (PS1 | port | pixels differing
+by more than 24) with the desync's text. A screenshot is only judged by such checks: a first look at loop 4,221's
+called the missing figure Snake; it was the guard.
+
+In PCSX2 the replay is now in sync to loop 5,109. At 5,110 (0:03:05.37) `GV_PadData`'s release bits (0x4010) are
+missing as `GM_GameStatus` changes; the Redux control run shows the same, so it's the harness's pad rebuild. Its
+screenshot also differs over most of the top half (not looked into yet). Matching build: 80 OK, VR 2 OK.

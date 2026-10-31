@@ -94,6 +94,8 @@ def compile_port():
     # MGS_TAS_RAW, MGS_TAS_TIME=<file>: the PS1's raw pads and its timing too (port/src/tas_replay.c; the
     # files from tools/port/tas/trace_to_pads.py).
     debug += ["-DMGS_TAS"] if os.environ.get("MGS_TAS_PADS") else []
+    # MGS_TAS_SHOT=<loop>: with the replay, the frame of that game loop to host:frame_<n>.ppm (tools/port/tas/run_port.py).
+    debug += ["-DMGS_TAS_SHOT=%d" % int(os.environ["MGS_TAS_SHOT"])] if os.environ.get("MGS_TAS_SHOT") else []
     objs = []
     for name in sorted(os.listdir(os.path.join(PORT, "src"))):
         if name.endswith(".c"):

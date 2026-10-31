@@ -214,6 +214,31 @@ int Port_TasStreamMayStart(void)
 #endif
 }
 
+/** strctrl.c's Act2, destroying the stream's actor (its Die clears STATE_VOX_STREAM): whether the PS1's had gone
+ * by this loop (its record without the bit, or a later stream started). It goes once the stream task stops,
+ * after the SPU has played the last of the voice (sd_str.c's interrupts), which the port's IOP does at its own
+ * pace: a loop early at 12,101. Not at Act's end: the PS1 ends the demo at loop 518 and clears the bit at 520.
+ * So it only holds the destroy, never forces it. */
+int Port_TasStreamMayEnd(void)
+{
+#ifdef MGS_TAS
+    /* Die runs in the next loop (GV_DestroyActorQuick); a bit still set 8 loops on is the next stream's (the
+       demo at loop 11,482 is followed by another, and the hold would never end) */
+    int t;
+    for (t = GV_Time + 1; t <= GV_Time + 8; t++)
+    {
+        const unsigned char* r = time_record_at(t);
+        if (!r || !(read_u32(r + 4) & 0x20) || s_StreamStarts < read_u32(r + 28))
+        {
+            return t == GV_Time + 1;
+        }
+    }
+    return 1;
+#else
+    return 1;
+#endif
+}
+
 /** stream.c's StartRead, a stream's first read: held while the PS1's stream heap had no data yet (time.bin's
  * bottom 0). The PS1's can take seconds to come (the codec's voice at loop 5,827: at 5,950), the port's is in at
  * once, and the call runs differently meanwhile (its rand() at loop 5,846). */

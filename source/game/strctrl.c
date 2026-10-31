@@ -39,6 +39,13 @@ static void Act2( Work *work )
 {
     if ( !FS_StreamTaskState() )
     {
+#ifdef MGS_PORT
+        extern int Port_TasStreamMayEnd( void ); /* port/src/tas_replay.c: in TAS replays, the PS1's loop */
+        if ( !Port_TasStreamMayEnd() )
+        {
+            return;
+        }
+#endif
         GV_DestroyActor( &work->actor );
     }
 }

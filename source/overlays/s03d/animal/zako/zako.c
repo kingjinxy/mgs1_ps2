@@ -639,7 +639,96 @@ void s03d_800CE644(Work *work, int arg)
         control->turn.vy = vy;
     }
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CE720.s")
+void s03d_800CE8F4(Work *work, int arg);
+void s03d_800CE9E8(Work *work, int arg);
+void s03d_800CEB38(Work *work, int arg);
+void s03d_800CECBC(Work *work, int arg);
+
+static inline void SetModeFields(Work *work, void (*fn)(Work *, int))
+{
+    work->field_8E8 = fn;
+    work->field_8F0 = 0;
+    work->control.turn.vz = 0;
+    work->control.turn.vx = 0;
+}
+
+void s03d_800CE720(Work *work, int arg)
+{
+    int press;
+
+    work->field_8FC->class |= 0x9E;
+    work->field_B24 = 4000;
+
+    press = work->field_AD8;
+
+    if (arg == 0)
+    {
+        if (press & 0x10000)
+        {
+            SetAction(work, 3, 4);
+        }
+        else
+        {
+            SetAction(work, 5, 4);
+        }
+
+        GM_ConfigMotionAdjust(&work->body, work->adjust);
+    }
+
+    if (work->param.fAF8 != 1 || !(GV_Time & 0x100))
+    {
+        Zako_800CDD94(work);
+    }
+
+    if (Zako_800CDA04(work))
+    {
+        return;
+    }
+
+    if (!(press & 0x30000))
+    {
+        SetMode(work, s03d_800CE12C);
+        return;
+    }
+
+    if (press & 0x40000)
+    {
+        SetModeFields(work, s03d_800CE8F4);
+        return;
+    }
+
+    if (press & 0x80000)
+    {
+        SetModeFields(work, s03d_800CE9E8);
+        return;
+    }
+
+    if (press & 0x100000)
+    {
+        SetModeFields(work, s03d_800CEB38);
+        return;
+    }
+
+    if (press & 0x200000)
+    {
+        SetModeFields(work, s03d_800CECBC);
+        return;
+    }
+
+    if (work->param.fAF8 != 1 || !(GV_Time & 0x100))
+    {
+        if (work->field_AE6 >= 0)
+        {
+            work->control.turn.vy = work->field_AE6;
+        }
+    }
+    else
+    {
+        work->control.turn.vy = work->field_B98;
+    }
+
+    work->field_B20 = work->control.rot.vy;
+}
 void s03d_800CE8F4(Work *work, int arg)
 {
     work->field_8FC->class |= 0x9E;

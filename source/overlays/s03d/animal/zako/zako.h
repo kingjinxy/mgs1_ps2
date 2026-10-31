@@ -123,7 +123,9 @@ typedef struct _Work
     char            pad_B88[0xB90 - 0xB88];
     int             field_B90;      /* 0xB90 */
     unsigned short  field_B94;      /* 0xB94 */
-    char            pad_B96[0xBA0 - 0xB96];
+    char            pad_B96[0xB98 - 0xB96];
+    short           field_B98;      /* 0xB98 */
+    char            pad_B9A[0xBA0 - 0xB9A];
     short           field_BA0;      /* 0xBA0 */
     char            pad_BA2[0xC00 - 0xBA2];
 } Work;

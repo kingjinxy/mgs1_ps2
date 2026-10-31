@@ -116,6 +116,10 @@ def compile_port():
         # read from host: at startup (port/src/tas_replay.c), not embedded: they'd push .bss past 16 MB
         if os.environ.get(env):
             shutil.copy(os.path.expanduser(os.environ[env]), os.path.join(OUT, name))
+    if os.environ.get("MGS_TAS_PADS"):  # loads.bin from the same folder (trace_to_pads.py)
+        loads = os.path.join(os.path.dirname(os.path.expanduser(os.environ["MGS_TAS_PADS"])), "loads.bin")
+        if os.path.exists(loads):
+            shutil.copy(loads, os.path.join(OUT, "tas_loads.bin"))
     return objs
 
 

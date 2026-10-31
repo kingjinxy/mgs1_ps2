@@ -269,8 +269,28 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       the scratchpad (`g_PsxScratch`, ordinary memory at 0x91b780) up through the game thread's stack. Found by
       printing each object `DG_TransChanl` starts on, then who made the one with the bad model (`DG_MakeObjs`'s
       caller). Fixed with a header-and-model struct under `MGS_PORT`; the only file with that warning.
-- [ ] rand seed at loop 7,597 (0:04:21.14, `s02a`). Its screenshot's PS1 side (the Redux control run) shows GAME OVER
+- [x] rand seed at loop 7,597 (0:04:21.14, `s02a`). Its screenshot's PS1 side (the Redux control run) shows GAME OVER
       and the port a codec call: Redux has drifted from the PS1 by here, so that side is no reference.
+      A codec call whose face read the PS1 started 19 vertical blanks after its request, for a 2,287-sector seek
+      (BizHawk per frame: `cdbios_task` at 0x800B4E58), where `d01a`'s took about 4: the seek model can't know.
+      File reads now follow the trace like streams: `Port_TasFileStart` (in `CDBIOS_ReadRequest`) finds the PS1's
+      read of the same size (time.bin's bytes left becoming it, from 3 loops back to 60 on) and
+      `Port_TasFileAhead` holds sectors past the PS1's progress, per vertical blank; the model is only for reads
+      the trace doesn't show (none in the run so far).
+- [x] `GM_GameStatus` and `GV_PadData` at loop 9,253 (0:05:16.50, `s02a`), the harness: the circle press at the
+      elevator. Where the pads were zeroed, trace_to_pads.py rebuilt [2]/[3] from line t+1's raw pads (`n[8]`);
+      the loop read line t's (`f[8]`, as raw.bin), and line t+1 had the circle let go. Found with a BizHawk
+      screenshot (`client.screenshot`) and the elevator panel's state read from PS1 memory (found by its actor's
+      filename string): the panel wasn't it, the raw pads were. Loop 5,110 still passes.
+- [x] `GV_PadData` at loop 9,633 (0:05:25.68, `s03a`), the harness: the load's end. The port's faster load
+      reaches it at its own loop 9,451, realigned to the PS1's 9,633, with its own last pads. Now loads.bin
+      (trace_to_pads.py: each PS1 load end's GV_PadData as recorded) sets GV_PadData and pad.c's last status
+      (`dword_800AB950`/`954`, behind press and release) at the realign, and from the loader's end
+      (`GM_LoadComplete` -1) the port gets the pads of the PS1's last loop of the load (Snake's walk started
+      there with down held; anim frame `field_9BC` was a loop ahead). pads.bin's own records won't do: their
+      [2]/[3] can be rebuilt (loop 490).
+- [ ] rand seed at loop 11,444 (0:06:19.70, `s03d`). Screenshot no use: Redux is at the title screen by here, the
+      port's dump black (run_port.py now waits 3 s before closing PCSX2 when dumping: the first was cut).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

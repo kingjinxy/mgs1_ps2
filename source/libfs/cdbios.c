@@ -46,6 +46,8 @@ static inline void int_to_loc( int pos, CdlLOC *loc )
 extern int                  MgsCd_Init(void);
 extern int                  MgsCd_Paced;
 extern int                  Port_TasStreamAhead(int left); /* port/src/tas_replay.c */
+extern int                  Port_TasFileAhead(int left);
+extern int                  Port_TasFileMatched(void);
 extern int                  MgsCd_Start(int sector, int count);
 extern int                  MgsCd_Poll(void);
 extern const unsigned char *MgsCd_Sector(int i);
@@ -187,9 +189,11 @@ static void CDBIOS_Main(void)
 
                 for (i = task->sector - chunk_sector; more && i >= 0 && i < chunk_count; i++)
                 {
-                    if (task->remaining * 4 >= 0x7F000000 && Port_TasStreamAhead(task->remaining * 4))
+                    if ((task->remaining * 4 >= 0x7F000000 && Port_TasStreamAhead(task->remaining * 4)) ||
+                        (!task->callback && Port_TasFileAhead(task->remaining * 4)))
                     {
-                        status = 1; /* a stream (no size: 0x7FFF0000 left) ahead of the PS1's: the rest later */
+                        status = 1; /* a stream (no size: 0x7FFF0000 left) or file read ahead of the PS1's: the
+                                       rest later */
                         break;
                     }
                     SwEnterCriticalSection();
@@ -207,7 +211,8 @@ static void CDBIOS_Main(void)
         if (chunk_count == 0 && task->state == CDBIOS_STATE_READ && cdbios_next_state < 0)
         {
             chunk_sector = task->sector;
-            MgsCd_Paced = task->callback ? 0 : (task->remaining * 4 + 2047) / 2048; /* file reads (fscd.c): cdbios_ps2.c */
+            MgsCd_Paced = task->callback || Port_TasFileMatched() ? 0 : (task->remaining * 4 + 2047) / 2048; /* file
+                                    reads (fscd.c) the trace doesn't show: cdbios_ps2.c's model of the PS1's drive */
             chunk_count = MgsCd_Start(chunk_sector, CDBIOS_CHUNK);
 
             if (chunk_count == 0)
@@ -537,6 +542,13 @@ void CDBIOS_ReadRequest(void *buffer, unsigned int sector, unsigned int size, vo
     cdbios_task.sector = sector;
     cdbios_task.callback = callback;
     cdbios_task.sectors_delivered = 0;
+#ifdef MGS_PORT
+    if (!callback)
+    {
+        extern void Port_TasFileStart(int size); /* port/src/tas_replay.c: the PS1's read of this file */
+        Port_TasFileStart(size);
+    }
+#endif
 
     cdbios_stop_flag = 0;
     cdbios_start_flag = 1;

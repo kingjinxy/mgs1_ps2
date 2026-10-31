@@ -233,6 +233,8 @@ def main():
                 time.sleep(0.5)
     finally:
         if run.poll() is None:
+            if a.shot:
+                time.sleep(3)  # the frame dump is still being written to host: (a cut one at loop 11,444)
             run.send_signal(signal.SIGTERM)  # pcsx2_run.py closes PCSX2
             run.wait(30)
         log.close()

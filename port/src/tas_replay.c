@@ -55,13 +55,16 @@ static unsigned int   size_mgs_tas_pads;
 static unsigned char* mgs_tas_raw;
 static unsigned int   size_mgs_tas_raw;
 static unsigned char* mgs_tas_time;
+static unsigned char* mgs_tas_loads; /* host:tas_loads.bin: GV_PadData at the PS1's load ends */
+static unsigned int   size_mgs_tas_loads;
 static unsigned int   size_mgs_tas_time;
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
-extern int          DG_UnDrawFrameCount;
+extern int          DG_UnDrawFrameCount, GM_LoadComplete;
 extern short        linkvarbuf[96];
 extern unsigned char GV_PadData[64], pad_800C14E0[16], GM_PlayerPosition[8];
 extern int          GM_PlayerStatus;
+extern unsigned int dword_800AB950, dword_800AB954; /* libgv/pad.c: the pads' last status */
 extern int          CDBIOS_ReadSync(void);
 extern int          gTotalFrameTime;
 extern void*        GM_PlayerControl;
@@ -125,6 +128,22 @@ static void hex(FILE* f, const void* data, int n)
 #endif
 
 #ifdef MGS_TAS
+static int   s_Ps1Loads;
+static int   s_Ps1LoadEnd[MAX_LOADS]; /* the PS1's load ends: the loops whose line has GM_LoadRequest back to 0 */
+static int   s_Loads; /* the PS1 load ends passed */
+
+/** The loop whose pads the port gets: its own, but once its load is in (GM_LoadComplete -1, loader.c: the stage's
+ * actors are made and run), the PS1's last loop of that load: the port's load is faster, so its own loop number is
+ * far behind (Snake's walk at loop 9,632 with down held). */
+static unsigned int pads_time(void)
+{
+    if (GM_LoadRequest && GM_LoadComplete == -1 && s_Loads < s_Ps1Loads && GV_Time < s_Ps1LoadEnd[s_Loads] - 1)
+    {
+        return (unsigned int)(s_Ps1LoadEnd[s_Loads] - 1);
+    }
+    return (unsigned int)GV_Time;
+}
+
 static int          s_LoadEnded;    /* a load started or ended in this loop: the seed becomes the PS1's at its end */
 static unsigned int s_StreamStarts; /* the streams started (FS_StreamTickStart), against the PS1's count */
 static int          s_LoopTick;     /* the vertical blank the loop began at (Port_TasTrace) */
@@ -238,6 +257,84 @@ int Port_TasStreamAhead(int left)
 #endif
 }
 
+#ifdef MGS_TAS
+static int s_FileLoop = -1; /* the PS1's loop that requested the file read in progress (Port_TasFileStart), or -1 */
+static int s_FileSize;
+#endif
+
+/** CDBIOS_ReadRequest, a file read (no callback): finds the PS1's (time.bin's file read bytes left becoming the
+ * size, from a few loops back on), whose progress Port_TasFileAhead then follows: the PS1's drive took from 4 to
+ * 20 vertical blanks to start a read at about the same distance (loops 5,796 and 7,566), so the trace is the
+ * reference, and cdbios_ps2.c's model only covers reads it doesn't show. */
+void Port_TasFileStart(int size)
+{
+#ifdef MGS_TAS
+    int t;
+    s_FileLoop = -1;
+    s_FileSize = size;
+    for (t = GV_Time - 3; t < GV_Time + 60; t++)
+    {
+        const unsigned char* r = time_record_at(t);
+        const unsigned char* p = time_record_at(t - 1);
+        if (r && p && (int)read_u32(r + 32) == size && (int)read_u32(p + 32) != size)
+        {
+            s_FileLoop = t;
+            break;
+        }
+    }
+    if (s_FileLoop != GV_Time)
+    {
+        printf("tas: file read of %d bytes at loop %d, the PS1's at %d\n", size, GV_Time, s_FileLoop);
+    }
+#else
+    (void)size;
+#endif
+}
+
+int Port_TasFileMatched(void)
+{
+#ifdef MGS_TAS
+    return s_FileLoop >= 0;
+#else
+    return 0;
+#endif
+}
+
+/** cdbios.c, before each sector of a file read: whether the port has read as far as the PS1 had (as for streams,
+ * Port_TasStreamAhead), so the sector waits. */
+int Port_TasFileAhead(int left)
+{
+#ifdef MGS_TAS
+    const unsigned char* p = time_record_at(GV_Time - 1);
+    const unsigned char* r = time_record();
+    int                  start, end, v;
+    if (s_FileLoop < 0)
+    {
+        return 0;
+    }
+    /* before the PS1's request: nothing read; a value that isn't this read's: done */
+    start = GV_Time - 1 < s_FileLoop || !p ? s_FileSize : (int)read_u32(p + 32);
+    end   = GV_Time < s_FileLoop || !r ? s_FileSize : (int)read_u32(r + 32);
+    if (start < 0 || start > s_FileSize)
+    {
+        start = 0;
+    }
+    if (end < 0 || end > s_FileSize)
+    {
+        end = 0;
+    }
+    v = start - 5120 * (mts_get_tick_count() - s_LoopTick);
+    if (v < end)
+    {
+        v = end;
+    }
+    return left <= v;
+#else
+    (void)left;
+    return 0;
+#endif
+}
+
 /** FS_StreamTickStart (Capture_TickStart): a stream has started. */
 void Port_TasTickStart(void)
 {
@@ -271,7 +368,7 @@ void Port_TasRawPads(void* pads, void* states)
 {
 #ifdef MGS_TAS
     static unsigned int  next;
-    unsigned int         count, time = (unsigned int)GV_Time, i;
+    unsigned int         count, time = pads_time(), i;
     const unsigned char* r;
     if (!mgs_tas_raw || (count = size_mgs_tas_raw / 28) == 0 || time < read_u32(mgs_tas_raw))
     {
@@ -326,7 +423,7 @@ void Port_TasPads(void)
 {
 #ifdef MGS_TAS
     static unsigned int next;
-    unsigned int        count = size_mgs_tas_pads / RECORD, time = (unsigned int)GV_Time;
+    unsigned int        count = size_mgs_tas_pads / RECORD, time = pads_time();
     if (!mgs_tas_pads || count == 0 || time < read_u32(mgs_tas_pads))
     {
         return;
@@ -371,13 +468,31 @@ void Port_TasPads(void)
 #ifdef MGS_TAS
 static FILE* s_Trace;
 static int   s_ShotLoop = -1; /* host:tas_shot.txt: the loop whose frame is dumped */
-static int   s_Ps1Loads;
-static int   s_Ps1LoadEnd[MAX_LOADS]; /* the PS1's load ends: the loops whose line has GM_LoadRequest back to 0 */
 #endif
 
 /** HalGame_Init, before the game starts: the file and the table scan here, not in a game loop (a few
  * milliseconds after the GV_Clock flip let the HAL draw an ordering table not yet built: TLB misses in
  * DrawOTagImpl). */
+#ifdef MGS_TAS
+/** GV_PadData as the PS1's trace line of a load's end `time` has it (host:tas_loads.bin, trace_to_pads.py). */
+static void pads_as_ps1(int time)
+{
+    unsigned int i;
+    for (i = 0; mgs_tas_loads && i + 68 <= size_mgs_tas_loads; i += 68)
+    {
+        if ((int)read_u32(mgs_tas_loads + i) == time)
+        {
+            const unsigned char* p = mgs_tas_loads + i + 4;
+            memcpy(GV_PadData, p, 64);
+            /* and GV_UpdatePadSystem's last status, which its next press and release come from */
+            dword_800AB950 = (p[0] | p[1] << 8) | (unsigned int)(p[16] | p[17] << 8) << 16;
+            dword_800AB954 = (p[32] | p[33] << 8) | (unsigned int)(p[48] | p[49] << 8) << 16;
+            return;
+        }
+    }
+}
+#endif
+
 void Port_TasInit(void)
 {
 #ifdef MGS_TAS
@@ -386,6 +501,7 @@ void Port_TasInit(void)
     mgs_tas_pads = load("host:tas_pads.bin", &size_mgs_tas_pads);
     mgs_tas_raw  = load("host:tas_raw.bin", &size_mgs_tas_raw);
     mgs_tas_time = load("host:tas_time.bin", &size_mgs_tas_time);
+    mgs_tas_loads = load("host:tas_loads.bin", &size_mgs_tas_loads);
     n            = mgs_tas_time ? (int)(size_mgs_tas_time / TIME_RECORD) : 0;
     for (t = 0; t < n && s_Ps1Loads < MAX_LOADS; t++)
     {
@@ -412,7 +528,7 @@ void Port_TasInit(void)
 void Port_TasTrace(void)
 {
 #ifdef MGS_TAS
-    static int           loads, prev_request, traced = -1;
+    static int           prev_request, traced = -1;
     FILE*                f = s_Trace;
     const char*          stage;
     const unsigned char* r;
@@ -425,12 +541,14 @@ void Port_TasTrace(void)
         Display_RequestDump(); /* the frame this loop draws, at its display */
         printf("tas: frame of loop %d dumped\n", GV_Time);
     }
-    if (prev_request && !GM_LoadRequest && loads < s_Ps1Loads)
+    if (prev_request && !GM_LoadRequest && s_Loads < s_Ps1Loads)
     {
-        if (GV_Time != s_Ps1LoadEnd[loads])
+        if (GV_Time != s_Ps1LoadEnd[s_Loads])
         {
-            printf("tas: load end %d at loop %d, the PS1's at %d\n", loads, GV_Time, s_Ps1LoadEnd[loads]);
-            GV_Time = s_Ps1LoadEnd[loads];
+            printf("tas: load end %d at loop %d, the PS1's at %d\n", s_Loads, GV_Time, s_Ps1LoadEnd[s_Loads]);
+            GV_Time = s_Ps1LoadEnd[s_Loads];
+            pads_as_ps1(GV_Time); /* the PS1 updated its pads all through its load; the port's are its last loop's
+                                     (loop 9,633: down held) */
         }
         if ((r = time_record()) != 0)
         {
@@ -440,7 +558,7 @@ void Port_TasTrace(void)
             linkvarbuf[91]  = gTotalFrameTime / 60 / 3600; /* GM_PlayTimeHours/Seconds, as gamed.c's Act */
             linkvarbuf[92]  = gTotalFrameTime / 60 % 3600;
         }
-        loads++;
+        s_Loads++;
         s_LoadEnded = 1;
     }
     if (!prev_request && GM_LoadRequest)
@@ -457,7 +575,7 @@ void Port_TasTrace(void)
     s_LoadEnded = 0;
     traced      = GV_Time;
     s_LoopTick  = mts_get_tick_count();
-    if (!f || (GM_LoadRequest && loads < s_Ps1Loads && GV_Time >= s_Ps1LoadEnd[loads]))
+    if (!f || (GM_LoadRequest && s_Loads < s_Ps1Loads && GV_Time >= s_Ps1LoadEnd[s_Loads]))
     {
         return; /* still loading at the PS1's load end (the PS1 drive's pace, cdbios_ps2.c): the loop's number is
                    set to the PS1's at the load's end */

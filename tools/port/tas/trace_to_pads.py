@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Makes the port's TAS replay tables from BizHawk's trace (trace.lua), for port/src/tas_replay.c:
  - pads.bin: for each change of GV_PadData[0..3], a little-endian u32 GV_Time and the 64 bytes;
+ - loads.bin: at each PS1 load end, the loop and GV_PadData as recorded (tas_replay.c's realign);
  - raw.bin: for each change, a u32 GV_Time and the PS1's raw mts pads (pad_800C14E0[0..1]) and pad init
    states (pad_state_800C14F0[0..1]) at the loop's vertical blank;
  - time.bin: for each loop from GV_Time 0, the tick FS_StreamGetTick returned (s32, 0x80000000: no stream;
@@ -59,9 +60,10 @@ for i, f in enumerate(rows):
     pads = bytes.fromhex(n[7])                      # the pads loop t's actors used
     if int(n[4], 16) & STATE_PADRELEASE or int(n[12]) > 0:
         # zeroed (GV_UpdatePadSystem): [2]/[3].status hold the result, not the controller, which a second update
-        # in the loop needs (script.c's PadCmd at loop 5,110: the held buttons' release); mts's raw pads have it.
+        # in the loop needs (script.c's PadCmd at loop 5,110: the held buttons' release); mts's raw pads have it,
+        # as the loop read them: line t's, as raw.bin (loop 9,252's circle at the elevator, gone on line t+1).
         # Only where the recorded buttons are 0: a flag set after the loop's update (loop 5,002) left them as read
-        rp = bytes.fromhex(n[8])
+        rp = bytes.fromhex(f[8])
         pads = bytearray(pads)
         for port in (0, 1):
             o = (2 + port) * 16
@@ -92,6 +94,13 @@ for i, f in enumerate(rows):
     # t+1); stream starts: up to and including loop t; file read: line t+1; play time: line t
     time[t] = struct.pack("<iIIiIiiIii", tick, int(n[4], 16), int(f[11]), int(f[3]), int(f[5], 16), int(f[2]),
                           int(n[19]), starts, int(n[20]), int(f[21]))
+# loads.bin: at each PS1 load end (the line whose GM_LoadRequest is back to 0), a u32 GV_Time and that line's
+# GV_PadData as recorded (pads.bin's records can have [2]/[3] rebuilt): tas_replay.c's realign at the load's end
+loads = bytearray()
+for prev, f in zip(rows, rows[1:]):
+    if int(prev[11]) and not int(f[11]):
+        loads += struct.pack("<I", int(f[1])) + bytes.fromhex(f[7])
+open(os.path.join(out_dir, "loads.bin"), "wb").write(loads)
 lines = len(rows)
 pads_path, time_path = os.path.join(out_dir, "pads.bin"), os.path.join(out_dir, "time.bin")
 open(pads_path, "wb").write(out)

@@ -11398,3 +11398,232 @@ Not yet. The port's part is done, and the Redux control run for the screenshot i
 
 - tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_7597.png
 
+- tool `Bash`: Archive and commit the crash fix
+
+## Claude
+
+I fixed the crash, and it was a real port bug, not a harness problem. The replay now plays through `s01a` and stays in sync to loop 7,596 (0:04:21.1). That's committed as `022487bd6`; nothing is pushed.
+
+**Cause:**
+- `takabe/lit_mdl.c` sets up a built-in model as a static `DG_DEF` and initializes its zero-length `models[]` array. PSY-Q's old GCC kept that model data. Modern GCC drops it with a warning ("excess elements in array initializer"), so in the port the variable was only the 32-byte header.
+- The actor copies header plus model from it, so it took whatever came next in memory as its model: one claiming 2,509,024 vertices.
+- When that object first became visible (loop 6,741), the code that transforms vertices wrote millions of them through the emulated scratchpad and ran over the game thread's stack. That corrupted the saved registers, and returning through a garbage address then raised the "Jump to unaligned address" error you saw.
+
+**Fix:** under `MGS_PORT` the header and model now sit in one struct, so the copy gets the real model. No other source file has that warning, so there are no other instances of this exact bug.
+
+**How I found it:** I first ruled out a real model overflowing the scratchpad, bad draw-queue entries and the task stacks. Then I printed each object as it was drawn, which pointed to the one with the impossible vertex count, and logged who created it.
+
+**Next desync:** the rand seed at loop 7,597 (0:04:21.14) in `s02a`. Its screenshot is no help this time: the Redux control run that supplies the PS1 side shows a GAME OVER screen while the port is in a codec call, so Redux has drifted from the real PS1 by now. For this one I'd compare with BizHawk, as with the codec timing.
+
+The matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`). The walkthrough, the TAS plan and the Planning Doc's list of port bugs are updated.
+
+## User
+
+Let's continue with the next desync
+
+## Claude
+
+Starting with the traces around loop 7,597:
+
+- tool `Bash`: Compare traces 7540-7600
+
+- tool `Bash`: Log seek distances for all calls
+
+- tool `Bash`: PS1 stream fields during face wait
+
+- tool `Bash`: Find the CD task struct layout
+
+- tool `Bash`: Read CDBIOS_TASK and PS1 task loop
+
+- tool `Bash`: Per-frame PS1 CD task state
+
+- tool `Bash`: Read ReadRequest and the paced hooks
+
+## Claude
+
+The port's `CDBIOS_ReadRequest` is the shared code, so the hook goes there. Implementing it:
+
+- tool `Bash`: Gate file reads on the PS1's recorded progress
+
+- tool `Bash`: Compare traces 9230-9256
+
+- tool `Bash`: Stream start before 9253
+
+- tool `Bash`: When the PS1's stream request started
+
+- tool `Bash`: Find PADRELEASE setters and s02a sources
+
+- tool `Bash`: Screenshots of PS1 (BizHawk) and port at 9255
+
+## Claude
+
+The port stopped at 9,254 on a position difference before its dump, and the two frame files are left over from earlier runs. Rerunning with that field ignored as well:
+
+- tool `Bash`: Port frame at 9255 and side-by-side
+
+- tool `Read`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8/scratchpad/cmp_9255.png
+
+- tool `Bash`: Find evpanel trigger conditions
+
+- tool `Bash`: Read evpanel act start and pad release
+
+- tool `Bash`: Read evpanel menu entry
+
+- tool `Bash`: Log the port's elevator panel states
+
+- tool `Bash`: Log the port's elevator panel states
+
+- tool `Bash`: Read evpanel message function
+
+## Claude
+
+The panel's messages come from the game's trap and script system (enter, leave and so on), and bit 0x40 is the 7th entry of its message table. Checking which message that is:
+
+- tool `Bash`: Read the panel's message table
+
+- tool `Bash`: Read message table values
+
+- tool `Bash`: Log all panel messages
+
+## Claude
+
+The port's panel never gets a single message. In state 0 without a message it calls `s03e_evpanel_800C3B14`, which may check Snake and the pad itself. Reading it:
+
+- tool `Bash`: Read evpanel proximity check
+
+## Claude
+
+The panel's menu opens on the enter message from Snake (bits 0x104). The port never sends one, so Snake's arrival at the panel isn't detected. Finding where enter messages are sent:
+
+- tool `Bash`: Find senders of HASH_ENTER
+
+- tool `Bash`: Read bind.c enter dispatch
+
+- tool `Bash`: Read HZD bind event dispatch
+
+## Claude
+
+Enter messages come from HZD binds. A bind can also require Snake to face a direction and press a button (`GV_PadData[0].press`). Reading the rest of that condition:
+
+- tool `Bash`: Read the bind condition function
+
+- tool `Bash`: Find evpanel in PS1 overlay maps
+
+- tool `Bash`: Locate s02a overlay map files
+
+- tool `Bash`: Get evpanel symbols in s02a
+
+- tool `Bash`: GV_ACT layout and evpanel Work offsets
+
+- tool `Bash`: Read GV_ACT and Work head
+
+## Claude
+
+Writing the BizHawk script. At loop 9,200 it finds the string and the actor once, then logs the panel's state (+0x2E) and enter count (+0x44) every frame up to 9,256:
+
+- tool `Bash`: Log the PS1's elevator panel state
+
+- tool `Bash`: PS1 panel state near 9253
+
+- tool `Bash`: Pads around 9252 on both sides and in the table
+
+## Claude
+
+The PS1's raw pad at line 9,252 has a press (`dfff`), which the port's raw pad shows only at line 9,253, a loop later. Checking `raw.bin` around there:
+
+- tool `Bash`: raw.bin entries near 9252
+
+- tool `Bash`: MGS pad bit values
+
+- tool `Bash`: Read pad bit comments
+
+- tool `Bash`: Use line t raw pads for the PADRELEASE rebuild; rerun
+
+- tool `Bash`: Context around 9633
+
+- tool `Bash`: Set the PS1's pads at load-end realign; rerun
+
+- tool `Bash`: Find pads.bin readers
+
+- tool `Bash`: Add loads.bin and use it at realign; rerun
+
+- tool `Bash`: Read press computation
+
+- tool `Bash`: Read status/press update
+
+## Claude
+
+The previous state lives in two globals, not in `GV_PadData`: `dword_800AB950` holds pads 0 and 1's last status, and `dword_800AB954` pads 2 and 3's. The realign has to set those too:
+
+- tool `Bash`: Set the pad system's last status at realign; rerun
+
+- tool `Bash`: Pads, passage time, position at 9634-9635
+
+- tool `Bash`: Diff Snake CONTROL and work at 9633-9635
+
+## Claude
+
+The BizHawk reference trace doesn't have Snake's control or work fields; those come from `trace_debug.lua`. Running that in BizHawk up to just past this point (frame 19,530):
+
+- tool `Bash`: BizHawk debug trace; diff Snake state
+
+- tool `Bash`: Identify Snake work field 0x9BC
+
+- tool `Bash`: Where the anim frame counter changes
+
+- tool `Bash`: Read anim frame increment and reset
+
+- tool `Bash`: Find load handling in gamed.c
+
+- tool `Bash`: Read load completion in GM_Act
+
+- tool `Bash`: Snake anim frame at each load end, PS1 vs port
+
+- tool `Bash`: Find load index and pad time lookups
+
+- tool `Bash`: Feed the PS1's load-end pads while loading; rerun
+
+- tool `Bash`: Limit the remap to the load's last step; rerun
+
+## Claude
+
+The duplicate was already gone (the earlier listing came from before my edit), so the script stopped there before applying the rest. Applying the other changes:
+
+- tool `Bash`: Limit the remap to the load's last step; rerun
+
+## Claude
+
+Still 9,399, so `GM_LoadComplete` must already be set during the load. Logging when the remap is active:
+
+- tool `Bash`: Find GM_LoadComplete writers
+
+- tool `Bash`: Read loader GM_LoadComplete use
+
+- tool `Bash`: Use GM_LoadComplete -1; rerun
+
+- tool `Bash`: Tidy comment; screenshot run; matching builds
+
+## Claude
+
+Matching builds pass. Writing the docs while the screenshot run finishes:
+
+- tool `Bash`: Update docs; check screenshot run
+
+## Claude
+
+The docs are updated. Waiting for the screenshot run before checking the normal link, since a link would replace the ELF that run is using:
+
+- tool `Bash`: Wait for the screenshot run
+
+- tool `Bash`: Wait for the screenshots
+
+- tool `Write`: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/memory/progress-during-headless-runs.md
+
+- tool `Bash`: Index memory; check the frame dump
+
+- tool `Bash`: Wait for the dump before closing; redo screenshot
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_11444.png
+
+- tool `Bash`: Normal link; archive; status
+

@@ -708,3 +708,15 @@ overflows (32 KB mts stacks, 64 KB EE thread stacks with marks). Found by printi
 transformed, then logging `DG_MakeObjs` calls whose model had an impossible vertex count with their caller.
 No other source file has that warning. PCSX2: in sync to loop 7,596; at 7,597 (0:04:21.14, `s02a`) the rand seed
 differs. Matching build: 80 OK, VR 2 OK.
+
+## Step 17: file reads follow the trace; pads at the elevator and at load ends (2026-10-31)
+
+Loop 7,597: a codec face read that the PS1 started 19 vertical blanks late for a short seek; rather than a better
+drive model, file reads now follow the PS1's recorded progress (the read of the same size, matched in time.bin),
+as streams do. Loop 9,253: BizHawk screenshot and memory reads (the elevator panel's actor found by its filename
+string) led to the raw pads: where the game zeroed the pads, the harness rebuilt them from the next line's raw
+pads instead of the loop's own. Loop 9,633: at a load's end the port's pads were those of its own (much earlier)
+loop number; now loads.bin carries the PS1's GV_PadData at each load end, and the loop after the loader's end
+reads the PS1's last load loop's pads. BizHawk's trace_debug.lua (Snake's work) showed the anim frame a loop
+ahead. PCSX2: in sync to loop 11,443; at 11,444 (0:06:19.70, `s03d`) the rand seed differs.
+Matching build: 80 OK, VR 2 OK.

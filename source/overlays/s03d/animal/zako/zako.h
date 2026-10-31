@@ -8,8 +8,8 @@
 typedef struct _PARAM
 {
     signed char fAF8;
-    char        fAF9;
-    char        fAFA;
+    signed char fAF9;
+    signed char fAFA;
     signed char c_root;
     char        defends[4];
     signed char roots[4];
@@ -89,12 +89,13 @@ typedef struct _Work
     int             field_AD8;      /* 0xAD8 */
     int             field_ADC;      /* 0xADC */
     int             field_AE0;      /* 0xAE0 */
-    char            pad_AE4[0xAE6 - 0xAE4];
+    short           field_AE4;      /* 0xAE4 */
     short           field_AE6;      /* 0xAE6 */
     short           field_AE8;      /* 0xAE8 */
     char            pad_AEA[0xAEC - 0xAEA];
     int             field_AEC;      /* 0xAEC */
-    char            pad_AF0[0xAF6 - 0xAF0];
+    int             field_AF0;      /* 0xAF0 */
+    char            pad_AF4[0xAF6 - 0xAF4];
     short           field_AF6;      /* 0xAF6 */
     short           field_AF8;      /* 0xAF8 */
     char            pad_AFA[0xB00 - 0xAFA];
@@ -107,9 +108,7 @@ typedef struct _Work
     unsigned short  field_B24;      /* 0xB24 */
     short           field_B26;      /* 0xB26 */
     int             field_B28;      /* 0xB28 */
-    char            pad_B2C[0xB32 - 0xB2C];
-    unsigned char   field_B32;      /* 0xB32 */
-    unsigned char   field_B33;      /* 0xB33 */
+    unsigned char   field_B2C[8];   /* 0xB2C; [6] and [7]: field_B32, field_B33 */
     SVECTOR         field_B34;      /* 0xB34 */
     int             field_B3C;      /* 0xB3C */
     SVECTOR         field_B40;      /* 0xB40 */
@@ -134,8 +133,10 @@ typedef struct _Work
     int             field_B9C;      /* 0xB9C */
     short           field_BA0;      /* 0xBA0 */
     short           field_BA2;      /* 0xBA2 */
-    char            pad_BA4[0xC00 - 0xBA4];
 } Work;
+
+#define field_B32 field_B2C[6]
+#define field_B33 field_B2C[7]
 
 typedef struct _ZakoActor
 {

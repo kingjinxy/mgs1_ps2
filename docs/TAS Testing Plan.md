@@ -305,8 +305,9 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       the four after it in its .s; zakocom.c `800D46F8`, `800D4EAC` with its Act and Die, `800D55C8` with the
       commander's constructor (zakocom.c is complete). For the port only (`#ifdef MGS_PORT`; the matching build keeps
       the INCLUDE_ASM, and `overlay_survey.py` skips that `#else`), C that differs from the PS1 in register choice
-      alone: `800D1054` with three more senses, `800D14AC`. Left: `800CD1C4` (two functions), then the stage table
-      (`source/stage/s03d.c`: constructors as literal addresses, 15 of them by the survey).
+      alone: `800D1054` with three more senses, `800D14AC`. Also matching: `800CD1C4` (GetResources) and the guard's
+      constructor; `Work` is 0xBA4 bytes (was padded to 0xC00), `PARAM.fAF9`/`fAFA` are signed. No INCLUDE_ASM left;
+      next, the literal addresses (7 by the survey, the stage table's among them).
       What it took: jump tables come out of the rodata files (`overlay2.c`, zakocom.c's own block) with any constants
       after them moved below the function, so the order holds; inline helpers (`SetAction`, `SetMode`, ...) for the
       PS1's scheduling; zako11a's empty `for (i = 0; i < 0; i++)` loop in the init for its block layout; a struct

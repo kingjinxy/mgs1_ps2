@@ -327,7 +327,197 @@ int Zako_800CD16C(char *opt, char *out)
     return count;
 }
 
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CD1C4.s")
+extern const char s03d_dword_800DB3E0[]; /* "Err not enough work !!\n" */
+extern const char s03d_dword_800DB3F8[]; /* "Err Err Err Change Root Num Over !!\n" */
+extern const char s03d_dword_800DB420[]; /* "Err Err Err Change Defend Num Over !!\n" */
+extern const char s03d_dword_800DB448[]; /* "Life=%d Faint=%d Blood=%c Area=%c \n" */
+extern const char s03d_dword_800DB46C[]; /* "watchar.c : action point Err\n" */
+extern int        s03d_dword_800C39A8;
+extern int        GM_CurrentMap;
+int  ZakoCom_800D3FF4(Work *work);
+int  ZakoCom_800D4038(void);
+
+void s03d_800CD1C4(Work *work, int name, int where)
+{
+    char *opt;
+    int   addr, i;
+
+    s03d_800CCE3C(work, name, where);
+
+    work->param.fAF8 = ZakoCom_800D3FF4(work);
+    if (work->param.fAF8 < 0)
+    {
+        fprintf(0, (char *)s03d_dword_800DB3E0);
+    }
+
+    work->field_B04 = ZakoCom_800D4038();
+
+    work->param.roots[0] = 0;
+    work->param.c_root = 0;
+    opt = GCL_GetOption('r');
+    if (opt)
+    {
+        if (Zako_800CD16C(opt, work->param.roots) >= 4)
+        {
+            fprintf(0, (char *)s03d_dword_800DB3F8);
+        }
+    }
+
+    switch (work->param.fAF8)
+    {
+    case 0:
+        work->field_B64 = 3000;
+        break;
+    case 1:
+        work->field_B64 = 4000;
+        break;
+    case 2:
+        work->field_B64 = 7000;
+        break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        work->field_B64 = 8000;
+        break;
+    }
+
+    work->param.life = 192;
+    opt = GCL_GetOption('l');
+    if (opt)
+    {
+        work->param.life = GCL_StrToInt(opt);
+    }
+
+    work->param.faint = 255;
+    opt = GCL_GetOption('f');
+    if (opt)
+    {
+        work->param.faint = GCL_StrToInt(opt);
+    }
+
+    work->param.field_B18 = 40;
+    opt = GCL_GetOption('z');
+    if (opt)
+    {
+        work->param.field_B18 = GCL_StrToInt(opt);
+    }
+
+    work->param.fAF9 = 'A';
+    opt = GCL_GetOption('b');
+    if (opt)
+    {
+        work->param.fAF9 = GCL_StrToInt(opt);
+    }
+
+    work->param.defends[work->param.c_root] = 255;
+    opt = GCL_GetOption('n');
+    if (opt)
+    {
+        if (Zako_800CD16C(opt, work->param.defends) >= 4)
+        {
+            fprintf(0, (char *)s03d_dword_800DB420);
+        }
+    }
+
+    work->param.fAFA = 'A';
+    opt = GCL_GetOption('a');
+    if (opt)
+    {
+        work->param.fAFA = GCL_StrToInt(opt);
+    }
+
+    if (work->param.fAFA == 'S')
+    {
+        Zako_800D0EF0(work, 1);
+    }
+
+    fprintf(0, (char *)s03d_dword_800DB448, work->param.life, work->param.faint, work->param.fAF9, work->param.fAFA);
+
+    if (s03d_800CD0C8(work) < 0)
+    {
+        fprintf(1, (char *)s03d_dword_800DB46C);
+    }
+
+    work->field_8FC = GM_AllocTarget();
+    if (work->field_8FC)
+    {
+        Zako_800CCCF4(work);
+    }
+
+    work->field_AC8 = 0;
+    work->field_ACA = 0;
+    work->field_ACC = 0;
+    work->field_ACE = 0;
+    work->field_AD0 = 0;
+    work->field_AD4 = 0;
+
+    work->field_B48 = work->nodes[0];
+    work->field_B5C = HZD_GetAddress(work->control.map->hzd, &work->field_B48, -1);
+    work->field_B22 = 512;
+    work->field_B24 = 4000;
+    work->field_B28 = 0;
+    work->field_B20 = 0;
+    work->field_AE8 = 0;
+    work->field_AE4 = 0;
+    work->field_B60 = GM_CurrentMap;
+    work->field_B34 = *(SVECTOR *)&s03d_dword_800C39A8;
+    work->field_AF0 = 0;
+    work->control.mov = work->nodes[0];
+    work->field_AF6 = 0;
+    work->field_AF8 = 0;
+    work->field_B00 = 1;
+    work->field_BA0 = 0;
+
+    for (i = 0; i < 8; i++)
+    {
+        work->field_B2C[i] = 0;
+    }
+
+    work->field_B33 = 0x17;
+    ((signed char *)work->field_B2C)[4] = -1;
+
+    GM_ConfigControlRadarparam(&work->control, 0, 512, 4000, 0);
+
+    work->field_B40 = work->nodes[0];
+    work->field_B54 = GM_CurrentMap;
+
+    addr = HZD_GetAddress(work->control.map->hzd, &work->control.mov, -1);
+    work->field_B50 = addr;
+    work->field_B74 = addr;
+    work->field_B58 = addr;
+    work->field_B80 = work->field_B40;
+}
+
+/* rodata after this function's jump table (0x800DB48C), from overlay2.c */
+const char s03d_dword_800DB4AC[] = {'z', 'a', 'k', 'o'};
+const char s03d_dword_800DB4B0[] = {'.', 'c', 0x0, 0x8f};
+const char s03d_dword_800DB4B4[] = {' ', 'm', 'e', 'r'};
+const char s03d_dword_800DB4B8[] = {'y', 'l', ' ', 'K'};
+const char s03d_dword_800DB4BC[] = {'I', 'L', 'L', 'E'};
+const char s03d_dword_800DB4C0[] = {'D', ' ', '!', '!'};
+const char s03d_dword_800DB4C4[] = {'!', ' ', '\n', 0x0};
+const char s03d_dword_800DB4C8[] = {' ', 'S', 'N', 'A'};
+const char s03d_dword_800DB4CC[] = {'K', 'E', ' ', 'K'};
+const char s03d_dword_800DB4D0[] = {'I', 'L', 'L', 'E'};
+const char s03d_dword_800DB4D4[] = {'D', ' ', '!', '!'};
+const char s03d_dword_800DB4D8[] = {'!', ' ', '\n', 0x0};
+
+void *NewZako_800CD5A0(int name, int where)
+{
+    Work *work;
+
+    work = GV_NewActor(4, sizeof(Work));
+    if (work != NULL)
+    {
+        GV_SetNamedActor(&work->actor, (GV_ACTFUNC)s03d_800CCC54, (GV_ACTFUNC)s03d_800CD054,
+                         (char *)s03d_dword_800DB4AC);
+        s03d_800CD1C4(work, name, where);
+    }
+
+    return (void *)work;
+}
 
 int s03d_800CD61C(Work *work)
 {

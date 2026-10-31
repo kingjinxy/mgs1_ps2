@@ -360,29 +360,6 @@ int s03d_800D46F8(int cmd)
 
 /* the rest of the rodata, after this function's jump table (0x800DBBD0) */
 const char s03d_dword_800DBBF0[32] = "%d reset_enemy_num[%d ]\n";
-const int s03d_dword_800DBC10 = 0x800D4F14;
-const int s03d_dword_800DBC14 = 0x800D4F5C;
-const int s03d_dword_800DBC18 = 0x800D5008;
-const int s03d_dword_800DBC1C = 0x800D5090;
-const int s03d_dword_800DBC20 = 0x800D50D0;
-const int s03d_dword_800DBC24 = 0x800D5164;
-const int s03d_dword_800DBC28 = 0x800D51A8;
-const int s03d_dword_800DBC2C = 0x800D53D8;
-const int s03d_dword_800DBC30 = 0x800D5268;
-const int s03d_dword_800DBC34 = 0x800D52A4;
-const int s03d_dword_800DBC38 = 0x800D52B8;
-const int s03d_dword_800DBC3C = 0x800D52F0;
-const int s03d_dword_800DBC40 = 0x800D5324;
-const int s03d_dword_800DBC44 = 0x800D5344;
-const int s03d_dword_800DBC48 = 0x800D53A8;
-const int s03d_dword_800DBC4C = 0x800D53D8;
-const char s03d_dword_800DBC50[32] = "Err Err Err Sound Buff Over !!\n";
-const char s03d_dword_800DBC70[] = {'z', 'o', 'n', 'e'};
-const char s03d_dword_800DBC74[] = {'=', '%', 'd', ' '};
-const char s03d_dword_800DBC78[] = {0x0, 0x0, 0x0, 0x0};
-const char s03d_dword_800DBC7C[] = {'z', 'a', 'k', 'o'};
-const char s03d_dword_800DBC80[] = {'c', 'o', 'm', '.'};
-const char s03d_dword_800DBC84[] = {'c', 0x0, 0x0, 0xf};
 void s03d_800D47BC(ZakoComMgr *mgr)
 {
     int i;
@@ -656,7 +633,241 @@ int ZakoCom_800D4E48(char *str)
 
     return count;
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D4EAC.s")
+extern int     s03d_dword_800DC2F8;
+extern int     GM_GameOverTimer;
+void OpenCinemaScreen(int, int);
+void CloseCinemaScreen(void);
+
+void s03d_800D4EAC(void)
+{
+    int i;
+    int enemies;
+
+    enemies = ZAKOCOM_MGR->field_60;
+
+    if (GM_GameOverTimer != 0 || GM_Vitality <= 0)
+    {
+        return;
+    }
+
+    switch (s03d_dword_800DC2F8)
+    {
+    case 0:
+        if (ZAKOCOM_MGR->field_10 == 0 && GM_StreamStatus() == -1)
+        {
+            GM_VoxStream(ZAKOCOM_MGR->field_114, 0x40000000);
+        }
+        if (enemies != 0)
+        {
+            s03d_dword_800DC2F8 = 1;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 1:
+        if (enemies >= 3)
+        {
+            if (GM_ItemTypes[GM_Item + 1] & 0x2)
+            {
+                GM_Item = -1;
+            }
+            if (GM_WeaponTypes[GM_Weapon + 1] & 0x200)
+            {
+                GM_Weapon = -1;
+            }
+            OpenCinemaScreen(0, 60000);
+            s03d_dword_800DC2F8 = 2;
+            ZAKOCOM_MGR->field_10 = 0;
+            GM_GameStatus |= 0x100A2000;
+        }
+        break;
+
+    case 2:
+        if (ZAKOCOM_MGR->field_10 == 0)
+        {
+            if (GM_StreamStatus() == 1)
+            {
+                GM_StreamPlayStart();
+            }
+            if (ZAKOCOM_MGR->field_124[5] >= 0)
+            {
+                GCL_ExecProc(ZAKOCOM_MGR->field_124[5], NULL);
+            }
+        }
+        if (ZAKOCOM_MGR->field_10 > 10)
+        {
+            s03d_dword_800DC2F8 = 3;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 3:
+        if (ZAKOCOM_MGR->field_10 > 30)
+        {
+            if (ZAKOCOM_MGR->field_124[0] >= 0)
+            {
+                GCL_ExecProc(ZAKOCOM_MGR->field_124[0], NULL);
+            }
+            s03d_dword_800DC2F8 = 4;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 4:
+        if (ZAKOCOM_MGR->field_10 > 60 && GM_StreamStatus() == -1)
+        {
+            GM_VoxStream(ZAKOCOM_MGR->field_118, 0);
+            if (ZAKOCOM_MGR->field_124[1] >= 0)
+            {
+                GCL_ExecProc(ZAKOCOM_MGR->field_124[1], NULL);
+            }
+            s03d_dword_800DC2F8 = 5;
+            ZAKOCOM_MGR->field_10 = 0;
+            if (GM_SocomFlag < 0)
+            {
+                GM_PlayerControl->mov.vx = ((SVECTOR *)&s03d_dword_800C3B90)->vx;
+                GM_PlayerControl->mov.vz = ((SVECTOR *)&s03d_dword_800C3B90)->vz;
+            }
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 5:
+        if (ZAKOCOM_MGR->field_10 == 60)
+        {
+            if (ZAKOCOM_MGR->field_124[2] >= 0)
+            {
+                GCL_ExecProc(ZAKOCOM_MGR->field_124[2], NULL);
+            }
+            s03d_dword_800DC2F8 = 6;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 6:
+        if (ZAKOCOM_MGR->field_10 == 30 && ZAKOCOM_MGR->field_124[3] >= 0)
+        {
+            GCL_ExecProc(ZAKOCOM_MGR->field_124[3], NULL);
+        }
+        if (ZAKOCOM_MGR->field_10 == 180 && ZAKOCOM_MGR->field_124[4] >= 0)
+        {
+            GCL_ExecProc(ZAKOCOM_MGR->field_124[4], NULL);
+        }
+        if (ZAKOCOM_MGR->field_10 > 182)
+        {
+            CloseCinemaScreen();
+            GM_GameStatus &= ~0x100A2000;
+            s03d_dword_800DC2F8 = 8;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 8:
+        if (enemies == 13 || enemies == 14)
+        {
+            s03d_dword_800DC2F8 = 9;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 9:
+        if (enemies >= 15)
+        {
+            s03d_dword_800DC2F8 = 10;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        break;
+
+    case 10:
+        ZAKOCOM_MGR->field_10++;
+        if (ZAKOCOM_MGR->field_10++ > 30)
+        {
+            s03d_dword_800DC2F8 = 11;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        break;
+
+    case 11:
+        ZAKOCOM_MGR->field_10++;
+        if (ZAKOCOM_MGR->field_10++ > 220)
+        {
+            s03d_dword_800DC2F8 = 12;
+        }
+        break;
+
+    case 12:
+        if (enemies >= 17)
+        {
+            s03d_dword_800DC2F8 = 13;
+            ZAKOCOM_MGR->field_10 = 0;
+        }
+        break;
+
+    case 13:
+        if (s03d_dword_800DC2E8 == 0)
+        {
+            s03d_dword_800DC2F8 = 14;
+            ZAKOCOM_MGR->field_10 = 0;
+            for (i = 0; i < 8; i++)
+            {
+                if (ZAKOCOM_MGR->entries[i].field_C)
+                {
+                    s03d_dword_800DC2F8 = 13;
+                }
+            }
+        }
+        break;
+
+    case 14:
+        if (ZAKOCOM_MGR->field_10 > 30)
+        {
+            s03d_dword_800DC2F8 = 15;
+        }
+        ZAKOCOM_MGR->field_10++;
+        break;
+
+    case 7:
+    case 15:
+        break;
+    }
+}
+
+void s03d_800D53EC(GV_ACT *work)
+{
+    s03d_800D4EAC();
+    ZakoCom_800D4DD4();
+    s03d_800D4CE0(work);
+    ZAKOCOM_MGR->field_0C++;
+    ZakoCom_800D41C0();
+
+    if (s03d_dword_800DC2F8 == 15)
+    {
+        GV_DestroyActor(work);
+    }
+}
+
+void s03d_800D5458(GV_ACT *work)
+{
+    if (ZAKOCOM_MGR->field_120 >= 0)
+    {
+        GCL_ExecProc(ZAKOCOM_MGR->field_120, NULL);
+    }
+}
+
+/* the rest of the rodata, after this file's second jump table (0x800DBC10) */
+const char s03d_dword_800DBC50[32] = "Err Err Err Sound Buff Over !!\n";
+const char s03d_dword_800DBC70[] = {'z', 'o', 'n', 'e'};
+const char s03d_dword_800DBC74[] = {'=', '%', 'd', ' '};
+const char s03d_dword_800DBC78[] = {0x0, 0x0, 0x0, 0x0};
+const char s03d_dword_800DBC7C[] = {'z', 'a', 'k', 'o'};
+const char s03d_dword_800DBC80[] = {'c', 'o', 'm', '.'};
+const char s03d_dword_800DBC84[] = {'c', 0x0, 0x0, 0xf};
 int ZakoCom_800D5484(int arg0, int *out)
 {
     int *p = out;

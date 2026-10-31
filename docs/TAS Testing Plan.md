@@ -206,7 +206,9 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       the tables took the controller from, and a second update in the loop (`PadCmd`) reports the release. Where the
       game zeroed them, the buttons now come from mts's raw pads (`trace_to_pads.py`). (Its screenshot differs over
       most of the top half: not looked into.)
-- [ ] `DG_UnDrawFrameCount` at loop 5,751 (0:03:21.53, `d01a`): port 3, PS1 0x7FFF00EC.
+- [x] `DG_UnDrawFrameCount` at loop 5,751 (0:03:21.53, `d01a`), the harness: after `FS_StreamSoundMode`,
+      `strctrl.c` asks for the tick again in the loop and the PS1 got -1; the harness now returns -1 then.
+- [ ] rand seed at loop 5,809 (0:03:24.39, `d01a`).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

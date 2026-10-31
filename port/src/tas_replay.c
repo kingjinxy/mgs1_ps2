@@ -143,6 +143,20 @@ static const unsigned char* time_record(void)
 }
 #endif
 
+#ifdef MGS_TAS
+static int s_SoundModeLoop = -1;
+#endif
+
+/** FS_StreamSoundMode: the clock is reset to wait for the sound; strctrl.c asks again in the same loop (its
+ * goto loop_case3), and the PS1's answer then was -1 (the sound not started yet, fs_stream_last_time -1), not
+ * the tick the loop started with (loop 5,751). */
+void Port_TasSoundMode(void)
+{
+#ifdef MGS_TAS
+    s_SoundModeLoop = GV_Time;
+#endif
+}
+
 int Port_TasTick(int* tick)
 {
 #ifdef MGS_TAS
@@ -150,6 +164,11 @@ int Port_TasTick(int* tick)
     if (!r)
     {
         return 0;
+    }
+    if (s_SoundModeLoop == GV_Time)
+    {
+        *tick = -1;
+        return 1;
     }
     *tick = read_u32(r) == NO_TICK ? mts_get_tick_count() + 1 : (int)read_u32(r); /* last_time -1: now - -1 */
     return 1;

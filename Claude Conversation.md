@@ -9868,3 +9868,62 @@ With the narrowed rule, the Redux control run (the real PS1 code under the same 
 
 - tool `Bash`: Update docs and commit harness fix
 
+## Claude
+
+Committed as `33ac8abad`. Now loop 5,751: the screenshot, and both traces around it:
+
+- tool `Bash`: Compare traces around loop 5751
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_5751.png
+
+- tool `Bash`: Compare stream data fields around 5751
+
+- tool `Bash`: Read FS_StreamGetTick and stream_tick
+
+- tool `Bash`: Read GetTick rest and the time table entries
+
+- tool `Bash`: Find GetTick and SoundMode callers
+
+- tool `Bash`: Read strctrl packet loop
+
+- tool `Bash`: Read the tick hooks on both sides
+
+## Claude
+
+The port gets a `Port_TasSoundMode()` hook in `FS_StreamSoundMode`. Redux gets a breakpoint there that does the same:
+
+- tool `Bash`: Add SoundMode hook to port
+
+- tool `Bash`: Apply -1 rule on both sides, check Redux run
+
+## Claude
+
+The Redux control run now matches the reference to loop 6,500, apart from the known seed. Building the port and running it live:
+
+- tool `Bash`: Build port and run to next desync
+
+## Claude
+
+Meanwhile, the matching build (`stream.c` changed):
+
+- tool `Bash`: Run matching builds
+
+## Claude
+
+Matching build: 80 OK, VR 2 OK. The port run is still going and will notify me when it finishes. Once it does, I'll commit this fix and take on the next desync as the one more step you asked for, then stop.
+
+The desync at loop 5,751 (0:03:21.53) was in the harness, not the port:
+- **What the PS1 does:** after the audio packet, the PS1's stream code resets its clock to wait for the sound, then reads the clock again in the same loop. That second read returns −1, so the next packet (the demo's "stop drawing" one) waits two more loops.
+- **What the harness did:** it returned the loop's recorded tick for every read, so the packet went two loops early.
+- **The fix:** once the clock has been reset in a loop, the port and the Redux script both return −1 for the rest of that loop.
+
+With the fix, the Redux control run matches the PS1 reference through loop 6,500 (about 0:03:47), apart from the known intro seed.
+
+- tool `Bash`: Read port run result
+
+## Claude
+
+In sync through loop 5,808 now. The next desync is the rand seed at loop 5,809 (0:03:24.39). Committing this step:
+
+- tool `Bash`: Update docs and commit
+

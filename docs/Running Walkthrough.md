@@ -629,3 +629,12 @@ them (`STATE_PADRELEASE` or `DG_UnDrawFrameCount`) and the recorded ones are 0. 
 `STATE_PADMASK` and without the zero check; it broke loop 5,002 (0:03:01.70), where the flag came after the loop's
 update. Redux control run: matches to 5,300. PCSX2: in sync to loop 5,750; at 5,751 (0:03:21.53, `d01a`)
 `DG_UnDrawFrameCount` is 3 against the PS1's 0x7FFF00EC (screenshot `tas/shots/loop_5751.png`).
+
+## Step 11: stream clock after FS_StreamSoundMode (2026-10-30)
+
+Loop 5,751 (0:03:21.53, `d01a`), the harness (the Redux control run too): after the audio packet `strctrl.c` calls
+`FS_StreamSoundMode` (clock -1, 1) and asks for the tick again in the same loop (`goto loop_case3`); the PS1 got
+-1, so the demo packet (`DG_UnDrawFrameCount = 3`) waited two loops, while the harness returned the loop's tick to
+every call. Now, after `FS_StreamSoundMode` in a loop, the tick is -1 (port: `Port_TasSoundMode`; Redux: a
+breakpoint at 0x80024404). Its screenshot was black on both. Redux control run: matches to 6,500. PCSX2: in sync
+to loop 5,808; at 5,809 (0:03:24.39) the rand seed differs. Matching build: 80 OK, VR 2 OK.

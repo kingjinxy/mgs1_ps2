@@ -547,6 +547,10 @@ void FS_StreamTickStart( void )
 // for some reason no ptr access here
 void FS_StreamSoundMode( void )
 {
+#ifdef MGS_PORT
+    extern void Port_TasSoundMode( void ); /* port/src/tas_replay.c: the loop's later ticks are this clock's */
+    Port_TasSoundMode();
+#endif
     fs_stream_last_time = -1;
     fs_stream_next_time = 1;
 }

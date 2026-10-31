@@ -109,9 +109,13 @@ if os.getenv("TAS_NO_GATE") == nil then bp(0x80037894, "tas stream gate", functi
 end) end
 -- FS_StreamGetTick: the PS1's value; with its stream clock not started (NO_TICK, fs_stream_last_time -1) it returned
 -- mts_time + 1, so a packet went as soon as its data was in
+-- After FS_StreamSoundMode in the loop (strctrl.c asks again), -1: the sound not started yet (loop 5,751)
+local sound_mode_loop = -1
+bp(0x80024404, "tas sound mode", function() sound_mode_loop = u32(GV_TIME) end)  -- FS_StreamSoundMode
 bp(0x800244D4, "tas tick", function()            -- FS_StreamGetTick's return
   local r = time_rec(u32(GV_TIME))
   if not r then return end
+  if sound_mode_loop == u32(GV_TIME) then PCSX.getRegisters().GPR.n.v0 = 0xFFFFFFFF; return end
   local tick = le(TIME, r)
   PCSX.getRegisters().GPR.n.v0 = tick ~= NO_TICK and tick or (u32(MTS_TIME) + 1) % 0x100000000
 end)

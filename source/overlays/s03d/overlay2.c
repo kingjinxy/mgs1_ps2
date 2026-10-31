@@ -1,5 +1,13 @@
 #include "mgstype.h"
 
+extern const char s03d_dword_800DB5CC[];
+extern const char s03d_dword_800DB5B8[];
+extern const char s03d_dword_800DB5A4[];
+void s03d_800D0CD4();
+void s03d_800D0D6C();
+void s03d_800D0DF0();
+void s03d_800D0E2C();
+
 int s03d_dword_800C39A8 = 0x75307530;
 int s03d_dword_800C39AC = 0x00007530;
 int s03d_dword_800C39B0 = 0x05DC012C;
@@ -53,13 +61,13 @@ int s03d_dword_800C3A74 = 0x00000000;
 int s03d_dword_800C3A78 = 0x00000064;
 int s03d_dword_800C3A7C = 0x0000FC00;
 int s03d_dword_800C3A80 = 0x00000000;
-int s03d_dword_800C3A84 = 0x800DB5CC;
-int s03d_dword_800C3A88 = 0x800DB5B8;
-int s03d_dword_800C3A8C = 0x800DB5A4;
-int s03d_dword_800C3A90 = 0x800D0CD4;
-int s03d_dword_800C3A94 = 0x800D0D6C;
-int s03d_dword_800C3A98 = 0x800D0DF0;
-int s03d_dword_800C3A9C = 0x800D0E2C;
+int s03d_dword_800C3A84 = (int)s03d_dword_800DB5CC;
+int s03d_dword_800C3A88 = (int)s03d_dword_800DB5B8;
+int s03d_dword_800C3A8C = (int)s03d_dword_800DB5A4;
+int s03d_dword_800C3A90 = (int)s03d_800D0CD4;
+int s03d_dword_800C3A94 = (int)s03d_800D0D6C;
+int s03d_dword_800C3A98 = (int)s03d_800D0DF0;
+int s03d_dword_800C3A9C = (int)s03d_800D0E2C;
 int s03d_dword_800C3AA0 = 0xFE0C0005;
 int s03d_dword_800C3AA4 = 0x00000050;
 int s03d_dword_800C3AA8 = 0x00000400;

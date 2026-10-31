@@ -960,7 +960,67 @@ void s03d_800CE9E8(Work *work, int arg)
         work->control.rot.vy = rot->vy;
     }
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CEB38.s")
+extern SVECTOR s03d_dword_800C3A44;
+extern SVECTOR s03d_dword_800C3A4C;
+extern SVECTOR s03d_dword_800C3A54;
+void *NewTenage3(SVECTOR *pos, SVECTOR *step, int fuse_time, int type, int model, int do_sound, int player_side);
+
+void s03d_800CEB38(Work *work, int arg)
+{
+    SVECTOR *pos;
+    SVECTOR *step;
+    SVECTOR  out;
+    SVECTOR  rot;
+    SVECTOR  diff;
+    int      dist;
+
+    if (arg == 0)
+    {
+        SetAction(work, 7, 4);
+    }
+
+    if (arg == 17)
+    {
+        GM_SeSet(&work->control.mov, SE_PINNUKI);
+    }
+
+    if (arg == 45)
+    {
+        if (work->param.fAF8 == 2)
+        {
+            pos = &s03d_dword_800C3A44;
+        }
+        else
+        {
+            pos = &s03d_dword_800C3A4C;
+        }
+
+        dist = GV_DiffVec3(pos, &work->field_B68);
+        step = &s03d_dword_800C3A54;
+        step->vz = dist / 8;
+
+        GV_SubVec3(&work->field_B68, pos, &diff);
+        rot.vx = 0;
+        rot.vy = GV_VecDir2(&diff);
+        rot.vz = 0;
+
+        DG_SetPos2(pos, &rot);
+        DG_RotVector(step, &out, 1);
+        NewTenage3(pos, &out, 60, 0, 15240, 0, 0);
+    }
+
+    if (Zako_800CDA04(work))
+    {
+        return;
+    }
+
+    if (work->body.is_end)
+    {
+        SetMode(work, s03d_800CE720);
+    }
+
+    work->control.turn.vy = work->field_AE6;
+}
 void s03d_800CECBC(Work *work, int arg)
 {
     work->field_8FC->class |= 0x9E;

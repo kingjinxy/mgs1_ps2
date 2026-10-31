@@ -208,7 +208,11 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       most of the top half: not looked into.)
 - [x] `DG_UnDrawFrameCount` at loop 5,751 (0:03:21.53, `d01a`), the harness: after `FS_StreamSoundMode`,
       `strctrl.c` asks for the tick again in the loop and the PS1 got -1; the harness now returns -1 then.
-- [ ] rand seed at loop 5,809 (0:03:24.39, `d01a`).
+- [ ] rand seed at loop 5,809 (0:03:24.39, `d01a`), the port: a codec call's file read (trace field 20) runs from
+      5,796 to 5,817 on the PS1 and is in earlier in the port, so the call state's `rand()` comes early (its
+      screenshot: the portraits shown, the PS1's still black). Tried: `FS_LoadFileSync` returning the PS1's bytes
+      left (under 0x7FFF0000) in every loop; it broke the s00a load at loop 917 (0:00:44.89). To try: the gate only
+      outside stage loads (e.g. not while `GM_LoadRequest` is set).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

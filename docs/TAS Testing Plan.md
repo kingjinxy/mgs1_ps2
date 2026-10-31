@@ -300,7 +300,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       `zako11a`/`zako11e`/`zako11f`/`enemy`), `tools/port/fdiff.py s03d <func>` shows the differing instructions
       of one against `build/s03d.matching.bin`. `s03d`'s `Work` is its own layout (target pointer at 0x8FC and a
       TARGET at 0x900, where zako11a has the pointer at 0x900), so fields are mapped from the assembly.
-      Decompiled so far (matching): `s03d_800CF194`, `s03d_800CEE3C`, `s03d_800CF68C`. `PARAM`'s 0xB16 is the faint
+      Decompiled so far (matching): `s03d_800CF194`, `s03d_800CEE3C`, `s03d_800CF68C`, `s03d_800CFB04` (its
+      jump tables came out of `overlay2.c`'s rodata: zako.obj's follow it, so they land at the same addresses). `PARAM`'s 0xB16 is the faint
       (what `Zako_800CCCF4` passes to `GM_SetPowerTarget`), not `max_life`; renamed. `tools/port/disasm_s.py s03d
       <func>` disassembles a stub with its calls named.
 

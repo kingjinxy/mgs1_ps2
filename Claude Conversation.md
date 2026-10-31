@@ -9779,3 +9779,92 @@ Synced through loop 5,109 now, past the old desync at 4,221. The next desync is 
 
 - tool `Bash`: Update planning doc and conversation archive
 
+## Claude
+
+No lines removed from the archive. Committing:
+
+- tool `Bash`: Commit fix, screenshot tooling, and docs
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+The fix for Snake's position is confirmed: the port now replays in sync to loop 5,109 (0:03:05.3). Before, it went off at 4,221 (0:02:35.57). The matching build is still 80 OK, VR 2 OK, and everything is committed as `59fe485ad`, not pushed.
+
+**The bug:** the wall check behind Snake's knock passes a line as two separate variables. The code reading it assumes the second sits right after the first in memory. That was true on the PS1 but not in the port, so the port's knock found no wall and made no sound. The PS1 guard turned toward the knock; the port's didn't, so he was too far away for Snake's punch to aim at. The two variables are now a real array in the port. Three more of Snake's wall checks had the same pattern and got the same fix.
+
+**Screenshots:** each desync now saves `tas/shots/loop_<T>.png`: the PS1 screen (from the Redux control run), the port's screen, and the pixels that differ by more than 24. There are two so far: `loop_4221.png` (this bug) and `loop_5110.png`.
+
+**Next desync, loop 5,110 (0:03:05.37):** this one is in the replay harness, not the port. The Redux control run shows the same difference, so the port isn't to blame. On that loop the game's state changes, and the PS1 still reports some held buttons as just released; the harness's pad replay drops that. It looks like the earlier pad timing case at loop 1,011, where the game also read the pads twice in one loop around a state change.
+
+Separately, the `loop_5110.png` difference covers most of the top half of the frame. I haven't looked into that yet, and it isn't necessarily related to the pad desync.
+
+## User
+
+Commit the changes and continue
+
+## Claude
+
+The commit is already in: `59fe485ad` has everything from the last round. Checking the tree is clean, then on to the harness desync at loop 5,110 (0:03:05.37):
+
+- tool `Bash`: Check tree and read pad update code
+
+- tool `Bash`: Read script.c pad update and state flags
+
+- tool `Bash`: List game status flag definitions
+
+- tool `Bash`: Read state flag values
+
+- tool `Bash`: Read raw pad table construction
+
+- tool `Bash`: Read Port_TasPads
+
+- tool `Bash`: Check raw pad field timing vs GV_PadData
+
+- tool `Bash`: Check raw pad field timing vs GV_PadData
+
+- tool `Bash`: Read pads record construction
+
+## Claude
+
+The pads for loop t come from line t+1, so the mask check and the raw source both use that line. For PADDEMO the game uses the demo pad instead of the controller, so I leave those loops out:
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/tas/trace_to_pads.py
+
+- tool `Bash`: Find constants section
+
+## Claude
+
+The line-length warnings are the linter's 79-column default; the file already uses 120. Adding the two flag constants, regenerating the tables, and checking the Redux control run to loop 5,300 first:
+
+- tool `Bash`: Regenerate tables and check Redux control run
+
+- tool `Bash`: Narrow override rule and recheck Redux control run
+
+## Claude
+
+The Redux control run now matches the reference to loop 5,300, apart from the known intro seed. Running the port live to the next desync, with screenshots:
+
+- tool `Bash`: Run port to next desync with screenshots
+
+## Claude
+
+The port run is still going; it stops at the next desync and saves the screenshots, and I'll be notified when it finishes.
+
+The changes you asked me to commit were already in: commit `59fe485ad` (the Snake fix and screenshots) was made before your message. The working tree was clean when I started.
+
+**Desync at loop 5,110 (0:03:05.37):** this was in the replay harness, not the port.
+- **What happens on the PS1:** on that loop a game script sets a flag that zeroes the pads, then reads the pads a second time. That second read reports the buttons Snake was holding as released.
+- **What the harness got wrong:** it builds each loop's controller from the pads the game recorded. Under that flag the record is already zeroed, so there was nothing to release.
+- **The fix:** when the game has zeroed the pads and the recorded buttons are 0, the tables now take the buttons from the raw controller state in the trace instead. The change is in `tools/port/tas/trace_to_pads.py`.
+
+My first version of that rule also covered a partial mask and loops where the flag was only set after the read. That broke the replay earlier, at loop 5,002 (0:03:01.70), so I narrowed it.
+
+With the narrowed rule, the Redux control run (the real PS1 code under the same harness) matches the PS1 reference through loop 5,300 (0:03:12.5 or so). The only difference left is the known intro seed. The port's run is the remaining check, and I'll commit the fix with the doc updates once its result is in.
+
+- tool `Bash`: Read port run result
+
+- tool `Bash`: Update docs and commit harness fix
+

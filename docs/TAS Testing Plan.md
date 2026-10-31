@@ -202,8 +202,11 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       under `MGS_PORT`, as in three more callers.
 - [x] Screenshots at each desync (`run_port.py`, `tas/shots/loop_<T>.png`: PS1 from the Redux control run | port |
       difference over 24).
-- [ ] `GV_PadData` at loop 5,110 (0:03:05.37): release bits 0x4010 missing as `GM_GameStatus` changes; the Redux
-      control run too, so the harness. The screenshot differs over most of the top half.
+- [x] `GV_PadData` at loop 5,110 (0:03:05.37), the harness: `STATE_PADRELEASE` zeroes `GV_PadData[2]/[3]`, which
+      the tables took the controller from, and a second update in the loop (`PadCmd`) reports the release. Where the
+      game zeroed them, the buttons now come from mts's raw pads (`trace_to_pads.py`). (Its screenshot differs over
+      most of the top half: not looked into.)
+- [ ] `DG_UnDrawFrameCount` at loop 5,751 (0:03:21.53, `d01a`): port 3, PS1 0x7FFF00EC.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

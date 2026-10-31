@@ -22,6 +22,7 @@ REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 src = os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "tas", "reference", "trace.log.xz"))
 out_dir = os.path.expanduser(sys.argv[2] if len(sys.argv) > 2 else "~/emu/tas")
 NO_TICK = -0x80000000
+STATE_PADRELEASE = 0x10000000  # GM_GameStatus (g_define.h)
 
 
 def stream_tick(now, last, nxt):
@@ -56,6 +57,17 @@ for i, f in enumerate(rows):
     t = int(f[1])
     n = rows[i + 1] if i + 1 < len(rows) else f
     pads = bytes.fromhex(n[7])                      # the pads loop t's actors used
+    if int(n[4], 16) & STATE_PADRELEASE or int(n[12]) > 0:
+        # zeroed (GV_UpdatePadSystem): [2]/[3].status hold the result, not the controller, which a second update
+        # in the loop needs (script.c's PadCmd at loop 5,110: the held buttons' release); mts's raw pads have it.
+        # Only where the recorded buttons are 0: a flag set after the loop's update (loop 5,002) left them as read
+        rp = bytes.fromhex(n[8])
+        pads = bytearray(pads)
+        for port in (0, 1):
+            o = (2 + port) * 16
+            if pads[o] == pads[o + 1] == 0:
+                pads[o:o + 2] = (~(rp[port * 8 + 2] | rp[port * 8 + 3] << 8) & 0xFFFF).to_bytes(2, "little")
+        pads = bytes(pads)
     if pads != prev:
         out += struct.pack("<I", t) + pads
         prev = pads

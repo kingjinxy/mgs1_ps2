@@ -618,3 +618,14 @@ called the missing figure Snake; it was the guard.
 In PCSX2 the replay is now in sync to loop 5,109. At 5,110 (0:03:05.37) `GV_PadData`'s release bits (0x4010) are
 missing as `GM_GameStatus` changes; the Redux control run shows the same, so it's the harness's pad rebuild. Its
 screenshot also differs over most of the top half (not looked into yet). Matching build: 80 OK, VR 2 OK.
+
+## Step 10: pad release under STATE_PADRELEASE (2026-10-30)
+
+Loop 5,110 (0:03:05.37), a harness problem (the Redux control run showed it too): a script's `pad -r`
+(`script.c` `PadCmd`) sets `STATE_PADRELEASE` and updates the pads a second time in the loop, and the PS1 reports
+the held buttons' release (0x4010). The tables rebuilt the controller from `GV_PadData[2]/[3]`, which the flag had
+already zeroed. `trace_to_pads.py` now takes the buttons from mts's raw pads (trace field 8) where the game zeroed
+them (`STATE_PADRELEASE` or `DG_UnDrawFrameCount`) and the recorded ones are 0. Tried first: the same for
+`STATE_PADMASK` and without the zero check; it broke loop 5,002 (0:03:01.70), where the flag came after the loop's
+update. Redux control run: matches to 5,300. PCSX2: in sync to loop 5,750; at 5,751 (0:03:21.53, `d01a`)
+`DG_UnDrawFrameCount` is 3 against the PS1's 0x7FFF00EC (screenshot `tas/shots/loop_5751.png`).

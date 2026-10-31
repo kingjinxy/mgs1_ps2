@@ -403,7 +403,114 @@ void Zako_800CDF2C(Work *work)
     GM_MoveTarget(t, &work->control.mov);
     GM_PowerTarget(t);
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CDF94.s")
+void s03d_800D05DC(Work *work, int arg);
+void s03d_800D0698(Work *work, int arg);
+void s03d_800D0754(Work *work, int arg);
+void s03d_800D07DC(Work *work, int arg);
+void s03d_800D085C(Work *work, int arg);
+void s03d_800D08DC(Work *work, int arg);
+void s03d_800D0958(Work *work, int arg);
+void s03d_800D09D8(Work *work, int arg);
+void s03d_800CE5B4(Work *work, int arg);
+void s03d_800CE644(Work *work, int arg);
+
+static inline void SetMode(Work *work, void (*fn)(Work *, int))
+{
+    work->field_8E8 = fn;
+    work->field_8F0 = 0;
+    work->control.turn.vz = 0;
+    work->control.turn.vx = 0;
+    GM_ConfigMotionAdjust(&work->body, 0);
+}
+
+static inline void SetMode2(Work *work, void (*fn)(Work *, int))
+{
+    if (!work->field_8EC)
+    {
+        work->field_8EC = (int)fn;
+        work->field_8F4 = 0;
+    }
+
+    work->control.turn.vz = 0;
+    work->control.turn.vx = 0;
+    GM_ConfigMotionAdjust(&work->body, 0);
+}
+
+int s03d_800CDF94(Work *work)
+{
+    int press;
+
+    press = work->field_AD8;
+
+    if (press & 0x1)
+    {
+        SetMode2(work, s03d_800D05DC);
+        return 0;
+    }
+
+    if (press & 0x2)
+    {
+        SetMode2(work, s03d_800D0698);
+        return 0;
+    }
+
+    if (press & 0x4)
+    {
+        SetMode2(work, s03d_800D0754);
+        return 0;
+    }
+
+    if (press & 0x40)
+    {
+        SetMode2(work, s03d_800D07DC);
+        return 0;
+    }
+
+    if (press & 0x80)
+    {
+        SetMode2(work, s03d_800D085C);
+        return 0;
+    }
+
+    if (press & 0x400)
+    {
+        SetMode2(work, s03d_800D08DC);
+        return 0;
+    }
+
+    if (press & 0x800)
+    {
+        SetMode2(work, s03d_800D0958);
+        return 0;
+    }
+
+    if (press & 0x200)
+    {
+        SetMode2(work, s03d_800D09D8);
+        return 0;
+    }
+
+    if (press & 0x100)
+    {
+        SetMode(work, s03d_800CE5B4);
+        return 1;
+    }
+
+    if (press & 0x20)
+    {
+        SetMode(work, s03d_800CE644);
+        return 1;
+    }
+
+    if (press & 0x30000)
+    {
+        SetMode(work, s03d_800CE720);
+        work->adjust[2].vx = 0;
+        return 1;
+    }
+
+    return 0;
+}
 int  s03d_800CDF94(Work *work);
 void s03d_800CE318(Work *work, int arg);
 

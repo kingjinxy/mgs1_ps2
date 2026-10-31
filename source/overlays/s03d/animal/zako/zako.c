@@ -172,7 +172,65 @@ void Zako_800CCDE0(Work *work)
     work->field_8F4 = 0;
 }
 
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CCE3C.s")
+extern const char s03d_dword_800DB3C4[]; /* "ippanhei" */
+extern const char s03d_dword_800DB3D0[]; /* "enemy" */
+extern const char s03d_dword_800DB3D8[]; /* "famas" */
+void *NewShadow2(CONTROL *control, OBJECT *parent, SVECTOR indices, int **enabled);
+void *NewGunLight(MATRIX *world, int **pvisible);
+int   Zako_800D0EF0(Work *work, int index);
+
+int s03d_800CCE3C(Work *work, int name, int where)
+{
+    SVECTOR  indices;
+    CONTROL *control;
+    OBJECT  *body;
+    OBJECT  *weapon;
+    int      i;
+
+    control = &work->control;
+    if (GM_InitControl(control, name, where) < 0)
+    {
+        return -1;
+    }
+
+    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
+    GM_ConfigControlAttribute(control, RADAR_VISIBLE | RADAR_SIGHT);
+    GM_ConfigControlInterp(control, 4);
+
+    body = &work->body;
+    weapon = &work->weapon;
+
+    GM_InitObject(body, GV_StrCode((char *)s03d_dword_800DB3C4), 0x32D, GV_StrCode((char *)s03d_dword_800DB3D0));
+    GM_ConfigObjectJoint(body);
+    GM_ConfigMotionControl(body, &work->m_ctrl, GV_StrCode((char *)s03d_dword_800DB3D0), work->m_segs1, work->m_segs2,
+                           control, work->rots);
+    GM_ConfigObjectLight(body, work->light);
+
+    work->models[1] = work->body.objs->def;
+    work->models[0] = GV_GetCache(GV_CacheID(3127, 'k'));
+    work->lod = 1;
+
+    work->hom = GM_SetHomingTarget(&work->body.objs->objs[6].world, control);
+
+    GM_InitObject(weapon, GV_StrCode((char *)s03d_dword_800DB3D8), 109, 0);
+    GM_ConfigObjectLight(weapon, work->light);
+    GM_ConfigObjectRoot(weapon, body, 4);
+
+    for (i = 0; i < 0; i++)
+    {
+    }
+
+    indices.vx = 0;
+    indices.vy = 6;
+    indices.vz = 12;
+    indices.pad = 15;
+    work->shadow = NewShadow2(control, body, indices, &work->enable_shadow);
+    work->glight = NewGunLight(&body->objs->objs[4].world, &work->enable_glight);
+
+    Zako_800D0EF0(work, 0);
+    Zako_800CCDE0(work);
+    return 0;
+}
 
 void s03d_800CD054(Work *work)
 {

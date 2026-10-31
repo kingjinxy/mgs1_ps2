@@ -638,3 +638,22 @@ Loop 5,751 (0:03:21.53, `d01a`), the harness (the Redux control run too): after 
 every call. Now, after `FS_StreamSoundMode` in a loop, the tick is -1 (port: `Port_TasSoundMode`; Redux: a
 breakpoint at 0x80024404). Its screenshot was black on both. Redux control run: matches to 6,500. PCSX2: in sync
 to loop 5,808; at 5,809 (0:03:24.39) the rand seed differs. Matching build: 80 OK, VR 2 OK.
+
+## Step 12: faster TAS iterations (2026-10-31)
+
+Loop 5,809 (0:03:24.39) first: gating the codec's file poll (`radiomes.c`) on the PS1's bytes left didn't help.
+The port's codec read runs at loops 5,775 to 5,782 and the PS1's at 5,795 to 5,816, so the port requests the file
+early (TAS plan). Reverted.
+
+Then the time per iteration, measured to that desync: link 34 s, PCSX2 replay 44 s (4.4x real time), and for the
+screenshots the Redux control run, 253 s. Changes:
+- `build_ps2.compile_cached`: a gcc command is skipped when its object is newer than the source and every header
+  (gcc's `.d`) and was made by the same command line (`.cmd`). The overlays, HAL and `port/src` now compile in
+  parallel through it. A link with nothing changed: 11 s, 8 of them the 1.4 GB disc image (`mkiso.py`, shared
+  with SH1, left as it is).
+- The screenshot loop is read at startup from `host:tas_shot.txt` (`run_port.py --shot`), not a `-DMGS_TAS_SHOT`
+  build, so the rerun at a desync doesn't link again. Same desync, byte-identical screenshot.
+- The control run's screens are cached in `obj_ps2/shots/cache/`, keyed by the loop, the tables and
+  `redux_replay.lua`. A run to the 5,809 desync with screenshots: 309 s, then 96 s with the cache.
+- Tried: Redux's dynarec instead of `-interpreter`. Its breakpoints never fire (empty trace), so no.
+Matching build: 80 OK, VR 2 OK.

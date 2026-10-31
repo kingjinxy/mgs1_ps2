@@ -10,18 +10,20 @@ range of loops, and linkvarbuf by index: --ignore "rand seed@809-921" --ignore "
 difference is still counted and reported at the end.
 
 At a desync it also takes screenshots of that loop for the record (unless --no-shots): the port again to that loop,
-linked with MGS_TAS_SHOT (its frame dumped), and the PS1 game in the PCSX-Redux control run (redux_replay.lua,
+not linked again (host:tas_shot.txt: its frame dumped), and the PS1 game in the PCSX-Redux control run (redux_replay.lua,
 TAS_SHOT) at the same time; tas/shots/loop_<T>.png is PS1 | port | difference (white: differs, both scaled to the
 PS1's 320 wide). The two are a frame apart if the dump and Redux's screen aren't from the same loop's drawing:
 redux_<T+1> is kept in obj_ps2/shots/ to check.
 
 usage: run_port.py [--tables DIR (default ~/emu/tas)] [--ref TRACE] [--from 315] [--last T] [--seconds 900]
-                   [--ignore SPEC]... [--no-link] [--no-shots] [--shot T (link with MGS_TAS_SHOT=T)]"""
+                   [--ignore SPEC]... [--no-link] [--no-shots] [--shot T (dump loop T's frame)]"""
 import argparse
 import glob
+import hashlib
 import lzma
 import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -74,13 +76,28 @@ def take_shots(a, t, desc):
     for f in glob.glob(os.path.join(REPO, "obj_ps2", "frame_*.ppm")) + glob.glob(os.path.join(SHOTS, "redux_*")):
         os.remove(f)
     print("screenshots of loop %d: the port again and the Redux control run" % t, flush=True)
-    rx = redux(os.path.expanduser(a.tables), t)
-    cmd = [sys.executable, os.path.abspath(__file__), "--no-shots", "--shot", str(t), "--last", str(t + 2),
+    # the control run only depends on the loop, the tables and redux_replay.lua: its screens are kept by those
+    key = hashlib.sha1(str(t).encode())
+    for f in ("pads.bin", "raw.bin", "time.bin", "MovieSaveRam.bin"):
+        key.update(open(os.path.join(os.path.expanduser(a.tables), f), "rb").read())
+    key.update(open(os.path.join(REPO, "tools", "port", "tas", "redux_replay.lua"), "rb").read())
+    cache = os.path.join(SHOTS, "cache", key.hexdigest())
+    rx = None if os.path.isdir(cache) else redux(os.path.expanduser(a.tables), t)
+    if rx is None:
+        print("screenshots: the control run's from %s" % os.path.relpath(cache, REPO), flush=True)
+        for f in glob.glob(os.path.join(cache, "*")):
+            shutil.copy(f, SHOTS)
+    cmd = [sys.executable, os.path.abspath(__file__), "--no-shots", "--no-link", "--shot", str(t), "--last", str(t + 2),
            "--tables", a.tables, "--ref", a.ref, "--from", str(a.start), "--seconds", str(a.seconds)]
     for spec in a.ignore + ["%s@%d-%d" % (n, t, t + 2) for n in FIELDS.values()]:  # the run's own desync again
         cmd += ["--ignore", spec]
     subprocess.run(cmd, stdout=subprocess.DEVNULL)
-    rx.wait(900)
+    if rx is not None:
+        rx.wait(900)
+        if os.path.exists(os.path.join(SHOTS, "redux_%d.raw" % t)):
+            os.makedirs(cache, exist_ok=True)
+            for f in glob.glob(os.path.join(SHOTS, "redux_%d.*" % t)) + glob.glob(os.path.join(SHOTS, "redux_%d.*" % (t + 1))):
+                shutil.copy(f, cache)
     compose(t, desc)
 
 
@@ -159,11 +176,15 @@ def main():
         env = dict(os.environ, MGS_MC_IMAGE=os.path.join(tables, "MovieSaveRam.bin"),
                    MGS_TAS_PADS=os.path.join(tables, "pads.bin"), MGS_TAS_RAW=os.path.join(tables, "raw.bin"),
                    MGS_TAS_TIME=os.path.join(tables, "time.bin"))
-        if a.shot:
-            env["MGS_TAS_SHOT"] = str(a.shot)
         if subprocess.run([sys.executable, os.path.join(REPO, "build", "link_ps2.py")], env=env,
                           stdout=subprocess.DEVNULL).returncode:
             sys.exit("link_ps2.py failed")
+
+    shot = os.path.join(REPO, "obj_ps2", "tas_shot.txt")  # read by the port at startup (tas_replay.c)
+    if a.shot:
+        open(shot, "w").write("%d\n" % a.shot)
+    elif os.path.exists(shot):
+        os.remove(shot)
 
     ref_path = os.path.expanduser(a.ref)
     ref = {}

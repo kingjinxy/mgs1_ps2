@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_ps2  # noqa: E402
@@ -51,11 +52,20 @@ def run(cmd, check=True, **kw):
     return r
 
 
+def compile_all(jobs):
+    """gcc -c command lines (cmd, obj), in parallel, skipping objects that are up to date (build_ps2.compile_cached)."""
+    with ThreadPoolExecutor(os.cpu_count()) as ex:
+        for (cmd, obj), (rc, err, _) in zip(jobs, ex.map(lambda j: build_ps2.compile_cached(*j), jobs)):
+            if rc:
+                sys.exit("FAILED: %s\n%s" % (" ".join(cmd), err[-4000:]))
+    return [obj for _, obj in jobs]
+
+
 def compile_hal():
     os.makedirs(HAL_INC, exist_ok=True)
     if not os.path.islink(os.path.join(HAL_INC, "psyq")):
         os.symlink(os.path.join(PSYQ, "psyq_4.4", "include"), os.path.join(HAL_INC, "psyq"))
-    objs = []
+    jobs = []
     # Test cards (MGS_MC_FORMAT=1): an unformatted PS2 card in port 1 is formatted at the first card access,
     # and each PS1 card image written is copied to host:cardN.mcd (ps2/memcard_ps2.c), for PCSX2 runs with
     # pcsx2_run.py --memcards.
@@ -72,8 +82,8 @@ def compile_hal():
                 continue
             obj = os.path.join(OUT, "hal", rel.replace("/", "_")[:-2] + ".o")
             os.makedirs(os.path.dirname(obj), exist_ok=True)
-            run([CC, "-c", *flags, os.path.join(HAL, rel), "-o", obj])
-            objs.append(obj)
+            jobs.append(([CC, "-c", *flags, os.path.join(HAL, rel), "-o", obj], obj))
+    objs = compile_all(jobs)
     if os.environ.get("MGS_MC_IMAGE"):
         c = os.path.join(OUT, "hal", "mc_fixed_image.c")
         run([os.path.join(PS2SDK, "bin", "bin2c"), os.path.expanduser(os.environ["MGS_MC_IMAGE"]), c,
@@ -94,15 +104,13 @@ def compile_port():
     # MGS_TAS_RAW, MGS_TAS_TIME=<file>: the PS1's raw pads and its timing too (port/src/tas_replay.c; the
     # files from tools/port/tas/trace_to_pads.py).
     debug += ["-DMGS_TAS"] if os.environ.get("MGS_TAS_PADS") else []
-    # MGS_TAS_SHOT=<loop>: with the replay, the frame of that game loop to host:frame_<n>.ppm (tools/port/tas/run_port.py).
-    debug += ["-DMGS_TAS_SHOT=%d" % int(os.environ["MGS_TAS_SHOT"])] if os.environ.get("MGS_TAS_SHOT") else []
-    objs = []
+    jobs = []
     for name in sorted(os.listdir(os.path.join(PORT, "src"))):
         if name.endswith(".c"):
             obj = os.path.join(OUT, "port", name[:-2] + ".o")
             os.makedirs(os.path.dirname(obj), exist_ok=True)
-            run([CC, "-c", *PS2_CFLAGS, *debug, os.path.join(PORT, "src", name), "-o", obj])
-            objs.append(obj)
+            jobs.append(([CC, "-c", *PS2_CFLAGS, *debug, os.path.join(PORT, "src", name), "-o", obj], obj))
+    objs = compile_all(jobs)
     for env, name in (("MGS_TAS_PADS", "tas_pads.bin"), ("MGS_TAS_RAW", "tas_raw.bin"),
                       ("MGS_TAS_TIME", "tas_time.bin")):
         # read from host: at startup (port/src/tas_replay.c), not embedded: they'd push .bss past 16 MB

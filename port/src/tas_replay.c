@@ -300,6 +300,7 @@ void Port_TasPads(void)
 
 #ifdef MGS_TAS
 static FILE* s_Trace;
+static int   s_ShotLoop = -1; /* host:tas_shot.txt: the loop whose frame is dumped */
 static int   s_Ps1Loads;
 static int   s_Ps1LoadEnd[MAX_LOADS]; /* the PS1's load ends: the loops whose line has GM_LoadRequest back to 0 */
 #endif
@@ -310,7 +311,8 @@ static int   s_Ps1LoadEnd[MAX_LOADS]; /* the PS1's load ends: the loops whose li
 void Port_TasInit(void)
 {
 #ifdef MGS_TAS
-    int t, prev = 0, n;
+    int   t, prev = 0, n;
+    FILE* f;
     mgs_tas_pads = load("host:tas_pads.bin", &size_mgs_tas_pads);
     mgs_tas_raw  = load("host:tas_raw.bin", &size_mgs_tas_raw);
     mgs_tas_time = load("host:tas_time.bin", &size_mgs_tas_time);
@@ -323,6 +325,14 @@ void Port_TasInit(void)
             s_Ps1LoadEnd[s_Ps1Loads++] = t;
         }
         prev = request;
+    }
+    if ((f = fopen("host:tas_shot.txt", "r")) != 0) /* run_port.py --shot: the loop whose frame to dump */
+    {
+        if (fscanf(f, "%d", &s_ShotLoop) != 1)
+        {
+            s_ShotLoop = -1;
+        }
+        fclose(f);
     }
     s_Trace = fopen("host:tas_trace.log", "w");
     printf("tas: replay, %d PS1 load ends, trace %s\n", s_Ps1Loads, s_Trace ? "host:tas_trace.log" : "unavailable");
@@ -340,13 +350,11 @@ void Port_TasTrace(void)
     {
         return; /* once per loop */
     }
-#ifdef MGS_TAS_SHOT
-    if (GV_Time == MGS_TAS_SHOT)
+    if (GV_Time == s_ShotLoop)
     {
         Display_RequestDump(); /* the frame this loop draws, at its display */
         printf("tas: frame of loop %d dumped\n", GV_Time);
     }
-#endif
     if (prev_request && !GM_LoadRequest && loads < s_Ps1Loads)
     {
         if (GV_Time != s_Ps1LoadEnd[loads])

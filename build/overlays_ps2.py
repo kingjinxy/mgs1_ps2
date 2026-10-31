@@ -18,6 +18,7 @@ loaded again.
 import os
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "port"))
 import overlay_survey  # noqa: E402
@@ -64,7 +65,8 @@ def build(run, objcopy, ld, cc, renames):
         else:
             ready[n] = srcs
     sources = sorted({s for srcs in ready.values() for s in srcs})
-    failed = [s for s, rc, _ in map(build_ps2.compile_one, sources) if rc]
+    with ThreadPoolExecutor(os.cpu_count()) as ex:
+        failed = [s for s, rc, _ in ex.map(build_ps2.compile_one, sources) if rc]
     if failed:
         sys.exit("overlay sources failed to compile:\n  " + "\n  ".join(failed))
     os.makedirs(OVL, exist_ok=True)

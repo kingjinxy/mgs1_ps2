@@ -211,8 +211,12 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [ ] rand seed at loop 5,809 (0:03:24.39, `d01a`), the port: a codec call's file read (trace field 20) runs from
       5,796 to 5,817 on the PS1 and is in earlier in the port, so the call state's `rand()` comes early (its
       screenshot: the portraits shown, the PS1's still black). Tried: `FS_LoadFileSync` returning the PS1's bytes
-      left (under 0x7FFF0000) in every loop; it broke the s00a load at loop 917 (0:00:44.89). To try: the gate only
-      outside stage loads (e.g. not while `GM_LoadRequest` is set).
+      left (under 0x7FFF0000) in every loop; it broke the s00a load at loop 917 (0:00:44.89). Then the gate only in
+      radiomes.c's codec poll (`menu_radio_codec_helper_helper9_80047FF4`), only while the PS1's count went down
+      (flat counts are stale: 2,048 at loops 779 to 787, 0x7FFEF000 at 502 to 763 held the intro call): in sync
+      to 5,808 again, 5,809 unchanged. A poll log shows why: the port's codec read runs at loops 5,775 to 5,782
+      (0:03:22.3), the PS1's at 5,795 to 5,816, so the port *requests* the file about 20 loops early; the read's
+      speed isn't it. To find: what the PS1 waited on before the request (the call's start, a stream or a seek).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

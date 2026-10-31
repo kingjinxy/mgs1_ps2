@@ -58,14 +58,42 @@ def main_exe_sources():
     return sources
 
 
+def up_to_date(cmd, obj):
+    """Whether obj was made by this command line (obj.cmd) and is newer than its source and headers (gcc's obj.d)."""
+    try:
+        if open(obj + ".cmd").read() != "\0".join(cmd):
+            return False
+        deps = open(obj[:-2] + ".d").read().replace("\\\n", " ").split(":", 1)[1].split()
+        t = os.path.getmtime(obj)
+        return all(os.path.getmtime(d) <= t for d in deps)
+    except (OSError, IndexError):
+        return False
+
+
+def compile_cached(cmd, obj):
+    """Runs a gcc -c command line (with -o obj) unless obj is up to date: (return code, stderr, compiled)."""
+    cmd = cmd + ["-MMD", "-MF", obj[:-2] + ".d"]
+    if up_to_date(cmd, obj):
+        return 0, "", False
+    if os.path.exists(obj + ".cmd"):
+        os.remove(obj + ".cmd")
+    r = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
+    if r.returncode == 0:
+        open(obj + ".cmd", "w").write("\0".join(cmd))
+    return r.returncode, r.stderr, True
+
+
 def compile_one(src):
     obj = os.path.join(OUT, src[len("source/"):-2] + ".o")
     log = obj[:-2] + ".log"
     os.makedirs(os.path.dirname(obj), exist_ok=True)
     cmd = [CC, "-c", *CFLAGS, *["-I" + i for i in INCLUDES], os.path.join(ROOT, src), "-o", obj]
-    r = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
-    open(log, "w").write(r.stdout + r.stderr)
-    return src, r.returncode, r.stderr
+    rc, err, compiled = compile_cached(cmd, obj)
+    if compiled:
+        open(log, "w").write(err)
+    else:
+        err = open(log).read() if os.path.exists(log) else ""  # its warnings, for the count
+    return src, rc, err
 
 
 def main():

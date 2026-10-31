@@ -9927,3 +9927,562 @@ In sync through loop 5,808 now. The next desync is the rand seed at loop 5,809 (
 
 - tool `Bash`: Update docs and commit
 
+## Claude
+
+Committed as `a0c393563`. Now the one more step: the seed at loop 5,809 (0:03:24.39). The Redux control run matched to 6,500, so this one is in the port. Looking at the trace and screenshot:
+
+- tool `Bash`: Compare seeds around loop 5809
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_5809.png
+
+- tool `Bash`: Show PS1 file read remaining around 5809
+
+- tool `Bash`: Read FS_LoadFileSync
+
+- tool `Bash`: Find the real FS_LoadFileSync
+
+- tool `Bash`: Gate file load completion on PS1 timing
+
+## Claude
+
+Building and running the port live:
+
+- tool `Bash`: Build port and run to next desync
+
+- tool `Bash`: Run matching builds
+
+## Claude
+
+I committed the stream clock fix as `a0c393563`. The port now stays in sync through loop 5,808 (0:03:24.3). For the one further step you allowed, I have a fix built for the next desync, but its check run is still going and nothing from it is committed yet.
+
+**The next desync, loop 5,809 (0:03:24.39):** the random seed differs. This one is in the port, not the harness: the Redux control run matched the PS1 reference past this point.
+- **Cause:** a codec call is loading its data from disc. On the PS1 that read runs from loop 5,796 to 5,817. The port's disc reads don't have the PS1's CD timing, so its read finished before loop 5,809.
+- **Effect:** the codec's call state started early and drew a random number the PS1 hadn't drawn yet.
+- **Screenshot (`tas/shots/loop_5809.png`):** the port's frame already shows the two portraits beside the codec panel. On the PS1 those areas are still black.
+
+**The fix (`Port_TasFileSync` in `port/src/tas_replay.c`):**
+- For TAS replays only, the port's file-load check now reports the PS1's recorded bytes left whenever the PS1 was still reading. That makes the load finish on the PS1's loop.
+- The intro codec case is left out. There the PS1's read was stuck behind the stream's endless read, and gating on that broke the intro before.
+- This gate also applies to stage loads. If it causes trouble there, that will show in the run.
+
+The matching build still passes (80 OK, VR 2 OK). When the run finishes I'll commit if it gets past loop 5,809. If it doesn't, I'll report what happened and stop either way.
+
+- tool `Bash`: Read port run result
+
+- tool `Bash`: Revert file sync gate and rebuild
+
+## Claude
+
+Per the project rules, failed attempts get written down so they aren't retried blind. I'm adding it to the open item in the TAS plan and committing that doc change on its own:
+
+- tool `Bash`: Document failed attempt and commit
+
+## Claude
+
+The extra step didn't work, so I reverted it. The port is still in sync up to loop 5,808 (0:03:24.3), as of commit `a0c393563`.
+
+**What I tried:** at loop 5,809 (0:03:24.39) a codec call's data finishes loading earlier in the port than on the PS1, so a random draw happens early. I made the port's file loading wait for the PS1's recorded progress. That also slowed down stage loads, and the replay broke much earlier, at the dock load on loop 917 (0:00:44.89).
+
+**What's committed:**
+- `a0c393563`: the stream clock fix that gets the port to loop 5,808.
+- `26269b642`: a note in the TAS plan on the loop 5,809 desync, the attempt that failed, and the next idea: apply the wait only outside stage loads.
+
+The file-loading change and the screenshot from that broken run are discarded. The working tree is clean, the port is rebuilt without the change, and nothing is pushed.
+
+Stopping here as you asked. The loop 5,809 desync is the next one to take up.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - **Overall goal:** use TASVideos #5139 (MGS Integral, all bosses) as a regression and accuracy test for the PS2 port in `/home/alex/Documents/mgs1_ps2`, branch `ps2-port`.
+   - **Requests this session, in order:**
+     - The user asked how far along the project is. I estimated 20–25%.
+     - "Let's proceed with Snake's position being off" (the desync at loop 4,221).
+     - Take a screenshot every time the port and the PS1 game differ, for documentation.
+     - Judge screenshots only by objective evidence. I had said Snake was missing from the port's frame; it was a guard.
+     - "Commit the changes and continue."
+     - "After you've completed whatever task you're on, if it's not too drastic, just commit and continue, but only do this for one step."
+   - **Standing constraints (CLAUDE.md and memory), verbatim where it matters:**
+     - GitHub only without asking. distrib.app was approved once, for PCSX-Redux.
+     - "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run the matching build after port changes. Expected: 80 OK; with `--variant=vr_exe`, 2 OK. The command, from `build/`: `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py`.
+     - Before commits, update `docs/Running Walkthrough.md`, `docs/Planning Doc.md` (checkboxes), `docs/TAS Testing Plan.md` and `Claude Conversation.md`.
+       - The archive: concatenate all session `.jsonl` files (`ls -tr`) into a scratch file, then run `python3 tools/port/archive_conversation.py <file> "Claude Conversation.md"`.
+       - Check that `git diff` shows no removed lines.
+     - "No `pkill -f <pattern>`" in a command whose own command line contains the pattern.
+     - Keep gdb stops rare. Notify at stopping points.
+     - "TAS loops come with their movie timestamp" (h:mm:ss).
+     - Check `docs/` for what was already tried before planning a debugging technique.
+     - Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+
+2. Key Technical Concepts:
+   - **Comparison setup:** the Redux control run (PS1 code under the same harness) separates harness problems from port bugs. The BizHawk reference trace has no CONTROL fields; the Redux and port traces do (field 23 = Snake CONTROL, 124 bytes; field 24 = Snake work +0x9B0, 192 bytes).
+   - **Trace fields:** 4 status, 5 seed, 7 `GV_PadData`, 8 mts raw pads, 9 position, 12 `DG_UnDrawFrameCount`, 14 `mts_time`, 15/16 stream last/next, 19 stream bottom, 20 file bytes left, 21 `gTotalFrameTime`.
+   - **`time.bin` record (40 bytes):** tick +0, status +4, load request +8, passage +12, seed +16, clock +20, bottom +24, start count +28, file left +32, total frame time +36.
+   - **Line/loop timing:** the pads for loop t come from line t+1.
+   - **Port bug class:** decompiled code relying on PSY-Q's stack or memory layout (adjacent locals; `GM_CameraList[-1]`).
+   - **PS1 addresses:**
+     - `homing_targets` 0x800B8230; `GM_GetHomingTarget2` 0x80032EAC; `NewAfterSe` 0x800604C0; `sna_8004F628` 0x8004F628; `HZD_GetOnlineHazardAtr` 0x80028830;
+     - `FS_StreamSoundMode` 0x80024404; `FS_StreamGetTick` return 0x800244D4;
+     - `GM_Noise*`: Power 0x800ABA24, Length 0x800ABA30, Position 0x800AB9F8; `COM_NoiseMinDisID` (s00a) 0x800E0D44.
+   - **Redux Lua APIs:** `PCSX.GPU.takeScreenShot()` returns `{data slice, width, height, bpp}`; bpp prints as `"cdata<enum 751>: 0"` (0 = 15-bit). Raw data is written with `Support.File.open(path,"TRUNCATE"):write(ss.data)`.
+   - **Port frame dump:** `Display_RequestDump()` (HAL `display_ps2.c`) writes `host:frame_NNNN.ppm` to `obj_ps2/`.
+   - **Game status flags:** `STATE_PADRELEASE` 0x10000000, `STATE_PADMASK` 0x08000000, `STATE_PADDEMO` 0x40000000, `STATE_DEMO` 0x80000000.
+
+3. Files and Code Sections:
+   - **`source/chara/snake/sna_init.c` and `source/chara/snake/snake.c` (port bug fix, committed in 59fe485ad):**
+     - `sna_line_check(SVECTOR *line, ...)` reads `line[1]`, but callers pass two separate locals.
+     - In `sna_8004F544`, under `MGS_PORT`:
+       ```c
+       #ifdef MGS_PORT
+           /* sna_line_check reads the line's end as line[1]: on the PS1 vec2 is next to vec1 on the stack */
+           SVECTOR line[2];
+       #define vec1 line[0]
+       #define vec2 line[1]
+       #else
+           SVECTOR vec1;
+           SVECTOR vec2;
+       #endif
+       ```
+       It is followed by `#undef` of both names after the function.
+     - The same fix in `snake.c` `sna_8004E71C` (`vec`, `vec_saved`), `snake.c` `sna_8004E808` (`SStack48`, `auStack40`) and `sna_init.c` `sna_80051A10` (`vec`, `vec2`).
+   - **`build/link_ps2.py`:** new option `MGS_TAS_SHOT=<loop>` adds `-DMGS_TAS_SHOT=%d`.
+   - **`port/src/tas_replay.c`:**
+     - New declaration `extern void Display_RequestDump(void);`.
+     - In `Port_TasTrace`, after the once-per-loop check:
+       ```c
+       #ifdef MGS_TAS_SHOT
+           if (GV_Time == MGS_TAS_SHOT)
+           {
+               Display_RequestDump(); /* the frame this loop draws, at its display */
+               printf("tas: frame of loop %d dumped\n", GV_Time);
+           }
+       #endif
+       ```
+     - Committed in a0c393563:
+       ```c
+       static int s_SoundModeLoop = -1;  // under MGS_TAS
+       void Port_TasSoundMode(void) { s_SoundModeLoop = GV_Time; }
+       ```
+       In `Port_TasTick`, after the `!r` check: `if (s_SoundModeLoop == GV_Time) { *tick = -1; return 1; }`.
+   - **`source/libfs/stream.c` (a0c393563):** `FS_StreamSoundMode` calls `Port_TasSoundMode()` under `MGS_PORT`.
+   - **`tools/port/tas/redux_replay.lua`:**
+     - New `TAS_SHOT`/`TAS_SHOT_DIR`: saves the screen at loops SHOT and SHOT+1 as `redux_<t>.raw` plus `.txt` (`w h bpp`).
+     - New `sound_mode_loop` breakpoint at 0x80024404. The "tas tick" hook returns v0 = 0xFFFFFFFF in that loop.
+     - All temporary DEBUG hooks have been removed.
+   - **`tools/port/tas/run_port.py`:**
+     - Functions `redux(tables, t)`, `ps1_image(t)` (parses bpp as the last token; 15-bit to RGB), `take_shots(a, t, desc)` and `compose(t, desc)`.
+     - New options `--no-shots` and `--shot T`.
+     - At a desync it relinks with `MGS_TAS_SHOT`, reruns to T+2 (ignoring every field at T..T+2) while the Redux control run goes to T+1, then writes `tas/shots/loop_<T>.png` (PS1 | port | diff > 24) and `.txt`.
+     - Scratch files go to `obj_ps2/shots/`.
+   - **`tools/port/tas/trace_to_pads.py` (33ac8abad):**
+     - Constant `STATE_PADRELEASE = 0x10000000`.
+     - When line n's status has `STATE_PADRELEASE` or `n[12] > 0`, and the recorded `[2+port].status` bytes are 0, the status is replaced with the inverted mts raw pad buttons from `n[8]` (bytes `port*8+2..3`).
+   - **Docs and data:**
+     - Walkthrough Steps 9–11; TAS plan entries; Planning Doc ("In sync to loop 5,808 (0:03:24.3, ..."); `tas/README.md` (screenshots).
+     - Screenshots `tas/shots/loop_4221`, `loop_5110`, `loop_5751`, `loop_5809`.
+   - **Commits:**
+     - 59fe485ad (sna_line_check, screenshots)
+     - 33ac8abad (pad release)
+     - a0c393563 (SoundMode tick)
+     - 26269b642 (docs: seed at 5,809 and the failed file gate)
+
+4. Errors and fixes:
+   - **Debug block in the wrong function:** a string replace put it in `GM_GetHomingTarget` instead of `GM_GetHomingTarget2`. Fixed with `git checkout` and an insert after the second function's anchor.
+   - **Debug build gate:** `MGS_TAS` isn't defined for game sources, so the debug code was gated on `MGS_PORT` only.
+   - **MAP index offset:** wrong in the Lua debug; CONTROL.map is at +0x2C.
+   - **Screenshot compose crash:** the bpp parse failed on the `"cdata<enum 751>: 0"` text. Fixed by taking the last token; added the >24 diff threshold.
+   - **Screenshot misread (user feedback):** I said Snake was missing from the port frame; it was the guard. I acknowledged it and will only judge by logs or pixel checks.
+   - **First pad-release rule too broad:** it included `PADMASK` and had no zero check, and broke loop 5,002 (0:03:01.70). Narrowed.
+   - **SoundMode fall-through:** falling through to the real `FS_StreamGetTick` would query the port's own sound counter, so -1 is returned explicitly.
+   - **File-read gate:** `Port_TasFileSync` in `FS_LoadFileSync` (fscd.c), returning the PS1's bytes left below 0x7FFF0000, broke the s00a load at loop 917 (0:00:44.89). Reverted; the shot was deleted; the attempt is documented.
+
+5. Problem Solving:
+   - **Loop 4,221 (port bug):**
+     - The punch homing at 4,219 failed because guard [1] was elsewhere.
+     - The guard heard no noise at 3,994/3,995.
+     - The wall knock at 3,988 found no wall because of the `sna_line_check` stack pair. Fixed.
+   - **Loop 5,110 (0:03:05.37, harness):** `PadCmd` sets `STATE_PADRELEASE` and updates the pads again. Fixed in `trace_to_pads.py`.
+   - **Loop 5,751 (0:03:21.53, harness):** the tick after `FS_StreamSoundMode` in the same loop is -1 on the PS1. Fixed.
+   - **Loop 5,809 (0:03:24.39, port), unresolved:**
+     - The codec's file read is 5,796–5,817 on the PS1 and faster in the port, so the call state's `rand()` comes early.
+     - The documented next idea is to gate only outside stage loads, e.g. not while `GM_LoadRequest` is set.
+     - The port is currently in sync to loop 5,808.
+   - **Unexamined:** the screenshot differences at loop 5,110, which cover most of the top half.
+
+6. All user messages:
+   - "Alright, how far along would you estimate we are with making this project work?"
+   - "Let's proceed with Snake's position being off"
+   - "For documentation purposes, take a screenshot every time there's a difference between the port and the PS1 game"
+   - "Try to not judge the screenshots by anything other than objective evidence. Previously you stated that Snake was not in the frame, when in fact it was a guard that was not in the frame."
+   - "Commit the changes and continue"
+   - "After you've completed whatever task you're on, if it's not too drastic, just commit and continue, but only do this for one step."
+
+7. Pending Tasks:
+   - None explicitly. The user limited the auto-continue to one step, and that step (the seed at 5,809) was attempted, reverted and documented. The open item stays in the TAS plan.
+
+8. Current Work:
+   - The last action was the commit 26269b642, "TAS plan: the seed at loop 5,809 and the file read gate tried", after reverting `Port_TasFileSync` (`port/src/tas_replay.c`, `source/libfs/fscd.c`) and rebuilding.
+   - The working tree is clean. The port replays in sync to loop 5,808 (0:03:24.3).
+
+9. Optional Next Step:
+   - Report to the user and stop. The one-step allowance is used up: the user said "only do this for one step".
+   - The report should cover: commit a0c393563 (in sync to 5,808); the attempted fix for loop 5,809, which broke loop 917 and was reverted and documented in 26269b642; and the suggested next attempt (gate the file read only outside stage loads). Wait for the user before continuing.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Continue
+
+- tool `Bash`: Show last doc commit and file read code
+
+- tool `Bash`: Read FS_LoadFileSync and tas_replay outline
+
+- tool `Bash`: Read tick functions and FS_LoadFileSync callers
+
+- tool `Bash`: Read codec file read poll
+
+## Claude
+
+Gating only the codec's poll (radiomes.c), not every `FS_LoadFileSync`, so stage loads stay untouched.
+
+- tool `Bash`: Add codec-only file read gate
+
+- tool `Bash`: Run TAS replay with the codec gate
+
+## Claude
+
+Meanwhile, the matching build:
+
+- tool `Bash`: Run matching builds
+
+## Claude
+
+Matching builds: 80 OK and 2 OK. Waiting for the replay.
+
+- tool `Bash`: Check replay output
+
+## Claude
+
+The replay is still running. I'll pick up when it finishes.
+
+## Claude
+
+That run left out the ignore for the known seed difference at loop 809 that earlier runs used. Rerunning with it:
+
+- tool `Bash`: Delete stray shot; find ignore flag used before
+
+- tool `Bash`: Get the ignore spec
+
+- tool `Bash`: Extract the ignore spec
+
+- tool `Bash`: Show ignore command context
+
+- tool `Bash`: Show earlier ignore command
+
+- tool `Bash`: Find ignore spec text
+
+## Claude
+
+Looking for the ignore option the earlier runs used. Checking its format in the script:
+
+- tool `Bash`: Find ignore spec format
+
+- tool `Bash`: Rerun TAS replay with known ignore
+
+## Claude
+
+I'm rerunning the replay with the documented exception for the known seed difference at loops 809–916 (0:00:41), which the first run left out. The new change only affects the codec's file read, so it can't touch that difference. I'll report when the run finishes.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+Same break at loop 917 (0:00:44.89), even with the gate limited to the codec. Checking what the PS1's recorded bytes left look like there:
+
+- tool `Bash`: Dump PS1 file bytes left around both loops
+
+## Claude
+
+Around loop 917 the recorded value is 0x7FFF0000, which the gate skips. If the gate causes the break, it must act earlier:
+
+- tool `Bash`: Find loops before 917 where gate would act
+
+- tool `Bash`: Narrow the gate and rerun the replay
+
+## Claude
+
+The replay is running again with the narrowed gate. I'll report when it finishes.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+Still breaks at loop 917. Logging the loops where the gate actually holds a read:
+
+- tool `Bash`: Run replay to 920 with gate logging
+
+- tool `Bash`: Gate only on decreasing reads; rerun replay
+
+## Claude
+
+The full replay is running with the new rule. I'll report when it finishes.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+Loop 917 is fine again, but loop 5,809 (0:03:24.39) still desyncs. Checking whether the gate acts in that codec call at all:
+
+- tool `Bash`: Log codec polls up to loop 5810
+
+- tool `Bash`: Revert gate and document finding
+
+## Claude
+
+The desync at loop 5,809 (0:03:24.39) is still there. Holding back the codec's file read didn't fix it, and the reason is now clear.
+
+**What I found:** in the port, the codec call reads its file during loops 5,775–5,782 (0:03:22.3). On the PS1 that read runs from 5,795 to 5,816, so the port asks for the file about 20 loops early. The read itself isn't too fast, so making the port wait for the PS1's read progress could never line it up.
+
+**What I tried:** I applied that wait only to the codec's read and left stage loads alone. That fixed the earlier break at loop 917 (0:00:44.89): the cause was leftover "bytes left" counts that don't change between loops, and these had been holding up the intro codec call. With those ignored, the replay stayed in sync to 5,808, the same as before.
+
+**State:**
+- I reverted the code change. Matching builds passed while it was in (80 OK, and 2 OK for `vr_exe`), and the replay is back where it was.
+- The only uncommitted change is a note in `docs/TAS Testing Plan.md` with what I found.
+- Nothing is committed or pushed.
+
+**Next:** find what the PS1 waits on before it asks for the codec file, such as the call's start, a stream or a disc seek. I can commit the note, and that's where I'd pick up.
+
+## User
+
+I want to see if there is a way to speed up TAS testing
+
+## Claude
+
+Let me first see where a run's time goes.
+
+- tool `Bash`: Read run_port.py flow
+
+- tool `Bash`: Inspect PCSX2 launcher speed settings and run log
+
+- tool `Bash`: Check limiter settings in launcher
+
+## Claude
+
+PCSX2 already runs unlimited. Timing each piece of a run:
+
+- tool `Bash`: Time link and replay to loop 5808
+
+- tool `Bash`: Time link and replay to loop 5808
+
+## Claude
+
+Measured: linking takes 34 s and the replay to loop 5,808 takes 44 s (about 4.4× real time). A desync costs both again, plus the Redux control run, for the screenshots. Checking why linking is slow:
+
+- tool `Bash`: Inspect link_ps2.py steps
+
+- tool `Bash`: Read compile and main steps
+
+- tool `Bash`: Profile link_ps2.py
+
+## Claude
+
+Linking spends 22 s recompiling the overlays, 5 s the HAL and 5 s rewriting the 1.4 GB disc image, all every time:
+
+- tool `Bash`: Read compile_one and overlay build
+
+## Claude
+
+Yes, there's a fair amount to gain. I timed an iteration that stops at the current desync, loop 5,809 (0:03:24.39):
+
+| Step | Time |
+|---|---|
+| Link (`link_ps2.py`) | 34 s |
+| Replay in PCSX2 to loop 5,808 | 44 s (about 4.4× real time) |
+| At a desync, for the screenshots | another link, another replay and the Redux control run |
+
+Why the link takes 34 s:
+- **22 s: overlay recompile.** Every overlay source is recompiled every time, one at a time. The main executable at least compiles in parallel.
+- **5 s: HAL recompile**, also one file at a time.
+- **5 s: disc image rewrite.** The 1.4 GB ISO is rewritten with both PS1 discs each time.
+- About 1 s for the link itself.
+
+**What I'd do, cheapest first:**
+1. **Compile overlays and HAL in parallel**, like the main executable. A few lines in `overlays_ps2.py` and `link_ps2.py`; linking should drop to around 12 s.
+2. **Skip files that are up to date.** Use gcc's dependency files plus a saved copy of each file's compiler flags, so changing a setting like `MGS_TAS_SHOT` still forces a recompile. A one-line fix would then recompile only that file, and linking should take a few seconds.
+3. **Read the screenshot loop at runtime** from a small host file instead of compiling it in. A desync then needs no second link. I'd also run the Redux control run at the same time as the port's rerun rather than after it.
+4. **Make the disc image cheaper.** That means not rewriting the PS1 disc data when only the ELF changed. `mkiso.py` is shared with the Silent Hill port, so this one needs more care.
+
+Together, 1–3 should cut an iteration from about 80 s to about 50 s, and more on runs that end in a desync.
+
+**The replay itself** is now the biggest cost: at the current speed the whole movie (163,838 loops) would take about 20 minutes. Two options:
+- **A faster renderer.** `CLAUDE.md` requires PCSX2's software renderer, but that rule exists for performance measurements, and the TAS replay doesn't measure performance. A faster one might help a lot, but it's your rule, so I'd only test it with your OK.
+- **Splitting the movie into segments run in parallel** (Phase 4 in the TAS plan). This is the biggest gain for long replays, but it's a larger project because the port can't start in the middle of the movie yet.
+
+Should I go ahead with 1–3?
+
+## User
+
+yes
+
+- tool `Bash`: Read build script headers and HAL compile
+
+## Claude
+
+Starting with the build side: a shared up-to-date check in `build_ps2.py`, used by the main executable, the overlays, the HAL and `port/src`.
+
+- tool `Bash`: Add cached compile; parallel overlays
+
+## Claude
+
+Now the HAL and `port/src` compiles in `link_ps2.py`, parallel and cached:
+
+- tool `Bash`: Parallelize HAL/port compile; time two links
+
+## Claude
+
+The cached link is down from 34 s to 11 s. Where the rest goes:
+
+- tool `Bash`: Profile cached link
+
+## Claude
+
+The disc image is now 8 of the 11 s. Looking at the HAL's `mkiso.py`:
+
+- tool `Bash`: Inspect mkiso.py and disc ordering
+
+- tool `Bash`: Read table loading, init and shot code
+
+- tool `Bash`: Make the shot loop a runtime value
+
+## Claude
+
+Testing the whole flow: a run to the loop 5,809 (0:03:24.39) desync, screenshots included, timed against the earlier run.
+
+- tool `Bash`: Time a full desync run with screenshots
+
+## Claude
+
+Same desync, and the screenshot came out byte-identical. But the whole run took 303 s, so something besides the link and the two 44 s replays is slow. Checking the Redux control run:
+
+- tool `Bash`: Inspect the Redux control run launch
+
+## Claude
+
+Redux runs with `-interpreter -debugger` because the harness's breakpoints need them. Timing it alone to loop 5,810:
+
+- tool `Bash`: Time the Redux control run alone
+
+- tool `Bash`: Find shot path handling
+
+- tool `Bash`: Cache the Redux control run's screens
+
+## Claude
+
+Now the dynarec test. I'm running the control run to loop 1,500 (0:01:12) under both CPU modes and comparing the two traces:
+
+- tool `Bash`: Compare Redux interpreter vs dynarec traces
+
+## Claude
+
+The dynarec run hasn't finished in more than 8 minutes, against 68 s for the interpreter. Most likely the breakpoints never fire, so it never reaches the loop where it quits. Stopping it:
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Kill leftover Redux; check dynarec trace length
+
+## Claude
+
+That `kill` loop matched its own shell, which `CLAUDE.md` warns about. Checking by PID instead:
+
+- tool `Bash`: List Redux processes; check trace lengths
+
+- tool `Bash`: Two desync runs to test the Redux cache
+
+## Claude
+
+Meanwhile, the matching build check, since the build scripts changed:
+
+- tool `Bash`: Run matching builds
+
+## Claude
+
+Matching builds pass (80 OK and 2 OK). Waiting for the two cache runs.
+
+## User
+
+I'm putting this on pause
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Check for leftover emulators; show working tree
+
+## Claude
+
+Paused. I stopped the test run that was in progress, and no PCSX2 or Redux process is still running. Nothing is committed.
+
+**Uncommitted changes:**
+- **Faster linking:** about 11 s instead of 34 s when nothing changed. The overlays, HAL and `port/src` now compile in parallel, and files that are up to date are skipped. A file still recompiles when its source, one of its headers or its compiler flags change.
+- **Screenshot loop read at runtime:** the port reads it from `host:tas_shot.txt` instead of having it compiled in, so taking the screenshots at a desync no longer relinks. A test run to the loop 5,809 desync (0:03:24.39) produced the same desync and a byte-identical screenshot.
+- **Redux screenshots cached:** they're keyed by loop, tables and Lua script, so a repeat desync at the same loop skips the Redux run. That run is the biggest cost, at 253 s to loop 5,809. **This part is untested.** The test run that would have checked it is the one I stopped.
+- **TAS plan:** the note from before on the loop 5,809 finding.
+
+The matching builds pass: 80 OK, and 2 OK with `--variant=vr_exe`.
+
+**Not done:**
+- **Redux's faster CPU mode (dynarec) doesn't work for the control run.** Its breakpoints never fire and its trace stays empty, so the control run stays on the slower interpreter.
+- **The disc image rewrite is left as it is** and still takes about 8 s per link.
+
+**When you pick it up:**
+- Run the desync twice. The second run should print "screenshots: the control run's from …" and finish in about 2 minutes instead of 5.
+- Then update the walkthrough and the conversation log, and commit.
+
+## User
+
+Continue
+
+- tool `Bash`: Two desync runs to test the Redux cache
+
+## Claude
+
+I'm running the desync twice to test the cache: the first run fills it and the second should skip Redux. Meanwhile I'm writing up the walkthrough step.
+
+- tool `Bash`: Read walkthrough tail and README mentions
+
+- tool `Bash`: Append walkthrough step 12
+
+## Claude
+
+The walkthrough step is written. I'll add the timing numbers when the runs finish.
+
+- tool `Bash`: Read cache test result
+
+## Claude
+
+The cache works: the second run took 96 s against 309 s for the first, and the screenshot came out identical. Finishing the docs and the conversation archive, then committing:
+
+- tool `Bash`: Finish walkthrough; archive conversation; check no removals
+

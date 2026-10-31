@@ -300,7 +300,7 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       `zako11a`/`zako11e`/`zako11f`/`enemy`), `tools/port/fdiff.py s03d <func>` shows the differing instructions
       of one against `build/s03d.matching.bin`. `s03d`'s `Work` is its own layout (target pointer at 0x8FC and a
       TARGET at 0x900, where zako11a has the pointer at 0x900), so fields are mapped from the assembly.
-      Decompiled so far (matching): `s03d_800CF194`, `s03d_800CEE3C`, `s03d_800CF68C`, `s03d_800CFB04`, `s03d_800D46F8`, `s03d_800CE12C`, `s03d_800CDF94`, `s03d_800CE720`, `s03d_800CE318`, `s03d_800CCE3C`, `s03d_800D09D8`, `s03d_800CEB38`, `s03d_800D041C`, `s03d_800CDB5C` (it needed zako11a's empty `for (i = 0; i < 0; i++)` loop for the block layout; an inline `SetAction` gives the PS1's scheduling; their
+      Decompiled so far (matching): `s03d_800CF194`, `s03d_800CEE3C`, `s03d_800CF68C`, `s03d_800CFB04`, `s03d_800D46F8`, `s03d_800CE12C`, `s03d_800CDF94`, `s03d_800CE720`, `s03d_800CE318`, `s03d_800CCE3C`, `s03d_800D09D8`, `s03d_800CEB38`, `s03d_800D041C`, `s03d_800CDB5C`, `s03d_800CD75C` (its jump table sat inside overlay2.c's rodata, so the constants after it moved into zako.c below it; it needed zako11a's empty `for (i = 0; i < 0; i++)` loop for the block layout; an inline `SetAction` gives the PS1's scheduling; their
       jump tables came out of `overlay2.c`'s rodata: zako.obj's follow it, so they land at the same addresses). `PARAM`'s 0xB16 is the faint
       (what `Zako_800CCCF4` passes to `GM_SetPowerTarget`), not `max_life`; renamed. `tools/port/disasm_s.py s03d
       <func>` disassembles a stub with its calls named.

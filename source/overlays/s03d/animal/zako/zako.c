@@ -65,6 +65,44 @@ int  s03d_800CD75C(Work *work);
 int  s03d_800CD984(Work *work);
 void s03d_800D041C(Work *work);
 void s03d_800D14AC(Work *work);
+void s03d_800CFB04(Work *work, int arg);
+
+static inline void SetAction(Work *work, int action, int interp)
+{
+    work->field_8E0 = action;
+    GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[action], 0, interp);
+}
+
+static inline void SetMode(Work *work, void (*fn)(Work *, int))
+{
+    work->field_8E8 = fn;
+    work->field_8F0 = 0;
+    work->control.turn.vz = 0;
+    work->control.turn.vx = 0;
+    GM_ConfigMotionAdjust(&work->body, 0);
+}
+
+static inline void SetMode2(Work *work, void (*fn)(Work *, int))
+{
+    if (!work->field_8EC)
+    {
+        work->field_8EC = (int)fn;
+        work->field_8F4 = 0;
+    }
+
+    work->control.turn.vz = 0;
+    work->control.turn.vx = 0;
+    GM_ConfigMotionAdjust(&work->body, 0);
+}
+
+static inline void SetModeFields(Work *work, void (*fn)(Work *, int))
+{
+    work->field_8E8 = fn;
+    work->field_8F0 = 0;
+    work->control.turn.vz = 0;
+    work->control.turn.vx = 0;
+}
+
 void s03d_800D13F8(Work *work);
 void s03d_800D3B5C(Work *work);
 void s03d_800D153C(Work *work);
@@ -345,7 +383,98 @@ int Zako_800CD720(SVECTOR *vec)
 
     return ABS(x) + ABS(y) + ABS(z);
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CD75C.s")
+extern const char s03d_dword_800DB4B4[];
+extern const char s03d_dword_800DB4C8[];
+int  Zako_800CD720(SVECTOR *vec);
+void s03d_800CFA04(Work *work, int arg);
+void s03d_800CF4D4(Work *work, int arg);
+
+int s03d_800CD75C(Work *work)
+{
+    short   val;
+    TARGET *target;
+
+    target = work->field_8FC;
+    if (!(target->damaged & TARGET_POWER))
+    {
+        return 0;
+    }
+
+    val = target->a_mode - 1;
+    switch (val)
+    {
+    case 2:
+        target->force = DG_ZeroVector;
+        if (target->faint <= 0)
+        {
+            work->field_8DC = 1;
+            SetMode(work, s03d_800CFB04);
+        }
+        else
+        {
+            SetMode(work, s03d_800CFA04);
+        }
+        break;
+    case 3:
+        work->field_8DC = 0;
+        SetMode(work, s03d_800CFB04);
+        break;
+    case 0:
+        target->force = DG_ZeroVector;
+        if (target->vital <= 0)
+        {
+            if (target->vital != work->field_BA2 - 64)
+            {
+                work->field_BA0 = 1;
+                printf((char *)s03d_dword_800DB4B4);
+            }
+            else
+            {
+                printf((char *)s03d_dword_800DB4C8);
+            }
+            work->field_8DC = 1;
+            SetMode(work, s03d_800CFB04);
+        }
+        else
+        {
+            SetMode(work, s03d_800CFA04);
+        }
+        break;
+    case 1:
+        if (Zako_800CD720(&target->force) < 100)
+        {
+            work->field_8DC = 3;
+        }
+        else
+        {
+            work->field_8DC = 2;
+        }
+        SetMode(work, s03d_800CFB04);
+        break;
+    case 4:
+        work->field_8DC = 3;
+        SetMode(work, s03d_800CFB04);
+        break;
+    case 7:
+        SetMode(work, s03d_800CF4D4);
+        break;
+    case 8:
+        SetMode(work, s03d_800CF548);
+        break;
+    }
+
+    target->damage = 0;
+    target->damaged = 0;
+    return 1;
+}
+
+/* rodata after this function's jump table (0x800DB4DC), from overlay2.c */
+const char    s03d_dword_800DB500[36] = "aaa reset wait zone id = %d z=%d\n";
+const char    s03d_dword_800DB524[36] = "bbb reset fight zone id = %d z=%d\n";
+const SVECTOR s03d_dword_800DB548 = {-200, 1000, 600, 0};
+const SVECTOR s03d_dword_800DB550 = {5, 0, 100, 0};
+const SVECTOR s03d_dword_800DB558 = {400, 1000, 400, 0};
+const int     s03d_dword_800DB560 = 0;
 int s03d_800CD984(Work *work)
 {
     if (work->control.mov.vx < 0x1194)
@@ -532,28 +661,6 @@ void s03d_800D09D8(Work *work, int arg);
 void s03d_800CE5B4(Work *work, int arg);
 void s03d_800CE644(Work *work, int arg);
 
-static inline void SetMode(Work *work, void (*fn)(Work *, int))
-{
-    work->field_8E8 = fn;
-    work->field_8F0 = 0;
-    work->control.turn.vz = 0;
-    work->control.turn.vx = 0;
-    GM_ConfigMotionAdjust(&work->body, 0);
-}
-
-static inline void SetMode2(Work *work, void (*fn)(Work *, int))
-{
-    if (!work->field_8EC)
-    {
-        work->field_8EC = (int)fn;
-        work->field_8F4 = 0;
-    }
-
-    work->control.turn.vz = 0;
-    work->control.turn.vx = 0;
-    GM_ConfigMotionAdjust(&work->body, 0);
-}
-
 int s03d_800CDF94(Work *work)
 {
     int press;
@@ -631,12 +738,6 @@ int s03d_800CDF94(Work *work)
 }
 int  s03d_800CDF94(Work *work);
 void s03d_800CE318(Work *work, int arg);
-
-static inline void SetAction(Work *work, int action, int interp)
-{
-    work->field_8E0 = action;
-    GM_ConfigObjectAction(&work->body, ((short *)&s03d_dword_800C39E0)[action], 0, interp);
-}
 
 void s03d_800CE12C(Work *work, int arg)
 {
@@ -865,14 +966,6 @@ void s03d_800CE8F4(Work *work, int arg);
 void s03d_800CE9E8(Work *work, int arg);
 void s03d_800CEB38(Work *work, int arg);
 void s03d_800CECBC(Work *work, int arg);
-
-static inline void SetModeFields(Work *work, void (*fn)(Work *, int))
-{
-    work->field_8E8 = fn;
-    work->field_8F0 = 0;
-    work->control.turn.vz = 0;
-    work->control.turn.vx = 0;
-}
 
 void s03d_800CE720(Work *work, int arg)
 {

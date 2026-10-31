@@ -1864,7 +1864,83 @@ int Zako_800D0408(Work *work)
 {
     return work->control.mov.vx >= 0x1195;
 }
-#pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D041C.s")
+void s03d_800D041C(Work *work)
+{
+    short   *act;
+    CONTROL *control;
+    void   (*action)(Work *, int);
+    int      time;
+
+    act = (short *)&work->field_8C8;
+    control = &work->control;
+
+    work->field_AEC = 0;
+    work->field_B24 = 0;
+    work->field_8FC->class = TARGET_AVAIL;
+    work->field_8F8 = 0;
+    work->field_B9C = 0;
+
+    action = work->field_8E8;
+
+    control->height = work->body.height;
+    control->hzd_height = control->levels[0] + 750;
+
+    time = work->field_8F0++;
+
+    if (action == NULL)
+    {
+        action = s03d_800CE12C;
+        work->field_8E8 = s03d_800CE12C;
+    }
+
+    action(work, time);
+
+    action = (void (*)(Work *, int))work->field_8EC;
+    if (action != NULL)
+    {
+        time = work->field_8F4++;
+        action(work, time);
+    }
+
+    if (act[14] == 0)
+    {
+        control->r_sphere = GV_NearExp2(control->r_sphere, act[13]);
+    }
+    else
+    {
+        control->r_sphere = -1;
+    }
+
+    if (work->field_8FC->class & TARGET_POWER)
+    {
+        work->hom->flag = 1;
+    }
+    else
+    {
+        work->hom->flag = 0;
+    }
+
+    if (ZAKOCOM_MGR->entries[work->param.fAF8].field_4 == 1)
+    {
+        work->hom->flag = 0;
+    }
+
+    if (!Zako_800D0408(work))
+    {
+        work->hom->flag = 0;
+        work->field_8FC->class = TARGET_AVAIL;
+    }
+
+    if (act[2] < 0 && control->grounded)
+    {
+        act[2] = 0;
+    }
+
+    act[2] -= 16;
+    control->step.vy = act[2];
+
+    work->field_BA2 = work->field_8FC->vital;
+}
 void s03d_800D05DC(Work *work, int arg1)
 {
     if (arg1 == 0)

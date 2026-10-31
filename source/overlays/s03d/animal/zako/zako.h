@@ -34,7 +34,8 @@ typedef struct _Work
     MATRIX          light[2];       /* 0x888 */
 
     int             field_8C8;      /* 0x8C8 */
-    int             field_8CC;      /* 0x8CC */
+    short           field_8CC;      /* 0x8CC */
+    short           field_8CE;      /* 0x8CE */
     char            pad_8D0[0x8D4 - 0x8D0];
     SVECTOR         field_8D4;      /* 0x8D4 */
     int             field_8DC;      /* 0x8DC */
@@ -91,7 +92,9 @@ typedef struct _Work
     char            pad_AE4[0xAE6 - 0xAE4];
     short           field_AE6;      /* 0xAE6 */
     short           field_AE8;      /* 0xAE8 */
-    char            pad_AEA[0xAF6 - 0xAEA];
+    char            pad_AEA[0xAEC - 0xAEA];
+    int             field_AEC;      /* 0xAEC */
+    char            pad_AF0[0xAF6 - 0xAF0];
     short           field_AF6;      /* 0xAF6 */
     short           field_AF8;      /* 0xAF8 */
     char            pad_AFA[0xB00 - 0xAFA];
@@ -125,9 +128,11 @@ typedef struct _Work
     unsigned short  field_B94;      /* 0xB94 */
     char            pad_B96[0xB98 - 0xB96];
     short           field_B98;      /* 0xB98 */
-    char            pad_B9A[0xBA0 - 0xB9A];
+    char            pad_B9A[0xB9C - 0xB9A];
+    int             field_B9C;      /* 0xB9C */
     short           field_BA0;      /* 0xBA0 */
-    char            pad_BA2[0xC00 - 0xBA2];
+    short           field_BA2;      /* 0xBA2 */
+    char            pad_BA4[0xC00 - 0xBA4];
 } Work;
 
 typedef struct _ZakoActor

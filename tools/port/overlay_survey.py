@@ -33,7 +33,10 @@ def overlay_objects(name):
 
 
 def strip_comments(text):
-    return re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
+    """The source as the port compiles it: comments out, and the #else part of an `#ifdef MGS_PORT` (the matching
+    build's INCLUDE_ASM where the port has C that doesn't match it yet)."""
+    text = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
+    return re.sub(r"(#ifdef\s+MGS_PORT\b.*?)#else\b.*?#endif", r"\1#endif", text, flags=re.S)
 
 
 def main():

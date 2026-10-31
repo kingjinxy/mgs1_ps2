@@ -7,6 +7,7 @@
 #include "libdg/libdg.h"
 #include "libgcl/libgcl.h"
 #include "okajima/blood.h"
+#include "mts/mts.h" // for fprintf
 
 extern int s03d_dword_800C39B0;
 extern int s03d_dword_800C39B8;
@@ -2463,7 +2464,128 @@ void Zako_800D0FF4(Work *work)
         }
     }
 }
+int NearAsiato(void);
+int SearchNearAsiato(HZD_HDL *hzd, SVECTOR *pos, int facedir, int range, int length);
+int AsiatoCheck(HZD_HDL *hzd, SVECTOR *pos);
+
+#ifdef MGS_PORT
+/* Not matching yet: in the noise check's case 100, the PS1 keeps the distance in s0 and compares into v0; this
+   compiles the compare into s0 (2 instructions differ; the other three functions match). Same behaviour. */
+int s03d_800D1054(HZD_HDL *hzd, SVECTOR *vec1, SVECTOR *vec2)
+{
+    int from, to;
+
+    from = HZD_GetAddress(hzd, vec1, -1);
+    to = HZD_GetAddress(hzd, vec2, -1);
+    from &= 0xFF;
+    to &= 0xFF;
+    return HZD_ZoneDistance(hzd, from, to);
+}
+
+void s03d_800D10B4(Work *work)
+{
+    CONTROL *control;
+    int      dist;
+
+    if (!(work->field_B33 & 0x1))
+    {
+        return;
+    }
+
+    control = &work->control;
+    if (control->map->index != GM_PlayerMap)
+    {
+        return;
+    }
+
+    if (GM_NoisePower == 0)
+    {
+        return;
+    }
+
+    switch (GM_NoisePower)
+    {
+    case 5:
+        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) < 500)
+        {
+            work->field_B32 |= 0x1;
+        }
+        break;
+    case 200:
+        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) < 4000)
+        {
+            work->field_B32 |= 0x1;
+        }
+        break;
+    case 100:
+        dist = GV_DiffVec3(&GM_NoisePosition, &control->mov);
+        fprintf(1, (char *)s03d_dword_800DB5D4, dist);
+        if (dist < 4000 && s03d_800D1054(control->map->hzd, &control->mov, &GM_NoisePosition) < 300)
+        {
+            work->field_B32 |= 0x1;
+            GM_NoiseLength = 0;
+            GM_NoisePower = 0;
+        }
+        break;
+    case 255:
+        work->field_B32 |= 0x1;
+        break;
+    }
+}
+
+void s03d_800D123C(Work *work)
+{
+    if (!(work->field_B33 & 0x2))
+    {
+        return;
+    }
+    if (work->field_B26 != 2)
+    {
+        return;
+    }
+    if (!(GM_PlayerStatus & PLAYER_CB_BOX))
+    {
+        return;
+    }
+
+    if (GV_DiffVec3(&work->field_B34, &GM_PlayerPosition) > 50 || work->field_B3C != GM_WhereList[0]->rot.vy)
+    {
+        if (ZAKOCOM_MGR->field_1C == 1)
+        {
+            return;
+        }
+        work->field_B34 = GM_PlayerPosition;
+        work->field_B3C = GM_WhereList[0]->rot.vy;
+        work->field_B32 |= 0x2;
+    }
+
+    work->field_B26 = 0;
+}
+
+void s03d_800D1324(Work *work)
+{
+    HZD_HDL *hzd;
+    SVECTOR *pos;
+    short   *vis;
+
+    if (!(work->field_B33 & 0x10) || work->field_ACA == 5)
+    {
+        return;
+    }
+
+    hzd = work->control.map->hzd;
+    pos = &work->control.mov;
+    vis = (short *)&work->field_B20;
+
+    if (AsiatoCheck(hzd, pos) && SearchNearAsiato(hzd, pos, vis[0], vis[1], vis[2]) >= 0)
+    {
+        work->field_B32 |= 0x10;
+        fprintf(1, (char *)s03d_dword_800DB5E8, NearAsiato());
+    }
+}
+#else
 #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D1054.s")
+#endif
 void Zako_800D13E8(Work *work)
 {
     SVECTOR unused[2];
@@ -2499,7 +2621,31 @@ void s03d_800D13F8(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+/* Not matching yet: the PS1 gives the guard's position pointer a higher register priority than the work
+   pointer (s1/s2 swapped; 17 instructions differ). Same behaviour. */
+extern SVECTOR s03d_dword_800C3AB0;
+
+void s03d_800D14AC(Work *work)
+{
+    SVECTOR  diff;
+    SVECTOR *mov;
+    SVECTOR *player;
+
+    mov = &work->control.mov;
+    player = &GM_PlayerPosition;
+    GV_SubVec3(&s03d_dword_800C3AB0, mov, &diff);
+    *(int *)&work->field_B98 = GV_VecDir2(&diff);
+
+    GV_SubVec3(player, mov, &diff);
+    diff.vy = 0;
+    *(int *)&work->field_B94 = GV_VecDir2(&diff);
+    work->field_B90 = GV_VecLen3(&diff);
+    work->field_B26 = 2;
+}
+#else
 #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D14AC.s")
+#endif
 
 void s03d_800D153C(Work *work)
 {

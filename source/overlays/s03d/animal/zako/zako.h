@@ -110,7 +110,8 @@ typedef struct _Work
     char            pad_B2C[0xB32 - 0xB2C];
     unsigned char   field_B32;      /* 0xB32 */
     unsigned char   field_B33;      /* 0xB33 */
-    char            pad_B34[0xB40 - 0xB34];
+    SVECTOR         field_B34;      /* 0xB34 */
+    int             field_B3C;      /* 0xB3C */
     SVECTOR         field_B40;      /* 0xB40 */
     SVECTOR         field_B48;      /* 0xB48 */
     int             field_B50;      /* 0xB50 */

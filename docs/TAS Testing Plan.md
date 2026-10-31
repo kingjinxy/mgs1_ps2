@@ -255,7 +255,7 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       `Port_TasPads` rewrites them from the pad record, which is the next trace line's. Now `Port_TasPadsDone`, at
       the end of `GV_UpdatePadSystem`, puts the buttons back to `Port_TasRawPads`'s (the PS1's at the loop's
       vertical blank) for the code that reads them directly later in the loop.
-- [ ] PCSX2 crash after loop 6,732 (0:03:54.4, `s01a`, the first gameplay after the cutscene): TLB miss in
+- [ ] PCSX2 crash after loop 6,732 (0:03:55.00, `s01a`, the first gameplay after the cutscene): TLB miss in
       `DG_TransChanl`, once loading `obj->model` from a `DG_OBJS` base of 0x8407ee4, once `lw v1, 8(sp)` with sp
       0x8410e44, then a jump to 0xff70fee6. Both values look like a valid address with 0x08000000 set, but sp isn't
       near the task stacks (`mts_port_stacks` 0x6715c8, 32 KB each). The draw queue's entries and their models

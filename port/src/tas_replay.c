@@ -62,6 +62,7 @@ extern int          DG_UnDrawFrameCount;
 extern short        linkvarbuf[96];
 extern unsigned char GV_PadData[64], pad_800C14E0[16], GM_PlayerPosition[8];
 extern int          GM_PlayerStatus;
+extern int          CDBIOS_ReadSync(void);
 extern int          gTotalFrameTime;
 extern void*        GM_PlayerControl;
 extern char*        GM_GetArea(int flag);
@@ -386,9 +387,10 @@ void Port_TasTrace(void)
     }
     s_LoadEnded = 0;
     traced      = GV_Time;
-    if (!f)
+    if (!f || (GM_LoadRequest && loads < s_Ps1Loads && GV_Time >= s_Ps1LoadEnd[loads]))
     {
-        return;
+        return; /* still loading at the PS1's load end (the PS1 drive's pace, cdbios_ps2.c): the loop's number is
+                   set to the PS1's at the load's end */
     }
     stage = GM_GetArea(0);
     fprintf(f, "%d %d %d %d %08x %08x %.8s ", mts_get_tick_count(), GV_Time, GV_Clock, GV_PassageTime,
@@ -398,10 +400,10 @@ void Port_TasTrace(void)
     hex(f, GM_PlayerPosition, 8);
     fprintf(f, "%d %d %d ", GM_AlertMode, GM_LoadRequest, DG_UnDrawFrameCount);
     hex(f, linkvarbuf, 192);
-    /* the 8 BizHawk-only fields (stream clock, pad states, the game task's wait, stream data, file read, play time)
-       as "-", then
+    /* the BizHawk-only fields (stream clock, pad states, the game task's wait, stream data, play time) as "-",
+       but the file read's bytes left (field 20, not compared: the PS1 drive's pace, cdbios_ps2.c), then
        trace_debug.lua's: GM_PlayerStatus, Snake's CONTROL (124 bytes) and his work from 0x9B0 (192 bytes) */
-    fprintf(f, "- - - - - - - - %08x ", GM_PlayerStatus);
+    fprintf(f, "- - - - - - %d - %08x ", CDBIOS_ReadSync(), GM_PlayerStatus);
     if (GM_PlayerControl)
     {
         hex(f, GM_PlayerControl, 124);

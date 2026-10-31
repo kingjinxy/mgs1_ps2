@@ -657,3 +657,19 @@ screenshots the Redux control run, 253 s. Changes:
   `redux_replay.lua`. A run to the 5,809 desync with screenshots: 309 s, then 96 s with the cache.
 - Tried: Redux's dynarec instead of `-interpreter`. Its breakpoints never fire (empty trace), so no.
 Matching build: 80 OK, VR 2 OK.
+
+## Step 13: the PS1 drive's pace for file reads (2026-10-31)
+
+Loop 5,809 (0:03:24.39): the codec's face read is waited for by the call's `rand()`. The Redux control run showed
+`fs_stream_task_state` already 0, so it's the PS1's CD drive: the face read drains at 2.5 sectors a vertical blank
+and the call's 2-sector `RADIO.DAT` read before it takes 42 vertical blanks after the demo stream (a long seek).
+The port's reads are instant. Rather than gating each read on the PS1's numbers, TAS builds now pace file reads
+(those without a callback) in `port/src/cdbios_ps2.c`: the read isn't reported done before its sectors would have
+come in at the PS1's rate, plus a seek of 1 + 0.075 * sqrt(distance) vertical blanks, fitted to the trace's codec
+reads with a small calibration log (about 3 vertical blanks for 1,415 sectors, 29 for 120,341).
+Tried and failed, all at loop 917 (0:00:44.89, the intro call running late): pacing streams and stage loads too
+(streams already follow the PS1's tick table, loads end at its loop), and a fixed 10-vertical-blank seek. What
+counts: the harness waits for a port that's early (stream starts, load ends), not one that's late, so the model
+errs short. Also: the port trace has the file read's bytes left (field 20; not compared), and lines are left out
+while the port still loads past the PS1's load end. PCSX2: in sync to loop 6,276; at 6,277 (0:03:37.57, `s01a`) the
+rand seed differs. Matching build: 80 OK, VR 2 OK.

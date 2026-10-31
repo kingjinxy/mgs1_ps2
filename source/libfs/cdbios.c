@@ -44,6 +44,7 @@ static inline void int_to_loc( int pos, CdlLOC *loc )
 #define CDBIOS_CHUNK 16 /* sectors per read: at one read per vertical blank, ~6x the PS1 drive */
 
 extern int                  MgsCd_Init(void);
+extern int                  MgsCd_Paced;
 extern int                  MgsCd_Start(int sector, int count);
 extern int                  MgsCd_Poll(void);
 extern const unsigned char *MgsCd_Sector(int i);
@@ -200,6 +201,7 @@ static void CDBIOS_Main(void)
         if (chunk_count == 0 && task->state == CDBIOS_STATE_READ && cdbios_next_state < 0)
         {
             chunk_sector = task->sector;
+            MgsCd_Paced = task->callback == NULL; /* file reads (fscd.c): see cdbios_ps2.c */
             chunk_count = MgsCd_Start(chunk_sector, CDBIOS_CHUNK);
 
             if (chunk_count == 0)

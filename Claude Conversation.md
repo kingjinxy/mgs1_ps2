@@ -10486,3 +10486,230 @@ The cache works: the second run took 96 s against 309 s for the first, and the s
 
 - tool `Bash`: Finish walkthrough; archive conversation; check no removals
 
+- tool `Bash`: Commit the speedups
+
+## Claude
+
+TAS iterations are faster now, and the work is committed as `f4eccba3d`. Nothing is pushed.
+
+| | Before | After |
+|---|---|---|
+| Link, nothing changed | 34 s | 11 s |
+| Run to the loop 5,809 desync (0:03:24.39) with screenshots, first time at that loop | about 5 min | 309 s, about the same |
+| Same run, later times at that loop | about 5 min | 96 s |
+
+- **Link:** overlays, HAL and `port/src` compile in parallel and skip files that are up to date. 8 of the remaining 11 s is the disc image rewrite, which I left as it is.
+- **Screenshots:** the port no longer relinks to take them, and the Redux control run's screens are cached. A repeat desync at the same loop now skips Redux, which took about 4 minutes of the 5.
+
+The replay result didn't change: same desync, identical screenshot. The matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`).
+
+Redux's faster CPU mode is ruled out: the harness's breakpoints don't fire under it, so the control run has to stay on the interpreter.
+
+The commit also includes the walkthrough step, the TAS plan's note on loop 5,809 and the conversation archive.
+
+The replay itself is still about 44 s to loop 5,809, and about 20 minutes for the whole movie. To cut that further:
+- Try PCSX2's hardware renderer. That needs your OK, since `CLAUDE.md` requires the software one.
+- Split the movie into segments run in parallel (Phase 4 in the TAS plan), which is a bigger project.
+
+## User
+
+I don't think either of these will help much at this point. Let's just continue fixing the desyncs
+
+## Claude
+
+Back to loop 5,809. The port asks for the codec file about 20 loops early, so I'm looking at what triggers that request:
+
+- tool `Bash`: Find codec file request sites
+
+- tool `Bash`: Read codec CD task and caller
+
+- tool `Bash`: Log the port's face read start
+
+- tool `Bash`: Compare stream fields around the codec
+
+- tool `Bash`: Find stream task state and harness hooks
+
+- tool `Bash`: Read the stream task
+
+- tool `Bash`: Find stream variable addresses
+
+- tool `Bash`: Look in main map for stream symbols
+
+## Claude
+
+Those variables are static, so the map doesn't list them. `FS_StreamTaskState` loads `fs_stream_task_state`, so I'll read the address from its code:
+
+- tool `Bash`: Find function addresses and binary
+
+- tool `Bash`: Dump instructions of FS_StreamTaskState/Sync
+
+## Claude
+
+`fs_stream_task_state` is at 0x800B52C0 and `fs_stream_end` at 0x800B529C. Adding a temporary print of both to the Redux script for loops 5,770–5,800:
+
+- tool `Bash`: Find per-loop write and memory reader in Lua
+
+- tool `Bash`: Read the per-loop trace site
+
+- tool `Bash`: Log stream task end in port and Redux
+
+- tool `Bash`: Revert debug; outline cdbios_ps2.c
+
+- tool `Bash`: Read the CD layer and its callers
+
+- tool `Bash`: Read the cdbios task loop
+
+- tool `Bash`: Pace CD reads to PS1 speed; run replay
+
+- tool `Bash`: No seek for contiguous reads; rerun
+
+## Claude
+
+Same result, so I need numbers: when this load starts and ends on each side.
+
+- tool `Bash`: Compare load request spans PS1 vs port
+
+- tool `Bash`: Measure PS1 read rate per frame
+
+- tool `Bash`: Compare vblanks per loop during load
+
+- tool `Bash`: Find PS1 load end and port realign log
+
+- tool `Bash`: Log the port's seeks during the load
+
+- tool `Bash`: Show the seek log
+
+- tool `Bash`: Read the load realign in Port_TasTrace
+
+- tool `Bash`: Skip trace past PS1 load end; rerun
+
+## Claude
+
+Past loop 490 now. The next break is loop 917 (0:00:44.89): the PS1 requests the s00a load there, after the intro codec call, and the port doesn't. Checking when the port does:
+
+- tool `Bash`: Port status around 917
+
+## Claude
+
+The load ends match (the port's are realigned), so the gap is in the intro call between loops 768 and 917. Comparing game status changes in that span:
+
+- tool `Bash`: Status changes 760-917 both sides
+
+- tool `Bash`: Read trace line format and ReadSync
+
+- tool `Bash`: Read compare_trace FIELDS
+
+- tool `Bash`: Trace port file bytes left; compare
+
+- tool `Bash`: Find extern declarations
+
+- tool `Bash`: Declare and rerun with file bytes traced
+
+- tool `Bash`: Measure seek time in vblanks
+
+- tool `Bash`: Seek 10 vblanks; full replay
+
+- tool `Bash`: Find stream vs file distinction in cdbios
+
+- tool `Bash`: Pace only callback-less file reads; rerun
+
+## Claude
+
+Still loop 917. (Also, `MgsCd_Paced` is only defined in TAS builds, which would break a normal build's link. I'll fix that.) Checking where the port's codec reads fall now:
+
+- tool `Bash`: Port codec read timeline with pacing
+
+- tool `Bash`: Log paced chunk starts during codec reads
+
+- tool `Bash`: Show paced read log
+
+- tool `Bash`: Seek 3 vblanks; full replay
+
+## Claude
+
+Past 5,809 now. The next desync is the rand seed at loop 5,825 (0:03:24.92), with the same two values as at 5,809 before. Checking which side draws when:
+
+- tool `Bash`: Compare seeds and reads around 5800-5825
+
+## Claude
+
+The PS1's face read runs 5,796–5,817 and the port's ends at 5,806, still about 8 loops early. The port then draws the random number at 5,825, before the PS1 does. Looking at the read before it:
+
+- tool `Bash`: Compare reads before the face read
+
+- tool `Bash`: Log every paced seek to loop 5824
+
+## Claude
+
+Only 8 paced reads with a seek up to loop 5,824. Matching them to the PS1's read events:
+
+- tool `Bash`: Match port seeks with PS1 read latencies
+
+- tool `Bash`: Show raw seek lines
+
+- tool `Bash`: Match port seeks with PS1 read latencies
+
+- tool `Bash`: Distance-based seek; full replay
+
+- tool `Bash`: Fix non-TAS link; normal link; matching builds
+
+## Claude
+
+The normal link and the matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`). Now taking the loop 6,277 screenshot, which I skipped while testing, and updating the docs in the meantime:
+
+- tool `Bash`: Rerun to 6277 with screenshots
+
+- tool `Bash`: Find doc spots to update
+
+- tool `Bash`: Update TAS plan entries
+
+- tool `Bash`: Update planning doc and walkthrough
+
+## Claude
+
+The docs are updated. Waiting for the screenshot run before committing.
+
+## User
+
+Since we struggled with this in the SH1 port, I think it’d be worth looking at that too. I know we want to keep the port in lockstep with the PS1 game, but given that one of the benefits of the port is faster load times, is there any way we can keep things in lockstep while accounting for different load times?
+
+## Claude
+
+Checking what the SH1 port ran into first:
+
+- tool `Bash`: Search SH1 docs for load-time issues
+
+## Claude
+
+Yes, and the harness mostly works this way already. Normal builds keep fast loading: the pacing I just added only exists in TAS builds (`MGS_TAS`). Within TAS builds, there are two kinds of disc reads:
+
+1. **Blocking stage loads stay fast.** The game does nothing while a stage loads, so its length isn't visible to the game. At each load's end the harness sets the loop number, seed, clocks and play time to the PS1's values at its load end. The port can finish in a fraction of the time and still be in lockstep. That's why pacing stage loads only broke things: with this realign, the port doesn't need the PS1's load time.
+2. **Reads during gameplay are paced, in TAS builds only.** The codec's face and `RADIO.DAT` reads run while the game keeps looping, drawing random numbers and running the call's states. Their length changes what the game does, so there's no single point to realign at. Matching the PS1 drive's speed is the only way to stay in step there. These are the reads with no callback, which is the set I'm pacing now.
+
+So the rule is: realign after reads the game waits on, pace reads the game runs through.
+
+**The SH1 port.** It hit the same problem with voice lines and landed on the same shape of model: a seek time growing with the square root of the distance (4 + 44·√(distance/200,000) vertical blanks in `libcd_ps2.c`). One difference: SH1's model is on in every build, not just for testing.
+
+**What could still stop lockstep from carrying over:**
+- **Things that count time during a load.** The realign covers what the PS1 trace records: the clocks, play time and seed. If another counter advances during a load, it would differ by the load's length. The fix is to add it to the realign, not to slow the load.
+- **Reads that need both.** A codec call is one: gameplay-time reads, and then a stream start the harness already waits for. Pacing the read sets the start time, and the existing wait handles anything left over.
+- **In a normal build,** codec portraits appear sooner than on the PS1. That's a visible difference, but a harmless one and arguably an improvement. If you'd rather match the PS1 there too, the pacing could be made a build option instead of TAS-only.
+
+The screenshot run for the loop 6,277 desync is still going. I'll commit once it's done and then take up that desync.
+
+## User
+
+Is it still running? I don't see its window
+
+- tool `Bash`: Check screenshot run status
+
+## Claude
+
+Yes, it's still running, just without a window: Redux runs with `-no-ui`. It's the Redux control run for the screenshots, 2.5 minutes in, with about 2 more to go since it takes about 4½ minutes to reach this loop. The port's replay to the desync is finished, and its rerun at the same loop has no window either. The output stays empty until the end because it's piped through `tail`. I'll commit when it finishes.
+
+- tool `Bash`: Read result and status
+
+- tool `Read`: /home/alex/Documents/mgs1_ps2/tas/shots/loop_6277.png
+
+- tool `Bash`: Archive conversation and commit
+

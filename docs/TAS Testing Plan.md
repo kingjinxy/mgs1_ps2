@@ -208,7 +208,7 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       most of the top half: not looked into.)
 - [x] `DG_UnDrawFrameCount` at loop 5,751 (0:03:21.53, `d01a`), the harness: after `FS_StreamSoundMode`,
       `strctrl.c` asks for the tick again in the loop and the PS1 got -1; the harness now returns -1 then.
-- [ ] rand seed at loop 5,809 (0:03:24.39, `d01a`), the port: a codec call's file read (trace field 20) runs from
+- [x] rand seed at loop 5,809 (0:03:24.39, `d01a`), the port: a codec call's file read (trace field 20) runs from
       5,796 to 5,817 on the PS1 and is in earlier in the port, so the call state's `rand()` comes early (its
       screenshot: the portraits shown, the PS1's still black). Tried: `FS_LoadFileSync` returning the PS1's bytes
       left (under 0x7FFF0000) in every loop; it broke the s00a load at loop 917 (0:00:44.89). Then the gate only in
@@ -217,6 +217,15 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       to 5,808 again, 5,809 unchanged. A poll log shows why: the port's codec read runs at loops 5,775 to 5,782
       (0:03:22.3), the PS1's at 5,795 to 5,816, so the port *requests* the file about 20 loops early; the read's
       speed isn't it. To find: what the PS1 waited on before the request (the call's start, a stream or a seek).
+      Not the stream (Redux: `fs_stream_task_state` 0 from loop 5,760): the PS1's drive. Fixed for the whole class:
+      TAS builds pace file reads (no callback) to the PS1's 2x drive, 2.5 sectors a vertical blank plus a seek of
+      1 + 0.075 * sqrt(distance) vertical blanks (`port/src/cdbios_ps2.c`; fitted to the codec reads, a little
+      short: the harness waits for an early port, not a late one). Pacing streams and stage loads too broke loop
+      917 (0:00:44.89; streams follow the PS1's clock already, loads end at its loop); a fixed 10-vertical-blank
+      seek made the intro call late, also at 917. The port trace now has the file read's bytes left (field 20,
+      not compared), and lines past the PS1's load end while the port still loads are left out (the loop number
+      is the PS1's at the load's end).
+- [ ] rand seed at loop 6,277 (0:03:37.57, `s01a`).
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

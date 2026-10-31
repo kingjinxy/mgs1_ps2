@@ -18,6 +18,29 @@ static sceCdlFILE    s_Disc;
 static int           s_Ready;
 static unsigned int  s_DiscSectors; /* PS1 sectors in the file */
 static unsigned int  s_Skip;        /* where the chunk's first PS1 sector starts in the bounce buffer */
+int MgsCd_Paced; /* set by libfs/cdbios.c for each read: a file read (no callback) */
+#ifdef MGS_TAS
+/* TAS replays: file reads (MgsCd_Paced: no callback; streams follow the PS1's clock already, stage loads end at
+ * the PS1's loop) take as long as on the PS1's 2x drive, 150 sectors a second (2.5 a vertical blank: the
+ * 10,240 bytes a game loop of the codec's face read at loop 5,796), plus a seek when a read doesn't go on
+ * from where the last one (any read) ended: 1 + 0.075 * sqrt(distance in sectors) vertical blanks, fitted to the
+ * PS1 trace's codec reads (about 3 for 1,415 and 2,046 sectors, 9 for 9,432, 29 for 120,341), a little short: a
+ * port read that's early is waited for where it matters (the PS1's stream starts), a late one isn't. Times in
+ * fifths of a vertical blank (mts_get_tick_count). */
+#define PS1_FIFTHS_PER_SECTOR 2
+extern int          mts_get_tick_count(void);
+static int seek_fifths(int from, int to)
+{
+    unsigned int d = (unsigned int)(from > to ? from - to : to - from), r = 0;
+    while ((r + 1) * (r + 1) <= d)
+    {
+        r++;
+    }
+    return 5 + (int)r * 3 / 8; /* 0.075 * 5 = 3/8 */
+}
+static int          s_Due;        /* when the read in progress is in */
+static int          s_NextSector; /* where it ends */
+#endif
 static unsigned char s_Bounce[BOUNCE_SECTORS * DVD_SECTOR] __attribute__((aligned(64)));
 
 /** Finds the disc file; 1 when it's ready. */
@@ -72,6 +95,14 @@ int MgsCd_Start(int sector, int count)
     {
         return 0;
     }
+#ifdef MGS_TAS
+    {
+        int now = mts_get_tick_count() * 5;
+        int begin = !MgsCd_Paced ? now - count * PS1_FIFTHS_PER_SECTOR : sector != s_NextSector ? now + seek_fifths(s_NextSector, sector) : s_Due > now ? s_Due : now;
+        s_Due        = begin + count * PS1_FIFTHS_PER_SECTOR;
+        s_NextSector = sector + count;
+    }
+#endif
     return count;
 }
 
@@ -82,6 +113,12 @@ int MgsCd_Poll(void)
     {
         return 1;
     }
+#ifdef MGS_TAS
+    if (mts_get_tick_count() * 5 < s_Due)
+    {
+        return 1; /* in, but not yet on the PS1 */
+    }
+#endif
     if (sceCdGetError() != SCECdErNO)
     {
         printf("cdbios: drive error %d\n", sceCdGetError());

@@ -1,0 +1,1 @@
+DESYNC rand seed            at loop 6277 (s01a, movie 0:03:37.57, frame 13041): port 93d26f54, PS1 274c47f2

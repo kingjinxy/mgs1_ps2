@@ -14981,3 +14981,77 @@ The tank cutscene now runs on the real code, moving the desync to loop 20,980. I
 
 - tool `Bash`: Commit s05a, log draws at 20,980
 
+## Claude
+
+Again these are raw `rand()` calls: 5 draws in both on one loop, then the PS1 repeats them and the port doesn't. I'll use the raw hook to identify them.
+
+- tool `Bash`: Identify direct rand caller at 20,979
+
+## Claude
+
+That run stopped early at loop 6,668 with no desync. It may be a flaky hang rather than anything to do with this change, so I'll check what happened and rerun.
+
+- tool `Bash`: Check early stop and rerun raw rand log
+
+- tool `Bash`: Resolve the hang PC
+
+## Claude
+
+The PC is only the interrupt return, so it doesn't say who hung. What matters is whether a plain build hangs too, or only with the hook. I'll run a clean build to find out.
+
+- tool `Bash`: Run clean build twice for repeatability
+
+- tool `Bash`: Log spark creation near 20,979
+
+- tool `Bash`: Temporarily tag raw rand sites, run, restore
+
+- tool `Bash`: Retry tagging on likely sites only
+
+- tool `Bash`: See the link error for tagged builds
+
+## Claude
+
+`sstorm.c`, the snowstorm effect, is the prime suspect: a particle spawn uses about 5 raw draws. The stage's opening matches this timing too, so I'll read its spawn logic directly.
+
+- tool `Bash`: Read snowstorm spawn logic
+
+- tool `Bash`: Tag raw rand uses inline, run, restore
+
+## Claude
+
+Not any of those. I'll tag every raw `rand()` in the sources linked into `s05a` at once.
+
+- tool `Bash`: Tag all raw rand sites in s05a sources
+
+- tool `Bash`: Check what loaded before 20,979
+
+## Claude
+
+The port shows 5 "draws" at loop 20,978 with no caller, so it's likely not drawing at all: the harness is overwriting the seed. I'll check when the replay rewrites it.
+
+- tool `Bash`: See harness seed writes and load fields
+
+- tool `Bash`: Read port log around the reload
+
+- tool `Bash`: Resync seed one loop after loads, rerun
+
+- tool `Bash`: Read the seed resync flow
+
+## Claude
+
+The flow shows my extension covered the wrong loop: the resync lands on line 20,978, so one extra loop only reaches 20,979. The difference is on 20,980, two loops after. I'll make it two.
+
+- tool `Bash`: Extend resync to two loops, rerun
+
+- tool `Bash`: Repeat the hang and read its context
+
+## Claude
+
+The hang is repeatable, and the last log line is `command.c: Where Is Snake ????`. That points at a loop in the guards' command code that depends on something layout-sensitive.
+
+- tool `Bash`: Read the command.c code around the message
+
+- tool `Bash`: Confirm clean state, then try targeted resync
+
+- tool `Bash`: Commit, log draws at 21,126
+

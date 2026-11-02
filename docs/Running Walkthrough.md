@@ -877,3 +877,5 @@ The hang at 17,561 was the movie player, which the TAS skips with a button. `mov
 At 18,261 the port entered the codec's call state just before a multiple-of-4 loop and the PS1 just after, so the port drew twice more. The draws only animate the signal bars, so `Port_TasCodecDraw` follows the PS1's seed (a marked shortcut). In sync to loop 20,842 (0:11:11.65).
 
 At 20,842 the stage binary `s05a` wasn't linked in. Its 76 literal pointers and stage table are now by symbol (byte-exact in the matching build), and it links. In sync to loop 20,980 (0:11:16.64).
+
+The seed at 20,980 follows a reload: the port lacks 5 PS1 draws in loop 20,979, and tagging every `rand()` and `GV_Rand` found no port caller. A one-loop resync at 20,980 stands in, marked as a shortcut. A resync after every load, and separately a HAL `rand` log, both hung near 6,668 repeatably; clean builds do not. That hang is unexplained. In sync to loop 21,126 (0:11:21.60).

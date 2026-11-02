@@ -869,3 +869,5 @@ is 0 (BizHawk). The desync at 15,061 was a map trap firing a loop late because `
 with line t+1's raw pads fixed it. In sync to loop 15,114 (0:08:20.18), where the play time seconds differ.
 
 The play time at 15,114 differed only as bookkeeping: `gTotalFrameTime` now follows the recording each loop. In sync to loop 17,042 (0:09:20.38), a seed difference in `s04b`.
+
+The seed at 17,042 was lip sync at a clip's end: the PS1's sound ends during a loop, so jimctrl.c reads the old counter there and -1 in the next. `timeline.bin` now carries the end. In sync to the FMV at 17,561, which hangs on HAL stubs. Ponytail rules added to CLAUDE.md.

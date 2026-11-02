@@ -14851,3 +14851,49 @@ Ponytail isn't in my rules or your project instructions, so I'll look for it on 
 
 - tool `Bash`: Replay recorded play time each loop and rerun
 
+## Claude
+
+That fix was far bigger than expected: the run went from loop 15,114 to **17,042 (0:09:20.38, 10.72%)**. I'll commit it, then look at the seed difference in `s04b`.
+
+- tool `Bash`: Commit progress, inspect seed desync at 17,042
+
+## Claude
+
+The PS1 makes one more random draw than the port in loop 17,041. I'll log the port's draws in this window to see which code is drawing, using the method that worked at 12,835.
+
+- tool `Bash`: Log port random draw callers near the desync
+
+- tool `Bash`: Read lip sync draw conditions
+
+- tool `Bash`: Log jimctrl end and mouth state, then restore
+
+- tool `Bash`: Pass PS1's sound end to jimctrl and rerun
+
+## Claude
+
+That moved it one loop, and lip sync at 17,041 now matches. The next draw at 17,042 is in the same area, so I'll look at both sides again.
+
+- tool `Bash`: Log draws and mouth state past the sound end
+
+- tool `Bash`: Hold counter on the end loop and rerun
+
+## Claude
+
+Failed to authenticate: OAuth session expired and could not be refreshed
+
+## User
+
+Can I log in again?
+
+## Claude
+
+Failed to authenticate: OAuth session expired and could not be refreshed
+
+## User
+
+Proceed, but continue until 6 pm, not 5 pm
+
+- tool `Bash`: Check state and why the run ended at 17,560
+
+- tool `Bash`: Commit, then read the FMV player and prior notes
+

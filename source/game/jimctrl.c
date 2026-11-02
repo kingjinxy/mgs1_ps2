@@ -279,6 +279,12 @@ static void Act(Work *work)
     }
 
     str_counter = get_str_counter();
+#ifdef MGS_PORT
+    {
+        extern int Port_TasStrCounter( int *counter ); /* port/src/tas_replay.c: the PS1's, in TAS replays */
+        Port_TasStrCounter( &str_counter );
+    }
+#endif
     if ((str_counter < 0) || (str_status == 0))
     {
         if (work->field_30 < 0)
@@ -289,13 +295,6 @@ static void Act(Work *work)
         GV_DestroyActor(&work->actor);
         return;
     }
-
-#ifdef MGS_PORT
-    {
-        extern int Port_TasStrCounter( int *counter ); /* port/src/tas_replay.c: the PS1's, in TAS replays */
-        Port_TasStrCounter( &str_counter );
-    }
-#endif
 
     str_counter >>= 2;
 

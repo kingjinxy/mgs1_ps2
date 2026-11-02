@@ -343,7 +343,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] TLB misses in `s03d_800D47BC` (NULL guard; PS1 RAM at 0xB90 is 0).
 - [x] `GV_PadData` at loop 15,061 (0:08:18.40): the press was lost where `STATE_PADRELEASE` zeroed the pads; `trace_to_pads.py` recovers it from line t+1's raw pads.
 - [x] Fixed: play time from the recording each loop.
-- [ ] Next desync: rand seed at loop 17,042 (0:09:20.38, `s04b`).
+- [x] Fixed: jimctrl.c ends with the sound on the PS1's loops, from the timeline.
+- [ ] Next desync: the FMV hang at loop 17,561 (0:09:35.55, `s04c`): StSetRing and CdRead2 are HAL stubs.
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

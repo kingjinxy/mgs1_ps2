@@ -216,10 +216,24 @@ void Port_TasStrCounter(int* counter)
         {
             /* the exact read: jimctrl.c's field_30 ends its loop at the counter >> 2, on line t + 1 */
             int recorded = (int)read_u32(mgs_tas_timeline + (GV_Time + 1) * 8 + 4);
+            static int last;
+            /* The PS1's sound ends during a loop: jimctrl.c read the old counter there, -1 only in the next
+               (17,041's lip sync, 17,042's mouth) */
+            if (mgs_tas_timeline[GV_Time * 8 + 1] & 1)
+            {
+                *counter = -1;
+                return;
+            }
+            if (mgs_tas_timeline[(GV_Time + 1) * 8 + 1] & 1)
+            {
+                *counter = last;
+                return;
+            }
             if (recorded >= 0)
             {
                 *counter = recorded << 2;
             }
+            last = *counter;
         }
     }
 #else

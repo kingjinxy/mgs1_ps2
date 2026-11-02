@@ -14,6 +14,10 @@
 #include "libgcl/libgcl.h"
 #include "game/game.h"
 
+#ifdef MGS_PORT
+extern int Port_TasCodecDraw(void); /* port/src/tas_replay.c: in TAS replays, as the PS1 drew */
+#endif
+
 static SPRT             SECTION(".bss") gRadioNumberSprt_800bd9b0;
 char                    SECTION(".bss") gap_800BD9C4[ 12 ]; // TODO
 static SPRT             SECTION(".bss") gRadioNumberSprt2_800bd9d0;
@@ -1229,7 +1233,11 @@ skip_fading:
         break;
     case 5: // codec call in progress
         pCharaStruct2 = work->field_218;
+#ifdef MGS_PORT
+        if (!(GV_Time & 3) && Port_TasCodecDraw())
+#else
         if (!(GV_Time & 3))
+#endif
         {
             if (rand() % 4 <= 0)
             {

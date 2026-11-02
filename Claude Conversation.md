@@ -14917,3 +14917,31 @@ The source confirms that value. The run is now at **loop 18,261 (0:09:55.34)**. 
 
 - tool `Bash`: Commit, make draw logger, run at 18,261
 
+## Claude
+
+The port makes 2 extra draws in loop 18,260, and they don't come through `GV_Rand`, so something calls `rand()` directly. I'll hook `rand` itself.
+
+- tool `Bash`: Find direct rand callers and context
+
+- tool `Bash`: Temporarily log raw rand callers via the HAL
+
+## Claude
+
+It's the codec screen: `menu_radio_codec_helper_8004158C` draws where the PS1 doesn't at that moment. I'll read it and find when the PS1 makes those same two draws.
+
+- tool `Bash`: Read codec rand use and PS1 draw timing
+
+- tool `Bash`: Check PS1 file read during this codec
+
+- tool `Bash`: See what enters the codec call state
+
+- tool `Bash`: Gate codec draw and locate the block end
+
+- tool `Bash`: Finish codec gate cleanly and rerun
+
+## Claude
+
+Big jump: **loop 20,842 (0:11:11.65), 12.85%**, now in `s05a`. I'll commit and log the next seed difference.
+
+- tool `Bash`: Commit, log draws at 20,842
+

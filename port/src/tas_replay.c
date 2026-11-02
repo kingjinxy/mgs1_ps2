@@ -484,6 +484,19 @@ int Port_TasMovieMayEnd(void)
 #endif
 }
 
+/** radio.c's call state: its two rand()s, which only animate the signal bars, if the PS1's seed moved this loop.
+ * shortcut: the port enters the state on its own loop (18,260), fix that if a call's timing ever matters. */
+int Port_TasCodecDraw(void)
+{
+#ifdef MGS_TAS
+    const unsigned char* r = time_record();
+    const unsigned char* next = time_record_at(GV_Time + 1);
+    return !r || !next || read_u32(r + 16) != read_u32(next + 16);
+#else
+    return 1;
+#endif
+}
+
 /** gvd.c, after GV_PassageTime is measured: the PS1's. */
 void Port_TasPassageTime(void)
 {

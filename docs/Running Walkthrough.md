@@ -873,3 +873,5 @@ The play time at 15,114 differed only as bookkeeping: `gTotalFrameTime` now foll
 The seed at 17,042 was lip sync at a clip's end: the PS1's sound ends during a loop, so jimctrl.c reads the old counter there and -1 in the next. `timeline.bin` now carries the end. In sync to the FMV at 17,561, which hangs on HAL stubs. Ponytail rules added to CLAUDE.md.
 
 The hang at 17,561 was the movie player, which the TAS skips with a button. `movie.c` now skips movies in the port (real playback stays on the Planning Doc), and in TAS replays ends on the PS1's loop. In sync to loop 18,261 (0:09:55.34).
+
+At 18,261 the port entered the codec's call state just before a multiple-of-4 loop and the PS1 just after, so the port drew twice more. The draws only animate the signal bars, so `Port_TasCodecDraw` follows the PS1's seed (a marked shortcut). In sync to loop 20,842 (0:11:11.65).

@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 20,842 (0:11:11.65), 12.85%.
+Current: loop 20,980 (0:11:16.64), 12.95%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -28,5 +28,6 @@ Current: loop 20,842 (0:11:11.65), 12.85%.
 | 17,560 | 0:09:35.51 | 11.01% | jimctrl.c ends with the sound on the PS1's loops, from the timeline | Nov 2 |
 | 18,261 | 0:09:55.34 | 11.39% | movies skipped in the port, ending on the PS1's loop in TAS replays | Nov 2 |
 | 20,842 | 0:11:11.65 | 12.85% | the codec's signal bar draws follow the PS1's seed in TAS replays | Nov 2 |
+| 20,980 | 0:11:16.64 | 12.95% | `s05a` linked in: pointer tables and stage table by symbol | Nov 2 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.

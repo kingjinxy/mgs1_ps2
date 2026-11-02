@@ -178,8 +178,8 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 - [ ] The same for common symbols in shared actor files (`enemy/asiato.c`, `takabe/findtrap.c`, ...): they stay in
       the linker's order (they must stay common: see Running Walkthrough Step 21)
 - [x] Policy: an overlay is linked in once it has no `INCLUDE_ASM` and no literal addresses of its own
-      code/data (`tools/port/overlay_survey.py`); the link prints the rest. Left out now (20): brf, camera,
-      d18a/d18ar, s03d, s07b, s08b/s08br, s11d, s11g, s15c, s19b/s19br (stubs); s05a, s07a, s11a, s11e,
+      code/data (`tools/port/overlay_survey.py`); the link prints the rest. Left out now (18): brf, camera,
+      d18a/d18ar, s07b, s08b/s08br, s11d, s11g, s15c, s19b/s19br (stubs); s07a, s11a, s11e,
       s11i (literal addresses: `NEWCHARA` tables, string/function pointer tables); rank, s14e (an
       object's source missing). Not in the matching build at all: s10a, s11b, s11h, s15a, s17a-s19a and
       some `r` variants
@@ -261,7 +261,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 20,842 (0:11:11.65; was 12,101, 0:06:42.1,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 20,980 (0:11:16.64; was 12,101, 0:06:42.1,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair,
       `lit_mdl.c`'s dropped model initializer,
       chafgrnd.c's NULL `RECT` (`prim.c`).

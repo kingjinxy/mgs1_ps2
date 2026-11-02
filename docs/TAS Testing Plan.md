@@ -346,7 +346,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: jimctrl.c ends with the sound on the PS1's loops, from the timeline.
 - [x] Fixed: movies skipped in the port, ending on the PS1's loop in TAS replays.
 - [x] Fixed: the codec's signal bar draws follow the PS1's seed in TAS replays.
-- [ ] Next desync: rand seed at loop 20,842 (0:11:11.65, `s05a`).
+- [x] Fixed: `s05a` linked in: pointer tables and stage table by symbol.
+- [ ] Next desync: rand seed at loop 20,980 (0:11:16.64, `s05a`).
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

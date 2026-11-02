@@ -14945,3 +14945,39 @@ Big jump: **loop 20,842 (0:11:11.65), 12.85%**, now in `s05a`. I'll commit and l
 
 - tool `Bash`: Commit, log draws at 20,842
 
+## Claude
+
+In this cutscene the PS1 draws once every loop and the port doesn't draw at all, so a per-loop effect is missing or not running on the port. I'll see what starts at this loop.
+
+- tool `Bash`: Look at the PS1 draw pattern and overlay actors
+
+- tool `Bash`: Check the s05a overlay in the port
+
+- tool `Bash`: Find why s05a is excluded from the link
+
+## Claude
+
+`s05a` has no assembly stubs but does have 76 hardcoded address references in its source. How the `s03d` fix handled those is the template, so I'll list them.
+
+- tool `Bash`: List s05a literal addresses and the s03d template
+
+- tool `Bash`: Check targets and stage table tooling
+
+- tool `Bash`: Rewrite pointers; view stage table and link policy
+
+- tool `Bash`: Check chara macros for the stage table
+
+- tool `Bash`: Convert stage table, verify matching, link s05a
+
+## Claude
+
+`s05a` now links into the port, and the matching build confirms the table rewrite is byte-exact (80 OK). Running the TAS against the real overlay.
+
+- tool `Bash`: Tidy comments and run TAS with s05a linked
+
+## Claude
+
+The tank cutscene now runs on the real code, moving the desync to loop 20,980. I'll commit that and check the next one.
+
+- tool `Bash`: Commit s05a, log draws at 20,980
+

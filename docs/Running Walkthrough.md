@@ -830,3 +830,13 @@ paced it. `Port_TasStrCounter` derives it from the PS1's tick. The first roundin
 gave loop 12,879 (0:07:09.26); `str_tick_count` logged in BizHawk gave the exact inverse.
 
 PCSX2: in sync to loop 13,005, desync at 13,006 (0:07:13.55). Matching build: 80 OK, VR 2 OK.
+
+## Step 25: the disc timeline, first slice (2026-11-02)
+
+The stream patches kept breaking at chained streams, so the PS1's stream state is now recorded per loop:
+`tools/port/tas/timeline.lua` (StrctrlWork's act and state, stream data, CD bytes left, sound counter), then
+`timeline_to_bin.py` to `tas_timeline.bin`. `Port_TasStreamMayEnd` lets the port's Nth stream end once the PS1's Nth
+has (recorded to loop 14,000; the old logic beyond). Tried first: comparing by loop, where a late port never ended its
+stream; releasing at the tick's reset, which broke loop 11,483. The old patches stay until the timeline proves better.
+
+PCSX2: desync at loop 13,006 (0:07:13.55), unchanged, now with the chained stream's read 2 loops late, not 7.

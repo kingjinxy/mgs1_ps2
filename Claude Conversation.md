@@ -14304,3 +14304,77 @@ Commit these changes and then tackle the new desync
 
 - tool `Bash`: Update docs, commit, and inspect GameStatus around 13,006
 
+- tool `Bash`: Log non-guard draws and find CUT_IN's setter
+
+- tool `Bash`: Compare stream read progress with the PS1's around the desync
+
+- tool `Bash`: Print per-loop stream restart on both sides
+
+- tool `Bash`: Read stream control and the PS1's records around the restart
+
+- tool `Bash`: Release the hold at the tick reset and rerun
+
+## Claude
+
+No, the recorded disc timeline isn't built yet. So far I've only added pieces of it: the stream gate (`Port_TasStreamBottom`), the late-read wait (`file_wait`) and the PS1 sound counter for lip sync. We agreed to deal with the current desync first, and I've been working on that since the last commit. The `trace.lua` recording pass and the replay table don't exist, and all the old patches are still in.
+
+**Current state:**
+- **Committed:** `ca2c6493f`, which stays in sync to loop 13,005.
+- **Latest experiment (uncommitted):** the desync at 13,006 traced back to `Port_TasStreamMayEnd` holding a chained stream 6–7 loops too long. My fix releases the hold when the PS1's tick resets, but it breaks an earlier loop: the run now desyncs at 11,483 (0:06:21.01), so **this is a regression**, and I haven't checked whether it fixes 13,006.
+
+Chained streams are what this patch keeps getting wrong: it has now broken at 519, 521, 11,483 and 13,006. That's a strong sign we should stop tuning it. I'd now build the timeline next, recording the exact loop each stream actor ends on instead of inferring it from the tick and status bits. I'll stop here until you confirm, and the experiment can stay uncommitted until then.
+
+## User
+
+Let’s go with the disc timeline method
+
+## Claude
+
+Starting with the recording pass. I'll add a separate `timeline.lua` that logs the PS1's stream and CD state every loop, and leave the existing tables alone so the old patches stay available for comparison.
+
+- tool `Bash`: Find PS1 addresses for the timeline recording
+
+- tool `Bash`: Extract StrctrlWork's address from the PS1 executable
+
+- tool `Bash`: Record the PS1 timeline to loop 14,000 and show its transitions
+
+- tool `Bash`: Build the timeline table, wire it in, rerun the TAS
+
+- tool `Bash`: Fix the declaration and rerun the TAS
+
+## Claude
+
+The timeline fixes the chained-stream end: the regression at 11,483 is gone. The run now stops at loop 12,971 (0:07:12.38), inside the newly started stream, so the next check is what differs there.
+
+- tool `Bash`: Inspect draws and stream state at loop 12,971
+
+- tool `Bash`: See when the port's chained stream starts and how chaining works
+
+- tool `Bash`: Count stream ends against the timeline and rerun
+
+## Claude
+
+The first slice of the disc timeline is working and has already fixed the problem that broke the old patch. The current desync at loop 13,006 (0:07:13.55) remains, though, so overall sync hasn't advanced yet. There were no crashes or TLB misses, and nothing here is committed. The old patches are all still in the code, except that past the end of the table `Port_TasStreamMayEnd` falls back to its old logic.
+
+## What's built
+- **`tools/port/tas/timeline.lua`:** logs the PS1's stream actor, data position, CD bytes left and sound counter every loop. So far it covers loops up to 14,000 only.
+- **`tools/port/tas/timeline_to_bin.py`:** turns that log into `tas_timeline.bin`, which `link_ps2.py` copies next to the image.
+- **`Port_TasStreamMayEnd`:** now counts stream ends, so the port's Nth stream may end once the PS1's Nth has ended.
+
+## Results
+- **Chained streams:** the guesswork is gone. The regression at loop 11,483 no longer appears, and every chain up to 13,005 stays in sync.
+- **The second chained stream:** the port now restarts its read at loop 12,956, against the PS1's 12,954. That was 12,961 before, so it's much closer but still 2 loops late. Its data arrives on the same loop as the PS1's by 12,961.
+- **The problem it replaces:** my first version compared loops only, and the port then never ended its stream. Counting stream ends fixed that.
+
+## Still open
+- **Loop 13,006:** the port is still missing one draw, so this desync isn't caused by the late stream end alone, as I'd suspected. A likely candidate is the sound counter, though that's unconfirmed: the formula gives 3 where the PS1 had 2 at loop 12,964, the first loop of this stream.
+- **`STATE_CUT_IN`:** I haven't rechecked whether its 7-loop lateness is gone now that the stream restart is closer.
+
+Next, I'd feed the port the recorded counter directly in place of the formula, since the timeline already holds it. That should show whether the counter explains 13,006. After that, I'd run the recording over the whole movie and move stream starts and data arrival onto the table.
+
+## User
+
+Commit the changes up to now and continue
+
+- tool `Bash`: Commit, then feed the recorded sound counter and rerun
+

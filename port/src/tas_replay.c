@@ -58,6 +58,8 @@ static unsigned char* mgs_tas_time;
 static unsigned char* mgs_tas_loads; /* host:tas_loads.bin: GV_PadData at the PS1's load ends */
 static unsigned int   size_mgs_tas_loads;
 static unsigned int   size_mgs_tas_time;
+static unsigned char* mgs_tas_timeline; /* host:tas_timeline.bin: the PS1's stream actor per loop (timeline_to_bin.py) */
+static unsigned int   size_mgs_tas_timeline;
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
 extern int          DG_UnDrawFrameCount, GM_LoadComplete;
@@ -242,6 +244,23 @@ int Port_TasStreamMayEnd(void)
     /* Die runs in the next loop (GV_DestroyActorQuick); a bit still set 8 loops on is the next stream's (the
        demo at loop 11,482 is followed by another, and the hold would never end) */
     int t;
+    if ((unsigned int)GV_Time + 1 < size_mgs_tas_timeline && mgs_tas_timeline)
+    {
+        /* the recorded loop: the PS1's Nth stream through Act2 ended (line t + 1 going from 2 to 3 when its Act2
+           destroyed the actor in t) before the port's Nth may, chained or not: a late port doesn't wait for the
+           next one's (loop 12,952) */
+        static int scanned, ps1_ends, ends;
+        for (; scanned <= GV_Time + 1; scanned++)
+        {
+            ps1_ends += scanned > 0 && mgs_tas_timeline[scanned] == 3 && mgs_tas_timeline[scanned - 1] == 2;
+        }
+        if (ps1_ends > ends)
+        {
+            ends++;
+            return 1;
+        }
+        return 0;
+    }
     for (t = GV_Time + 1; t <= GV_Time + 8; t++)
     {
         const unsigned char* r = time_record_at(t);
@@ -557,6 +576,7 @@ void Port_TasInit(void)
     mgs_tas_raw  = load("host:tas_raw.bin", &size_mgs_tas_raw);
     mgs_tas_time = load("host:tas_time.bin", &size_mgs_tas_time);
     mgs_tas_loads = load("host:tas_loads.bin", &size_mgs_tas_loads);
+    mgs_tas_timeline = load("host:tas_timeline.bin", &size_mgs_tas_timeline);
     n            = mgs_tas_time ? (int)(size_mgs_tas_time / TIME_RECORD) : 0;
     for (t = 0; t < n && s_Ps1Loads < MAX_LOADS; t++)
     {

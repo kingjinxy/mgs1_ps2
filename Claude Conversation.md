@@ -14897,3 +14897,23 @@ Proceed, but continue until 6 pm, not 5 pm
 
 - tool `Bash`: Commit, then read the FMV player and prior notes
 
+- tool `Bash`: Read the game's movie code and HAL movie support
+
+- tool `Bash`: Read movie.c and PS1 loop gaps through the movie
+
+- tool `Bash`: Skip movies in the port, end on PS1 loop, rerun
+
+- tool `Bash`: Compare the undraw counter around the movie end
+
+## Claude
+
+The movie now ends on the right loop, and only one field differs: the PS1's movie sets the undraw counter to 2 as it ends. I'll do the same in the skip path.
+
+- tool `Bash`: Match the undraw count at movie end and rerun
+
+## Claude
+
+The source confirms that value. The run is now at **loop 18,261 (0:09:55.34)**. I'll commit, then make the draw logging a reusable script, since seed desyncs keep recurring.
+
+- tool `Bash`: Commit, make draw logger, run at 18,261
+

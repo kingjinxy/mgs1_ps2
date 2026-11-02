@@ -307,6 +307,19 @@ static void Act(Work *work)
         return;
     }
 
+#ifdef MGS_PORT
+    {
+        /* shortcut: movies are skipped, until the HAL's movie_ps2.c is hooked up (Planning Doc) */
+        extern int Port_TasMovieMayEnd( void ); /* port/src/tas_replay.c: in TAS replays, the PS1's loop */
+        if ( Port_TasMovieMayEnd() )
+        {
+            DG_UnDrawFrameCount = 2;
+            GV_DestroyActor( &work->actor );
+        }
+        return;
+    }
+#endif
+
     start_xa_sd();
 
     GV_ResetPacketMemory();

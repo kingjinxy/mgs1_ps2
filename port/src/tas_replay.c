@@ -473,6 +473,17 @@ void Port_TasLoadEnd(void)
 #endif
 }
 
+/** movie.c: STATE_DEMO goes in Die, the loop after the destroy; the record's status is its next line's. */
+int Port_TasMovieMayEnd(void)
+{
+#ifdef MGS_TAS
+    const unsigned char* r = time_record_at(GV_Time + 1);
+    return !r || !(read_u32(r + 4) & 0x80000000u);
+#else
+    return 1;
+#endif
+}
+
 /** gvd.c, after GV_PassageTime is measured: the PS1's. */
 void Port_TasPassageTime(void)
 {

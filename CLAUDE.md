@@ -3,6 +3,17 @@
 Port of the `mgs_reversing` decomp to the PS2. Plan: `docs/Planning Doc.md`. Rules below are
 carried over from the Silent Hill PS2 port (`../silent-hill-1-ps2-port`), where they were learned.
 
+## Ponytail (solve it with the least new code)
+
+From `DietrichGebert/ponytail` (MIT), `AGENTS.md`. Take the first option that fully works: does it need to exist;
+already in this codebase; standard library or platform; an installed dependency; one clear line; otherwise the minimum.
+
+- Before editing, list everything the change must reach. Bug fixes: grep the callers, fix the root cause once.
+- Be lazy about the solution, not the change: finish every part it needs. No abstraction, option or "for later" code.
+- Deletion beats addition. Between options of equal size, take the one correct on edge cases.
+- New non-trivial logic leaves one small check. A shortcut with a known limit gets `shortcut: <the limit>, <when to upgrade>`.
+- Never cut validation, error handling that prevents data loss, security, or anything the user asked for.
+
 ## Matching build (regression check)
 
 Run from `build/` after every port change; all outputs must print `OK: ... matches target hash`:

@@ -13606,3 +13606,390 @@ I'll get the movie timestamps for the loops I'll mention in the docs.
 
 - tool `Bash`: Update planning doc and conversation archive
 
+## Claude
+
+The docs and archive only add lines; the one removed line in the TAS plan is the checkbox I ticked. Now the commits, in three parts: the stream end, the overlay data layout, and the docs.
+
+- tool `Bash`: Commit the changes in three parts
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+The TAS replay now runs in sync to loop 12,770 (0:07:05.59), up from 12,101. That's where I stopped the run; it isn't a desync. Everything is committed in three commits, the last `1219dee47`, and the matching builds pass (80 OK, and 2 OK with `--variant=vr_exe`). One new problem is still open: an intermittent hang at loop 11,520.
+
+**Fixed:**
+- **Voice stream end, loop 12,102 (0:06:42.12):** the port's voice stream ended one loop early. When a voice stream ends depends on the PS2's sound hardware finishing the audio, which runs at its own pace. The replay now holds the stream's end until the PS1's loop. It only ever delays an end, and never by more than 8 loops, because a demo can be followed straight away by another stream.
+- **Crash, loop 12,652 (0:07:00.75):** two layout bugs, both in data the code reads by running past one variable into the next:
+  - The guards' model names ("ippanhei", "famas") are strings stored as 4-byte pieces. The PS2 compiler aligned each piece to 8 bytes, so the names came out wrong and the models weren't found.
+  - The guard commander's 0x120-byte struct starts at one variable and covers the 71 after it. The port's linker had placed those words in its own order, so the struct overlapped other data.
+- **Rand seed, loop 12,758 (0:07:05.19):** I logged each guard's state per loop on both machines. At loop 12,696 (0:07:02.61) one guard played the wrong animation (action 0 instead of 34) and fell through the floor. The guards' action table had the same kind of gaps.
+
+**General fix:** overlay data now keeps the PS1's layout:
+- Arrays in overlay files are marked with their PS1 alignment (221 of them, plus the split strings), through a macro in `source/include/ps1align.h` that is empty for the matching build.
+- Explicit zero values in overlay files stay in `.data` instead of moving out of the table.
+- `s03d`'s commander words have their own section.
+
+These changes touch every overlay in the build, not just `s03d`.
+
+**Still open:**
+- **Hang at loop 11,520 (0:06:22.25):** the game sometimes hangs there, in 3 of about 12 runs, every time after the guards are first created. I've made the PS2 side (the HAL repo, `libetc_ps2.c`) report where the CPU is stuck during a hang, but no hang has happened since, so the cause isn't known yet. That HAL change is not committed, since the HAL is shared with the Silent Hill port.
+- **Shared actor files:** some variables in files several overlays share still sit in the linker's order. None is read the way the commander's struct is, but they could break the same way.
+
+The docs (Walkthrough Step 21, the Planning Doc, the TAS plan) and the conversation archive are updated. I also kept the guard logger as `tools/port/tas/zako_log.lua` for future AI desyncs. The next step is to run the replay past loop 12,770 to find the next desync.
+
+## User
+
+I want to do some testing on console. Check for crashes while I play, much like we were doing today with Silent Hill
+
+## Claude
+
+I'll check the deploy script and the state of the log server first, then deploy and start watching.
+
+- tool `Bash`: Inspect deploy script, servers, and log
+
+- tool `Bash`: Build a normal image and confirm no TAS data
+
+- tool `Monitor`: Console log: crashes, TLB misses, exceptions, hangs
+
+## Claude
+
+The MGS image is built and ready, and I'm watching the console log.
+
+The new build is a normal one with no TAS replay data, and it includes yesterday's `s03d` fixes. The server is already pointing at it. The PS2 was still running Silent Hill, so I didn't send a restart.
+
+**To start:** power-cycle the PS2 if you need to, then start `neutrino_mgs` from uLaunchELF.
+
+**What the watcher catches:**
+- Crashes, exceptions and TLB misses are reported as they happen.
+- Hangs show up as a PC report from the new hang watch, which gives us the location the TAS hang at loop 11,520 never did. That report goes out by SIO, though, which may not reach the network log on real hardware. If the game freezes and I don't say anything, tell me. The screen colour also helps: it blinks red, magenta, yellow or blue depending on the cause.
+
+If you see something odd that isn't a crash, like a graphics glitch or missing sound, tell me roughly when and where, and I'll check the log around that moment.
+
+## User
+
+Is the slower gameplay when Snake is underwater at the Dock intentional or simply slowdown on the PS1?
+
+- tool `Bash`: Check water area frame rate code
+
+## Claude
+
+It's intentional. The game deliberately slows itself down underwater, so it isn't PS1 slowdown or a port problem.
+
+The water area actor sets `DG_FrameRate = 3` when Snake is in the water, which drops the game from 30 fps to 20 fps ([wt_area.c:191](source/takabe/wt_area.c#L191)). It sets it back to 2, which is 30 fps, when he's out ([wt_area.c:202](source/takabe/wt_area.c#L202)).
+
+Because movement, animation and AI all advance one step per frame, that lower rate slows the whole game down to about two-thirds speed, not just the picture. That gives the heavy, wading-through-water feel. You'd see the same on a PS1, and the port plays it the same way.
+
+## User
+
+Make a note that I want to change things in the future so that it runs at 60 FPS like the rest of the game, but with the same heavy, wading through water feel.
+
+- tool `Bash`: Add the water note to the 60 FPS doc
+
+## Claude
+
+I've added the note to the end of [docs/60 FPS update.md](docs/60%20FPS%20update.md) as a to-do: the water runs at 60 FPS, with Snake's speed and animation staying at the original slowed pace so it keeps the same heavy feel. It isn't committed yet. I'll include it in the next commit unless you want it in sooner.
+
+The crash watcher is still running.
+
+## User
+
+As a general note, I’m observing a lot of minor texture seam issues
+
+- tool `Bash`: Search for seam notes and record the issue
+
+## Claude
+
+I've added it to `docs/Planning Doc.md` under a new "Known visual issues" section; I haven't investigated it yet. Earlier emulator comparisons in the walkthrough also noted small seam differences in the renderer, and Silent Hill has a similar open item, so this may be a shared HAL renderer issue rather than something specific to MGS.
+
+To help me narrow it down, it'd be useful to know:
+- **Where they show up:** a place or two where they're obvious.
+- **What they look like:** thin lines between polygons on walls and floors, or lines at the edges of 2D elements like the HUD and text.
+- **Whether they move:** do they shimmer as the camera moves, or stay fixed?
+
+Thin lines that come and go with camera movement can also appear on a real PS1, so I'd compare those spots against DuckStation before calling them port bugs.
+
+## User
+
+On screen text like the opening credits and the life bar have minor texture seams
+
+- tool `Bash`: Record detail and inspect GS sprite setup
+
+- tool `Bash`: Read sprite filtering notes in the renderer
+
+## Claude
+
+I've added the credits and life bar to the seam note. I haven't found the cause yet, but this narrows it down.
+
+The HAL renderer has a mode for 2D that draws sprites horizontally squeezed for anamorphic widescreen, optionally with bilinear filtering. Filtering pulls in the neighbouring texels at the edge of each sprite, which would show as faint lines where sprites meet. Credits text and the life bar are both built from separate sprites side by side, so they'd be affected. Without filtering, squeezing drops texel columns, which can also look like gaps. This is my best guess so far; nothing's been tested.
+
+**Can you check one thing:** are you playing in widescreen or 4:3 right now?
+- **Widescreen:** try 4:3 if the option's handy. If the seams disappear, the squeeze is the cause, and the fix is in `gpu_gs.c`, which would likely help Silent Hill too.
+- **Already 4:3:** the squeeze isn't involved. I'd then look at how the 2x high-res drawing rounds sprite edges, and compare those screens against DuckStation.
+
+The crash watcher hasn't reported anything so far.
+
+## User
+
+I am playing in 4:3 and 1x resolution. We don’t have 2x resolution, 32-bit, or widescreen options in this port yet.
+
+## Claude
+
+That rules out my guess, since both of those paths are off. At 1x, sprites should map to pixels exactly, so I'll read how they're actually drawn.
+
+- tool `Bash`: Read the textured sprite path
+
+## Claude
+
+That explains why the sprite path looks fine. At 1x, with no squeeze, a true sprite maps one texel to one pixel exactly, so it shouldn't seam, and my widescreen theory is out. I'm sorry for the detour; I should have checked what the port offers first.
+
+**New suspect (not tested yet):** the life bar and credits may be drawn as textured quads rather than sprites; I haven't confirmed that. The renderer sends their texture coordinates as whole texels (`u << 4` in `gpu_gs.c:1441`), with no half-texel offset. The GS samples textures at texel centres, so a coordinate sitting exactly on a texel boundary can round to the neighbouring texel along a quad's edge or across the diagonal where it's split into two triangles. That would look like faint lines in text and bars. It would also fit what you've seen across the game, and Silent Hill's seam, since the code is shared.
+
+**How I'd test it:**
+1. Confirm how the life bar and credits are drawn.
+2. Add a half-texel offset to textured polygons, behind a switch so sprites and Silent Hill stay as they are.
+3. Check the credits in PCSX2 against DuckStation.
+4. Give you a build to try on the console.
+
+Testing on the console means restarting the game, so nothing changes under you while you play. The note in the Planning Doc is up to date, and the crash watcher is still running and hasn't reported anything.
+
+Should I start on this now, or wait until you've finished this session?
+
+## User
+
+Just note it for now. I’m also noticing that the codec audio still has the popping issue from earlier.
+
+- tool `Bash`: Note seam suspect and codec popping
+
+## Claude
+
+Both are noted in `docs/Planning Doc.md`, and I'm not changing anything for now: the seam suspect and test plan are under "Known visual issues", and the codec popping is in a new "Known audio issues" section.
+
+The docs have no record of the earlier popping work, so I wrote this up as a fresh item, and I can't tell from them what was tried before. If you remember when it came up or what was changed, I'll add that.
+
+Codec voices play through the streaming path in `sd_str.c`, so that's where I'd start. The crash watcher is still running, so keep playing.
+
+## User
+
+The game has frozen on a yellow screen
+
+## Claude
+
+Yellow means the hang watch sees that threads have stopped running while SIF is fine. I'll check the log.
+
+- tool `Bash`: Inspect console log around the hang
+
+## Claude
+
+It's a real crash, and the console has kept its state. Mapping the addresses:
+
+- tool `Bash`: Map the crash PC and disassemble
+
+- tool `Bash`: Read the crashing function
+
+- tool `Bash`: Find nextPrim definition and users
+
+## Claude
+
+`nextPrim` is in two places: the scope and a debug menu. The port needs the raw 24-bit link, with no `0x80000000`. I'll fix both, run the matching build and deploy, since the game has crashed anyway.
+
+- tool `Bash`: Fix nextPrim, matching build, deploy
+
+- tool `Monitor`: Console log: crashes and hangs
+
+## Claude
+
+The freeze should be fixed, and the new build is deployed and restarting on the PS2. If it hasn't come back in about 30 seconds, power-cycle and start `neutrino_mgs` again.
+
+- **Cause:** a real crash in `s01a`, in the scope's moving bar graph (`DrawMovingBarGraph` in `source/equip/scope.c`). It runs while the scope is out, so you were probably using it. That graph counts the previous frame's draw packets and follows their links with a PS1 macro that adds `0x80000000` to each address. That address is fine on the PS1 but faults on the PS2.
+- **Fix:** the port now follows the plain link. I also fixed the same macro in `source/menu/debug.c`. The matching build passes (80 OK), but I haven't checked this in PCSX2.
+- **To test:** use the scope again. Its bar graph should now move without freezing the game.
+- **Crash watcher:** the first watcher didn't alert me to this crash, even though the log had it, and I only found it when you told me. I've started a new, tighter one, so please still tell me about any freeze.
+
+The fix isn't committed yet, and neither are the notes from this session. I'll commit them all when you've finished testing.
+
+## User
+
+The crash was fixed. The game is now stuck checking for a memory card. Let’s put that as top priority on the todo list
+
+- tool `Bash`: Add memory card item, peek at log
+
+- tool `Bash`: Correct the memory card note
+
+## Claude
+
+It's now the top item on the to-do list, in a new "To do: top priority" section at the top of the known-issues part of `docs/Planning Doc.md`. Glad the scope crash is confirmed fixed.
+
+The log may hold a useful lead: the last lines are `TASK 7 START`, `REQUEST 100000A` and `RESULT 0`, then nothing. If task 7 is the memory card task, it seems to get its answer and then nobody acts on it, but I haven't verified that.
+
+Were you saving or loading when it stuck, and is a memory card in the slot? I'll add that to the note and look into it whenever you say.
+
+## User
+
+I was saving the game. The game says that it’s checking for a memory card. I have my PS2 memory card plugged in with my Silent Hill save, but MGS1 needs to create its own save.
+
+- tool `Bash`: Add save details to memory card note
+
+## Claude
+
+I've added that to the note: it happens when saving in game, with a PS2 card holding Silent Hill's save and no MGS save yet. So the case to test is creating a first save on a card that isn't empty.
+
+That also gives me a place to start. The game is probably stuck on the step that checks the card or looks for its save directory, because the card isn't what the PS1 code expects, or the port's card layer gives an answer it doesn't handle. That's only a guess until I read the code.
+
+Do you want me to start on it now, or keep testing? Saving won't work until it's fixed, so I'd avoid it for now.
+
+## Claude
+
+The crash watcher ran its full 30 minutes with no crashes or hangs reported, and it has now expired. I'll start it again when you go back to testing.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Overall: use TASVideos #5139 as a regression test for the MGS1 PS2 port in `/home/alex/Documents/mgs1_ps2`, branch `ps2-port`. This session: fix next desyncs, then console testing with crash watching while the user plays.
+   - Standing constraints (CLAUDE.md/memory):
+     - GitHub only without asking. "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run matching build after port changes: from `build/`, `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py` (80 OK; `--variant=vr_exe` 2 OK).
+     - Before commits update `docs/Running Walkthrough.md`, `docs/Planning Doc.md`, `docs/TAS Testing Plan.md`, `Claude Conversation.md` (concatenate all session .jsonl by `ls -tr`, run `tools/port/archive_conversation.py <file> "Claude Conversation.md"`; no removed lines).
+     - No `pkill -f <pattern>` in a command containing the pattern. TAS loops come with movie timestamp. Check `docs/` before planning debugging techniques. Notify at stopping points. Never dismiss TLB misses. Status line every 5 min during windowless runs. Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Commit/push only when asked. Hung PS2 needs a power cycle. A safety check blocks `rm -f $V/*.c`.
+
+2. Key Technical Concepts:
+   - Overlay data layout: EE GCC 8-aligns arrays; `PS1_ALIGN(n)`/`STR_PIECE` (`source/include/ps1align.h`, empty in matching build); `-fno-zero-initialized-in-bss` for `source/overlays/`; `SECTION` empty in port → common symbols in linker order; `-fno-common` globally is wrong (common stays global past `--keep-global-symbol`, sharing with main exe).
+   - `Port_TasStreamMayEnd` holds strctrl `Act2` destroy (Die runs a loop later), bounded 8 loops.
+   - HAL hang watch screen colours: yellow = threads stopped, SIF fine. Crash handler logs `CRASH:` to `~/ps2serve/ps2.log`.
+   - Deploy: `./build-and-deploy` restarts whichever game runs; plain `build/link_ps2.py` gives non-TAS image (run_port builds TAS image with env vars, so rebuild before console).
+   - PS1 `nextPrim` ORs 0x80000000, faulting in EE user mode.
+   - BizHawk per-loop state compare: `tools/port/tas/zako_log.lua` with `run_bizhawk.sh` (needs periodic log output or stall check kills it; Wine logs have CRLF).
+
+3. Files and Code Sections:
+   - Committed (5bfb42781, 2d267fe87, 1219dee47): `port/src/tas_replay.c`, `source/game/strctrl.c`, `build/build_ps2.py`, `source/include/ps1align.h`, overlay sources, `source/overlays/s03d/overlay3.c`, `tools/port/tas/zako_log.lua`, docs.
+   - UNCOMMITTED in mgs1_ps2: `source/equip/scope.c` and `source/menu/debug.c` (after includes: `#ifdef MGS_PORT #undef nextPrim #define nextPrim(p) ((void *)(((P_TAG *)(p))->addr)) #endif`); `docs/60 FPS update.md` (water at 60 FPS to-do); `docs/Planning Doc.md` (To do: top priority memory card; Known visual issues seams; Known audio issues codec popping).
+   - UNCOMMITTED in `../psx-to-ps2-HAL`: `src/ps2/libetc_ps2.c` (hang_watch prints EPC via `sio_puts`, `#include <sio.h>`); shared with SH1.
+
+4. Errors and fixes:
+   - Stream hold at Act's end broke loop 519; this-loop record broke 521; unbounded hold broke 11,483 → Act2, next record, 8-loop bound.
+   - `-fno-common` for all overlays suspected of a hang → reverted, `overlay3.c` section instead.
+   - Wrong widescreen/2x theory for seams: user said port is 4:3, 1x only; apologised.
+   - Wrong memory-card note ("after restart") corrected from log.
+   - First console watcher missed the scope crash; the replacement watcher has now expired too.
+
+5. Problem Solving:
+   - TAS in sync to loop 12,770 (0:07:05.59); next desync not yet run. Open: intermittent hang at loop 11,520 (0:06:22.25), 3 of ~12 runs.
+   - Console scope crash (`DrawMovingBarGraph`) fixed; user confirmed.
+   - Seam suspect (untested): textured quad UVs lack half-texel offset, `gpu_gs.c:1441` `u << 4`. User said just note it.
+   - Memory card: last log lines `TASK 7 START`, `REQUEST 100000A`, `RESULT 0`, then nothing.
+
+6. All user messages:
+   - "Continue with the next desync"
+   - "I want to do some testing on console. Check for crashes while I play, much like we were doing today with Silent Hill"
+   - "Is the slower gameplay when Snake is underwater at the Dock intentional or simply slowdown on the PS1?"
+   - "Make a note that I want to change things in the future so that it runs at 60 FPS like the rest of the game, but with the same heavy, wading through water feel."
+   - "As a general note, I’m observing a lot of minor texture seam issues"
+   - "On screen text like the opening credits and the life bar have minor texture seams"
+   - "I am playing in 4:3 and 1x resolution. We don’t have 2x resolution, 32-bit, or widescreen options in this port yet."
+   - "Just note it for now. I’m also noticing that the codec audio still has the popping issue from earlier."
+   - "The game has frozen on a yellow screen"
+   - "The crash was fixed. The game is now stuck checking for a memory card. Let’s put that as top priority on the todo list"
+   - "I was saving the game. The game says that it’s checking for a memory card. I have my PS2 memory card plugged in with my Silent Hill save, but MGS1 needs to create its own save."
+
+7. Pending Tasks:
+   - Memory card save hang (top priority on to-do; not started; awaiting user's go).
+   - Later: seams, codec popping, water at 60 FPS, hang at 11,520, next TAS desync, commit outstanding changes when asked.
+
+8. Current Work:
+   Console testing session. Last action: added save details to the memory card note and asked the user whether to start on it now or keep testing. The crash watcher (Monitor b87mgrk5a) has expired with no events and isn't running.
+
+9. Optional Next Step:
+   Wait for the user's answer to "Do you want me to start on it now, or keep testing?". If they keep testing, re-arm the console log watcher (`tail -n0 -F ~/ps2serve/ps2.log` filtered for CRASH/TLB Miss/hang_watch/watchdog) and mention that it had expired.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Make sure that you’ve updated all the .md docs up to this point
+
+- tool `Bash`: Check doc state and recent walkthrough content
+
+- tool `Bash`: Append walkthrough step, regenerate conversation archive, run matching builds
+
+- tool `Bash`: Record matching build result in walkthrough
+
+## Claude
+
+All the `.md` docs are now up to date, but nothing is committed yet.
+
+- **`docs/Running Walkthrough.md`:** added Step 22, covering the console testing, the scope crash fix, the memory card hang and the noted issues.
+- **`Claude Conversation.md`:** regenerated from all 7 sessions. It gained 327 lines and lost none.
+- **`docs/Planning Doc.md`:** already had the memory card hang at the top of the to-do list, plus the seams and codec popping.
+- **`docs/60 FPS update.md`:** already had the water note.
+- **`docs/TAS Testing Plan.md`:** needed no change, because the TAS hasn't been run since it was last updated. It's still in sync to loop 12,770 (0:07:05.59).
+
+The matching build passes with the scope and debug changes: 80 OK, and VR 2 OK.
+
+The HAL's `libetc_ps2.c` change in `../psx-to-ps2-HAL` is also still uncommitted.
+
+## User
+
+Alright, let’s get the memory card working in much the same way as Silent Hill. We’ll come back to it later to improve it and make it work with PS1 saves copied to the PS2 memory card, both in reading and writing, but the basic functionality comes first
+
+- tool `Bash`: Survey memory card code, docs, and last console log
+
+- tool `Bash`: Read memcard game code and the HAL card layer
+
+- tool `Bash`: Read the first part of memcard.c and locate log strings
+
+- tool `Bash`: Read save-menu flow and HAL psx_card
+
+- tool `Bash`: Read save task, memcard_check and PS2 card driver
+
+- tool `Bash`: Read write path and all users of the info functions
+
+- tool `Bash`: Apply HAL fixes for card query thread and frame events
+
+- tool `Bash`: Update fixed-card stub, add config, build and deploy
+
+- tool `ToolSearch`: 
+
+- tool `Monitor`: PS2 memory card activity and crashes
+
+- tool `PushNotification`: 
+
+## Claude
+
+I found and fixed two causes of the memory card hang, and the new build is ready. Neither fix has been tested yet, on console or in PCSX2. The PS2 didn't answer the deploy, so **please power-cycle it, start `neutrino_mgs`, then save and load**. Saving to the card creates the MGS save folder next to your Silent Hill save.
+
+**The two bugs:**
+- **Stuck on "checking for a memory card":** the HAL only delivered the card check's answer on the game task that started the card. MGS saves from a separate memory card task, so the answer never arrived. `PortMc_InfoWait` now returns it on any thread.
+- **Would have hung next, during the write:** MGS tracks a save or load by counting one `HwCARD` event per 128-byte frame, and the HAL never sent those. It sends them now, or an error event if a write fails. This is behind a new MGS-only setting, `HAL_GAME_CARD_FRAME_EVENTS`.
+
+The changes are in `psx_card.c`, `memcard_ps2.c` and `memcard_fixed.c` in the HAL, plus [hal_game_config.h](port/hal/hal_game_config.h). Silent Hill's own code path doesn't change, and PS1 saves copied to the card are left for later as you said.
+
+Saves still live in a PS1 card image inside the save folder, the same way Silent Hill does it. I'm watching the console log for card activity and crashes for the next 30 minutes.
+
+## User
+
+I will test on console later. Commit the changes for now. Add fixing the Neutrino reset issues to the todo list with a medium priority. Ideally I want to be able to leave the PS2 on all day and not have to worry about it hard crashing, no matter how many times it’s remotely reset.
+
+- tool `Bash`: Update docs, run matching builds, commit both repos
+

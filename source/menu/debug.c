@@ -8,6 +8,13 @@
 #include "mts/mts.h"
 #include "mts/mts_pad.h"
 
+#ifdef MGS_PORT
+/* The PS1's macro makes a KSEG0 address (0x80000000 |), which faults in the EE's user mode (crash in the scope's
+   bar graph, console, 2026-11-01); the port's packets are at the link's own address. */
+#undef nextPrim
+#define nextPrim(p) ((void *)(((P_TAG *)(p))->addr))
+#endif
+
 extern M_Sys MemorySystems[ MAX_MEMSYS ];
 extern DG_TEX  TexSets[DG_MAX_TEXTURES];
 

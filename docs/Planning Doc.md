@@ -269,3 +269,32 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 ## Open questions
 
 (none yet)
+
+## To do: top priority
+
+- [ ] **The game gets stuck checking for a memory card** on real hardware (user, 2026-11-01). Last log lines:
+      memory card task 7 starts, `REQUEST 100000A`, `RESULT 0`, then nothing. Not investigated yet.
+      Happens when saving in game: the screen stays on the check for a memory card. A PS2 card is in the slot
+      with Silent Hill's save and no MGS save yet, so creating a first save on a card that isn't empty is the
+      case to test.
+      Fixed in the HAL, not yet tested on console (2026-11-02): the card query's answer was only delivered on the
+      thread that started the card, and `HwCARD` events per frame were missing. Close this once a save and load work.
+- [ ] Later: read and write PS1 saves copied to the PS2 memory card.
+
+## To do: medium priority
+
+- [ ] **Neutrino reset issues.** A remote reset can leave the PS2 hung until a power cycle (RESET has never brought
+      Neutrino back on the user's console). Goal: the PS2 stays on all day and never hard crashes, however many
+      times it is reset remotely.
+
+## Known visual issues
+
+- [ ] Minor texture seams across the game, seen on real hardware (user, 2026-11-01). Not investigated yet.
+      Seen on 2D elements: the opening credits text and the life bar (tiles of adjacent sprites).
+      Not widescreen or 2x (neither exists in this port; seen at 4:3, 1x), and true sprites map 1:1. Suspect, untested:
+      textured quads' UVs have no half-texel offset (`gpu_gs.c`, `u << 4`), so edges can round to the next texel.
+      Test: confirm how these are drawn, try the offset behind a switch, compare with DuckStation.
+
+## Known audio issues
+
+- [ ] Codec audio still pops on real hardware (user, 2026-11-01).

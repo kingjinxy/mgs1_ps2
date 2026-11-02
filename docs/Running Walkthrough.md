@@ -785,3 +785,35 @@ Matching build: 80 OK, VR 2 OK.
   shared actor files (`enemy/asiato.c`, `takabe/findtrap.c`, `okajima/blur.c`, ...) still have the linker's order.
 
 PCSX2: in sync to loop 12,770 (0:07:05.59), where the run was stopped (not a desync). Matching build: 80 OK, VR 2 OK.
+
+## Step 22: console testing, the scope crash and a list of issues (2026-11-01)
+
+The user played on real hardware while the log (`~/ps2serve/ps2.log`) was watched for crashes.
+
+- **Yellow screen in the scope:** the HAL's hang watch colour for stopped threads. The crash was in
+  `DrawMovingBarGraph`: PS1 `nextPrim` ORs in 0x80000000, a KSEG address that faults in EE user mode.
+  `source/equip/scope.c` and `source/menu/debug.c` now redefine `nextPrim` under `MGS_PORT` to return the tag's
+  address as it stands. The user confirmed the fix on the console. The first log watcher missed this crash.
+- **HAL:** the hang watch prints the interrupted EPC by SIO (`libetc_ps2.c`, in `../psx-to-ps2-HAL`, uncommitted).
+- **Memory card hang, now top of the to-do list:** saving in game stays on the check for a memory card. A PS2 card
+  with a Silent Hill save is in the slot, and MGS1 has to create its own save. The log ends with task 7's start,
+  `REQUEST 100000A`, `RESULT 0`. Not investigated.
+- **Noted, not investigated:** minor texture seams, including on the opening credits and the life bar (suspect, not
+  tested: textured quad UVs have no half-texel offset, `gpu_gs.c:1441`); codec audio popping; the slow wading at the
+  Dock, to run at 60 FPS with the same heavy feel (`docs/60 FPS update.md`).
+
+The last 30-minute log watch saw no crash or hang. The TAS was not run in this step: still in sync to loop 12,770
+(0:07:05.59). Matching build with these changes: 80 OK, VR 2 OK.
+
+## Step 23: memory card saving, first fixes (2026-11-02)
+
+The log ended at `RESULT 0`, the next line of the save task being `memcard_check`.
+
+- **Check hang:** `PortMc_InfoPoll` answers only on `s_MainThread` (the task that called `InitCARD`), and MGS saves
+  from its memory card task, so `_card_info`'s event never came. `PortMc_InfoWait` now returns the state itself.
+- **Write hang, found by reading the code:** `memcard_status()` counts down by a `HwCARD` event per 128-byte frame,
+  which the HAL didn't send. New setting `HAL_GAME_CARD_FRAME_EVENTS` (MGS only) sends them on asynchronous
+  transfers, and `EvSpERROR` when a write fails.
+
+Built, but not run in PCSX2 or on console: the deploy found the PS2 not answering. Next: a first save and load on
+real hardware. PS1 saves copied to the card come later. Neutrino reset hangs went on the to-do list (medium).

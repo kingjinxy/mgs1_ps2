@@ -23,6 +23,9 @@
  * TestEvent: _card_info answers at once. */
 #define HAL_GAME_CARD_INFO_WAIT 1
 
+/* memcard_read/write count a transfer down by the HwCARD event of each 128-byte frame. */
+#define HAL_GAME_CARD_FRAME_EVENTS 1
+
 /* mts_pad.c reads the pads from the vertical blank callback, which the HAL runs in the interrupt: a thread
  * polls them instead of VSync (ps2/pad_ps2.c). */
 #define HAL_GAME_PAD_THREAD 1

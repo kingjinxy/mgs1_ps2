@@ -206,3 +206,10 @@ sections after it).
   from SH1 through the shared HAL are what make either option possible.
 - To do: profile MGS's own split between actor logic and `DG_ChanlUnits` once gameplay runs, to measure
   how much A saves.
+
+## To do: water at 60 FPS (user request, 2026-11-01)
+
+The Dock's water (`wt_area.c`) deliberately drops `DG_FrameRate` to 3 (20 fps), which also slows the game to two
+thirds of its speed. In the 60 FPS version, the water should run at 60 FPS like the rest of the game while keeping
+the same heavy, wading-through-water feel: Snake's speed and animation stay at the original pace (the two-thirds
+speed), only the picture gets smoother.

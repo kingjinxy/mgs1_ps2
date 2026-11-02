@@ -8,6 +8,13 @@
 #include "thing/sight.h"
 #include "chara/snake/sna_init.h"
 
+#ifdef MGS_PORT
+/* The PS1's macro makes a KSEG0 address (0x80000000 |), which faults in the EE's user mode (crash in the scope's
+   bar graph, console, 2026-11-01); the port's packets are at the link's own address. */
+#undef nextPrim
+#define nextPrim(p) ((void *)(((P_TAG *)(p))->addr))
+#endif
+
 extern int              dword_8009F604;
 extern short            dword_800ABBDC;
 extern short            dword_800ABBD4;

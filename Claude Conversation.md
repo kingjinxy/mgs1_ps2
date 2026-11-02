@@ -14378,3 +14378,300 @@ Commit the changes up to now and continue
 
 - tool `Bash`: Commit, then feed the recorded sound counter and rerun
 
+- tool `Bash`: Test recorded counter from both trace lines
+
+- tool `Bash`: Revert the experiment and confirm the committed state
+
+## Claude
+
+The changes are committed as `dfd8d51cd`, but the next experiment didn't work, so the TAS is still stuck at loop 13,006 (0:07:13.55). I've reverted that experiment, and a fresh run reaches loop 13,005 in sync, so the working tree matches the commit.
+
+## What I tried
+I fed the port the recorded sound counter directly in place of the formula from the tick:
+
+| Counter source | First desync |
+|---|---|
+| Formula from the tick (committed) | Loop 13,006 |
+| Recorded, same loop's line, rejecting -1 | Loop 12,879 |
+| Recorded, same loop's line, no -1 check | Loop 12,879 |
+| Recorded, next loop's line | Loop 12,835 |
+
+## What that shows
+- **The recording samples the wrong moment:** the sound counter changes in an interrupt during a loop. BizHawk 1.11.4 samples it once per loop, not at the point `jimctrl` reads it, so the recorded value is sometimes wrong for that read.
+- **The formula's accuracy was partly luck:** I said earlier that it didn't need its own recording, and that needs correcting. It matched the once-per-loop samples, but it does better than those samples because the tick is taken nearer the actual read, not because it's exact. It may simply be wrong at 13,006, but that's still unproven.
+
+## What I recommend next
+PCSX-Redux has execute breakpoints, which BizHawk 1.11.4 lacks, and `redux_replay.lua` already runs the game under the same harness. I'd add a breakpoint where `jimctrl` reads `get_str_counter()` and log the exact value each loop, then use that for the mouth data and subtitles. The Redux run's timing is a little different from BizHawk's, so I'd first check that it matches the reference through this stretch.
+
+I'm stopping here because this changes where the timeline's data comes from: partly Redux, not only BizHawk. Tell me if you want to go that way. The first slice of the timeline stays in, and the old patches are still there as they were.
+
+## User
+
+Yes, let’s use Redux too
+
+- tool `Bash`: Survey Redux script and locate jimctrl's counter read
+
+- tool `Bash`: Add Redux counter breakpoint and inspect launch args
+
+- tool `Bash`: Run the Redux control to loop 13,120 and compare with the reference
+
+- tool `Bash`: Record jimctrl's exact counter and feed it to the port
+
+- tool `Bash`: Record the full timeline to loop 13,200
+
+- tool `Bash`: Rerun the TAS with the exact counter
+
+## Claude
+
+The exact counter fixed it: loop 13,006 (0:07:13.55) is now in sync, and the TAS reaches loop 13,015 (0:07:13.88). That's only 9 loops further, but it confirms the sound counter was the cause, and the fix is now based on recorded data, not a formula that happened to be close. The run had no TLB misses or crashes.
+
+## What changed
+- **Redux dropped for this:** its control run isn't usable yet, as described above, so I didn't use it. The test edit to `redux_replay.lua` is reverted.
+- **Exact counter from BizHawk:** `jimctrl`'s `field_30` ends each loop equal to the counter it read, shifted down by 2. `timeline.lua` now samples it, and `Port_TasStrCounter` uses it when it has moved, falling back to the formula otherwise.
+- **Precision limit:** the value only has the counter's upper bits. That's what the mouth data uses, but subtitle timing reads the same variable and the low 2 bits are now zero. It hasn't caused a problem so far.
+
+## The new desync
+The PS1 sets `STATE_CUT_IN` at loop 13,015 and the port doesn't. It was 7 loops late in an earlier run (13,022), and I haven't re-measured that since the stream changes. The seed then differs from 13,017. Possible setters are `script.c`, `camera.c` and `cat_in.c`. The PS1's tick also jumps here, from 102 to 109 over 2 loops, so something on the PS1 took longer around this point. I'd look at that first.
+
+## Status
+- **Uncommitted:** `timeline.lua`, `timeline_to_bin.py` and `tas_replay.c`. The last commit is `dfd8d51cd`.
+- **Timeline range:** the recording stops at loop 13,200, so it needs extending before the TAS gets past that. A full-movie recording would take about an hour in the background.
+- **Console image:** `obj_ps2/mgs_ps2.iso` is still the TAS image, so run a plain `./build-and-deploy` before testing the memory card.
+
+## User
+
+Commit the changes and let’s continue fixing desyncs
+
+- tool `Bash`: Commit and inspect what sets CUT_IN
+
+- tool `Bash`: Record the timeline over the whole movie
+
+- tool `Bash`: Check camera changes and trace fields near loop 13,015
+
+## Claude
+
+Committed as `5b41decb4`. The desync at loop 13,015 (0:07:13.88) now has a clear shape, but I haven't found its cause yet.
+
+- **What differs:** the port sets `STATE_CUT_IN` one loop late. It was 7 loops late before the stream fixes.
+- **The setter:** it's the camera change in `camera.c`. The port's log shows `change camera 2` at loop 13,015, and the PS1's bit shows up one trace line earlier.
+- **What matches:** Snake's position, the alert state and the pads are the same on both sides through this stretch, so none of those explain the change.
+- **The PS1 side:** it had a slow stretch here, with `GV_PassageTime` at 4 and then 3 where it's normally 2. The timing makes me suspect this is connected, but that's only a guess so far.
+
+Next I'll find what requests this camera change. It repeats during this scene (12,868, 12,927, 12,955, 13,015, 13,045), so it could be a script or trigger tied to the voice line, a guard, or passage time. I'll log the caller of that function in the port and compare the condition with the PS1.
+
+The full-movie timeline recording is running in the background and should take about an hour. I'll report when it finishes, because that's what lets the TAS run past loop 13,200.
+
+## User
+
+Has the timeline recording finished yet?
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Overall: use TASVideos #5139 as a regression test for the MGS1 PS2 port in `/home/alex/Documents/mgs1_ps2`, branch `ps2-port`. Current: fix TAS desyncs using a recorded "disc timeline" rather than symptom patches. The timing must be TAS-only (`MGS_TAS`); normal play must not be sensitive to disc speed (faster loads must work). **Do not remove the stream patches until the new solution is confirmed better.**
+   - Standing constraints (CLAUDE.md/memory):
+     - GitHub only without asking. "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run matching build after port changes: from `build/`, `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py` (80 OK; `--variant=vr_exe` 2 OK).
+     - Before commits update `docs/Running Walkthrough.md`, `docs/Planning Doc.md`, `docs/TAS Testing Plan.md`, `Claude Conversation.md` (concatenate all session .jsonl by `ls -tr`, run `tools/port/archive_conversation.py <file> "Claude Conversation.md"`; no removed lines).
+     - No `pkill -f <pattern>` in a command containing the pattern. TAS loops come with movie timestamp. Check `docs/` before planning debugging techniques. Notify at stopping points. Never dismiss TLB misses. Status line every 5 min during windowless runs. Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Commit/push only when asked. Hung PS2 needs a power cycle. A safety check blocks `rm -f $V/*.c`.
+
+2. Key Technical Concepts:
+   - TAS harness: per-loop tables from BizHawk (`tas_pads/raw/time/loads.bin`), `run_port.py`, `compare_trace.py`; trace line t = state at end of loop t-1 (temp logs inside loop use GV_Time one lower than trace line).
+   - PS1 rand LCG: seed*0x41C64E6D+12345; counting draws between seeds per loop finds early/late draws (`scratchpad/steps.py A B`).
+   - Lip sync: `jimctrl.c` reads `get_str_counter()` (str_tick_count 0x8009F7B4), steps mouth data; `sna_act_helper2_helper2_80033054` (delay.c) draws `GV_RandS(32/16)`. tick = counter*64/105+1.
+   - `jimaku_work` 0x800B82F0: field_30 ends loop at counter>>2 (only when field_20==2). `StrctrlWork` 0x800B82B0; acts: Act 80037820, Act2 800377ec, destroy stand-in 80015164, Die 80037ae4. Pattern: Act2 at line L, destroy L+1, Die L+2.
+   - BizHawk 1.11.4 has no exec callbacks; Redux control run desyncs at 6,669 and is too slow (~11,392 in 9 min), unusable here.
+   - Temp logging method: patch `source/libgv/util.c`/zako.c with printf, resolve with `mips64r5900el-ps2-elf-addr2line -f -e obj_ps2/mgs.elf`, restore from scratchpad backup.
+   - `MGS_TAS` is only defined for port/src; game sources use `MGS_PORT` plus calls into tas_replay functions.
+   - `obj_ps2/mgs_ps2.iso` is currently the TAS image: run plain `./build-and-deploy` before console.
+
+3. Files and Code Sections:
+   - HAL (`../psx-to-ps2-HAL`, commits 8e2e080, 7925bae): `psx_card.c`, `memcard_ps2.c` (`int PortMc_InfoWait` returns state on any thread), `memcard_fixed.c`, `libetc_ps2.c`, tools/ps2_log.py, tools/udpfs_serve.py. Setting `HAL_GAME_CARD_FRAME_EVENTS` in `port/hal/hal_game_config.h`.
+   - mgs1_ps2 commits: d0fa101c3 (scope/debug nextPrim, memory card, docs), ca2c6493f (lip sync counter, seed check, late wait), dfd8d51cd (timeline first slice), 5b41decb4 (exact counter; in sync to 13,014).
+   - `port/src/tas_replay.c`: seed check before overwrite (`tas: seed at loop`), `file_wait`, `Port_TasStreamBottom` (used in `FS_StreamGetData`, `source/libfs/stream.c`, unproven), `Port_TasStrCounter` (formula `(tick*105-1)/64`, then recorded `field_30<<2` from timeline line t+1 if >=0), `Port_TasStreamMayEnd` (timeline: count PS1's 2→3 transitions vs port's ends; old logic past table).
+   - `source/game/jimctrl.c`: calls Port_TasStrCounter before `str_counter >>= 2`.
+   - `tools/port/tas/timeline.lua` (11 columns: t, act, die, state, sub, bottom, cd left, counter, str_status, jimaku field_20, field_30; TAS_TO env), `timeline_to_bin.py` (8 bytes per loop: actor kind u32, counter-if-moved s32 else -1), `build/link_ps2.py` copies timeline.bin to `tas_timeline.bin`.
+
+4. Errors and fixes:
+   - `file_wait` stalled at 5,471 on stream's endless read → limited to `<= s_FileSize`.
+   - Stream gate had no effect under `#ifdef MGS_TAS` → `MGS_PORT`.
+   - Counter rounding `((tick-1)*105+63)/64` gave 12,879 → `(tick*105-1)/64`.
+   - NO_TICK release broke 11,483 → removed; loop comparison hung a late port → count of ends.
+   - Once-a-loop recorded counter gave 12,879/12,835 → field_30.
+   - Redux edit reverted. TAS_TO recording timeout 300 too short → 480.
+
+5. Problem Solving:
+   - TAS in sync to loop 13,014 (0:07:13.85ish). Desync: `STATE_CUT_IN` (0x40) in GM_GameStatus at trace line 13,015 (0:07:13.88): PS1 100a2060, port sets at line 13,016, one loop late. Port log: `[13015]change camera 2`, i.e. set by camera.c's camera change (`trg.pad & 1`). Port's GV_Time 13015 change corresponds to trace line 13016; PS1 did it a loop earlier. Fields pad/position/alert match in 13,010-13,018 except PS1's GV_PadData-ish stick byte goes ff94→ff00 at line 13017 while port's remains ff94 (printed 8-byte field); PS1 passage time is 4 at 13015, 3 at 13016 (long loop), tick 102→106→109. Seed then differs at 13,017.
+   - Intermittent hang at 11,520 (0:06:22.25) not seen recently.
+   - Memory card fixes untested on console; stays in top priority. Neutrino reset in medium to-do.
+
+6. All user messages:
+   - "Make sure that you’ve updated all the .md docs up to this point"
+   - "Alright, let’s get the memory card working in much the same way as Silent Hill. We’ll come back to it later to improve it and make it work with PS1 saves copied to the PS2 memory card, both in reading and writing, but the basic functionality comes first"
+   - "I will test on console later. Commit the changes for now. Add fixing the Neutrino reset issues to the todo list with a medium priority. Ideally I want to be able to leave the PS2 on all day and not have to worry about it hard crashing, no matter how many times it’s remotely reset."
+   - "Let’s commit in the HAL repo too"
+   - "Let’s continue fixing the crashes with the TAS in our port. Are there any harness issues we’ve continually encountered while doing the MGS1 TAS where we could learn from the SH1 TAS? I’m thinking of the harness input issues that we’ve had to work around. I’m not sure what the format of the TAS is exactly, but I’m wondering what exactly we do at the moment to get the TAS lined up with the port."
+   - "Ok, let me back up. What can we learn from the console replay system in SH1?"
+   - "Let’s add what you’ve recommended and try looking for any desyncs again"
+   - "Why don’t we work to reproduce the PS1’s CD and stream timing so we don’t have to keep patching symptoms as they appear? We could borrow code from BizHawk or DuckStation. As a reminder, this timing should only be necessary for TAS compliance. When played normally, the game should not be sensitive to disc read speed (I.e. faster loads should work without issue)"
+   - "Let’s go with your plan. Just remember to not remove the stream patches until we can confirm that the new solution works better."
+   - "How and where does lip sync work in MGS1?"
+   - "Let’s continue trying to fix that loop"
+   - "Commit these changes and then tackle the new desync"
+   - "Did you do the recorded disc timeline thing from earlier?"
+   - "Let’s go with the disc timeline method"
+   - "Commit the changes up to now and continue"
+   - "Yes, let’s use Redux too"
+   - "Commit the changes and let’s continue fixing desyncs"
+
+7. Pending Tasks:
+   - Fix desyncs from 13,015 on; extend timeline to stream starts and data arrival, then compare against old patches before removing any.
+   - User's console memory card test later (rebuild non-TAS image first). Later: PS1 saves on PS2 card, Neutrino reset, seams, codec popping, water at 60 FPS, hang at 11,520.
+
+8. Current Work:
+   Commit 5b41decb4 done. Full-movie timeline recording running in background (task b3mkvcams, `timeline.lua` with no TAS_TO, writes `~/emu/tas/timeline.log`; ~1 hour; note a run overwrites the log while in progress, so don't run timeline_to_bin.py until done; `timeline.bin` currently covers to 13,201). Was investigating why port's camera change/CUT_IN at 13,015 is a loop late.
+
+9. Optional Next Step:
+   Per "Commit the changes and let’s continue fixing desyncs": find what triggers the camera change one loop earlier on the PS1 at trace line 13,015 (camera trigger input, compare position/Snake CONTROL and the stick byte difference at 13,017, and PS1's long loop), then rerun `python3 tools/port/tas/run_port.py --no-shots`. When the recording completes, run `timeline_to_bin.py`.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## Claude
+
+The task is still listed as running, so I'll check how far it has got.
+
+- tool `Bash`: Check timeline recording progress
+
+## Claude
+
+No, it's still running. The log is being written right now and has reached t = 196,207 (196,200 lines), with no end message yet.
+
+That's already past the 163,838 loops in the reference trace, which I didn't expect. So I can't estimate how much is left, and that mismatch needs explaining before I trust the log's loop numbers past that point. It may just be that the timeline counts something the trace doesn't, but I haven't checked. I also won't run `timeline_to_bin.py` until it finishes, because `timeline.bin` still only covers up to loop 13,201.
+
+## User
+
+How long is the TAS supposed to take in real time?
+
+- tool `Bash`: Find the movie's length from its file
+
+## Claude
+
+**About 1 hour 27 minutes.** `mgs.bk2` has about 313,200 input frames, and at the movie's 59.94 frames per second that's roughly 1:27:05. That's from the file itself, not the published TASVideos time.
+
+This may also explain the mismatch: **313,200 frames is well past t = 197,785**, which is where the recording is now. If `t` is closer to frames than loops, it's about 63% done, not nearly finished. I still haven't confirmed what `t` counts, because the reference's 163,838 loops don't match either figure.
+
+**The recording might not finish:** it started around 10:17 and has a 7,000-second timeout, so it will be killed at about 12:14. If `t` does run to about 313,200, then at the current pace it would need until around 12:20 to 12:40. The log would still hold everything recorded up to the cutoff, but it would be missing the end of the movie.
+
+I'd let this run continue, since that data is still enough to carry the desync work well past loop 13,201. If it's cut off, I'll record the rest with a longer timeout.
+
+- tool `Bash`: Inspect finished recording and how it ended
+
+- tool `Bash`: Convert timeline and check it for gaps and the late section
+
+## Claude
+
+The timeline recording has finished. It exited cleanly at about 12:09, before the timeout, so my worry about it being cut off was wrong. It reached t = 293,407, and I've converted it: `timeline.bin` now has 293,408 entries, up from about 13,200.
+
+- **`t` is `GV_Time`:** the recorder reads it directly, so `t` is the game's loop counter, not movie frames. My guess that it might track frames was wrong, and the run was never 63% done in the way I described.
+- **Loop count mismatch still open:** the log has 293,407 loops, the reference trace has 163,838, and the movie has about 313,200 frames. The stream fields look unchanged at the samples I checked from 200,000 on (same actor and jimaku state, same stream position), so this stretch may be a long stream that never ended, such as the movie's ending. I haven't confirmed that, or that the reference simply stops earlier.
+- **Small gaps in the log:** there are 8 places where `t` skips a value, 7 entries in total. They were written as "no stream actor, no counter", which could give a wrong result if one lands on a stream transition. I haven't looked at where they fall.
+
+The TAS itself is still stuck at the desync at loop 13,015 (0:07:13.88), and this recording doesn't fix that, because the bad loop is the camera change, not a missing timeline entry. I'm going back to that next. The extra data only helps once the run gets past loop 13,201.
+
+## User
+
+Proceed
+
+- tool `Bash`: Locate the camera change and cut-in code
+
+- tool `Bash`: Read the camera-change function and its callers
+
+- tool `Bash`: Trace who sets the camera event flag
+
+- tool `Bash`: Read the camera trigger logic and find its addresses
+
+- tool `Bash`: Record the PS1 camera flag and position around the desync; show port log
+
+- tool `Bash`: Read the harness script and check the camera log
+
+## Claude
+
+That was my script: it writes nothing until loop 12,990, so the watchdog took the empty log for a hang. I'll have it write a line for every loop and run it again.
+
+- tool `Bash`: Rerun PS1 camera recording with continuous log output
+
+- tool `Bash`: Find the camera message sender and surrounding port log
+
+- tool `Bash`: Compare PS1 timeline at the voice-line end with jimctrl code
+
+- tool `Bash`: Check delay timing and the recorded passage-time replay
+
+- tool `Bash`: Read the delayed-script actor and what finishes it
+
+- tool `Bash`: Read jimctrl's main loop and the TAS counter hook
+
+- tool `Bash`: Read the rest of jimctrl
+
+- tool `Bash`: Find script-visible consumers of subtitle and stream state
+
+- tool `Bash`: Temporarily log delay actors, run port, restore source
+
+- tool `Bash`: Temporarily log script callers, run port, restore, resolve addresses
+
+- tool `Bash`: Read the actor that launches the camera script
+
+## Claude
+
+The caller is in the s03d overlay, in code just after `ZakoCom`, the guard command logic. The `famaslit.c` name is a wrong line-info match. Now I'll find its source.
+
+- tool `Bash`: Find the source for the overlay caller
+
+- tool `Bash`: Read the guard manager's script triggers
+
+- tool `Bash`: Compare PS1 and port stream end around loop 12,954
+
+- tool `Bash`: Temporarily log stream teardown, run port, restore
+
+- tool `Bash`: Read stream Act end condition and the recorded ticks
+
+- tool `Bash`: Add TAS-only stream play end from timeline and rerun
+
+## Claude
+
+That took the run from loop 13,015 to loop 14,030. Before reporting, I'm running the matching build, since this touched game source.
+
+- tool `Bash`: Run matching builds and check tree
+
+## Claude
+
+The desync at loop 13,015 is fixed: the TAS now stays in sync until **loop 14,030 (0:07:50.07)**, about 1,000 loops further. The matching builds still pass (80 OK, and 2 OK for `vr_exe`). The change is uncommitted and the docs aren't updated yet.
+
+**Cause:** the camera change was only where the slip became visible. It actually started about 60 loops earlier:
+1. On the PS1, a voice stream reaches its end state in loop 12,951, but the port got there in 12,952.
+2. The guards' cutscene in `zakocom.c` waits for that stream to finish, then starts the next voice line and counts exactly 60 loops.
+3. So the guards' next script ran one loop late, at 13,014 on the port and 13,013 on the PS1, which set `STATE_CUT_IN` late.
+
+The lip-sync and delay ideas I checked along the way were both wrong.
+
+**Fix:** a new function, `Port_TasStreamPlayEnd`, is called from `source/game/strctrl.c`. In TAS builds, when the recorded timeline shows the PS1's Nth stream ending playback, the port's Nth stream ends in the same loop, as long as no read is still running. Without `MGS_TAS` the function just returns the original end test, so normal play doesn't depend on disc speed. The existing stream patches are all still in place.
+
+**New desync:** at loop 14,030, `GV_Clock` is 0 on the port and 1 on the PS1, and I haven't investigated it yet. The timeline's full length isn't the limit here, because `timeline.bin` now covers this range and more.
+
+The temporary logging is out of the source.
+
+## User
+
+Commit, update docs, and proceed
+
+- tool `Bash`: Read docs tails and data around the new desync
+

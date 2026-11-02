@@ -844,3 +844,18 @@ PCSX2: desync at loop 13,006 (0:07:13.55), unchanged, now with the chained strea
 The sound counter once a loop in BizHawk isn't the value `jimctrl.c` read (recorded values gave 12,835 or 12,879), and
 Redux's control run desyncs at loop 6,669 and is too slow to use here. `jimctrl.c`'s `field_30` ends its loop at the
 counter >> 2, so the timeline samples that: loop 13,006 (0:07:13.55) fixed. Next: `STATE_CUT_IN` at 13,015 (0:07:13.88).
+
+## Step 26: the stream's play end from the timeline (2026-11-02)
+
+The full-movie timeline recording finished (293,407 loops by `GV_Time`, against 163,838 in the reference trace; the
+difference isn't explained yet, and 8 small gaps in `t` are zeroed in `timeline.bin`).
+
+The desync at loop 13,015 (0:07:13.88), `STATE_CUT_IN` a loop late, looked like a camera trigger. Recording the PS1's
+`GM_event_camera_flag` and Snake's position ruled that out, and logging `delay.c` and `GCL_ExecProc` traced the script
+to `s03d_800D4EAC` in `zakocom.c`. Lip sync and delays were both wrong leads. The guards' cutscene waits for the stream
+to end (case 4), then counts 60 loops (case 5). The PS1's stream reached `Act2` in loop 12,951, the port's in 12,952,
+with the read already done.
+
+`Port_TasStreamPlayEnd` (TAS only) ends the port's Nth stream's play when the timeline shows the PS1's did, if no read
+is running. Normal play keeps the original test; the stream patches stay. In sync to loop 14,030 (0:07:50.07), where
+`GV_Clock` differs. Tried in the emulator only, not on the console.

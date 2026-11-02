@@ -338,7 +338,9 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [ ] Late file reads wait at the loop's end (`file_wait`, from SH1's `file_sync`) and `FS_StreamGetData` stops at
       the PS1's bottom (`Port_TasStreamBottom`): neither moved a desync yet. Keep or drop once tested.
 - [ ] One recorded disc timeline (`timeline.lua`): stream ends done, to loop 14,000; starts and data still to move. Keep the patches until it's shown to work better.
-- [ ] Next desync: `GM_GameStatus` 0x40 (`STATE_CUT_IN`) missing at loop 13,015 (0:07:13.88).
+- [x] `STATE_CUT_IN` late at loop 13,015 (0:07:13.88): the stream's play end one loop late at 12,951; `Port_TasStreamPlayEnd`.
+- [ ] Next desync: `GV_Clock` at loop 14,030 (0:07:50.07).
+- [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

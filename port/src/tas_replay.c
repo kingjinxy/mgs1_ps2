@@ -242,6 +242,32 @@ int Port_TasStreamMayStart(void)
 #endif
 }
 
+/** strctrl.c's Act, stream state 3: whether the play ended. The port's data state can come a loop after the PS1's with
+ * the read already done (12,951, whose voice starts the guards' 60-loop count to 13,014), so when the PS1's Nth stream
+ * reached Act2 the port's does too, if `idle` (no read running). Normal play: `ended`. */
+int Port_TasStreamPlayEnd(int ended, int idle)
+{
+#ifdef MGS_TAS
+    if ((unsigned int)GV_Time + 1 < size_mgs_tas_timeline / 8 && mgs_tas_timeline)
+    {
+        static int scanned, ps1_plays, plays;
+        for (; scanned <= GV_Time + 1; scanned++)
+        {
+            ps1_plays += scanned > 0 && mgs_tas_timeline[scanned * 8] == 2 && mgs_tas_timeline[(scanned - 1) * 8] == 1;
+        }
+        if (ended || (idle && ps1_plays > plays))
+        {
+            plays++;
+            return 1;
+        }
+        return 0;
+    }
+#else
+    (void)idle;
+#endif
+    return ended;
+}
+
 /** strctrl.c's Act2, destroying the stream's actor (its Die clears STATE_VOX_STREAM): whether the PS1's had gone
  * by this loop (its record without the bit, or a later stream started). It goes once the stream task stops,
  * after the SPU has played the last of the voice (sd_str.c's interrupts), which the port's IOP does at its own

@@ -138,8 +138,16 @@ loop_case3:
         {
             work->field_22_sub_state = 0;
         }
+#ifdef MGS_PORT
+        {
+            extern int Port_TasStreamPlayEnd( int ended, int idle ); /* port/src/tas_replay.c: in TAS replays, the PS1's loop */
+            if ( Port_TasStreamPlayEnd( ( !work->field_22_sub_state || FS_StreamIsForceStop() )
+                                        && FS_StreamIsEnd() && !FS_StreamSync(),
+                                        !work->field_22_sub_state && !FS_StreamTaskState() ) )
+#else
         if ( ( !work->field_22_sub_state || FS_StreamIsForceStop() )
             && FS_StreamIsEnd() && !FS_StreamSync() )
+#endif
         {
             printf( "StreamPlay end\n" );
             if ( work->field_24 )
@@ -148,6 +156,9 @@ loop_case3:
             }
             work->actor.act = ( GV_ACTFUNC )&Act2;
         }
+#ifdef MGS_PORT
+        }
+#endif
         break;
     }
 }

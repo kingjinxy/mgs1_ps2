@@ -862,3 +862,8 @@ is running. Normal play keeps the original test; the stream patches stay. In syn
 
 `GV_Clock` at 14,030 first looked like `dgd.c`'s frame skip, but `STATE_NOSLOW` isn't set there. It was a sampling
 artefact, corrected in `compare_trace.py`. In sync to loop 15,061 (0:08:18.40). Milestones: `docs/TAS Progress.md`.
+
+The TLB misses at loop 15,0xx were `s03d_800D47BC` sorting through a removed guard's NULL entry; the PS1's RAM at 0xB90
+is 0 (BizHawk). The desync at 15,061 was a map trap firing a loop late because `pads.bin` lost a button press under
+`STATE_PADRELEASE`. Checking for an all-ones status changed nothing (a misread of the record); using the `press` field
+with line t+1's raw pads fixed it. In sync to loop 15,114 (0:08:20.18), where the play time seconds differ.

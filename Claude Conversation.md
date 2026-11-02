@@ -14765,3 +14765,61 @@ Percentages are by movie frame (out of about 313,200). Each row shows the point 
 
 Save this to a TAS progress doc and then commit changes. After, move to fix the TLN miss
 
+- tool `Bash`: Save progress doc, commit, fix NULL guard, rerun, verify match
+
+## Claude
+
+The TLB misses are fixed, and the progress doc is saved and committed.
+
+- **Progress doc:** [docs/TAS Progress.md](docs/TAS%20Progress.md) is in commit `28c5a8e1e`, along with the clock correction and doc updates.
+- **TLB miss:** `s03d_800D47BC` now handles a NULL guard the way the PS1 does: the distance reads as 0 and the write is skipped. A full run logged no TLB misses at all, and the main matching build still passes (80 OK). I didn't rerun `vr_exe`, since this change is only in the `s03d` overlay.
+- **Not committed:** you asked for the commit before this fix, so `zakocom.c` is still an uncommitted change.
+
+The NULL guard wasn't the cause of the desync, which is still at **loop 15,061 (0:08:18.40)**. The PS1 clears the pads and sets status `0x10000000` there, and the port doesn't. That's the next thing to look at.
+
+## User
+
+Proceed
+
+- tool `Bash`: Identify the status bit and context at loop 15,061
+
+- tool `Bash`: Find setters of the status bit
+
+- tool `Bash`: List setters and see how far behind the port is
+
+- tool `Bash`: Log script callers before loop 15,061 and restore
+
+## Claude
+
+I've found the trigger for the desync at **loop 15,061 (0:08:18.40)**, but not why it's a loop late, and it isn't fixed yet. Unlike the 13,015 bug, this isn't a counted script: the logs show the script starts from a map trap (`HZD_ExecBind`). The port fires it in loop 15,061, setting `STATE_PADRELEASE` and teleporting Snake, while the PS1 does so one loop earlier.
+
+Position alone doesn't explain it, because the two sides match on position right up to this line. The PS1's line 15,061 also shows a new button press (raw pad `dfff`, the 0x2000 bit) landing exactly here, while the port still shows its old pad state. My leading theory is that this trap needs a button, and the port is getting that press a loop late, or the trap checks it at a different point in the loop. I haven't tested that yet.
+
+The next step is to compare the recorded raw pads with the port's around loops 15,059–15,061 and read the trap's condition. The temporary logging is out of the source. The NULL guard fix in `zakocom.c` is still uncommitted, and the TAS remains at 9.54%.
+
+## User
+
+Commit and then proceed
+
+- tool `Bash`: Commit, compare pads at the trap, read trap conditions
+
+- tool `Bash`: Inspect pad record selection and table entries
+
+- tool `Bash`: Rebuild pressed buttons in pad table and rerun
+
+- tool `Bash`: Use the press field to recover the input, rerun
+
+## Claude
+
+The input bug is fixed, and the TAS now stays in sync to **loop 15,114 (0:08:20.18)**, about 9.57%. The fix changed only that one record in `pads.bin`, so no other inputs moved. There were no TLB misses in this run. The NULL guard fix is committed as `dffc51eb6`.
+
+**Cause of the 15,061 desync:** `STATE_PADRELEASE` zeroed the recorded pads on the same line where the player pressed a button, so the replay never got that press, and the port's trap, which needs it, fired a loop late. `tools/port/tas/trace_to_pads.py` now recovers such presses from the next line's raw pads, but only where the loop's `press` field confirms them. My first attempt changed nothing because I'd misread the record's layout.
+
+**New desync:** at loop 15,114 the only difference is the play-time seconds counter, `linkvarbuf[92]`, at 472 on the port and 473 on the PS1. That's a frame-counter difference at a one-second boundary (28,380 frames is exactly 473 seconds), not a change in gameplay. I'd guess the port's total frame count is slightly behind, but I haven't checked. If the seed and position stay matched past it, this one is about bookkeeping, not game logic.
+
+The `trace_to_pads.py` change and the regenerated tables aren't committed yet, and `docs/TAS Progress.md` still says 15,061. I'd update both together with the next commit.
+
+## User
+
+Commit the changes
+

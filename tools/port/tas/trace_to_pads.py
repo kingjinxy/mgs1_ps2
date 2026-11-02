@@ -68,7 +68,12 @@ for i, f in enumerate(rows):
         for port in (0, 1):
             o = (2 + port) * 16
             if pads[o] == pads[o + 1] == 0:
-                pads[o:o + 2] = (~(rp[port * 8 + 2] | rp[port * 8 + 3] << 8) & 0xFFFF).to_bytes(2, "little")
+                # and a press the loop read (its press field) that the raw pads only show on line t+1 (loop 15,060)
+                nr = bytes.fromhex(n[8])
+                held = ~(rp[port * 8 + 2] | rp[port * 8 + 3] << 8) & 0xFFFF
+                late = ~(nr[port * 8 + 2] | nr[port * 8 + 3] << 8) & 0xFFFF
+                press = pads[port * 16 + 4] | pads[port * 16 + 5] << 8
+                pads[o:o + 2] = (held | late & press).to_bytes(2, "little")
         pads = bytes(pads)
     if pads != prev:
         out += struct.pack("<I", t) + pads

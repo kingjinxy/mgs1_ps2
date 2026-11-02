@@ -14675,3 +14675,93 @@ Commit, update docs, and proceed
 
 - tool `Bash`: Read docs tails and data around the new desync
 
+## Claude
+
+Docs and commit first. The desync data is already useful: at line 14,030 the PS1's clock doesn't flip, and it reads 1 on two lines in a row.
+
+- tool `Bash`: Update docs, archive conversation, commit, read clock code
+
+- tool `Bash`: Fix plan line; inspect clock holds in the recording
+
+- tool `Bash`: Read the frame-drop logic
+
+- tool `Bash`: Use PS1's recorded frame skip in TAS and rerun
+
+## Claude
+
+No change, so that hook isn't being reached. The table shows `GM_GameStatus` as 0 around here, while `NOSLOW` lives in a branch that needs a status bit. I'll check that before changing anything else.
+
+- tool `Bash`: Check status, passage and clock around the clock holds
+
+- tool `Bash`: Drop the failed hook and search other clock writers
+
+- tool `Bash`: Read raw PS1 trace at the clock holds
+
+- tool `Bash`: See how the comparison reads the clock
+
+- tool `Bash`: Correct the sampled clock in the reference and rerun
+
+## Claude
+
+`run_port.py` didn't pick that up: it reads the reference some other way. I'm finding that and applying the correction there too.
+
+- tool `Bash`: Find how run_port loads the reference
+
+- tool `Bash`: Share the clock correction with run_port and rerun
+
+## Claude
+
+The run now reaches loop 15,061 in a new stage. It also logged TLB misses, which can't be ignored, so I'm identifying those before going further.
+
+- tool `Bash`: Resolve TLB miss sites and context of new desync
+
+- tool `Bash`: Read the code at the TLB miss sites
+
+- tool `Bash`: Read the failing function
+
+- tool `Bash`: Record PS1 low RAM at the NULL read address
+
+## Claude
+
+The PS1 value at 0xB90 is 0, so a NULL guard sorts as distance 0, and the store only writes to low RAM. To build your timeline, I'm pulling the milestones from the docs and git.
+
+- tool `Bash`: Collect TAS milestones from git and docs
+
+- tool `Bash`: Compute time and percent for each milestone
+
+## Claude
+
+**The TAS is in sync for 0:08:18 of about 1:27:05, or 9.54% of the movie.** That's loop 15,061, which comes from a run that hasn't been committed yet; the last committed point is loop 14,030 (9.00%).
+
+Percentages are by movie frame (out of about 313,200). Each row shows the point reached once that fix was in; the commit date and time are in the last column.
+
+| In sync to loop | Movie time | % | What fixed it | Commit (2026) |
+|---|---:|---:|---|---|
+| 4,221 | 0:02:35.57 | 2.98% | `camera.c` out-of-bounds read | Oct 30, 15:53 |
+| 5,109 | 0:03:05.34 | 3.55% | `sna_line_check` stack pair | Oct 30, 19:30 |
+| 5,750 | 0:03:21.50 | 3.86% | Pad release from raw pads | Oct 30, 19:53 |
+| 5,808 | 0:03:24.35 | 3.91% | Stream tick -1 after sound mode | Oct 30, 20:05 |
+| 6,276 | 0:03:37.53 | 4.16% | File reads at the PS1 drive's pace | Oct 31, 10:09 |
+| 6,662 | 0:03:52.07 | 4.44% | Drive model fitted to the PS1 | Oct 31, 10:57 |
+| 6,732 | 0:03:55.00 | 4.50% | Stream data per vertical blank; crashed after this | Oct 31, 11:43 |
+| 7,596 | 0:04:21.11 | 5.00% | `lit_mdl.c` model initializer that GCC dropped | Oct 31, 12:06 |
+| 11,443 | 0:06:19.66 | 7.27% | File reads follow the PS1's recorded progress | Oct 31, 13:22 |
+| 12,101 | 0:06:42.09 | 7.69% | `s03d` guards decompiled; `chafgrnd.c` NULL rect | Oct 31, 15:21 |
+| 12,652* | 0:07:00.75 | 8.05% | Stream actor ends on the PS1's loop | Oct 31, 17:24 |
+| 12,758* | 0:07:05.19 | 8.14% | Guards' model names and `ZakoComMgr` layout | Oct 31, 17:24 |
+| 13,005 | 0:07:13.52 | 8.30% | Guard action table layout, lip sync on the PS1's counter | Nov 2, 09:17 |
+| 13,014 | 0:07:13.82 | 8.30% | Disc timeline with exact sound counter | Nov 2, 10:17 |
+| 14,030 | 0:07:50.07 | 9.00% | Stream play end from the timeline | Nov 2, 12:51 |
+| **15,061** | **0:08:18.40** | **9.54%** | Trace clock sampling corrected (a harness fix) | Not committed |
+
+\* Both were committed together at 17:24, so I've taken these two from the scratch runs and the plan's notes. They were separate stopping points, but no commit message records them.
+
+- **How to read the percentage:** it's the safest measure, but it won't predict how long the rest takes. Most of the work so far went on a few hard spots, and the `s03d` guard work alone took a large share.
+- **Fix in progress:** the NULL guard read in `s03d_800D47BC` is the current TLB miss (26 reads, 24 writes). The PS1's value there is 0, so the fix is straightforward, but it isn't written yet.
+- **Current desync:** at loop 15,061 (0:08:18.40) the PS1 has cleared the pads and set status `0x10000000`, and the port hasn't. I don't know yet whether the NULL guard read causes this.
+- **Not committed:** the clock correction and the `Planning Doc.md` update are still uncommitted.
+
+## User
+
+Save this to a TAS progress doc and then commit changes. After, move to fix the TLN miss
+

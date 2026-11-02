@@ -339,7 +339,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       the PS1's bottom (`Port_TasStreamBottom`): neither moved a desync yet. Keep or drop once tested.
 - [ ] One recorded disc timeline (`timeline.lua`): stream ends done, to loop 14,000; starts and data still to move. Keep the patches until it's shown to work better.
 - [x] `STATE_CUT_IN` late at loop 13,015 (0:07:13.88): the stream's play end one loop late at 12,951; `Port_TasStreamPlayEnd`.
-- [ ] Next desync: `GV_Clock` at loop 14,030 (0:07:50.07).
+- [x] `GV_Clock` at loop 14,030 (0:07:50.07): BizHawk sampled between `GV_Time++` and the flip (also 15,110); corrected in `compare_trace.py`.
+- [ ] TLB misses in `s03d_800D47BC` (NULL guard; PS1 RAM at 0xB90 is 0), then `GV_PadData` at loop 15,061 (0:08:18.40).
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

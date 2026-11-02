@@ -20,6 +20,14 @@ CONTROL = [(0, 8, "mov"), (8, 8, "rot"), (48, 2, "name"), (50, 2, "height"), (52
            (88, 1, "n_touches"), (96, 16, "vecs"), (120, 4, "levels")]
 
 
+def fix_clock(loops):
+    """BizHawk's frame can end between gvd.c's GV_Time++ and its GV_Clock flip: that line has the old clock, between
+    two lines of the same one (14,030 and 15,110; a real hold, dgd.c's, shifts the parity instead)."""
+    for t, f in loops.items():
+        if t - 1 in loops and t + 1 in loops and loops[t - 1][2] == f[2] == loops[t + 1][2]:
+            f[2] = "1" if f[2] == "0" else "0"
+
+
 def load(path):
     loops = {}
     path = os.path.expanduser(path)
@@ -27,6 +35,7 @@ def load(path):
         f = line.split()
         if len(f) >= 14:
             loops[int(f[1])] = f
+    fix_clock(loops)
     return loops
 
 

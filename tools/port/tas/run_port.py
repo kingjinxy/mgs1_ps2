@@ -30,7 +30,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from compare_trace import FIELDS, control_diff, linkvar_diff, same, when  # noqa: E402
+from compare_trace import FIELDS, control_diff, fix_clock, linkvar_diff, same, when  # noqa: E402
 
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 TRACE = os.path.join(REPO, "obj_ps2", "tas_trace.log")
@@ -192,6 +192,7 @@ def main():
         f = line.split()
         if len(f) >= 14:
             ref[int(f[1])] = f
+    fix_clock(ref)
     print("reference: %d loops; comparing from loop %d" % (len(ref), a.start), flush=True)
 
     if os.path.exists(TRACE):

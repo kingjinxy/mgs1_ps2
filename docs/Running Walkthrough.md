@@ -859,3 +859,6 @@ with the read already done.
 `Port_TasStreamPlayEnd` (TAS only) ends the port's Nth stream's play when the timeline shows the PS1's did, if no read
 is running. Normal play keeps the original test; the stream patches stay. In sync to loop 14,030 (0:07:50.07), where
 `GV_Clock` differs. Tried in the emulator only, not on the console.
+
+`GV_Clock` at 14,030 first looked like `dgd.c`'s frame skip, but `STATE_NOSLOW` isn't set there. It was a sampling
+artefact, corrected in `compare_trace.py`. In sync to loop 15,061 (0:08:18.40). Milestones: `docs/TAS Progress.md`.

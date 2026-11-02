@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 15,114 (0:08:20.18), 9.57%.
+Current: loop 17,042 (0:09:20.38), 10.72%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -24,5 +24,6 @@ Current: loop 15,114 (0:08:20.18), 9.57%.
 | 14,030 | 0:07:50.07 | 9.00% | Stream play end from the timeline | Nov 2, 12:51 |
 | 15,061 | 0:08:18.40 | 9.54% | Trace clock sampling corrected (harness fix) | Nov 2 |
 | 15,114 | 0:08:20.18 | 9.57% | NULL guard read in `zakocom.c`; button press lost under `STATE_PADRELEASE` in `pads.bin` | Nov 2 |
+| 17,042 | 0:09:20.38 | 10.72% | play time from the recording each loop | Nov 2 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.

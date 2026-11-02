@@ -342,7 +342,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] `GV_Clock` at loop 14,030 (0:07:50.07): BizHawk sampled between `GV_Time++` and the flip (also 15,110); corrected in `compare_trace.py`.
 - [x] TLB misses in `s03d_800D47BC` (NULL guard; PS1 RAM at 0xB90 is 0).
 - [x] `GV_PadData` at loop 15,061 (0:08:18.40): the press was lost where `STATE_PADRELEASE` zeroed the pads; `trace_to_pads.py` recovers it from line t+1's raw pads.
-- [ ] Next desync: `linkvarbuf[92]` (play time seconds) at loop 15,114 (0:08:20.18), 472 against 473.
+- [x] Fixed: play time from the recording each loop.
+- [ ] Next desync: rand seed at loop 17,042 (0:09:20.38, `s04b`).
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

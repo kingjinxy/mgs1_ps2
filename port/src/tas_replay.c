@@ -467,6 +467,7 @@ void Port_TasPassageTime(void)
     if (r)
     {
         GV_PassageTime = (int)read_u32(r + 12);
+        gTotalFrameTime = (int)read_u32(r + 36); /* display only; the PS1's total also counts loops the port's load skips */
     }
 #endif
 }

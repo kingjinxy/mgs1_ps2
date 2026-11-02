@@ -14823,3 +14823,31 @@ The `trace_to_pads.py` change and the regenerated tables aren't committed yet, a
 
 Commit the changes
 
+- tool `Bash`: Update docs, archive conversation and commit
+
+## Claude
+
+Committed as `2bffc7983`, and the working tree is clean. It includes the `trace_to_pads.py` fix and updates to all the docs, including `docs/TAS Progress.md`, now at loop 15,114 (0:08:20.18, 9.57%), and `Claude Conversation.md`.
+
+The regenerated `pads.bin` isn't in the commit because it lives in `~/emu/tas`, outside the repo. Rerunning `trace_to_pads.py` reproduces it.
+
+## User
+
+Firstly, is the Ponytail philosophy part of your rules? If not, download it from GitHub and incorporate it. Then follow the instructions below. 
+
+I want you to keep working on fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible when issues arise, using the Ponytail philosophy where available, and use your best judgement. If there’s a large issue that arises, notify me and I’ll see to it. After each desync is fixed, update docs and then commit before continuing. Continue working autonomously until 5:00 PM or we reach 100% TAS completion, whichever comes first.
+
+## Claude
+
+Ponytail isn't in my rules or your project instructions, so I'll look for it on GitHub.
+
+- tool `Bash`: Check for Ponytail locally and search GitHub
+
+- tool `Bash`: Search GitHub API for Ponytail repositories
+
+- tool `Bash`: Clone Ponytail into scratch and read it
+
+- tool `Bash`: Add Ponytail rules; compare play time around 15,114
+
+- tool `Bash`: Replay recorded play time each loop and rerun
+

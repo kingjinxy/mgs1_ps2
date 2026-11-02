@@ -867,3 +867,5 @@ The TLB misses at loop 15,0xx were `s03d_800D47BC` sorting through a removed gua
 is 0 (BizHawk). The desync at 15,061 was a map trap firing a loop late because `pads.bin` lost a button press under
 `STATE_PADRELEASE`. Checking for an all-ones status changed nothing (a misread of the record); using the `press` field
 with line t+1's raw pads fixed it. In sync to loop 15,114 (0:08:20.18), where the play time seconds differ.
+
+The play time at 15,114 differed only as bookkeeping: `gTotalFrameTime` now follows the recording each loop. In sync to loop 17,042 (0:09:20.38), a seed difference in `s04b`.

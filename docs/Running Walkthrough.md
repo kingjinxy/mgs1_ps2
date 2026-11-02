@@ -840,3 +840,7 @@ has (recorded to loop 14,000; the old logic beyond). Tried first: comparing by l
 stream; releasing at the tick's reset, which broke loop 11,483. The old patches stay until the timeline proves better.
 
 PCSX2: desync at loop 13,006 (0:07:13.55), unchanged, now with the chained stream's read 2 loops late, not 7.
+
+The sound counter once a loop in BizHawk isn't the value `jimctrl.c` read (recorded values gave 12,835 or 12,879), and
+Redux's control run desyncs at loop 6,669 and is too slow to use here. `jimctrl.c`'s `field_30` ends its loop at the
+counter >> 2, so the timeline samples that: loop 13,006 (0:07:13.55) fixed. Next: `STATE_CUT_IN` at 13,015 (0:07:13.88).

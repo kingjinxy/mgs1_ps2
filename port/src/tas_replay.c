@@ -212,6 +212,15 @@ void Port_TasStrCounter(int* counter)
     if (*counter >= 0 && Port_TasTick(&tick) && tick > 0)
     {
         *counter = (tick * 105 - 1) / 64;
+        if ((unsigned int)GV_Time + 1 < size_mgs_tas_timeline / 8 && mgs_tas_timeline)
+        {
+            /* the exact read: jimctrl.c's field_30 ends its loop at the counter >> 2, on line t + 1 */
+            int recorded = (int)read_u32(mgs_tas_timeline + (GV_Time + 1) * 8 + 4);
+            if (recorded >= 0)
+            {
+                *counter = recorded << 2;
+            }
+        }
     }
 #else
     (void)counter;
@@ -244,7 +253,7 @@ int Port_TasStreamMayEnd(void)
     /* Die runs in the next loop (GV_DestroyActorQuick); a bit still set 8 loops on is the next stream's (the
        demo at loop 11,482 is followed by another, and the hold would never end) */
     int t;
-    if ((unsigned int)GV_Time + 1 < size_mgs_tas_timeline && mgs_tas_timeline)
+    if ((unsigned int)GV_Time + 1 < size_mgs_tas_timeline / 8 && mgs_tas_timeline)
     {
         /* the recorded loop: the PS1's Nth stream through Act2 ended (line t + 1 going from 2 to 3 when its Act2
            destroyed the actor in t) before the port's Nth may, chained or not: a late port doesn't wait for the
@@ -252,7 +261,7 @@ int Port_TasStreamMayEnd(void)
         static int scanned, ps1_ends, ends;
         for (; scanned <= GV_Time + 1; scanned++)
         {
-            ps1_ends += scanned > 0 && mgs_tas_timeline[scanned] == 3 && mgs_tas_timeline[scanned - 1] == 2;
+            ps1_ends += scanned > 0 && mgs_tas_timeline[scanned * 8] == 3 && mgs_tas_timeline[(scanned - 1) * 8] == 2;
         }
         if (ps1_ends > ends)
         {

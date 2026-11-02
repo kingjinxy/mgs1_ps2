@@ -73,6 +73,7 @@ extern int          mts_get_tick_count(void);
 extern unsigned int Hal_RandSeed(void);
 extern void         srand(unsigned int seed);
 extern void         Display_RequestDump(void);
+extern void         mts_wait_vbl(int count);
 
 #define RECORD 68
 #define NO_TICK 0x80000000u
@@ -199,6 +200,22 @@ int Port_TasTick(int* tick)
 #endif
 }
 
+/** jimctrl.c: the sound's counter from the PS1's tick (stream.c: tick = counter * 64 / 105 + 1), for the voice's
+ * mouth data and subtitles, which read it directly: the port's IOP paces it, a loop early at 12,835 (Snake's lip
+ * sync's rand). The largest counter giving the tick: it equals the PS1's str_tick_count on loops 12,870 to 12,889. */
+void Port_TasStrCounter(int* counter)
+{
+#ifdef MGS_TAS
+    int tick;
+    if (*counter >= 0 && Port_TasTick(&tick) && tick > 0)
+    {
+        *counter = (tick * 105 - 1) / 64;
+    }
+#else
+    (void)counter;
+#endif
+}
+
 /** -1: no TAS timing (the caller decides); 0/1: whether the PS1 had started its stream by this loop. */
 int Port_TasStreamMayStart(void)
 {
@@ -249,6 +266,18 @@ int Port_TasStreamHold(void)
     return r && read_u32(r + 24) == 0;
 #else
     return 0;
+#endif
+}
+
+/** FS_StreamGetData: how far into the stream heap the PS1's data had come at this loop's start (time.bin's bottom),
+ * or -1. Packets past it wait: the voice's mouth data (jimctrl.c) a loop early drew Snake's lip sync's rand at 12,835. */
+int Port_TasStreamBottom(void)
+{
+#ifdef MGS_TAS
+    const unsigned char* r = time_record();
+    return r ? (int)read_u32(r + 24) : -1;
+#else
+    return -1;
 #endif
 }
 
@@ -492,6 +521,7 @@ void Port_TasPads(void)
 
 #ifdef MGS_TAS
 static FILE* s_Trace;
+static int   s_SeedDiffs;
 static int   s_ShotLoop = -1; /* host:tas_shot.txt: the loop whose frame is dumped */
 #endif
 
@@ -550,6 +580,35 @@ void Port_TasInit(void)
 #endif
 }
 
+#ifdef MGS_TAS
+/** The end of a loop outside a load: a file read behind the PS1's waits here, up to 10 s. Port_TasFileAhead only
+ * holds a port that's early; a late one ran on and took its result loops late (SH1's Port_RecFileSync). */
+static void file_wait(void)
+{
+    const unsigned char* p = time_record_at(GV_Time - 1);
+    int                  waited = 0, target;
+    if (!p || GM_LoadRequest || s_FileLoop < 0 || GV_Time - 1 < s_FileLoop)
+    {
+        return;
+    }
+    target = (int)read_u32(p + 32);
+    if (target < 0 || target > s_FileSize)
+    {
+        target = 0;
+    }
+    while (CDBIOS_ReadSync() > target && CDBIOS_ReadSync() <= s_FileSize && waited < 600)
+    {
+        mts_wait_vbl(1);
+        waited++;
+    }
+    if (waited)
+    {
+        printf("tas: loop %d waited %d vertical blanks for its file read\n", GV_Time, waited);
+    }
+}
+
+#endif
+
 void Port_TasTrace(void)
 {
 #ifdef MGS_TAS
@@ -593,10 +652,18 @@ void Port_TasTrace(void)
     }
     prev_request = GM_LoadRequest;
     r            = time_record();
+    if (r && Hal_RandSeed() != read_u32(r + 16) && s_SeedDiffs++ < 40)
+    {
+        /* before any overwrite below: a seed set at a load would hide a load's own different draws. In the log
+           for console runs too, which have no compare_trace.py following them */
+        printf("tas: seed at loop %d: port %08x, PS1 %08x%s\n", GV_Time, Hal_RandSeed(), read_u32(r + 16),
+               s_LoadEnded ? " (load: overwritten)" : "");
+    }
     if (s_LoadEnded && r)
     {
         srand(read_u32(r + 16));
     }
+    file_wait();
     s_LoadEnded = 0;
     traced      = GV_Time;
     s_LoopTick  = mts_get_tick_count();

@@ -290,6 +290,13 @@ static void Act(Work *work)
         return;
     }
 
+#ifdef MGS_PORT
+    {
+        extern int Port_TasStrCounter( int *counter ); /* port/src/tas_replay.c: the PS1's, in TAS replays */
+        Port_TasStrCounter( &str_counter );
+    }
+#endif
+
     str_counter >>= 2;
 
     pStrData2 = FS_StreamGetData(work->field_27);

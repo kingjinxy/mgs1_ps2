@@ -817,3 +817,16 @@ The log ended at `RESULT 0`, the next line of the save task being `memcard_check
 
 Built, but not run in PCSX2 or on console: the deploy found the PS2 not answering. Next: a first save and load on
 real hardware. PS1 saves copied to the card come later. Neutrino reset hangs went on the to-do list (medium).
+
+## Step 24: the seed check, late reads and lip sync's clock (2026-11-02)
+
+From SH1's replay system (`replays.md`): the seed is compared before any overwrite, and a late file read waits at
+the loop's end (`file_wait`; the first version also waited on a stream's endless read and stalled at loop 5,471).
+`FS_StreamGetData` stops at the PS1's `fs_stream_bottom` (`Port_TasStreamBottom`). These last two moved no desync.
+
+Rand seed at loop 12,835 (0:07:07.76): guards matched in every logged field, and counting draws between seeds showed
+an occasional draw a loop early, Snake's lip sync. `jimctrl.c` reads the sound counter directly, so the port's IOP
+paced it. `Port_TasStrCounter` derives it from the PS1's tick. The first rounding came out 1 low on many loops, which
+gave loop 12,879 (0:07:09.26); `str_tick_count` logged in BizHawk gave the exact inverse.
+
+PCSX2: in sync to loop 13,005, desync at 13,006 (0:07:13.55). Matching build: 80 OK, VR 2 OK.

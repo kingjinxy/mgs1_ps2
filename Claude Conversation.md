@@ -13993,3 +13993,314 @@ I will test on console later. Commit the changes for now. Add fixing the Neutrin
 
 - tool `Bash`: Update docs, run matching builds, commit both repos
 
+## Claude
+
+The changes are committed in both repos but not pushed: `d0fa101c3` in `mgs1_ps2` and `8e2e080` in `../psx-to-ps2-HAL`. The matching build passes (80 OK, VR 2 OK), and the conversation archive lost no lines.
+
+- **To-do list:** `docs/Planning Doc.md` has a new medium-priority section with the Neutrino reset issues and your goal of leaving the PS2 on all day through any number of remote resets. I also added PS1 saves copied to the PS2 card as a later item.
+- **Memory card:** it stays open in the top-priority section until a save and load work on console. Step 23 in the walkthrough records the fixes as untested.
+- **Left out of the commit:** `tools/ps2_log.py` and `tools/udpfs_serve.py` are still untracked in the HAL repo. They were already untracked before this work, and `./build-and-deploy` uses them, so they're worth committing at some point.
+
+## User
+
+Let’s commit in the HAL repo too
+
+- tool `Bash`: Commit the untracked HAL tools
+
+## Claude
+
+The HAL repo is now fully committed and its working tree is clean. The memory card and hang watch changes were already in `8e2e080`, so this added the two remaining tools, `tools/ps2_log.py` and `tools/udpfs_serve.py`, as `7925bae`. Nothing has been pushed.
+
+## Claude
+
+The console log watch expired with no events, which is expected because you haven't tested on the console yet. I'll start it again when you do.
+
+## User
+
+Let’s continue fixing the crashes with the TAS in our port. Are there any harness issues we’ve continually encountered while doing the MGS1 TAS where we could learn from the SH1 TAS? I’m thinking of the harness input issues that we’ve had to work around. I’m not sure what the format of the TAS is exactly, but I’m wondering what exactly we do at the moment to get the TAS lined up with the port.
+
+- tool `Bash`: Survey MGS TAS harness and find SH1 TAS docs
+
+- tool `Bash`: Read SH1's TAS plan and harness approach
+
+- tool `Bash`: Check TAS runner usage and SH1 replay notes
+
+- tool `Bash`: Replay the TAS in PCSX2 to the next desync
+
+## Claude
+
+The SH1 TAS has little to teach us yet, because it stops at Phase 1: it has a BizHawk setup and no per-loop trace or replay. Its plan says it copies MGS's method, so the lessons run mostly from MGS to SH1. I've also started the TAS towards the next desync in PCSX2, and I'll pick that up when it finishes.
+
+## How the TAS is lined up today
+**The movie:** it's a BizHawk `.bk2` with one line of inputs per video frame, 313,202 in total. Those inputs only work if every lag frame, CD seek and random number matches, so we can't play them directly in the port.
+
+**What we do instead:**
+1. **Record the PS1:** BizHawk plays the movie and logs what the game itself read and held on each game loop (`GV_Time`).
+2. **Feed the port:** `tas_pads.bin`, `tas_raw.bin` and `tas_time.bin` supply the same pad values by loop number, not by video frame. `GV_UpdatePadSystem` rebuilds the raw pads from them, and the game works out the rest itself.
+3. **Compare:** `run_port.py` checks the port's state against the trace every loop and stops at the first difference.
+
+**What we force to match the PS1:**
+
+| Item | How it's lined up |
+|---|---|
+| Load ends | `GV_Time`, `GV_Clock`, passage time and play time jump to the PS1's values |
+| Random seed | Set to the PS1's at load requests, starts and ends |
+| `GV_PassageTime` | The PS1's value every loop |
+| Stream clock | The PS1's tick |
+| Stream starts and ends | `Port_TasStreamMayStart`, `Port_TasStreamMayEnd` and `Port_TasStreamHold` |
+| CD data arrival | `Port_TasStreamAhead` and `Port_TasFileAhead` hold data until the PS1 had it |
+
+## The recurring harness problem
+Almost every harness workaround comes from one cause: **the PS1's CD and stream timing isn't reproduced, so we patch each symptom as it appears**. The 8-loop limit on `Port_TasStreamMayEnd` is the latest example. It broke at loop 519 (0:00:27.xx) and 521 before settling, and an unbounded version broke at loop 11,483 (0:06:21.xx).
+
+Two more problems repeat:
+- **Pads:** the loop numbering was off by one, which gave the dock's pads a loop early, and a loop can read the pads twice. Both are fixed by feeding raw pads at the point the game reads them.
+- **Hidden masking:** forcing the seed and timing can hide real port bugs. A real difference in how many random numbers get used during a load would be overwritten without being reported.
+
+## What SH1 does offer
+- **`demo_rec.c`:** records on the console, streams through the log, and replays with the PS1's load timing. It's the same "a file finished loading on a different step" problem, and its fix wasn't tested when `replays.md` was written, so it isn't a proven answer yet.
+- **Delta time:** SH1 takes it from the trace as well, which is the same idea as our `GV_PassageTime`.
+
+## Recommendation
+Keep the current approach, and make one change when the next stream or CD desync appears: drive stream delivery from one table of what data the PS1 had by each loop, rather than adding another special case. `tas_time.bin` already records most of that, so the change should be small. I'd also pass this lesson on to SH1's plan before it reaches Phase 3.
+
+## User
+
+Ok, let me back up. What can we learn from the console replay system in SH1?
+
+- tool `Bash`: Read rest of SH1 replay notes and recorder header
+
+## Claude
+
+SH1's replay system has several useful ideas, and the biggest is that it handles waiting differently from MGS. One caveat: its file-timing fix was still untested in `replays.md`, so treat that part as a design to borrow, not a proven result.
+
+## Worth taking
+1. **Wait for the disc in both directions.** SH1 holds a file that arrives early, and at the start of each step it also waits for one that's late, for up to 10 seconds. Our harness mostly only holds an early port (`Port_TasFileAhead` and friends). If a file is late, the loop just carries on and desyncs. `file_sync` would stop the game loop until the data arrives, which would remove a whole class of speed-dependent desyncs.
+2. **Sync on the moment the game sees the data.** SH1 records the step at which a file is post-processed, and holds only between files, never part-way through one. We meter sector progress, which is finer and more fragile. If we record "the loop this read completed" for each file and stream event, one rule could replace several special cases. That's the single table I suggested earlier, and SH1 gives it a concrete shape.
+3. **Keep expected values in the input data and stop on a mismatch.** SH1's `STEP ERROR` stops a replay inside the game, with no host needed. If our tables carried each loop's seed and key state, the TAS could check itself on the console, where `run_port.py` can't follow along live. That matters because SH1 found PCSX2 and console timing drift differently, so sync in PCSX2 doesn't prove sync on console.
+4. **Stream the log so a crash loses little.** SH1 sends recording data through the console log a second at a time. We could send the TAS trace the same way, at a low rate, to get a console TAS run with a usable crash point. This would also help track down the hang at loop 11,520 (0:06:22.25) if it happens on hardware.
+5. **Upload a replay to the running game.** `ps2_ctl.py replay NAME` sends the data in acknowledged, checksummed chunks. Our tables are 5.6 MB from `host:`, so on console we'd need to load them through UDPFS or a similar route, not this 1 KB chunk path.
+
+## Warnings from SH1
+- **Timing bugs can look like nothing is wrong.** SH1's desync depended on EE speed, and a profiling wrapper in the build was enough to keep it in sync. That's a reason to suspect timing in our intermittent hang at loop 11,520, and to be careful about adding logging while chasing it.
+- **Matching state can still be a desync.** SH1's random seed matched throughout because it was reseeded every step, so the seed proved nothing. That's the same masking risk we have at load ends. We should compare the seed before we overwrite it.
+- **Remote restarts have a known symptom.** SH1 freezes about 5–8 seconds after a remote restart, when vblank interrupts stop at `gameState 1`, and its UDPFS server can get stuck after many redeploys. Both belong with the Neutrino reset to-do.
+
+## What doesn't carry over
+SH1 records on its own console from a save, so its recordings start from a known state and can store anything. Ours comes from an emulator movie, so we only have what the BizHawk trace captures. SH1's forced vblank counts and per-step reseeding also have no direct equivalent, since MGS follows the PS1's clock another way.
+
+## Recommendation
+1. Compare the seed before overwriting it, which is a small change and could expose hidden bugs right away.
+2. Add the two-way wait, starting with reads, when the next CD or stream desync appears.
+3. Add the self-check and log streaming when we move the TAS to console.
+
+The PCSX2 run to the next desync is still going, and I'll report what it finds.
+
+- tool `Bash`: Read the TAS run result
+
+## Claude
+
+The TAS now stays in sync 66 loops further, from loop 12,770 (0:07:05.59) to loop 12,836 (0:07:07.79). The run stopped at a new desync there, in `s03d`. The random seed differs (port `5171d550`, PS1 `a8566349`), and it's the first field to diverge.
+
+The loop 11,520 (0:06:22.25) hang didn't happen on this run, there are no TLB misses, and nothing crashed. Because the run stopped at the desync, I don't yet know what comes after it.
+
+The screenshot comparison is in [loop_12836.png](tas/shots/loop_12836.png). This is the same kind of desync as loop 12,758 (0:07:05.19), so I'd start the same way: log the `GV_RandU` and `GV_RandS` callers on both sides, then compare guard state per loop with `zako_log.lua`. I haven't started that yet, so tell me when you want me to continue with it.
+
+## User
+
+Let’s add what you’ve recommended and try looking for any desyncs again
+
+- tool `Bash`: Read the replay harness and CD pacing code
+
+- tool `Bash`: Add seed check and late-read wait, rerun the TAS
+
+- tool `Bash`: Bound the wait to file reads and rerun the TAS
+
+## Claude
+
+I've added two of the three recommendations, and the TAS still desyncs in the same place: loop 12,835 (0:07:07.76) in `s03d`. It's one loop earlier than last run's 12,836 (0:07:07.79), and there were no crashes. No file changes are committed yet.
+
+## What I added (both in `port/src/tas_replay.c`)
+- **Seed check before overwriting:** every loop now compares the port's seed with the PS1's before any load overwrites it, and prints the first 40 differences to the log. It works without `run_port.py`, so it will also work in console runs.
+- **Late-read wait:** when a file read is behind the PS1's at the end of a loop, the game now waits for it, for up to 10 seconds. My first version also waited on streams and stalled the run at loop 5,471, so it now applies to file reads only. It fired on 56 loops, one vertical blank each, and never hit the limit.
+
+I didn't add log streaming or console table upload, because those are only needed for console TAS runs.
+
+## What the run showed
+- **Load ends weren't hiding anything:** the first seed difference is at loop 12,835, so every earlier load matched before its overwrite. That also clears the masking worry I raised, up to this point.
+- **The desync isn't a one-off random number:** from loop 12,850 (0:07:08.2x), the port's seeds run one loop ahead of the PS1's. For example, `9c1e71ae` is the port's at 12,850 and the PS1's at 12,851. The two stay on the same sequence for about 15 loops, so during that stretch the port drew one extra random number per loop. The seeds then diverge again at 12,865.
+- **It's probably timing-sensitive, but that's not proven:** the desync moved by one loop when the wait changed timing. That points to something in the guards or a file load that depends on when data arrives, though it's only one run.
+
+## Still open
+- **Cause of the desync:** I haven't found it yet. The next step is to log the `GV_RandU` and `GV_RandS` callers from loop 12,835 on both sides.
+- **The wait's benefit is unproven:** no desync has been fixed by it so far.
+- **Before testing the memory card:** `obj_ps2/mgs_ps2.iso` is currently the TAS image, so run a plain `./build-and-deploy` first.
+
+## User
+
+Why don’t we work to reproduce the PS1’s CD and stream timing so we don’t have to keep patching symptoms as they appear? We could borrow code from BizHawk or DuckStation. As a reminder, this timing should only be necessary for TAS compliance. When played normally, the game should not be sensitive to disc read speed (I.e. faster loads should work without issue)
+
+## Claude
+
+I'd reproduce the PS1's timing from a recording, not by borrowing emulator code. It would fix the patching problem and stay TAS-only, but an emulated CD drive on its own wouldn't keep us in sync.
+
+## Why borrowed drive code wouldn't be enough
+- **Sync depends on game loops, not just the drive:** the port needs to know which loop a sector landed in. BizHawk or DuckStation code could tell us a sector arrives at cycle X, but which loop that falls in depends on how long each PS1 loop took: CPU, GPU and interrupts. The port doesn't reproduce any of that, so we'd still need the trace to place each event.
+- **The target is Octoshock's behaviour:** the movie synced on BizHawk 1.11.4. Real seek times are complex: our notes show reads at about the same distance taking 4 to 20 vertical blanks. DuckStation's seek model could differ from Octoshock's, so only Octoshock's would really do.
+- **Sound timing is involved too:** the loop 12,102 (0:06:42.12) desync came from the SPU's pace when a voice stream ended, not from the CD. A drive model wouldn't cover that.
+- **Licensing:** Octoshock derives from Mednafen, which is GPL, and as far as I remember DuckStation's newer releases moved to a more restrictive licence. I'd want to check both before copying any code. A recording avoids the question.
+
+## What I'd do: one recorded disc timeline
+BizHawk already plays the movie exactly, so we can record what the drive actually did and replay that as a single table:
+
+1. **Record:** for each loop, log the CD and stream events the game could see: read requested, bytes delivered, read finished, stream started, stream data available, stream ended.
+2. **Replay:** one small layer in the port's CD code delivers data strictly by that table. If the port is early it holds, and if it's late it waits. This is the two-way rule from SH1, applied everywhere.
+3. **Remove the patches:** `Port_TasStreamAhead`, `Port_TasFileAhead`, `Port_TasFileStart`, `Port_TasStreamHold`, `Port_TasStreamMayStart`, the new `file_wait`, and probably `Port_TasStreamMayEnd` all fold into it. The `tas_time.bin` tick and data fields are already part of this.
+
+`tas_time.bin` holds a lot of this already, but only at the end of each loop. The 5,120-bytes-per-vblank estimate exists because we lack finer detail, so the trace needs one new pass with `trace.lua`.
+
+## Keeping it TAS-only
+All of it sits behind `MGS_TAS`, as the harness does today. Normal builds keep reading as fast as possible and don't see the table. That also gives us a useful test: a game bug that only appears with faster loads is exactly what your rule says shouldn't exist, so it would be a real port bug to fix, not one to hide with timing.
+
+## Limits
+This won't reproduce anything that isn't disc or stream timing. The current desync at loop 12,835 (0:07:07.76) may turn out to be a guard logic bug, in which case this won't fix it. It's also a rewrite of working code, so we'd have to re-pass all 12,800 loops, and a full run takes about two minutes.
+
+I'd first spend a short time finding what's behind the desync at loop 12,835. Then I'd build the timeline as its own step, so a change in sync can be traced to one cause. Tell me if you'd rather start the timeline straight away.
+
+## User
+
+Let’s go with your plan. Just remember to not remove the stream patches until we can confirm that the new solution works better.
+
+## Claude
+
+I'll start with the desync at loop 12,835 (0:07:07.76). All the existing stream patches stay in place. First I'm checking which state differs just before the seed does.
+
+- tool `Bash`: Compare trace around the desync and review the guard logging tools
+
+- tool `Bash`: Capture the PS1 guards' state around the desync in BizHawk
+
+## Claude
+
+I have the PS1's guard state from BizHawk. Next I'm logging the same fields in the port, using temporary code, to find the first guard that differs before the seed does.
+
+- tool `Bash`: Log guards in the port, restore source, and diff against the PS1
+
+- tool `Bash`: Diff guard logs with loop alignment
+
+- tool `Bash`: Count random draws per loop on both sides
+
+- tool `Bash`: Log random-number callers around the loop
+
+- tool `Bash`: Fix the logging patch and rerun, resolving callers
+
+- tool `Bash`: Read Snake's function that draws the extra number
+
+- tool `Bash`: Read delay.c
+
+- tool `Bash`: Read the lip-sync data source
+
+- tool `Bash`: Read FS_StreamGetData and notes on the bottom field
+
+- tool `Bash`: Gate stream packets at the PS1's bottom and rerun
+
+- tool `Bash`: Enable the gate in the game build, read jimctrl timing, rerun
+
+- tool `Bash`: Trace where the mouth-data clock comes from
+
+- tool `Bash`: Read FS_StreamGetTick and the capture hook
+
+- tool `Bash`: Route mouth data through the PS1's tick and rerun
+
+- tool `Bash`: Run matching builds and list changes
+
+## Claude
+
+The desync at loop 12,835 (0:07:07.76) is fixed, and the TAS now reaches loop 12,879 (0:07:09.26), where a new desync stops it. The cause was the sound clock, not the CD. No crashes occurred, the matching build passes (80 OK, VR 2 OK), and all the existing stream patches are still in place.
+
+## What caused it
+- **Guards ruled out:** every logged guard field matched the PS1 through loop 12,860.
+- **The extra draw:** the seeds showed a third random draw arriving one loop early. It comes from Snake's lip sync (`sna_act_helper2_helper2_80033054`).
+- **Root cause:** `jimctrl.c` times the mouth data and subtitles by reading `get_str_counter()` directly. That bypassed the PS1 tick the harness gives to streams, so it followed the port's own SPU pace.
+- **Fix:** `Port_TasStrCounter` now works out that counter from the PS1's recorded tick, in TAS builds only.
+
+## Changes to the plan
+- **The timeline needs a sound clock too:** this desync came from a clock, not disc data. So the recording should also include the sound counter for each loop, and `trace.lua` should capture it directly. My conversion from the tick loses a little precision, because the tick is a rounded version of the counter.
+- **The stream gate is unproven:** `Port_TasStreamBottom` stops the port seeing stream packets before the PS1 had them, which is the start of the timeline. The desync didn't move when I added it, so it didn't fix this one, but it also didn't break anything earlier. It's still in the code. `file_wait` is unproven in the same way.
+
+## Still open
+- **Loop 12,879:** the cause is unknown, and I don't know yet if it's the same kind of problem. I'd start with the same draw-count check, which is quick. It would also show if the precision loss is causing it.
+- **Not committed:** the changes are in `port/src/tas_replay.c`, `source/game/jimctrl.c` and `source/libfs/stream.c`, and the docs still need these steps written up.
+- **Console image:** `obj_ps2/mgs_ps2.iso` is the TAS image until you run a plain `./build-and-deploy`.
+
+## User
+
+How and where does lip sync work in MGS1?
+
+- tool `Bash`: Read the lip-sync data format and its users
+
+## Claude
+
+MGS1's lip sync isn't worked out from the audio. Each voice stream carries pre-authored mouth and blink data alongside its subtitles, and the game plays that data back against the sound clock. The main code is in [jimctrl.c](source/game/jimctrl.c).
+
+## The pipeline
+1. **Data arrives in the stream:** a voice line's stream contains packets of subtitles, mouth data and fonts. `jimctrl`'s actor fetches a packet with `FS_StreamGetData` and copies it to `jimaku_buffer`. The header gives the start and end time, plus offsets to the mouth data, subtitles and font.
+2. **The sound clock drives it:** each loop, `get_str_counter()` gives the voice playback position, shifted down by 2. Nothing advances until that counter reaches the packet's start time.
+3. **Mouth commands are stepped through:** `jimctrl_act_helper2_80038070` runs one step per counter tick, so a slow loop catches up by running several. The commands are bytes:
+
+| Byte | Meaning |
+|---|---|
+| High bit set | Set a value, and hold for up to 15 ticks |
+| `1x`, `5x` | Set a value, with a longer hold |
+| `2x` | Assign a character ID to a slot |
+| `4x` | Pick which slot later commands apply to |
+| `6x` | Motion command, which does nothing in the final game (`do_motion` is empty) |
+| `0x` | End of the data (it prints `KUTIPAKU END`, roughly "mouth flapping end") |
+
+4. **Values go into a table:** `do_paku` writes to `chara_work`, one `PAKU` entry per speaking character. A value of 0–3 sets the mouth state, and 4 triggers a blink.
+5. **Characters read their entry:** `jimctrl_helper_80037F68(id)` finds a character by ID and returns the mouth state with the eye flag above it. It clears the eye flag as it reads, so a blink only fires once.
+
+## How it reaches the screen
+- **3D characters:** `sna_act_helper2_helper2_80033054` in [delay.c](source/game/delay.c) turns the mouth state into a joint angle. Snake's call is at [sna_init.c:7922](source/chara/snake/sna_init.c#L7922), and only runs while a stream is playing (`GM_StreamStatus() == 2`).
+  - State 1 opens fully, to 128, moving 32 per loop.
+  - State 2 moves to half open, at 64.
+  - State 0 closes by 8 per loop.
+  - `adjust[6]` is added to `rots[6]`, so the movement is applied to one model joint rotation, which looks like the jaw or head. I didn't confirm which bone that is.
+- **Random variation:** each time the mouth reaches its target, `vz` gets a random offset (`GV_RandS(32)` or `GV_RandS(16)`) that decays back to 0. This is what made the seeds differ at loop 12,835.
+- **Other characters:** `demodoll0.c`, `meryl72/check.c`, `johnny.c`, `mempsy.c` and others use the same call or the same table, so this isn't specific to Snake.
+- **Codec portraits:** `menu/radiofacedraw.c` also uses this system, and the comments in `jimctrl.c` say the data updates the portraits. I haven't read how it maps states to portrait images.
+
+Subtitles use the same clock in `jimctrl_act_helper_80038070`, so the fix at loop 12,835 also moved their timing to the PS1's in TAS runs. In normal play the port still uses its own `get_str_counter()`, so lip sync follows the actual voice audio, as it should.
+
+## User
+
+Let’s continue trying to fix that loop
+
+- tool `Bash`: Count draws and log callers around loop 12,879
+
+- tool `Bash`: Find the sound counter's PS1 address
+
+- tool `Bash`: Log PS1's real sound counter and compare with the derived one
+
+- tool `Bash`: Apply exact counter inverse and rerun the TAS
+
+- tool `Bash`: Check the draw pattern at loop 13,006
+
+## Claude
+
+Loop 12,879 (0:07:09.26) is fixed, and the TAS now reaches loop 13,006 (0:07:13.55), which is 127 loops further. The run had no crashes or TLB misses, and the matching build hasn't changed since it last passed, because this fix only touched `tas_replay.c`.
+
+The cause was my own conversion. It returned 1 below the PS1's real sound counter on many loops. That sometimes changed the value after the shift by 2, so lip sync moved early or late. `Port_TasStrCounter` now uses `(tick * 105 - 1) / 64`, which matched the real `str_tick_count` from BizHawk on all 20 loops I compared (12,870–12,889). So the sound counter doesn't need its own field in the recording, unless the tick stops being sound-driven somewhere.
+
+**The new desync at loop 13,006 looks different:**
+- **Draw count:** this time the port makes one draw *fewer* than the PS1, and it doesn't catch up afterwards, at least through loop 13,013.
+- **Later difference:** `GM_GameStatus` differs at loop 13,015 (0:07:13.88), where the PS1 has bit 0x40 set and the port doesn't. The two may be related, because the voice line may be ending around here, but I haven't checked that.
+- **Next step:** the caller log can't show this one directly, because the missing draw only happens on the PS1. I'd compare the port's callers around this loop with what the PS1's draw pattern implies, then find what sets bit 0x40.
+
+These changes are still uncommitted, and `obj_ps2/mgs_ps2.iso` is still the TAS image.
+
+## User
+
+Commit these changes and then tackle the new desync
+
+- tool `Bash`: Update docs, commit, and inspect GameStatus around 13,006
+

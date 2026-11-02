@@ -330,7 +330,15 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       files, `PS1_ALIGN(n)` on their arrays. Found with `tools/port/tas/zako_log.lua` (each guard's state per loop).
 - [ ] Intermittent hang at loop 11,520 (0:06:22.25), 3 runs in about 12: the hang watch's PC report should show
       where.
-- [ ] Next desync: past loop 12,770 (0:07:05.59), not yet run.
+- [x] Rand seed at loops 12,835 (0:07:07.76) and 12,879 (0:07:09.26): Snake's lip sync's `GV_RandS`
+      (`sna_act_helper2_helper2_80033054`). `jimctrl.c` reads `get_str_counter()` directly, past the PS1's tick:
+      now `Port_TasStrCounter`, `(tick * 105 - 1) / 64`, equal to the PS1's `str_tick_count` on loops 12,870 to 12,889.
+      Guards matched throughout (`zako_log.lua`). Counting draws per loop between the two seeds found it.
+- [x] Seed check before any overwrite (`tas: seed at loop`, in the log): no load hid a difference before 12,835.
+- [ ] Late file reads wait at the loop's end (`file_wait`, from SH1's `file_sync`) and `FS_StreamGetData` stops at
+      the PS1's bottom (`Port_TasStreamBottom`): neither moved a desync yet. Keep or drop once tested.
+- [ ] One recorded disc timeline in place of the stream patches. Keep the patches until it's shown to work better.
+- [ ] Next desync: loop 13,006 (0:07:13.55), one draw fewer than the PS1; `GM_GameStatus` 0x40 missing at 13,015.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run
 

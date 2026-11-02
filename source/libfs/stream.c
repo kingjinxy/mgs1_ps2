@@ -407,6 +407,9 @@ void *FS_StreamGetData( int target_type )
     char *ptr;
     int   type;
     int   size;
+#ifdef MGS_PORT
+    int   ps1_bottom;
+#endif
 
     if (fs_stream_stop != 0)
     {
@@ -414,8 +417,20 @@ void *FS_StreamGetData( int target_type )
     }
 
     ptr = fs_stream_top;
+#ifdef MGS_PORT
+    {
+        extern int Port_TasStreamBottom( void ); /* port/src/tas_replay.c: the PS1's data, this loop */
+        ps1_bottom = Port_TasStreamBottom();
+    }
+#endif
     while (ptr != fs_stream_bottom)
     {
+#ifdef MGS_PORT
+        if (ptr - (char *)fs_stream_heap == ps1_bottom)
+        {
+            break;
+        }
+#endif
         type = *(int *)ptr & 0xFF;
         size = *(int *)ptr >> 8;
 

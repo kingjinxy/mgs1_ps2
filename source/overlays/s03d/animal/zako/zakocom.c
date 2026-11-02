@@ -375,7 +375,12 @@ void s03d_800D47BC(ZakoComMgr *mgr)
     for (i = 0; i < mgr->count; i++)
     {
         work = mgr->entries[ZAKOCOM_MGR->field_40[i]].field_C;
+#ifdef MGS_PORT
+        /* A removed guard's entry is NULL: the PS1 reads its RAM at 0xB90, 0 here (BizHawk, loops 0 to 15,063) */
+        dists[i] = work ? work->field_B90 : 0;
+#else
         dists[i] = work->field_B90;
+#endif
     }
 
     for (t3 = mgr->count - 1; t3 > -1; t3 = t4)
@@ -410,6 +415,9 @@ void s03d_800D47BC(ZakoComMgr *mgr)
     for (i = 0; i < mgr->count; i++)
     {
         work = mgr->entries[ZAKOCOM_MGR->field_40[i]].field_C;
+#ifdef MGS_PORT
+        if (work) /* the PS1 writes its RAM at 0xB64 */
+#endif
         work->field_B64 = (&s03d_dword_800C3BA0)[ZAKOCOM_MGR->field_40[i]];
     }
 }

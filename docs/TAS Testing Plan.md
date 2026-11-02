@@ -347,7 +347,10 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: movies skipped in the port, ending on the PS1's loop in TAS replays.
 - [x] Fixed: the codec's signal bar draws follow the PS1's seed in TAS replays.
 - [x] Fixed: `s05a` linked in: pointer tables and stage table by symbol.
-- [ ] Next desync: rand seed at loop 20,980 (0:11:16.64, `s05a`).
+- [x] Fixed: `s05a` linked in, seed resynced at loop 20,980 (shortcut).
+- [ ] Next desync: rand seed at loop 21,126 (0:11:21.60, `s05a`).
+- [ ] Find the PS1's 5 draws at loop 20,979 (0:11:16.60) that `tas_replay.c`'s `GV_Time == 20980` resync hides.
+- [ ] Hang near loop 6,668 (0:03:52.2, `s01a`) with some builds: a HAL `rand` log and a two-loop seed resync after every load both repeat it; clean builds pass. Cause unknown.
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

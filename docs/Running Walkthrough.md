@@ -879,3 +879,6 @@ At 18,261 the port entered the codec's call state just before a multiple-of-4 lo
 At 20,842 the stage binary `s05a` wasn't linked in. Its 76 literal pointers and stage table are now by symbol (byte-exact in the matching build), and it links. In sync to loop 20,980 (0:11:16.64).
 
 The seed at 20,980 follows a reload: the port lacks 5 PS1 draws in loop 20,979, and tagging every `rand()` and `GV_Rand` found no port caller. A one-loop resync at 20,980 stands in, marked as a shortcut. A resync after every load, and separately a HAL `rand` log, both hung near 6,668 repeatably; clean builds do not. That hang is unexplained. In sync to loop 21,126 (0:11:21.60).
+
+At 21,126 the port makes a burst of 5 draws two loops before the PS1, the same size as the 20,979 mystery. `GV_Rand`, the
+raw `rand()` sites tagged so far and `snowarea.c` are ruled out; the function list with many `rand` calls is the next lead.

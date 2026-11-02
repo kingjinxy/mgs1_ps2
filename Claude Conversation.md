@@ -15055,3 +15055,15 @@ The hang is repeatable, and the last log line is `command.c: Where Is Snake ????
 
 - tool `Bash`: Commit, log draws at 21,126
 
+- tool `Bash`: Fix plan and name the 5-draw caller
+
+## Claude
+
+No logged caller again, so these 5 draws come from a `rand` call my text search missed, such as one written with different spacing. I'll search more loosely.
+
+- tool `Bash`: Find functions calling rand at least four times
+
+- tool `Bash`: Tag anime creation and draws, run, restore
+
+- tool `Bash`: Tag the real particle source, run, restore
+

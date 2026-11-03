@@ -4,7 +4,6 @@ extern char R_GM_ItemTypes[] __asm__("GM_ItemTypes");
 extern char R_GM_PlayerControl[] __asm__("GM_PlayerControl");
 extern char R_GM_SnakeCamera[] __asm__("GM_SnakeCamera");
 extern char R_GM_WeaponTypes[] __asm__("GM_WeaponTypes");
-extern char R_gap_800B0614[] __asm__("gap_800B0614");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_GCL_ExecProc[] __asm__("GCL_ExecProc");
 extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
@@ -83,7 +82,7 @@ int G_s07b_800C8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[4] = (u)r[16] + (u)0;
     r[5] = (u)r[17] + (u)0;
     r[3] = 0;
-    r[2] = (u)r[2] + ((int)R_gap_800B0614 + 492);
+    r[2] = (u)r[2] + 2048;
     r[3] = *(int *)((u)r[3] + (int)R_GM_PlayerControl);
     r[2] = r[2] & 4095;
     *(short *)((u)r[3] + 78) = r[2]; CALL(R_NavigateGetTargetDist);

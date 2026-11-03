@@ -9,8 +9,10 @@ local function a(addr) return addr % 0x200000 end
 local function u32(addr) return memory.read_u32_le(a(addr), RAM) end
 local function s16(addr) local v = memory.read_u16_le(a(addr), RAM); return v >= 0x8000 and v - 0x10000 or v end
 local function s32(addr) local v = u32(addr); return v >= 0x80000000 and v - 0x100000000 or v end
+dofile("Z:\\home\\alex\\Documents\\mgs1_ps2\\tools\\port\\tas\\seek.lua")
 local out = io.open(OUT, "w")
 emu.limitframerate(false)
+out:write("# seek " .. seek(FROM) .. "\n"); out:flush()
 local prev = -1
 while true do
   local t = u32(0x800AB330)

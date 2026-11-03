@@ -1,5 +1,4 @@
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
-extern char R_MemorySystems[] __asm__("MemorySystems");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s07b_dword_800C3390[] __asm__("s07b_dword_800C3390");
 extern char R_s07b_dword_800C339C[] __asm__("s07b_dword_800C339C");
@@ -98,7 +97,7 @@ int G_s07b_800D1484(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[3] = (u)0 + 1;
     *(int *)((u)r[18] + 2092) = r[4];
     *(int *)((u)r[4] + 8) = r[3];
-    r[4] = *(unsigned short *)((u)r[16] + ((int)R_MemorySystems + 11574));
+    r[4] = *(unsigned short *)((u)r[16] + 38);
     r[3] = 0;
     *(short *)((u)r[3] + (int)R_s07b_dword_800C33F0) = r[4]; goto L800d1620;
     L800d161c:;

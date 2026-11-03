@@ -206,6 +206,11 @@ def translate(path, seg=None):
                 lines.append('t = r[%d]; %s %s' % (rs, ins(i + 1), ctrl.replace('(u)r[%d]' % rs, '(u)t').replace('())r[%d]' % rs, '())t')))
             else:
                 lines.append('%s %s' % (ins(i + 1), ctrl))
+            if o == 3 or (o == 0 and fn == 9):
+                # a call clobbers the caller-saved registers: a lui before it doesn't pair with an addiu after
+                # (s07b 800C8CCC: v0 = GV_VecDir2() + 0x800 was taken for an address 0x800B0800)
+                for x in list(range(1, 16)) + [24, 25, 31]:
+                    hi.pop(x, None)
             i += 2
             continue
         lines.append(ins(i)); i += 1

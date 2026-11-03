@@ -16703,3 +16703,363 @@ No new TLB misses: still only the 51 known ones in `DG_GetLightMatrix`. Committi
 
 - tool `Bash`: Update docs, archive conversation, and commit
 
+- tool `Bash`: Confirm the plan update and compare fields at the desync
+
+- tool `Bash`: Compare Snake's position loop by loop before the desync
+
+- tool `Bash`: Run the TAS with screenshots at the desync
+
+## Claude
+
+That run hit my 10-minute foreground limit, because screenshots add the PS1 control run. I'll rerun it in the background.
+
+- tool `Bash`: Run the TAS with screenshots in the background
+
+- tool `Monitor`: 5-minute status of the screenshot run
+
+## Claude
+
+While the screenshot run goes, a note on the movement. From loop 38,580 the PS1 moves Snake to a fixed point (−4,049, −439) and stops him there at 38,583. The port's Snake keeps his running direction and stops at the same loop. So the stop is scripted on both, but the PS1's scripted movement toward a target never happens on the port. That points at code that sets Snake's movement during this event, most likely one of the newly translated `s07b` actors.
+
+## Claude
+
+Screenshots are being taken: the port has reached 38,579 again, and the Redux control run is next.
+
+## Claude
+
+Still waiting on the second screenshot pass.
+
+## Claude
+
+While Redux catches up, I'll look in the translated `s07b` code for whatever moves Snake.
+
+- tool `Bash`: Find s07b code touching Snake's control
+
+- tool `Bash`: Decode the event's status flags
+
+## Claude
+
+The event sets `STATE_PADRELEASE` plus pause-only, so pad input is cut off and Snake is driven by the event. I'll wait for the screenshots before going further.
+
+## Claude
+
+Redux is still replaying toward loop 38,579.
+
+- tool `Bash`: Check the screenshot run's result
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Find code that uses the pad release flag
+
+- tool `Bash`: Read the pad demo actor
+
+- tool `Bash`: Read meryl72's pad release logic
+
+- tool `Bash`: Check how the port handles Japanese string encoding
+
+## Claude
+
+The encoding is handled (`-fexec-charset=EUC-JP`). Next I'll find the translated function that sends `run_move`.
+
+- tool `Bash`: Find the run_move sender in s07b
+
+- tool `Bash`: Find which function uses the run_move string
+
+- tool `Bash`: Read the translated run_move sender
+
+- tool `Bash`: Read the function using the run_move string
+
+- tool `Bash`: Log the run_move sender's conditions on the port
+
+## Claude
+
+No lines, so on the port `s07b_800C51DC` isn't called at all in those loops. I'll look at what calls it.
+
+- tool `Bash`: Find callers of the run_move sender
+
+## Claude
+
+Next I'll dump Meryl's whole Work struct on both sides and diff it. The actor is found through her `Act` function, which the constructor (`s07b_800CA8F8`) registers.
+
+- tool `Bash`: Find Meryl's Act function and Work size
+
+- tool `Bash`: Get Meryl's Act PS1 address
+
+- tool `Bash`: Locate the Meryl Act symbol
+
+- tool `Bash`: See how mips2c names extra entry points
+
+- tool `Bash`: Start a BizHawk dump of Meryl's Work
+
+## Claude
+
+While BizHawk runs, the same dump on the port at `Act` entry:
+
+- tool `Bash`: Dump Meryl's Work on the port
+
+- tool `Bash`: Check the BizHawk dump progress
+
+## Claude
+
+BizHawk is at loop 11,500, so it'll be a while. I'll set a 5-minute status line on it and, meanwhile, look at which fields of the port's Meryl change across those loops.
+
+- tool `Monitor`: 5-minute status of the PS1 Meryl Work dump
+
+- tool `Bash`: Show which Meryl fields change on the port
+
+## Claude
+
+On the port, Meryl's `mov` is at +0x20 (x 737, z 4,523 at loop 38,570), and her state words change sharply at 38,577, the loop where the event starts. Waiting on the PS1 dump to compare.
+
+## Claude
+
+BizHawk is at loop 26,500 of 38,578.
+
+## Claude
+
+The PS1 dump is done. I'll diff it against the port's, skipping words that are pointers on either side.
+
+- tool `Bash`: Diff Meryl's Work between port and PS1
+
+## Claude
+
+Meryl's Work is identical on both sides through loop 38,578, so she isn't the difference. Next I'll diff Snake's own Work. First, his `Act` address and size.
+
+- tool `Bash`: Find Snake's Act and the main map
+
+- tool `Bash`: Search maps for Snake's Act address
+
+## Claude
+
+Snake's `Act` is static, so it isn't in the map. I'll find his Work through `GM_PlayerControl`, which points at `&work->control` (Work + 0x20).
+
+- tool `Bash`: Get GM_PlayerControl's address and Snake's Act
+
+- tool `Bash`: Add Snake Work dumps on both sides and start BizHawk
+
+- tool `Bash`: Dump Snake's Work on the port
+
+## Claude
+
+Snake's Work is 1,816 bytes; the PS1 dump takes 3,000, which covers it. The BizHawk run takes about 20 minutes.
+
+- tool `Monitor`: 5-minute status of the PS1 Snake Work dump
+
+- tool `Bash`: See which Snake fields change on the port
+
+## Claude
+
+It's 9:33, so about two and a half hours remain. I'll compare once the PS1 Snake dump arrives.
+
+## User
+
+How viable would it be to have a memory dump for every frame of the TAS? It seems like we spend a lot of time running over and over again. Quick math suggests this would be several gigabytes, but I’m wondering if there’s a smarter way to store a dump.
+
+## Claude
+
+Yes, it's viable, but not as raw dumps. PS1 main RAM is 2 MB, and the movie has about 164,000 game loops, so a full dump per loop is around 330 GB. Three smarter options:
+
+**1. Deltas (most useful).** Most of the 2 MB doesn't change from one loop to the next: code, models, textures and the overlay stay put. If we store only the 64-byte blocks that changed since the last loop, plus a full keyframe every 1,000 loops, my guess is 10–50 KB per loop. Compressed with zstd, that's roughly 1–3 GB for the whole movie. A small Python reader could then rebuild RAM at any loop in milliseconds. Questions like "Meryl's Work at 38,576" or "who wrote this field, and when" become offline lookups instead of 20-minute BizHawk runs.
+
+The catch is speed. BizHawk 1.11.4's Lua reads memory a call at a time, and 2 MB per loop through Lua would be far too slow. It would have to run once in an emulator with fast access to RAM:
+- a DuckStation build with a small dump hook, or
+- Redux's Lua with its direct memory pointer.
+
+I'd check how fast each can write deltas before committing to one. It's a one-time pass of maybe a few hours, and the PS1 side never changes, so it never has to be redone.
+
+**2. PS1 save states every N loops (cheapest).** BizHawk can save a state every 1,000 loops as it replays: about 164 states at 1–2 MB each, so a few hundred MB. Any loop is then at most about 30 seconds of replay away, instead of 20 minutes from the start. It only uses BizHawk features that already work, but each question still means a short replay.
+
+**3. Only the regions that matter.** The actor heap, the game globals (`.data`/`.bss`) and the stack hold almost everything we compare, which is around 300–500 KB instead of 2 MB. This combines well with 1.
+
+The port side is different. Its memory changes with every build, so a dump store can't be reused there. The port still has to replay, and checkpoints only help until the next code change.
+
+My recommendation: do 2 now (an hour of work, and it immediately cuts each PS1 query to under a minute), then 1 if a fast dump path pans out. Want me to add the BizHawk checkpoints after this desync?
+
+## Claude
+
+The PS1 Snake dump is at loop 26,000, about 5 minutes from 38,580.
+
+## User
+
+Yes, let’s go ahead with that. The port will still have to run from the start, but it runs much faster in PCSX2 with unlimited speed anyways.
+
+## Claude
+
+Agreed. I'll add the checkpoints once the Snake dump finishes, since BizHawk is busy until then. First, the runner script:
+
+- tool `Bash`: Read the BizHawk runner script
+
+- tool `Bash`: Write the checkpoint and seek scripts and use them in the loggers
+
+## Claude
+
+The scripts are written. `checkpoints.lua` plays the whole movie once, which should take about an hour in the background. It starts as soon as the Snake dump releases BizHawk.
+
+## Claude
+
+The Snake dump is done. I'll start the checkpoint pass, then diff Snake.
+
+- tool `Bash`: Start checkpoints and diff Snake's Work
+
+- tool `Bash`: Find Snake's run_move handling
+
+- tool `Bash`: Read Snake's run_move case
+
+## Claude
+
+I'll log every message Snake's handler sees in loops 38,574 to 38,580 on the port.
+
+- tool `Bash`: Read the start of Snake's message loop
+
+- tool `Bash`: Log the messages Snake receives on the port
+
+- tool `Bash`: Outline the first caller's control flow
+
+- tool `Bash`: Read where the first caller calls the sender
+
+## Claude
+
+That caller is a game-over path (it fires when `GM_GameOverTimer` is −2), so it isn't this. Now the second caller, `73F0`:
+
+- tool `Bash`: Read the second caller around the sender call
+
+- tool `Bash`: Find how pad direction becomes a world direction
+
+- tool `Bash`: See what pad direction is relative to
+
+- tool `Bash`: Find who sets the pad origin angle
+
+- tool `Bash`: Find s07b code that sets the pad origin
+
+- tool `Bash`: Read the camera's pad origin update
+
+- tool `Bash`: Log pad origin changes on the port
+
+- tool `Bash`: Check checkpoint progress and size
+
+## Claude
+
+The checkpoints are working (29 states up to loop 29,000), but each state is 33 MB, about 5.4 GB for the whole movie. I'll check BizHawk's state compression setting and the free disk space.
+
+- tool `Bash`: Check state compression settings, disk space, and state contents
+
+- tool `Bash`: Enable state compression and deflate existing states
+
+- tool `Bash`: Make the checkpoint pass resumable and check GV_MSG layout
+
+- tool `Bash`: Check GV_MSG and how Snake receives messages
+
+## Claude
+
+The messages are stored inline in Snake's Work at 0x7A4 (8 × 20 bytes). The PS1 dump already covers that range (3,000 bytes), so no new run is needed.
+
+- tool `Bash`: Decode the PS1 Snake's received messages
+
+- tool `Bash`: Read the first caller's start and its Snake turn write
+
+- tool `Bash`: Log whether Meryl's handler turns Snake on the port
+
+- tool `Bash`: Find PADRELEASE setters and callers of the handler
+
+- tool `Bash`: Log which s07b functions set PADRELEASE on the port
+
+## Claude
+
+The insertion broke the build: some of those lines are one-line `if` statements. Easier: make `RECOMP_ENTRY` in `recomp.h` print every translated function entered in those 10 loops.
+
+- tool `Bash`: Log every translated function entered in loops 38,574 to 38,578
+
+- tool `Bash`: Find the link failure message
+
+- tool `Bash`: Read the link log's errors
+
+- tool `Bash`: Reproduce the link failure to see the error
+
+- tool `Bash`: Compile one overlay file to see the error
+
+- tool `Bash`: Retry the entry log without the printf declaration
+
+- tool `Bash`: Show translated functions entered per loop
+
+- tool `Bash`: Read Meryl's state dispatcher
+
+- tool `Bash`: Read the TARGET struct layout
+
+- tool `Bash`: Log Meryl's target fields on the port
+
+- tool `Bash`: Prepare symbol lookups for both dumps
+
+## Claude
+
+The PS1 Meryl dump was overwritten when the Snake dump reused the log file, so I'll redo it. Checkpoints will make it fast. How far has the checkpoint pass got?
+
+- tool `Bash`: Check checkpoint progress
+
+- tool `Bash`: See what the port's Meryl state functions touch
+
+- tool `Bash`: Read the state function that sets PADRELEASE
+
+- tool `Bash`: See how state 8BB4 affects Snake
+
+- tool `Bash`: Log Snake's turn around Meryl's write
+
+- tool `Bash`: View the end of Snake's Act
+
+- tool `Bash`: Run with turn logging and restore sources
+
+- tool `Bash`: Read how 8BB4 computes the vector
+
+## Claude
+
+The vector at +2160 comes from `s07b_800C4854`, called just before. I'll read it.
+
+- tool `Bash`: Read the function that computes Meryl's vector to Snake
+
+- tool `Bash`: Log the vector and direction, and read GV_VecDir2
+
+- tool `Bash`: Run with the vector log
+
+- tool `Bash`: Read the original assembly around the add
+
+- tool `Bash`: Locate the asm file and the add after GV_VecDir2
+
+- tool `Bash`: Inspect the asm file's call format
+
+- tool `Bash`: Show the raw words after the direction call
+
+- tool `Bash`: Find the seen-address rule in mips2c
+
+- tool `Bash`: Read mips2c's hi tracking and call handling
+
+- tool `Bash`: Find call emission in mips2c
+
+- tool `Bash`: Read the control-flow emission loop
+
+## Claude
+
+I'll add the fix: after a call and its delay slot, forget the `lui` values of caller-saved registers (1–15, 24, 25, 31).
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/mips2c.py
+
+- tool `Bash`: Regenerate s07b and s08b and diff the output
+
+## Claude
+
+Only two `s07b` files change (6 lines), and `s08b` is unchanged. I'll look at the diff.
+
+- tool `Bash`: Show the regenerated changes
+
+## Claude
+
+Both changes are corrections. The second, in `D1484`, was a load `lhu a0, 38(s0)` that had wrongly become an address in `MemorySystems`. Now the TAS:
+
+- tool `Bash`: Run the TAS with the translator fix
+
+## Claude
+
+Fixed. In sync to **loop 39,732 (0:21:06.15)**, a `rand` seed desync, and no new TLB misses. I'll run the matching build, then commit this along with the checkpoint tools.
+
+- tool `Bash`: Run the matching build and check checkpoints
+
+- tool `Bash`: Update docs, archive conversation, and commit
+

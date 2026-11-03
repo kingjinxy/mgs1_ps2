@@ -23,6 +23,7 @@ path, lua, bios = sys.argv[1:]
 c = json.load(open(path))
 c["DispMethod"] = 0                      # OpenGL (Direct3D's shaders don't compile under Wine)
 c["SoundEnabled"] = False
+c["SaveStateCompressionLevelNormal"] = 6  # checkpoints.lua: states hold the movie input log (30 MB raw)
 c["FrameSkip"] = 7
 c["FirmwareUserSpecifications"] = {"PSX+J": bios}
 c["RecentLua"]["recentlist"] = [lua] + [p for p in c["RecentLua"]["recentlist"] if p != lua]

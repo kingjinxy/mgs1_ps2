@@ -362,7 +362,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: overlay statics read by translated code by name: `chair_alive` etc. were `dword_800C3404`+124 (Psycho Mantis through).
 - [x] Fixed: `s10a` (not split by the decomp) linked in through the new stage_split.py and mips2c.py, with GTE instructions.
 - [x] Fixed: loop 47,499 (Wolf's tick burn read mid-loop: trace_to_pads.py's TICK_AT, 90,359 at loop 47,488).
-- [ ] Next desync: rand seed at loop 47,546 (0:25:23.46, `s10a`): port a8365886, PS1 ca019561.
+- [x] Fixed: loop 47,546 (translated calls passed 8 arguments: NewBulletEx's 9th, speed, was garbage; CALL passes 12).
+- [ ] Next desync: rand seed at loop 47,556 (0:25:23.79, `s10a`): port 98e9f25e, PS1 b629063f.
   Found so far (2026-11-03): in loop 47,498 the PS1's Wolf switches to state 0 (Work+1748) and draws 3 (her
   `RandU(4)`, `9A4C`, `RandU(16)`); the port's doesn't. Equal on both sides at the loop's start: Wolf's whole Work,
   her two TARGETs, the actor lists, the overlay's data, the resident globals but sound/OT/stack noise

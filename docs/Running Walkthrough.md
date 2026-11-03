@@ -960,3 +960,11 @@ Fix: `trace_to_pads.py`'s `TICK_AT`, a per-loop override of `ticks.bin` (shortcu
 Tried and dropped:
 - BizHawk's `event.onmemorywrite`/`onmemoryexecute`: no callbacks on this core, and with the System Bus scope the run stalls.
 - Setting the PS1's seed when the scenario runs (`gamed.c`): the seeds already matched there; reverted.
+
+## Step 35: a 9th argument for translated calls (Nov 3)
+
+Loop 47,546 (0:25:23.46): in loop 47,545, Wolf fires. The port made two anime actors (logged in `NewAnime`), the PS1 one: the extra was `AN_RecoilSmoke`, the bullet-hit smoke, whose script draws a `rand()` (`ScriptA`'s 0xFE). The bullet's Work, printed in the port's `Act` and dumped on the PS1 (`work_dump.lua`, act 80075dd4), had `speed` 0x02C00000 against 5,000: `NewBulletEx` takes 9 arguments, and mips2c.py's `CALL` passed the stack's only up to sp+28 (8 in all), so the 9th (sp+32) was whatever the callee found there. The bullet then went past its hit distance in its first loop and hit at once.
+
+Fix: `recomp.h`'s `CALL` passes the stack's words up to sp+44 (12 arguments; `stk`'s 32 bytes of padding keep the reads inside the frame). Shortcut: translated callees still take 8 (`RECOMP_ENTRY`'s a0-a7). In sync to loop 47,556 (0:25:23.79). Matching builds 80 and 2 OK.
+
+On the way: `bullet_count` (whose parity gates the other smoke) matched, 84 on both sides; I had misread the port's dump.

@@ -18066,3 +18066,151 @@ Next: docs and a commit for this fix. Checking my doc-update helper first.
 
 - tool `Bash`: View doc helper and current doc mentions
 
+- tool `Bash`: Update docs and commit fix
+
+## Claude
+
+Committed (`3e380dc85`). Now on loop 47,546 (0:25:23.46).
+
+- tool `Bash`: Draw counts around 47546
+
+## Claude
+
+The port makes one extra draw in loop 47,545. Logging its callers.
+
+- tool `Bash`: Port rand callers 47540-47545
+
+- tool `Bash`: Find GV_RandU source
+
+- tool `Bash`: Log GV_RandU caller at 47545
+
+- tool `Bash`: Symbolize GV_RandU caller
+
+- tool `Bash`: Symbolize GV_RandU caller
+
+## Claude
+
+Both of the port's draws in loop 47,545 come from an anime effect (`NewAnime_8005E1A0`, then its `ScriptA`); the PS1 makes 1 draw. Reading that code.
+
+- tool `Bash`: Find rand uses in anime.c
+
+- tool `Bash`: Find NewAnime_8005E1A0 definition and callers
+
+- tool `Bash`: Read NewAnime_8005E1A0 and Wolf's call
+
+## Claude
+
+Wolf's gun function (`92A0`) spawns a muzzle-flash anime (`RandU(16)`, then the anime script's draw). Dumping RAM on both sides at loop 47,546 (0:25:23.46) to see whether the PS1 made the effect too.
+
+- tool `Bash`: Dump both sides at 47545
+
+- tool `Bash`: Diff Wolf Work and PS1 actor list
+
+## Claude
+
+Wolf's Work is identical at 47,545. Checking which actors the PS1 created during that loop.
+
+- tool `Bash`: PS1 actors created in 47545
+
+- tool `Bash`: Read anime.c rand paths
+
+- tool `Bash`: Find anim table and the draw values
+
+- tool `Bash`: Read anim table and other user
+
+- tool `Bash`: Read Wolf fire function branch
+
+- tool `Bash`: Read the anime path after NewAnime
+
+- tool `Bash`: Find script selection in anime.c
+
+- tool `Bash`: Read anime init script setup
+
+- tool `Bash`: Find anime script opcode table
+
+- tool `Bash`: Read script dispatch and ScriptW
+
+- tool `Bash`: Read bullet.c anime path
+
+- tool `Bash`: Resolve rand call sites to source lines
+
+- tool `Bash`: Find NewAnime definition
+
+- tool `Bash`: Read NewAnime body
+
+- tool `Bash`: Log NewAnime calls and ScriptA rand
+
+## Claude
+
+The port makes two anime actors in loop 47,545 and the PS1 makes one. The extra one (30 frames, called from 0x158aa4) is the one that draws.
+
+- tool `Bash`: Identify the extra anime's creator
+
+- tool `Bash`: Find callers of AN_RecoilSmoke
+
+- tool `Bash`: Read bullet hit smoke logic
+
+## Claude
+
+The extra anime is a bullet-hit smoke puff (`okajima/bullet.c`), made only when `!(bullet_count & 1)`, so it's gated by a static counter's parity. Checking that counter on both sides.
+
+- tool `Bash`: Compare bullet_count at 47545
+
+- tool `Bash`: Find bullet_count symbols on both sides
+
+- tool `Bash`: Locate PS1 bullet_count address
+
+- tool `Bash`: Find PS1 bullet object file
+
+- tool `Bash`: Search main PS1 map for bullet_count
+
+- tool `Bash`: Port bullet_count and PS1 NewBulletEx address
+
+## Claude
+
+The port's `bullet_count` is 0 at loop 47,545. Reading the PS1's copy from its code to compare.
+
+- tool `Bash`: Find function incrementing bullet_count
+
+- tool `Bash`: Disassemble gp accesses in PS1 NewBulletEx
+
+- tool `Bash`: Find absolute loads/stores in PS1 NewBulletEx
+
+## Claude
+
+The PS1's `bullet_count` is 84 at loop 47,545 and the port's is 0, so the port's counter isn't keeping its value. Checking whether a stage-load data reset covers it.
+
+- tool `Bash`: Check bullet_count against overlay reset ranges
+
+- tool `Bash`: List overlay reset range symbols
+
+- tool `Bash`: Test if bullet_count in any reset bss range
+
+## Claude
+
+Nothing in the overlay reset covers it. Logging each `bullet_count` increment in a replay to find where the port's goes missing.
+
+- tool `Bash`: Read bullet_count increment context
+
+- tool `Bash`: Log port bullet_count increments
+
+- tool `Bash`: Read bullet Act start
+
+- tool `Bash`: Read bullet Work struct
+
+- tool `Bash`: Compare bullet Work port vs PS1
+
+- tool `Bash`: Diff bullet fields
+
+- tool `Bash`: Read recomp CALL macro
+
+- tool `Bash`: Read rest of RECOMP_ENTRY
+
+- tool `Bash`: Pass 12 args in CALL and replay
+
+## Claude
+
+That fixed it: in sync to loop 47,556 (0:25:23.79). Running the matching builds, then docs and a commit.
+
+- tool `Bash`: Run matching builds
+

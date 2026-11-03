@@ -1,0 +1,60 @@
+extern char R_GM_PlayerControl[] __asm__("GM_PlayerControl");
+extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
+extern char R_s07b_800C7C64[] __asm__("s07b_800C7C64");
+extern char R_GV_DiffDirAbs[] __asm__("GV_DiffDirAbs");
+extern char R_GV_VecDir2[] __asm__("GV_VecDir2");
+int G_s07b_800C53A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C53A0");
+int G_s07b_800C53A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(unsigned short *)((u)r[16] + 2116);
+    r[2] = (u)r[2] < (u)2;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800c5480;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_PlayerStatus);
+    r[2] = r[2] & 1;
+    c = ((r[2] != 0));  if (c) goto L800c53e0;
+    *(short *)((u)r[16] + 2240) = 0; goto L800c5480;
+    L800c53e0:;
+    r[2] = *(int *)((u)r[16] + 2168);
+    r[2] = (int)r[2] < 4001;
+    c = ((r[2] == 0));  if (c) goto L800c5480;
+    r[4] = (u)r[16] + 2160; CALL(R_GV_VecDir2);
+    r[3] = 0;
+    r[3] = *(int *)((u)r[3] + (int)R_GM_PlayerControl);
+    r[4] = *(short *)((u)r[3] + 10);
+    r[5] = (u)r[2] + (u)0; CALL(R_GV_DiffDirAbs);
+    r[2] = (int)r[2] < 1801;
+    c = ((r[2] != 0));  if (c) goto L800c5480;
+    r[2] = *(unsigned short *)((u)r[16] + 2240);
+    r[2] = (u)r[2] + 1;
+    *(short *)((u)r[16] + 2240) = r[2];
+    r[2] = (u)r[2] << 16;
+    r[2] = (int)r[2] >> 16;
+    r[2] = (int)r[2] < 151;
+    c = ((r[2] != 0));  if (c) goto L800c5480;
+    r[2] = *(short *)((u)r[16] + 2238);
+    r[3] = *(unsigned short *)((u)r[16] + 2238);
+    r[2] = (int)r[2] < 4;
+    c = ((r[2] == 0)); r[2] = (u)r[3] + 1; if (c) goto L800c545c;
+    *(short *)((u)r[16] + 2238) = r[2];
+    L800c545c:;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s07b_800C7C64;
+    *(short *)((u)r[16] + 2240) = 0;
+    *(int *)((u)r[16] + 2132) = r[2];
+    *(int *)((u)r[16] + 2144) = 0;
+    *(short *)((u)r[16] + 2246) = 0;
+    *(short *)((u)r[16] + 2244) = 0;
+    *(short *)((u)r[16] + 112) = 0;
+    *(short *)((u)r[16] + 108) = 0;
+    L800c5480:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

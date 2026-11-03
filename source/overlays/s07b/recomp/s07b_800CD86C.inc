@@ -1,0 +1,91 @@
+extern char R_s07b_dword_800C3390[] __asm__("s07b_dword_800C3390");
+extern char R_MENU_DrawBar2[] __asm__("MENU_DrawBar2");
+int G_s07b_800CD86C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CD86C");
+int G_s07b_800CD86C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 28) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 36) = r[31];
+    *(int *)((u)r[29] + 32) = r[18];
+    *(int *)((u)r[29] + 24) = r[16];
+    r[2] = *(int *)((u)r[17] + 2128);
+    r[2] = r[2] & 32;
+    c = ((r[2] == 0));  if (c) goto L800cd9ec;
+    r[2] = *(int *)((u)r[17] + 2016);
+    r[16] = *(short *)((u)r[2] + 38);
+    c = (((int)r[16] >= 0));  if (c) goto L800cd8b4;
+    r[16] = (u)0 + (u)0;
+    L800cd8b4:;
+    r[18] = *(int *)((u)r[17] + 2304);
+    r[2] = (int)r[18] < (int)r[16];
+    c = ((r[2] == 0)); r[6] = 0; if (c) goto L800cd8cc;
+    r[18] = (u)r[16] + (u)0;
+    L800cd8cc:;
+    r[2] = *(unsigned short *)((u)r[6] + (int)R_s07b_dword_800C3390);
+    r[2] = (u)r[2] < (u)1025;
+    c = ((r[2] != 0)); r[2] = (u)r[17] + 2292; if (c) goto L800cd9a4;
+    r[3] = *(unsigned short *)((u)r[6] + (int)R_s07b_dword_800C3390);
+    r[2] = (u)0 + 15360;
+    if (r[3]) { lo_ = (int)r[2] / (int)r[3]; hi_ = (int)r[2] % (int)r[3]; }
+    c = ((r[3] != 0));  if (c) goto L800cd8f8;
+    L800cd8f8:;
+    r[1] = (u)0 + -1;
+    c = ((r[3] != r[1])); r[1] = 0; if (c) goto L800cd910;
+    c = ((r[2] != r[1]));  if (c) goto L800cd910;
+    L800cd910:;
+    r[2] = lo_;
+    r[3] = 0x10000;
+    r[2] = (u)r[2] + 16;
+    *(char *)((u)r[17] + 2299) = r[2];
+    r[2] = *(unsigned short *)((u)r[6] + (int)R_s07b_dword_800C3390);
+    r[3] = r[3] | 49152;
+    if (r[2]) { lo_ = (int)r[3] / (int)r[2]; hi_ = (int)r[3] % (int)r[2]; }
+    c = ((r[2] != 0));  if (c) goto L800cd938;
+    L800cd938:;
+    r[1] = (u)0 + -1;
+    c = ((r[2] != r[1])); r[1] = 0; if (c) goto L800cd950;
+    c = ((r[3] != r[1]));  if (c) goto L800cd950;
+    L800cd950:;
+    r[3] = lo_;
+    r[3] = (u)r[3] + 63;
+    *(char *)((u)r[17] + 2300) = r[3];
+    r[3] = *(unsigned short *)((u)r[6] + (int)R_s07b_dword_800C3390);
+    r[2] = (u)0 + -32768;
+    if (r[3]) { lo_ = (int)r[2] / (int)r[3]; hi_ = (int)r[2] % (int)r[3]; }
+    c = ((r[3] != 0));  if (c) goto L800cd978;
+    L800cd978:;
+    r[1] = (u)0 + -1;
+    c = ((r[3] != r[1])); r[1] = 0; if (c) goto L800cd990;
+    c = ((r[2] != r[1]));  if (c) goto L800cd990;
+    L800cd990:;
+    r[2] = lo_;
+    r[2] = (u)r[2] + -64;
+    *(char *)((u)r[17] + 2301) = r[2];
+    r[2] = (u)r[17] + 2292;
+    L800cd9a4:;
+    r[4] = (u)0 + 28;
+    r[5] = (u)r[18] + (u)0;
+    r[7] = *(unsigned short *)((u)r[6] + (int)R_s07b_dword_800C3390);
+    r[6] = (u)r[16] + (u)0;
+    *(int *)((u)r[29] + 16) = r[2]; CALL(R_MENU_DrawBar2);
+    r[5] = (u)r[18] - (u)r[16];
+    c = (((int)r[5] <= 0)); r[2] = (int)r[5] < 64; if (c) goto L800cd9ec;
+    c = ((r[2] != 0));  if (c) goto L800cd9dc;
+    r[2] = *(int *)((u)r[17] + 2304);
+    r[2] = (u)r[2] + -64; goto L800cd9e8;
+    L800cd9dc:;
+    r[2] = *(int *)((u)r[17] + 2304);
+    r[2] = (u)r[2] - (u)r[5];
+    L800cd9e8:;
+    *(int *)((u)r[17] + 2304) = r[2];
+    L800cd9ec:;
+    r[31] = *(int *)((u)r[29] + 36);
+    r[18] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}

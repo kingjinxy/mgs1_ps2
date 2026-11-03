@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "ps1align.h"
 #include "chara/psyco/psyco.h"
 
@@ -74,6 +77,15 @@ typedef struct _Work {
     /* 0xAE4 */ char     field_AE4[ 4 ];
 } Work;
 
+extern char s07b_800CDF40[];
+extern char s07b_800CE134[];
+extern char s07b_800CE2A8[];
+extern char s07b_800CE43C[];
+extern char s07b_800CE660[];
+extern char s07b_800CE85C[];
+extern char s07b_800CEA18[];
+extern char s07b_800CED04[];
+extern char s07b_800CF130[];
 int s07b_dword_800C3390 = 0x01900388;
 int s07b_dword_800C3394 = 0x00F00140;
 int s07b_dword_800C3398 = 0x00000078;
@@ -81,17 +93,17 @@ int s07b_dword_800C339C = 0x00240018;
 int s07b_dword_800C33A0 = 0x00480030;
 int s07b_dword_800C33A4 = 0x00E0002C;
 int s07b_dword_800C33A8 = 0x00000040;
-int s07b_dword_800C33AC = 0x800CED04;
-int s07b_dword_800C33B0 = 0x800CF130;
-int s07b_dword_800C33B4 = 0x800CF130;
-int s07b_dword_800C33B8 = 0x800CF130;
-int s07b_dword_800C33BC = 0x800CDF40;
-int s07b_dword_800C33C0 = 0x800CE134;
-int s07b_dword_800C33C4 = 0x800CE2A8;
-int s07b_dword_800C33C8 = 0x800CE43C;
-int s07b_dword_800C33CC = 0x800CE660;
-int s07b_dword_800C33D0 = 0x800CE85C;
-int s07b_dword_800C33D4 = 0x800CEA18;
+int s07b_dword_800C33AC = (int)&s07b_800CED04;
+int s07b_dword_800C33B0 = (int)&s07b_800CF130;
+int s07b_dword_800C33B4 = (int)&s07b_800CF130;
+int s07b_dword_800C33B8 = (int)&s07b_800CF130;
+int s07b_dword_800C33BC = (int)&s07b_800CDF40;
+int s07b_dword_800C33C0 = (int)&s07b_800CE134;
+int s07b_dword_800C33C4 = (int)&s07b_800CE2A8;
+int s07b_dword_800C33C8 = (int)&s07b_800CE43C;
+int s07b_dword_800C33CC = (int)&s07b_800CE660;
+int s07b_dword_800C33D0 = (int)&s07b_800CE85C;
+int s07b_dword_800C33D4 = (int)&s07b_800CEA18;
 int s07b_dword_800C33D8 = 0x00000000;
 int s07b_dword_800C33DC = 0x0000FA24;
 int s07b_dword_800C33E0 = 0x00000000;
@@ -116,44 +128,44 @@ const char s07b_dword_800E4FC8[] = "胸像２";
 
 const char s07b_dword_800E4FD0[] PS1_ALIGN(4) = {0x0, 0x0, 0x0, 0x0};
 
-const int s07b_dword_800E4FD4 = 0x800CD040;
-const int s07b_dword_800E4FD8 = 0x800CD1BC;
-const int s07b_dword_800E4FDC = 0x800CD1A4;
-const int s07b_dword_800E4FE0 = 0x800CD1BC;
-const int s07b_dword_800E4FE4 = 0x800CD1A4;
-const int s07b_dword_800E4FE8 = 0x800CD1BC;
-const int s07b_dword_800E4FEC = 0x800CD1B0;
-const int s07b_dword_800E4FF0 = 0x800CD1BC;
-const int s07b_dword_800E4FF4 = 0x800CD070;
-const int s07b_dword_800E4FF8 = 0x800CD07C;
-const int s07b_dword_800E4FFC = 0x800CD07C;
-const int s07b_dword_800E5000 = 0x800CD07C;
-const int s07b_dword_800E5004 = 0x800CD0F8;
-const int s07b_dword_800E5008 = 0x800CD0DC;
-const int s07b_dword_800E500C = 0x800CD0DC;
-const int s07b_dword_800E5010 = 0x800CD0F8;
-const int s07b_dword_800E5014 = 0x800CD0F8;
+const int s07b_dword_800E4FD4 = -2146643904;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FD8 = -2146643524;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FDC = -2146643548;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FE0 = -2146643524;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FE4 = -2146643548;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FE8 = -2146643524;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FEC = -2146643536;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FF0 = -2146643524;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FF4 = -2146643856;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FF8 = -2146643844;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E4FFC = -2146643844;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5000 = -2146643844;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5004 = -2146643720;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5008 = -2146643748;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E500C = -2146643748;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5010 = -2146643720;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5014 = -2146643720;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
 
 const char s07b_dword_800E5018[] = "MANTIS";
 const char s07b_dword_800E5020[] = "マンティス";
 
-const int s07b_dword_800E502C = 0x800CFF7C;
-const int s07b_dword_800E5030 = 0x800D0064;
-const int s07b_dword_800E5034 = 0x800D0178;
-const int s07b_dword_800E5038 = 0x800D035C;
-const int s07b_dword_800E503C = 0x800D035C;
-const int s07b_dword_800E5040 = 0x800D052C;
-const int s07b_dword_800E5044 = 0x800D10C4;
-const int s07b_dword_800E5048 = 0x800D10D4;
-const int s07b_dword_800E504C = 0x800D10E4;
-const int s07b_dword_800E5050 = 0x800D10F4;
-const int s07b_dword_800E5054 = 0x800D1104;
-const int s07b_dword_800E5058 = 0x800D1114;
-const int s07b_dword_800E505C = 0x800D1124;
-const int s07b_dword_800E5060 = 0x800D1134;
-const int s07b_dword_800E5064 = 0x800D1144;
-const int s07b_dword_800E5068 = 0x800D1154;
-const int s07b_dword_800E506C = 0x800D1164;
+const int s07b_dword_800E502C = -2146631812;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5030 = -2146631580;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5034 = -2146631304;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5038 = -2146630820;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E503C = -2146630820;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5040 = -2146630356;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5044 = -2146627388;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5048 = -2146627372;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E504C = -2146627356;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5050 = -2146627340;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5054 = -2146627324;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5058 = -2146627308;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E505C = -2146627292;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5060 = -2146627276;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5064 = -2146627260;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E5068 = -2146627244;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
+const int s07b_dword_800E506C = -2146627228;  /* unused in the port: mips2c.py reads jump tables from the PS1 binary */
 
 const char s07b_dword_800E5070[] = "メリル";
 const char s07b_dword_800E5078[] = "hideo_b";
@@ -239,100 +251,380 @@ void s07b_800CAE00( Work *work )
     DG_SetPos2( pos, rot );
 }
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CAF54.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CAF54.s")
+#endif
 void s07b_800CAF54( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CAFC8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CAFC8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB068.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB068.s")
+#endif
 void s07b_800CB068( int );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB0B4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB0B4.s")
+#endif
 void s07b_800CB0B4( Work *work, int );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB130.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB130.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB224.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB224.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB264.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB264.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB2A4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB2A4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB6B0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB6B0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB770.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB770.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB8CC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB8CC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CB9E8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CB9E8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBAA4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBAA4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBB38.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBB38.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBC20.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBC20.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBCE8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBCE8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBD4C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBD4C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBDA0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBDA0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBDCC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBDCC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBE34.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBE34.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBF00.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBF00.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CBFB0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CBFB0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC138.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC138.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC174.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC174.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC468.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC468.s")
+#endif
 
 void s07b_800CC50C( void )
 {
     /* do nothing */
 }
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC514.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC514.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC578.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC578.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC67C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC67C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC6CC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC6CC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC704.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC704.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC790.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC790.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC89C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC89C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC8D4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC8D4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC930.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC930.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC970.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC970.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CC9E8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CC9E8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CCA10.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CCA10.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CCA80.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CCA80.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CCBB0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CCBB0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CCBFC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CCBFC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CCFE4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CCFE4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CD86C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CD86C.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CDA04.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CDA04.s")
+#endif
 int s07b_800CDA04( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CDA90.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CDA90.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CDAFC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CDAFC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CDBA4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CDBA4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CDCAC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CDCAC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CDF40.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CDF40.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CE134.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CE134.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CE2A8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CE2A8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CE43C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CE43C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CE660.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CE660.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CE85C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CE85C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CEA18.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CEA18.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CEBAC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CEBAC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CED04.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CED04.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CEFF0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CEFF0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF130.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF130.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF200.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF200.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF304.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF304.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF684.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF684.s")
+#endif
 void s07b_800CF684( void );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF6F0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF6F0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF768.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF768.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800CF9A0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800CF9A0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D075C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D075C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0774.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0774.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D098C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D098C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0A4C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0A4C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0A6C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0A6C.s")
+#endif
 
 void s07b_800D0B40( void )
 {
     /* do nothing */
 }
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0B48.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0B48.s")
+#endif
 
 void s07b_800D0C8C( void )
 {
@@ -340,15 +632,27 @@ void s07b_800D0C8C( void )
 }
 
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0C94.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0C94.s")
+#endif
 
 void s07b_800D0DCC( void )
 {
     /* do nothing */
 }
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0DD4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0DD4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D0F94.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D0F94.s")
+#endif
 
 void s07b_800D0FC0( Work *work, int arg1 )
 {
@@ -370,18 +674,38 @@ void s07b_800D0FC0( Work *work, int arg1 )
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D105C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D105C.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D1254.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D1254.s")
+#endif
 void s07b_800D1254( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D13C4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D13C4.s")
+#endif
 void s07b_800D13C4( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D1484.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D1484.s")
+#endif
 int s07b_800D1484( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D1638.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D1638.s")
+#endif
 void s07b_800D1638( Work *work );
 
 int s07b_800D187C( HZD_PAT *patrol, int *count, SVECTOR *data )
@@ -427,7 +751,11 @@ int s07b_800D18E0( Work *work )
     return 0;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s07b/recomp/s07b_800D195C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s07b/s07b_800D195C.s")
+#endif
 void s07b_800D195C( Work *work );
 
 void s07b_800D1C80( Work *work )

@@ -1,0 +1,68 @@
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_linkvarbuf[] __asm__("linkvarbuf");
+extern char R_s07b_dword_800C32F8[] __asm__("s07b_dword_800C32F8");
+extern char R_s07b_dword_800C3328[] __asm__("s07b_dword_800C3328");
+extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
+extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
+extern char R_GCL_StrToInt[] __asm__("GCL_StrToInt");
+extern char R_GM_AllocTarget[] __asm__("GM_AllocTarget");
+extern char R_GM_SetPowerTarget[] __asm__("GM_SetPowerTarget");
+extern char R_GM_SetTarget[] __asm__("GM_SetTarget");
+int G_s07b_800CA1FC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CA1FC");
+int G_s07b_800CA1FC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 32) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    r[4] = (u)0 + 108;
+    *(int *)((u)r[29] + 36) = r[31];
+    *(int *)((u)r[29] + 28) = r[17];
+    *(int *)((u)r[29] + 24) = r[16]; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800ca23c;
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    r[17] = (u)r[2] + (u)0; goto L800ca240;
+    L800ca23c:;
+    r[17] = *(short *)((u)r[2] + ((int)R_linkvarbuf + 24));
+    L800ca240:;
+    r[2] = *(unsigned short *)((u)r[18] + 2112);
+    r[2] = (u)r[2] + -1;
+    r[2] = (u)r[2] < (u)2;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800ca25c;
+    r[17] = *(int *)((u)r[2] + (int)R_s07b_dword_800C32F8);
+    L800ca25c:;
+    r[2] = (int)r[17] < 32;
+    c = ((r[2] == 0));  if (c) goto L800ca270;
+    r[17] = (u)0 + 32;
+    L800ca270:;
+     CALL(R_GM_AllocTarget);
+    r[16] = (u)r[2] + (u)0;
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)0 + 159;
+    r[6] = (u)0 + 2;
+    r[7] = 0;
+    r[7] = (u)r[7] + (int)R_s07b_dword_800C3328;
+    *(int *)((u)r[18] + 2012) = r[16]; CALL(R_GM_SetTarget);
+    r[3] = *(unsigned short *)((u)r[18] + 2112);
+    r[2] = (u)0 + 3;
+    c = ((r[3] != r[2])); r[8] = (u)0 + 20; if (c) goto L800ca2ac;
+    r[8] = (u)0 + 12;
+    L800ca2ac:;
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)0 + 1;
+    r[6] = (u)0 + -1;
+    r[7] = (u)r[17] + (u)0;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_DG_ZeroVector;
+    *(int *)((u)r[29] + 16) = r[8];
+    *(int *)((u)r[29] + 20) = r[2]; CALL(R_GM_SetPowerTarget);
+    r[31] = *(int *)((u)r[29] + 36);
+    r[18] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[2] = (u)0 + (u)0;
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}

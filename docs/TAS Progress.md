@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 37,813 (0:20:00.70), 22.98%.
+Current: loop 38,579 (0:20:26.61), 23.47%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -38,6 +38,7 @@ Current: loop 37,813 (0:20:00.70), 22.98%.
 | 29,057 | 0:15:36.67 | 17.93% | lip sync holds the counter on a loop the PS1's field_30 held | Nov 2 |
 | 35,095 | 0:18:39.13 | 21.42% | the lip sync hold never goes past the counter (a new stream reused the old one's) | Nov 2 |
 | 37,813 | 0:20:00.70 | 22.98% | the gun cameras' check phase: overlay `.data`/`.bss` reset on a stage load (`s08a` revisit) | Nov 3 |
+| 38,579 | 0:20:26.61 | 23.47% | `s07b` (Psycho Mantis) linked in: 157 stubs through mips2c.py, stage table and state table by symbol; the boss life bar now drawn | Nov 3 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

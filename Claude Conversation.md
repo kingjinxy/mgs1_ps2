@@ -16557,3 +16557,149 @@ Now a build and a TAS run past 35,095:
 
 - tool `Bash`: Update the plan checkbox and the reset doc's status
 
+- tool `Bash`: Update TAS docs, archive conversation, and commit
+
+## Claude
+
+One `sed` in the helper failed because of the `/` in `.data`/`.bss`, so the TAS plan line wasn't updated. I'll fix it and amend the commit.
+
+- tool `Bash`: Fix the TAS plan line and amend the commit
+
+- tool `Bash`: Check the progress table row
+
+## Claude
+
+Committed as `e92141a26`. I'll make the helper's plan edit safe for `/` in the text, then move on to 37,813.
+
+- tool `Bash`: Replace the fragile sed in the commit helper
+
+## Claude
+
+Now loop 37,813 (0:20:00.70) in `s07b`: the PS1 has `GM_GameStatus` bit 0x8000 set and the port doesn't.
+
+- tool `Bash`: Identify GM_GameStatus bit 0x8000
+
+- tool `Bash`: Search headers for the 0x8000 game status flag
+
+- tool `Bash`: List all game state flags
+
+- tool `Bash`: Find bit 15's name
+
+## Claude
+
+The PS1 shows a life bar there (`STATE_SHOW_LIFEBAR`) and the port doesn't. I'll find what sets it, and what the trace shows just before.
+
+- tool `Bash`: Find setters of the life bar flag and compare the trace
+
+- tool `Bash`: Read the life bar setters
+
+- tool `Bash`: Read when the player life bar is drawn
+
+- tool `Bash`: Find where the flag is cleared and view PS1 trace near the desync
+
+- tool `Bash`: Show the port trace around the desync
+
+## Claude
+
+The port matches on everything except the flag, including the 13-frame loop and the press. I'll check which button 0x0010 is.
+
+- tool `Bash`: Look up the pad bit names
+
+## Claude
+
+Triangle, so not a menu. Next I'll check which actors `s07b` contains, since a stage actor may set or clear the flag.
+
+- tool `Bash`: List s07b's overlay objects
+
+## Claude
+
+`s07b` is the Psycho Mantis fight (`psyco.obj`), so this is most likely the boss's life bar. I'll check whether `s07b` is linked into the port.
+
+- tool `Bash`: Check whether s07b is linked in
+
+## Claude
+
+`s07b` isn't linked into the port yet ("stage binary 477C is not linked in"), so the Psycho Mantis fight runs with no stage actors. It needs the same treatment `s08b` got. I'll check what's missing.
+
+- tool `Bash`: Survey what keeps s07b out of the link
+
+## Claude
+
+157 stubs, 64 literal addresses and 28 jump tables. I'll use `mips2c.py` as for `s08b`, starting with where the stubs are.
+
+- tool `Bash`: Count INCLUDE_ASM stubs per s07b source
+
+## Claude
+
+Psycho Mantis (`psyco.c`, 79) and Meryl (`meryl07b.c`, 78). Running the translator:
+
+- tool `Bash`: Translate s07b's stubs with mips2c.py
+
+## Claude
+
+Translated: 157 functions, plus 7 extra entry points. Next are the 64 literal addresses. I'll see where they are.
+
+- tool `Bash`: Check how the survey lists literals
+
+- tool `Bash`: Read how the survey finds literals
+
+- tool `Bash`: List the literal addresses by source in s07b
+
+## Claude
+
+I'll reuse the approach from `s08b`'s commit for the stage table and the literals.
+
+- tool `Bash`: Review how s08b's literals were converted
+
+- tool `Bash`: Find earlier stage table conversions
+
+## Claude
+
+Each literal needs the symbol at that address in the `s07b` map. I'll look at the literals in context first.
+
+- tool `Bash`: Show stage table literals and load the s07b map
+
+- tool `Bash`: Match each stage table literal to its map symbol and macro
+
+- tool `Bash`: Convert s07b's stage table literals to symbols
+
+## Claude
+
+Now the 64 literals in `psyco.c` and `meryl07b.c`:
+
+- tool `Bash`: Show each literal address line in context
+
+- tool `Bash`: Resolve the psyco data table and find its users
+
+## Claude
+
+They're all function starts. As in `s08b`, the data table becomes symbols and the jump tables become decimals. I'll check how `s08b` wrote the decimals.
+
+- tool `Bash`: See s08b's decimal and symbol conventions
+
+- tool `Bash`: Write jump tables as decimals and the state table as symbols
+
+## Claude
+
+To match `s08b` and avoid type clashes with the translator's declarations, I'll declare the state table's symbols as `extern char[]`. Then the matching build:
+
+- tool `Bash`: Fix declarations and run the matching build
+
+## Claude
+
+The matching build still passes (80 OK, `s07b` included). Now the port build and the TAS:
+
+- tool `Bash`: Build the port with s07b and run the TAS
+
+## Claude
+
+`s07b` linked and ran on the first try. The TAS is in sync to **loop 38,579 (0:20:26.61)**, 766 loops further, into the Mantis fight. I'll check for TLB misses, then commit.
+
+- tool `Bash`: Confirm s07b loaded and count TLB misses
+
+## Claude
+
+No new TLB misses: still only the 51 known ones in `DG_GetLightMatrix`. Committing:
+
+- tool `Bash`: Update docs, archive conversation, and commit
+

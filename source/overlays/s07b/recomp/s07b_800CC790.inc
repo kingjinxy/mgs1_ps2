@@ -1,0 +1,64 @@
+extern char R_GM_PlayerBody[] __asm__("GM_PlayerBody");
+extern char R_GM_PlayerControl[] __asm__("GM_PlayerControl");
+extern char R_GM_SnakeCamera[] __asm__("GM_SnakeCamera");
+extern char R_GV_SubVec3[] __asm__("GV_SubVec3");
+extern char R_GV_VecLen3[] __asm__("GV_VecLen3");
+int G_s07b_800CC790(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CC790");
+int G_s07b_800CC790(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 28) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 32) = r[31];
+    c = ((r[5] != 0)); *(int *)((u)r[29] + 24) = r[16]; if (c) goto L800cc808;
+    r[4] = (u)r[17] + 32;
+    r[16] = 0;
+    r[16] = (u)r[16] + (int)R_GM_SnakeCamera;
+    r[5] = (u)r[16] + (u)0;
+    r[6] = (u)r[29] + 16; CALL(R_GV_SubVec3);
+    r[4] = (u)r[29] + 16; CALL(R_GV_VecLen3);
+    r[3] = *(int *)((u)r[16] + 24);
+    r[3] = (u)r[3] + 500;
+    r[2] = (int)r[2] < (int)r[3];
+    c = ((r[2] == 0)); r[4] = (u)0 + -129; if (c) goto L800cc7ec;
+    r[3] = *(int *)((u)r[17] + 156);
+     goto L800cc850;
+    L800cc7ec:;
+    r[2] = *(int *)((u)r[17] + 156);
+    r[3] = *(int *)((u)r[2] + 40);
+    r[3] = r[3] & r[4];
+    *(int *)((u)r[2] + 40) = r[3]; goto L800cc888;
+    L800cc808:;
+    r[16] = 0;
+    r[16] = (u)r[16] + (int)R_GM_SnakeCamera;
+    r[5] = (u)r[16] + (u)0;
+    r[2] = 0;
+    r[4] = *(int *)((u)r[2] + (int)R_GM_PlayerControl);
+    r[6] = (u)r[29] + 16; CALL(R_GV_SubVec3);
+    r[4] = (u)r[29] + 16; CALL(R_GV_VecLen3);
+    r[3] = *(int *)((u)r[16] + 24);
+    r[3] = (u)r[3] + 500;
+    r[2] = (int)r[2] < (int)r[3];
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800cc868;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_PlayerBody);
+    r[3] = *(int *)((u)r[2] + 0);
+    L800cc850:;
+    r[2] = *(int *)((u)r[3] + 40);
+    r[2] = r[2] | 128;
+    *(int *)((u)r[3] + 40) = r[2]; goto L800cc888;
+    L800cc868:;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_PlayerBody);
+    r[4] = *(int *)((u)r[2] + 0);
+    r[2] = *(int *)((u)r[4] + 40);
+    r[3] = (u)0 + -129;
+    r[2] = r[2] & r[3];
+    *(int *)((u)r[4] + 40) = r[2];
+    L800cc888:;
+    r[31] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}

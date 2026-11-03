@@ -1,0 +1,64 @@
+extern char R_s07b_800CCA10[] __asm__("s07b_800CCA10");
+int G_s07b_800CCA80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CCA80");
+int G_s07b_800CCA80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[3] = *(unsigned char *)((u)r[16] + 2658);
+    c = ((r[3] == 0));  if (c) goto L800ccb40;
+    r[2] = *(int *)((u)r[16] + 2128);
+    r[2] = r[2] & 512;
+    c = ((r[2] != 0)); r[2] = r[3] & 3; if (c) goto L800ccaf0;
+    c = ((r[2] == 0)); r[4] = (u)0 + -129; if (c) goto L800ccad8;
+    r[2] = *(int *)((u)r[16] + 156);
+    r[3] = *(int *)((u)r[2] + 40);
+    r[3] = r[3] & r[4];
+    *(int *)((u)r[2] + 40) = r[3]; goto L800ccaf0;
+    L800ccad8:;
+    r[3] = *(int *)((u)r[16] + 156);
+    r[2] = *(int *)((u)r[3] + 40);
+    r[2] = r[2] | 128;
+    *(int *)((u)r[3] + 40) = r[2];
+    L800ccaf0:;
+    r[2] = *(unsigned char *)((u)r[16] + 2658);
+    r[2] = (u)r[2] + -1;
+    *(char *)((u)r[16] + 2658) = r[2];
+    r[2] = r[2] & 255;
+    c = ((r[2] != 0));  if (c) goto L800ccb40;
+    r[2] = *(int *)((u)r[16] + 2128);
+    r[2] = r[2] & 512;
+    c = ((r[2] != 0)); r[4] = (u)0 + -129; if (c) goto L800ccb38;
+    r[2] = *(int *)((u)r[16] + 156);
+    r[3] = *(int *)((u)r[2] + 40);
+    r[3] = r[3] & r[4];
+    *(int *)((u)r[2] + 40) = r[3];
+    L800ccb38:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s07b_800CCA10);
+    L800ccb40:;
+    r[2] = *(unsigned char *)((u)r[16] + 2659);
+    c = ((r[2] == 0)); r[2] = (u)r[2] + -1; if (c) goto L800ccba0;
+    *(char *)((u)r[16] + 2659) = r[2];
+    r[2] = r[2] & 255;
+    c = ((r[2] != 0));  if (c) goto L800ccb88;
+    r[2] = *(int *)((u)r[16] + 2124);
+    r[2] = r[2] & 2;
+    c = ((r[2] != 0));  if (c) goto L800ccba0;
+    r[3] = *(int *)((u)r[16] + 2016);
+    r[2] = *(unsigned short *)((u)r[3] + 0);
+    r[2] = r[2] | 156; goto L800ccb9c;
+    L800ccb88:;
+    r[3] = *(int *)((u)r[16] + 2016);
+    r[2] = *(unsigned short *)((u)r[3] + 0);
+    r[2] = r[2] & 65387;
+    L800ccb9c:;
+    *(short *)((u)r[3] + 0) = r[2];
+    L800ccba0:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

@@ -1,11 +1,13 @@
 -- Dumps the Work of every actor whose act is TAS_ACT (hex) at the game loops in TAS_LOOPS (comma separated),
 -- TAS_SIZE bytes, as hex words: for diffing an actor against the port's (port printf of the same).
 -- Or, with TAS_PTR (hex) instead of TAS_ACT, the Work at *TAS_PTR - TAS_PTROFF (e.g. Snake's: GM_PlayerControl 800AB9F4, 32).
+-- With TAS_FIELD (decimal), the struct a pointer at that offset of the Work points to instead (e.g. 2016: Mantis's TARGET).
 -- Run: TAS_ACT=800C9F50 TAS_SIZE=2428 TAS_LOOPS=38560,38570 tools/port/tas/run_bizhawk.sh tools/port/tas/work_dump.lua
 local OUT  = "Z:\\home\\alex\\emu\\tas\\work_dump.log"
 local ACT  = tonumber(os.getenv("TAS_ACT") or "0", 16)
 local PTR  = tonumber(os.getenv("TAS_PTR") or "0", 16)
 local POFF = tonumber(os.getenv("TAS_PTROFF") or "0")
+local FIELD = tonumber(os.getenv("TAS_FIELD") or "")
 local SIZE = tonumber(os.getenv("TAS_SIZE") or "256")
 local LOOPS, LAST, first = {}, 0, math.huge
 for v in string.gmatch(os.getenv("TAS_LOOPS") or "", "%d+") do LOOPS[tonumber(v)] = true; LAST = math.max(LAST, tonumber(v)); first = math.min(first, tonumber(v)) end
@@ -32,8 +34,8 @@ while true do
         local act, i = u32(list + 4), 0
         while act ~= 0 and act ~= list + 0x20 and i < 128 do
           if u32(act + 8) == ACT then
-            local w = {}
-            for o = 0, SIZE - 4, 4 do w[#w + 1] = string.format("%08x", u32(act + o)) end
+            local w, base = {}, FIELD and u32(act + FIELD) or act
+            for o = 0, SIZE - 4, 4 do w[#w + 1] = string.format("%08x", u32(base + o)) end
             out:write(t .. " " .. table.concat(w, " ") .. "\n")
           end
           act, i = u32(act + 4), i + 1

@@ -21,7 +21,7 @@ typedef struct _Work {
 } Work;
 
 static SVECTOR desert_pos = {20, -370, 60};
-static u_short desert_damage = 96;
+STATIC u_short desert_damage = 96;
 
 /*---------------------------------------------------------------------------*/
 

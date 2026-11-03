@@ -17063,3 +17063,143 @@ Fixed. In sync to **loop 39,732 (0:21:06.15)**, a `rand` seed desync, and no new
 
 - tool `Bash`: Update docs, archive conversation, and commit
 
+## Claude
+
+Committed as `c6638a596`. Next is the `rand` desync at 39,732. I'll log the port's `GV_Rand` callers over loops 39,700 to 39,732.
+
+- tool `Bash`: Log rand callers before the desync
+
+- tool `Bash`: Count PS1 draws per loop and find Think0 and UpdateStep
+
+- tool `Bash`: Find symbols around the Think0 address
+
+## Claude
+
+It's the `Think0` after `NewPsychoPot`, and its neighbours (`Idle`, `Think1`) match `statue.c`. I'll read it.
+
+- tool `Bash`: Read the statue's think functions
+
+- tool `Bash`: Read how the statue starts thinking
+
+- tool `Bash`: Read the statue's Act and constructor
+
+- tool `Bash`: Find who creates the statue
+
+- tool `Bash`: Read the conditions around statue creation
+
+- tool `Bash`: Outline Mantis's attack selection
+
+- tool `Bash`: Find Mantis's Act and size and check the checkpoint pass
+
+- tool `Bash`: Locate Mantis's constructor
+
+- tool `Bash`: Read Mantis's constructor
+
+## Claude
+
+`Act` is `s07b_800D1254`, so 0x800D1254 on the PS1. The checkpoint pass is at 138,000 and should finish in about 10 minutes. Meanwhile, the port's dump of Mantis's Work at loops 39,000 to 39,730:
+
+- tool `Bash`: Dump Mantis's Work on the port
+
+## Claude
+
+Mantis's Work is 2,792 bytes, and the port dump is in hand. I'll start the PS1 dump as soon as the checkpoint pass releases BizHawk.
+
+- tool `Bash`: Wait for the checkpoint pass to finish
+
+- tool `Bash`: Deflate states and dump Mantis on the PS1 from a checkpoint
+
+## Claude
+
+The checkpoints work: the PS1 dump took **48 seconds** instead of about 20 minutes, and all 159 states fit in 300 MB. Diffing Mantis:
+
+- tool `Bash`: Diff Mantis's Work between port and PS1
+
+- tool `Bash`: Find Mantis's struct and code using those offsets
+
+- tool `Bash`: Read Mantis's Work struct
+
+- tool `Bash`: Find writers of Mantis's sequence pointer
+
+- tool `Bash`: Find uses of Mantis's offset 0x7DC
+
+- tool `Bash`: Read the NAVIGATE struct
+
+- tool `Bash`: Per-loop Mantis dumps on both sides and diff
+
+- tool `Bash`: Read the selector's inputs
+
+- tool `Bash`: Trace Mantis's functions and selector at loop 39,729
+
+- tool `Bash`: Read CCA80, which calls CC67C
+
+## Claude
+
+`CCA80` doesn't call `CC67C` itself, so the call must come from its caller. I'll read `CCBFC`.
+
+- tool `Bash`: Read CCBFC
+
+- tool `Bash`: Dump Mantis's TARGET on both sides and decode it
+
+- tool `Bash`: Decode both TARGET dumps
+
+- tool `Bash`: Find and read the caller of CC67C
+
+- tool `Bash`: Outline D105C's control flow
+
+## Claude
+
+`CC67C` runs every loop on both sides, so the clear of +0x8F0 must be conditional inside it. Reading it:
+
+- tool `Bash`: Read CC67C
+
+- tool `Bash`: Look up the data at 0x800C3480
+
+- tool `Bash`: See which alive flag Mantis tracks
+
+## Claude
+
+`2288` holds what `NewPsychoChair` returns, presumably `&chair_alive`. I'll read `chair.c`'s alive handling.
+
+- tool `Bash`: Read chair_alive handling
+
+- tool `Bash`: Read chair's state and counter
+
+## Claude
+
+I need `GV_ACT`'s layout to know what `*p > 0` tests if `p` is the chair's Work.
+
+- tool `Bash`: Read GV_ACT and NewPsychoChair
+
+- tool `Bash`: Read the memory behind Mantis's pointer on both sides
+
+- tool `Bash`: Read how CDF40 sets the pointer
+
+- tool `Bash`: Look for static symbols in the matching build's outputs
+
+- tool `Bash`: Check whether the map has per-object section addresses
+
+- tool `Bash`: List symbol+offset references past word-sized symbols
+
+- tool `Bash`: Check the STATIC macro and the fifth reference
+
+- tool `Bash`: Read the STATIC macro and find what's at 0x800C338C
+
+- tool `Bash`: Find statics in smoke.c and desert.c
+
+- tool `Bash`: Check the five names for clashes
+
+- tool `Bash`: Make the five statics visible and rebuild the matching build
+
+## Claude
+
+The matching build still passes (80 OK), and the map now lists `chair_alive` at 0x800C3480 and `desert_damage` at 0x800C338C, as predicted. Regenerating `s07b`:
+
+- tool `Bash`: Regenerate s07b and check the new references
+
+- tool `Bash`: Read mips2c's symbol lookup
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/mips2c.py
+
+- tool `Bash`: Check warnings and run the TAS with the static fix
+

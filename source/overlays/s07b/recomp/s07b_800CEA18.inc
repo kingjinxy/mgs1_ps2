@@ -1,5 +1,5 @@
+extern char R_chair_alive[] __asm__("chair_alive");
 extern char R_s07b_800CE85C[] __asm__("s07b_800CE85C");
-extern char R_s07b_dword_800C3404[] __asm__("s07b_dword_800C3404");
 extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
 extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
 extern char R_NewPsychoBook[] __asm__("NewPsychoBook");
@@ -28,7 +28,7 @@ int G_s07b_800CEA18(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[4] = (u)0 + 1; CALL(R_NewPsychoPicture);
     r[4] = (u)0 + 1; CALL(R_NewPsychoBook);
     r[2] = 0;
-    r[2] = (u)r[2] + ((int)R_s07b_dword_800C3404 + 124);
+    r[2] = (u)r[2] + (int)R_chair_alive;
     *(int *)((u)r[16] + 2288) = r[2];
     L800cea7c:;
     r[4] = (u)r[16] + (u)0;

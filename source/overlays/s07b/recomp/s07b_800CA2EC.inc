@@ -1,7 +1,7 @@
 extern char R_GV_PadData[] __asm__("GV_PadData");
+extern char R_desert_damage[] __asm__("desert_damage");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s07b_800C7D88[] __asm__("s07b_800C7D88");
-extern char R_s07b_dword_800C332C[] __asm__("s07b_dword_800C332C");
 extern char R_s07b_dword_800E5BB0[] __asm__("s07b_dword_800E5BB0");
 extern char R_GCL_GetNextInt[] __asm__("GCL_GetNextInt");
 extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
@@ -42,7 +42,7 @@ int G_s07b_800CA2EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     L800ca364:;
      CALL(R_GCL_GetNextInt);
     r[3] = 0;
-    *(short *)((u)r[3] + ((int)R_s07b_dword_800C332C + 96)) = r[2];
+    *(short *)((u)r[3] + (int)R_desert_damage) = r[2];
     L800ca374:;
     r[4] = (u)r[18] + 2172;
     r[6] = (u)r[18] + 32;

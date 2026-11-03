@@ -1,5 +1,5 @@
+extern char R_ox_alive[] __asm__("ox_alive");
 extern char R_s07b_800CDCAC[] __asm__("s07b_800CDCAC");
-extern char R_s07b_dword_800C3404[] __asm__("s07b_dword_800C3404");
 extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
 extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
 extern char R_GV_RandU[] __asm__("GV_RandU");
@@ -27,7 +27,7 @@ int G_s07b_800CE43C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[5] = (u)0 + 129; CALL(R_s07b_800CAD54);
      CALL(R_NewPsychoOx);
     r[2] = 0;
-    r[2] = (u)r[2] + ((int)R_s07b_dword_800C3404 + 136);
+    r[2] = (u)r[2] + (int)R_ox_alive;
     *(int *)((u)r[16] + 2288) = r[2];
     L800ce494:;
     r[4] = (u)r[16] + (u)0;

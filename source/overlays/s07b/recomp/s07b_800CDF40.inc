@@ -1,7 +1,7 @@
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_chair_alive[] __asm__("chair_alive");
 extern char R_s07b_800CE134[] __asm__("s07b_800CE134");
 extern char R_s07b_800CE2A8[] __asm__("s07b_800CE2A8");
-extern char R_s07b_dword_800C3404[] __asm__("s07b_dword_800C3404");
 extern char R_NewPsychoChair[] __asm__("NewPsychoChair");
 extern char R_s07b_800CAD54[] __asm__("s07b_800CAD54");
 extern char R_s07b_800CB224[] __asm__("s07b_800CB224");
@@ -26,7 +26,7 @@ int G_s07b_800CDF40(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(short *)((u)r[16] + 2664) = 0; CALL(R_s07b_800CAD54);
      CALL(R_NewPsychoChair);
     r[2] = 0;
-    r[2] = (u)r[2] + ((int)R_s07b_dword_800C3404 + 124);
+    r[2] = (u)r[2] + (int)R_chair_alive;
     *(int *)((u)r[16] + 2288) = r[2];
     L800cdf98:;
     r[4] = (u)r[16] + (u)0; CALL(R_s07b_800CDA90);
@@ -48,7 +48,7 @@ int G_s07b_800CDF40(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     c = ((r[3] == r[2]));  if (c) goto L800ce054;
      goto L800ce080;
     L800cdffc:;
-    r[3] = *(int *)((u)r[2] + ((int)R_s07b_dword_800C3404 + 124));
+    r[3] = *(int *)((u)r[2] + (int)R_chair_alive);
     r[2] = (u)0 + 2;
     c = ((r[3] != r[2])); r[4] = (u)r[16] + (u)0; if (c) goto L800ce080;
     r[5] = (u)0 + -1000;
@@ -99,7 +99,7 @@ int G_s07b_800CDF40(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(short *)((u)r[16] + 108) = 0;
     r[2] = 0;
     L800ce0ec:;
-    r[3] = *(int *)((u)r[2] + ((int)R_s07b_dword_800C3404 + 124));
+    r[3] = *(int *)((u)r[2] + (int)R_chair_alive);
     r[2] = (u)0 + 2;
     c = ((r[3] == r[2])); r[2] = 0; if (c) goto L800ce120;
     r[11] = (u)r[2] + (int)R_DG_ZeroVector;

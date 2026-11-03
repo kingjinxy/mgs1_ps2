@@ -24,6 +24,10 @@ def sym(addr, used):
     i = bisect.bisect_right(keys, addr) - 1
     n = names[keys[i]]; off = addr - keys[i]
     used.add(n)
+    if off >= 4 and 'word' in n:
+        # likely a static of another object (not in the map), whose place differs in the port: make it STATIC
+        # (mgstype.h, global without the keyword) so the map names it (s07b's chair_alive was dword_800C3404+124)
+        print('warning: %08X read as %s+%d: a static past that symbol?' % (addr, n, off))
     return '((int)R_%s + %d)' % (n, off) if off else '(int)R_%s' % n
 
 def targets(start, ws):

@@ -16,7 +16,7 @@ typedef struct _Work {
     int     prev_turn;
 } Work;
 
-static int ox_alive = 0;
+STATIC int ox_alive = 0;
 
 static int UpdateStep( PSYOBJ *obj, int time )
 {

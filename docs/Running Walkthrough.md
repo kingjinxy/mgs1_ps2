@@ -886,3 +886,5 @@ raw `rand()` sites tagged so far and `snowarea.c` are ruled out; the function li
 The 5-draw bursts were the tank tread dust. A small HAL ring of `rand` return addresses named the caller without the hang. The right tread reads `svect3.vy` unset; PS1 disassembly puts that slot on `s05a_800DA940`'s `verts[9].vy`. The port now saves that value, and the 20,980 resync is removed. In sync to loop 22,669 (0:12:12.48).
 
 The TLB miss at s05a_800E00EC reads RAM at 8 and 12 (8, 0x340, 0, 0). The pad difference at 22,669: the codec end updates the pads twice, and the first took the release; `Port_TasPadsDone` restores the recorded one. In sync to loop 23,572 (0:12:39.38).
+
+`s07a` wasn't linked in; its 7 literal pointers are now symbols. In sync to loop 24,704 (0:13:15.64).

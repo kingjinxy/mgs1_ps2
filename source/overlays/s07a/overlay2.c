@@ -20,19 +20,22 @@ SVECTOR s07a_dword_800C36A4 = {-1024, 0, 0};
 SVECTOR s07a_dword_800C36AC = {0, 0, 100};
 SVECTOR s07a_dword_800C36B4 = {-1024, 0, 0};
 
+extern const char s07a_dword_800E2FA4[], s07a_aSocomx_800E2F98[], s07a_aFamasx_800E2F8C[];
+void MERYL_PutSound(), MERYL_PutBreath(), MERYL_PutLSight(), MERYL_PutBullet();
+
 char *s07a_dword_800C36BC[] =
 {
-    (char *)0x800E2FA4,
-    (char *)0x800E2F98,
-    (char *)0x800E2F8C
+    (char *)s07a_dword_800E2FA4,
+    (char *)s07a_aSocomx_800E2F98,
+    (char *)s07a_aFamasx_800E2F8C
 };
 
 void *s07a_dword_800C36C8[] = 
 {
-    (void *)0x800D9A6C,
-    (void *)0x800D9B14,
-    (void *)0x800D9C5C,
-    (void *)0x800D9C98
+    (void *)MERYL_PutSound,
+    (void *)MERYL_PutBreath,
+    (void *)MERYL_PutLSight,
+    (void *)MERYL_PutBullet
 };
 
 SVECTOR s07a_dword_800C36D8 = {5, -500, 80};

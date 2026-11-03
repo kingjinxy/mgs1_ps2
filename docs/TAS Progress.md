@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 23,572 (0:12:39.38), 14.53%.
+Current: loop 24,704 (0:13:15.64), 15.23%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -32,5 +32,6 @@ Current: loop 23,572 (0:12:39.38), 14.53%.
 | 21,126 | 0:11:21.60 | 13.04% | seed resynced at loop 20,980 (shortcut: 5 PS1 draws after the `s05a` reload, source not found) | Nov 2 |
 | 22,669 | 0:12:12.48 | 14.02% | the tank tread reads the PS1 stale stack value (M1E1StaleVy) | Nov 2 |
 | 23,572 | 0:12:39.38 | 14.53% | NULL read in m1e1sold.c, and a release lost on a two-update loop | Nov 2 |
+| 24,704 | 0:13:15.64 | 15.23% | `s07a` linked in (7 pointers by symbol) | Nov 2 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.

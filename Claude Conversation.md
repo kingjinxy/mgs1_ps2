@@ -15166,3 +15166,11 @@ The hook hangs at 6,668 again, which at least makes the hang reproducible on dem
 
 - tool `Bash`: Commit; inspect TLB and s07a status
 
+## Claude
+
+`s07a` is the same job with just 7 literals. I'll convert them using the map.
+
+- tool `Bash`: Resolve s07a literal addresses
+
+- tool `Bash`: Symbolize s07a, match, link, run
+

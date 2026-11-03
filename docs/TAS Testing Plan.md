@@ -350,7 +350,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: `s05a` linked in, seed resynced at loop 20,980 (shortcut).
 - [x] Fixed: the tank tread reads the PS1 stale stack value (M1E1StaleVy).
 - [x] Fixed: NULL read in m1e1sold.c, and a release lost on a two-update loop.
-- [ ] Next desync: `DG_UnDrawFrameCount` at loop 23,572 (0:12:39.38, `s07a`), and TLB misses at pc 0x3ea33c.
+- [x] Fixed: `s07a` linked in (7 pointers by symbol).
+- [ ] Next desync: rand seed at loop 24,704 (0:13:15.64, `s08a`), and TLB misses at pc 0x3ea33c (`s05a_800E1F0C`).
 - [x] The PS1's 5 draws at loop 20,979 (0:11:16.60): the tank's right tread reads `svect3.vy` unset, which is `s05a_800DA940`'s `verts[9].vy` on the PS1's stack. `M1E1StaleVy` reproduces it; the 20,980 resync is gone.
 - [ ] Hang near loop 6,668 (0:03:52.2, `s01a`) with some builds: a HAL `rand` log and a two-loop seed resync after every load both repeat it; clean builds pass. True EPC is the kernel's idle loop (0x81fe0): every thread blocked, a deadlock, last log between `add map 1` and `end scenario`. `hang_watch`'s EPC is stale (read it at the handler's entry). Cause unknown.
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.

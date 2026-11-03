@@ -60,6 +60,8 @@ static unsigned int   size_mgs_tas_loads;
 static unsigned int   size_mgs_tas_time;
 static unsigned char* mgs_tas_timeline; /* host:tas_timeline.bin: the PS1's stream actor per loop (timeline_to_bin.py) */
 static unsigned int   size_mgs_tas_timeline;
+static unsigned char* mgs_tas_ticks; /* host:tas_ticks.bin: the PS1's mts tick per loop (trace_to_pads.py) */
+static unsigned int   size_mgs_tas_ticks;
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
 extern int          DG_UnDrawFrameCount, GM_LoadComplete;
@@ -145,6 +147,19 @@ static unsigned int pads_time(void)
         return (unsigned int)(s_Ps1LoadEnd[s_Loads] - 1);
     }
     return (unsigned int)GV_Time;
+}
+
+/** The mts tick as game logic reads it (wolf2.c, key_item.c: rand() burns of tick % 256; mips2c.py's calls of
+ * mts_get_tick_count): in TAS replays the PS1's in this loop (host:tas_ticks.bin), else the port's. */
+int Port_GameTick(void)
+{
+#ifdef MGS_TAS
+    if (mgs_tas_ticks && (unsigned int)GV_Time < size_mgs_tas_ticks / 4)
+    {
+        return (int)read_u32(mgs_tas_ticks + GV_Time * 4);
+    }
+#endif
+    return mts_get_tick_count();
 }
 
 const char* Port_RecompLast[8]; /* recomp.h: the mips2c.py functions last entered */
@@ -639,6 +654,8 @@ void Port_TasPads(void)
 static FILE* s_Trace;
 static int   s_SeedDiffs;
 static int   s_ShotLoop = -1; /* host:tas_shot.txt: the loop whose frame is dumped */
+static int   s_RamLoop  = -1; /* host:tas_ramdump.txt: the loop whose game data (.data to _end) goes to host:tas_ram.bin,
+                                 for tools/port/tas/ram_diff.py against ram_dump.lua's PS1 RAM */
 #endif
 
 /** HalGame_Init, before the game starts: the file and the table scan here, not in a game loop (a few
@@ -674,6 +691,7 @@ void Port_TasInit(void)
     mgs_tas_time = load("host:tas_time.bin", &size_mgs_tas_time);
     mgs_tas_loads = load("host:tas_loads.bin", &size_mgs_tas_loads);
     mgs_tas_timeline = load("host:tas_timeline.bin", &size_mgs_tas_timeline);
+    mgs_tas_ticks = load("host:tas_ticks.bin", &size_mgs_tas_ticks);
     n            = mgs_tas_time ? (int)(size_mgs_tas_time / TIME_RECORD) : 0;
     for (t = 0; t < n && s_Ps1Loads < MAX_LOADS; t++)
     {
@@ -689,6 +707,14 @@ void Port_TasInit(void)
         if (fscanf(f, "%d", &s_ShotLoop) != 1)
         {
             s_ShotLoop = -1;
+        }
+        fclose(f);
+    }
+    if ((f = fopen("host:tas_ramdump.txt", "r")) != 0)
+    {
+        if (fscanf(f, "%d", &s_RamLoop) != 1)
+        {
+            s_RamLoop = -1;
         }
         fclose(f);
     }
@@ -736,6 +762,19 @@ void Port_TasTrace(void)
     if (GV_Time == traced)
     {
         return; /* once per loop */
+    }
+    if (GV_Time == s_RamLoop)
+    {
+        extern char _fdata[], _end[];
+        FILE*       d = fopen("host:tas_ram.bin", "wb");
+        if (d)
+        {
+            unsigned int base = (unsigned int)_fdata;
+            fwrite(&base, 4, 1, d);
+            fwrite(_fdata, 1, _end - _fdata, d);
+            fclose(d);
+            printf("tas: game data of loop %d dumped\n", GV_Time);
+        }
     }
     if (GV_Time == s_ShotLoop)
     {

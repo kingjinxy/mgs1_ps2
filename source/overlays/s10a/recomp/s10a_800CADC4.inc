@@ -87,7 +87,7 @@ int G_s10a_800CADC4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF50");
 int G_s10a_rc_800CAF50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -95,7 +95,7 @@ int G_s10a_rc_800CAF50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF58");
 int G_s10a_rc_800CAF58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -103,7 +103,7 @@ int G_s10a_rc_800CAF58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF60");
 int G_s10a_rc_800CAF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -111,7 +111,7 @@ int G_s10a_rc_800CAF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF68");
 int G_s10a_rc_800CAF68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -119,7 +119,7 @@ int G_s10a_rc_800CAF68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF70(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF70");
 int G_s10a_rc_800CAF70(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -127,7 +127,7 @@ int G_s10a_rc_800CAF70(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF78");
 int G_s10a_rc_800CAF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -135,7 +135,7 @@ int G_s10a_rc_800CAF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF80");
 int G_s10a_rc_800CAF80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -143,7 +143,7 @@ int G_s10a_rc_800CAF80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF88");
 int G_s10a_rc_800CAF88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -151,7 +151,7 @@ int G_s10a_rc_800CAF88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF90(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF90");
 int G_s10a_rc_800CAF90(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -159,7 +159,7 @@ int G_s10a_rc_800CAF90(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAF98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAF98");
 int G_s10a_rc_800CAF98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -167,7 +167,7 @@ int G_s10a_rc_800CAF98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800CAFA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800CAFA0");
 int G_s10a_rc_800CAFA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -175,5 +175,5 @@ int G_s10a_rc_800CAFA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

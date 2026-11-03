@@ -24,5 +24,5 @@ int G_s10a_800D7CAC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = *(int *)((u)r[4] + 1632);
     *(short *)((u)r[2] + 20) = r[5]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

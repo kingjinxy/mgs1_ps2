@@ -124,7 +124,7 @@ int G_s07b_800C9D44(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
 extern char R_GV_PadData[] __asm__("GV_PadData");
@@ -235,7 +235,7 @@ int G_s07b_rc_800C9F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s07b_dword_800C32F8[] __asm__("s07b_dword_800C32F8");
 extern char R_s07b_dword_800C33F0[] __asm__("s07b_dword_800C33F0");
@@ -300,5 +300,5 @@ int G_s07b_rc_800CA0F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

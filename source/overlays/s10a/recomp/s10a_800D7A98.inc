@@ -1,5 +1,5 @@
 extern char R_GV_RandU[] __asm__("GV_RandU");
-extern char R_mts_get_tick_count[] __asm__("mts_get_tick_count");
+extern char R_Port_GameTick[] __asm__("Port_GameTick");
 extern char R_s10a_800D712C[] __asm__("s10a_800D712C");
 int G_s10a_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D7A98");
 int G_s10a_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -14,7 +14,7 @@ int G_s10a_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[20] = (u)r[6] + (u)0;
     *(int *)((u)r[29] + 36) = r[31];
     *(int *)((u)r[29] + 20) = r[17];
-    *(int *)((u)r[29] + 16) = r[16]; CALL(R_mts_get_tick_count);
+    *(int *)((u)r[29] + 16) = r[16]; CALL(R_Port_GameTick);
     r[3] = (u)r[2] + (u)0;
     c = (((int)r[3] >= 0)); r[17] = (int)r[2] >> 8; if (c) goto L800d7ad8;
     r[2] = (u)r[3] + 255;
@@ -49,5 +49,5 @@ int G_s10a_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

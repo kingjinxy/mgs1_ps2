@@ -55,7 +55,7 @@ int G_s10a_800C7F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 32);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800C8030");
 int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -63,5 +63,5 @@ int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

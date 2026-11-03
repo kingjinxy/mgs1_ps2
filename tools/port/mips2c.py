@@ -182,8 +182,9 @@ def translate(path, seg=None):
             ctrl = 'goto L%x;' % (((pc + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2))
         elif o == 3:
             t = ((pc + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2)
-            funcs.add(names[t])
-            ctrl = 'CALL(R_%s);' % names[t]
+            n_ = {'mts_get_tick_count': 'Port_GameTick'}.get(names[t], names[t])  # game logic's tick (tas_replay.c)
+            funcs.add(n_)
+            ctrl = 'CALL(R_%s);' % n_
         elif o == 0 and fn == 8:
             if rs == 31:
                 ctrl = 'goto out;'
@@ -248,7 +249,7 @@ int G_%s(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
     RECOMP_ENTRY(%d)
 %s
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 ''' % (dec, name, name, name, frame, body)
 

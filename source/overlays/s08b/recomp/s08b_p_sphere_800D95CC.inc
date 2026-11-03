@@ -145,5 +145,5 @@ int G_s08b_p_sphere_800D95CC(int a0, int a1, int a2, int a3, int a4, int a5, int
     r[16] = *(int *)((u)r[29] + 32);
     r[29] = (u)r[29] + 72; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

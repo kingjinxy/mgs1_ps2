@@ -134,5 +134,5 @@ int G_s10a_800E0364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] + (u)r[3];
     *(short *)((u)r[4] + 12) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

@@ -21,5 +21,5 @@ int G_s10a_800D6878(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     c = (((int)r[3] > 0)); r[4] = (u)r[4] + 40; if (c) goto L800d688c;
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

@@ -72,5 +72,5 @@ int G_s10a_800CDF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 32);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

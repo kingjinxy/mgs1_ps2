@@ -40,5 +40,5 @@ int G_s10a_800D4CC4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(char *)((u)r[2] + 12) = 0;
     *(char *)((u)r[2] + 13) = r[5]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

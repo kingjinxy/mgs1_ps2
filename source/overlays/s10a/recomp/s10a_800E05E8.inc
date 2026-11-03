@@ -121,7 +121,7 @@ int G_s10a_800E05E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     c = (((int)r[7] > 0)); *(short *)((u)r[4] + 2) = r[2]; if (c) goto L800e0758;
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_Chanls[] __asm__("DG_Chanls");
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
@@ -271,5 +271,5 @@ int G_s10a_rc_800E07E4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

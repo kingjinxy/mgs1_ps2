@@ -13,5 +13,5 @@ int G_s10a_800CB44C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] << 1;
     *(short *)((u)r[4] + 4) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

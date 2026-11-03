@@ -69,7 +69,7 @@ int G_s07b_800C8010(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_GameOverTimer[] __asm__("GM_GameOverTimer");
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
@@ -286,5 +286,5 @@ int G_s07b_rc_800C8140(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     L800c84f8:;
     r[31] = *(int *)((u)r[29] + 36);
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

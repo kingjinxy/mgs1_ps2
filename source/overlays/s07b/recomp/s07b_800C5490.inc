@@ -13,5 +13,5 @@ int G_s07b_800C5490(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     L800c54b8:;
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

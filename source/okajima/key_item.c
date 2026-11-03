@@ -76,7 +76,11 @@ void KeyItemRun_800C8948(int where)
     int      tmp;
     HZD_PAT *route;
 
+#ifdef MGS_PORT
+    { extern int Port_GameTick(void); time = Port_GameTick() % 256; } /* the PS1's tick in TAS replays (tas_replay.c) */
+#else
     time = mts_get_tick_count() % 256;
+#endif
     for (i = 0; i < time; i++)
     {
         GV_RandU(4096);

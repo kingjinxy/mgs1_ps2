@@ -87,7 +87,7 @@ int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_s08b_dword_800C3598[] __asm__("s08b_dword_800C3598");
@@ -179,7 +179,7 @@ int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_s08b_dword_800C3598[] __asm__("s08b_dword_800C3598");
@@ -272,7 +272,7 @@ int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_s08b_dword_800C35EC[] __asm__("s08b_dword_800C35EC");
@@ -312,5 +312,5 @@ int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

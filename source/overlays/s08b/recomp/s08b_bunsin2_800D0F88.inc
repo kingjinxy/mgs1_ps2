@@ -32,5 +32,5 @@ int G_s08b_bunsin2_800D0F88(int a0, int a1, int a2, int a3, int a4, int a5, int 
     L800d100c:;
     r[2] = (u)0 + 1; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

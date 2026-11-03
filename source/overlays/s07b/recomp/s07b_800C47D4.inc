@@ -32,5 +32,5 @@ int G_s07b_800C47D4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)0 < (u)r[2];
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

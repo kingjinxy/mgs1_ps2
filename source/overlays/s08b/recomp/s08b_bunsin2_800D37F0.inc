@@ -62,5 +62,5 @@ int G_s08b_bunsin2_800D37F0(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[2] = (u)0 + 16448;
     *(int *)((u)r[4] + 6512) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

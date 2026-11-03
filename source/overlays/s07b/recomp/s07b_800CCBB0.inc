@@ -22,5 +22,5 @@ int G_s07b_800CCBB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)0 + -1;
     *(int *)((u)r[4] + 68) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

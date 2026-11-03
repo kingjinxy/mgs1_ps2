@@ -99,6 +99,10 @@ for i, f in enumerate(rows):
     # t+1); stream starts: up to and including loop t; file read: line t+1; play time: line t
     time[t] = struct.pack("<iIIiIiiIii", tick, int(n[4], 16), int(f[11]), int(f[3]), int(f[5], 16), int(f[2]),
                           int(n[19]), starts, int(n[20]), int(f[21]))
+# ticks.bin: for each loop, the PS1's mts tick when its actors ran, as game logic reads it (s10a's Wolf burns
+# tick % 256 rand() calls when made, late in a 30-blank loop: the next line's sample, 249 at loop 47,488; port Port_GameTick)
+ticks_bin = b"".join(struct.pack("<I", int(n[14])) for f, n in zip(rows, rows[1:]))
+open(os.path.join(out_dir, "ticks.bin"), "wb").write(ticks_bin)
 # loads.bin: at each PS1 load end (the line whose GM_LoadRequest is back to 0), a u32 GV_Time and that line's
 # GV_PadData as recorded (pads.bin's records can have [2]/[3] rebuilt): tas_replay.c's realign at the load's end
 loads = bytearray()

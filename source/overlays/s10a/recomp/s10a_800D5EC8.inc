@@ -7,7 +7,7 @@ int G_s10a_800D5EC8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[4] + 36) = r[6];
     *(int *)((u)r[4] + 56) = 0; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 int G_s10a_rc_800D5EDC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800D5EDC");
 int G_s10a_rc_800D5EDC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -15,5 +15,5 @@ int G_s10a_rc_800D5EDC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     RECOMP_ENTRY(0)
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

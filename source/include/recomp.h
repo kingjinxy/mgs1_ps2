@@ -12,10 +12,11 @@ void Gte_Command(unsigned int cmd);
     int r[32], c, t, hi_ = 0, lo_ = 0; long long mul = 0;                                    \
     unsigned char stk[(frame) + 32] __attribute__((aligned(8)));                             \
     (void)c; (void)t; (void)hi_; (void)lo_; (void)mul;                                       \
-    { extern const char *Port_RecompLast[8]; extern int Port_RecompN; Port_RecompLast[Port_RecompN++ & 7] = __func__; } /* shortcut: also keeps the layout past the deadlock in the TAS plan, drop it once that is found */ \
+    { extern const char *Port_RecompLast[8]; extern int Port_RecompN; Port_RecompLast[Port_RecompN++ & 7] = __func__; } \
     r[4] = a0; r[5] = a1; r[6] = a2; r[7] = a3; r[2] = 0; r[3] = 0;                          \
     r[29] = (int)stk + (frame);                                                              \
     ((int *)r[29])[4] = a4; ((int *)r[29])[5] = a5; ((int *)r[29])[6] = a6; ((int *)r[29])[7] = a7;
+#define RECOMP_RETURN return r[2]
 #define CALL(f) do { int *s_ = (int *)r[29]; \
         r[2] = ((int (*)(int, int, int, int, int, int, int, int))(f))(r[4], r[5], r[6], r[7], s_[4], s_[5], s_[6], s_[7]); } while (0)
 static inline int LWL(u a, int v) { unsigned char *p = (unsigned char *)(a & ~3u); int n = a & 3, i; u x = v; for (i = 0; i <= n; i++) { x = (x & ~(0xffu << (24 - 8 * i))) | ((u)p[n - i] << (24 - 8 * i)); } return x; }

@@ -120,6 +120,10 @@ def compile_port():
         timeline = os.path.join(os.path.dirname(os.path.expanduser(os.environ["MGS_TAS_PADS"])), "timeline.bin")
         if os.path.exists(timeline):
             shutil.copy(timeline, os.path.join(OUT, "tas_timeline.bin"))
+    if os.environ.get("MGS_TAS_PADS"):  # ticks.bin from the same folder (trace_to_pads.py)
+        ticks = os.path.join(os.path.dirname(os.path.expanduser(os.environ["MGS_TAS_PADS"])), "ticks.bin")
+        if os.path.exists(ticks):
+            shutil.copy(ticks, os.path.join(OUT, "tas_ticks.bin"))
     if os.environ.get("MGS_TAS_PADS"):  # loads.bin from the same folder (trace_to_pads.py)
         loads = os.path.join(os.path.dirname(os.path.expanduser(os.environ["MGS_TAS_PADS"])), "loads.bin")
         if os.path.exists(loads):

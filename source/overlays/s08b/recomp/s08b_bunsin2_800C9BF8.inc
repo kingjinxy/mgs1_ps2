@@ -25,7 +25,7 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     L800c9c6c:;
      goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33A0[] __asm__("s08b_dword_800C33A0");
@@ -204,7 +204,7 @@ int G_s08b_rc_800C9C74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 24);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_aJumpfctrlturnvyd_800E3920[] __asm__("s08b_aJumpfctrlturnvyd_800E3920");
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
@@ -316,7 +316,7 @@ int G_s08b_rc_800C9F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33AC[] __asm__("s08b_dword_800C33AC");
@@ -416,7 +416,7 @@ int G_s08b_rc_800CA11C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33AC[] __asm__("s08b_dword_800C33AC");
@@ -516,7 +516,7 @@ int G_s08b_rc_800CA298(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33C8[] __asm__("s08b_dword_800C33C8");
@@ -631,7 +631,7 @@ int G_s08b_rc_800CA414(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
@@ -782,7 +782,7 @@ int G_s08b_rc_800CA5D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
@@ -912,5 +912,5 @@ int G_s08b_rc_800CA858(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

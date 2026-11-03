@@ -36,5 +36,5 @@ int G_s08b_bunsin2_800CE800(int a0, int a1, int a2, int a3, int a4, int a5, int 
     L800ce898:;
     *(int *)((u)r[4] + 6576) = r[5]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

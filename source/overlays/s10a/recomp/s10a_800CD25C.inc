@@ -13,5 +13,5 @@ int G_s10a_800CD25C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(short *)((u)r[4] + 2888) = r[6];
     *(int *)((u)r[4] + 2856) = r[3]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

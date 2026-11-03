@@ -12,5 +12,5 @@ int G_s10a_800C78B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(char *)((u)r[3] + 5) = r[7];
     *(char *)((u)r[3] + 6) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

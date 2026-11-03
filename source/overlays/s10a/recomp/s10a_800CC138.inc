@@ -72,5 +72,5 @@ int G_s10a_800CC138(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     c = ((r[2] != 0)); r[6] = (u)r[6] + 16; if (c) goto L800cc164;
     r[29] = (u)r[29] + 8; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

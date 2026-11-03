@@ -11,5 +11,5 @@ int G_s07b_800CC9E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = r[2] & 65387;
     *(short *)((u)r[3] + 0) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

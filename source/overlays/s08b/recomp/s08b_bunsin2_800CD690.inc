@@ -49,5 +49,5 @@ int G_s08b_bunsin2_800CD690(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[31] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

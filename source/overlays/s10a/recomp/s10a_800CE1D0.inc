@@ -25,5 +25,5 @@ int G_s10a_800CE1D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     SWR(((u)r[3] + 52), r[6]);
     *(int *)((u)r[3] + 44) = r[4]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

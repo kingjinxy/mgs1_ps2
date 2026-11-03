@@ -151,7 +151,7 @@ int G_s07b_800CF9A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_GM_Camera[] __asm__("GM_Camera");
@@ -809,5 +809,5 @@ int G_s07b_rc_800CFBF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     L800d0758:;
     r[31] = *(int *)((u)r[29] + 120);
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

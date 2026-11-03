@@ -48,5 +48,5 @@ int G_s10a_800D0E1C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[2] + (int)R_dword_8009F480) = 0;
     *(int *)((u)r[4] + 964) = 0; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

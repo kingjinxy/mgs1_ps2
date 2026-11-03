@@ -154,7 +154,7 @@ int G_s07b_800CCFE4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
@@ -262,7 +262,7 @@ int G_s07b_rc_800CD25C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
@@ -361,7 +361,7 @@ int G_s07b_rc_800CD40C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_Magazine[] __asm__("GM_Magazine");
 extern char R_GM_MagazineMax[] __asm__("GM_MagazineMax");
@@ -542,5 +542,5 @@ int G_s07b_rc_800CD594(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 56);
     r[29] = (u)r[29] + 72; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

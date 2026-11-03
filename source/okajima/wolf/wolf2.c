@@ -754,7 +754,11 @@ int wolf2_GetResources(Wolf2Work *work, int name, int where)
     int ticks;
     int i;
 
+#ifdef MGS_PORT
+    { extern int Port_GameTick(void); ticks = Port_GameTick() % 256; } /* the PS1's tick in TAS replays (tas_replay.c) */
+#else
     ticks = mts_get_tick_count() % 256;
+#endif
     for (i = 0; i < ticks; i++)
     {
         GV_RandU(4096);

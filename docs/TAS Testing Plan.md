@@ -362,6 +362,16 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: overlay statics read by translated code by name: `chair_alive` etc. were `dword_800C3404`+124 (Psycho Mantis through).
 - [x] Fixed: `s10a` (not split by the decomp) linked in through the new stage_split.py and mips2c.py, with GTE instructions.
 - [ ] Next desync: rand seed at loop 47,499 (0:25:21.89, `s10a`): port 501d9992, PS1 0502f419.
+  Found so far (2026-11-03): in loop 47,498 the PS1's Wolf switches to state 0 (Work+1748) and draws 3 (her
+  `RandU(4)`, `9A4C`, `RandU(16)`); the port's doesn't. Equal on both sides at the loop's start: Wolf's whole Work,
+  her two TARGETs, the actor lists, the overlay's data, the resident globals but sound/OT/stack noise
+  (`ram_diff.py`), the pads. Next: Snake's Work and the rifle sight's at 47,497-47,498 (Wolf may react to the aim).
+- [x] PS1 tick for game logic (2026-11-03): `ticks.bin` (trace_to_pads.py: the next line's mts tick), read by
+  `Port_GameTick` (tas_replay.c) in `wolf2.c`/`key_item.c` (`tick % 256` rand burns) and in mips2c.py's calls of
+  `mts_get_tick_count`: Wolf's creation at loop 47,488 burns 249 as on the PS1, independent of the port's timing.
+- [x] Whole-RAM diff (2026-11-03): `ram_dump.lua` (PS1, 2 MB at a loop, from a checkpoint) and
+  `host:tas_ramdump.txt` (port: .data to _end into `host:tas_ram.bin`), compared per symbol by `ram_diff.py`.
+  `actor_list.lua` lists the PS1's actors (level, act, file).
   `s10a` (stage binary 4A9B) isn't linked in, and can't be yet: the decomp hasn't split it (no `asm/overlays/s10a`, commented out of `build/build.py`'s overlays; only its stage table, `source/stage/s10a.c`, exists). The same holds for `s11b`, `s11h`, `s15a`, `s17a`, `s18a`, `s19a` on the TAS route. Split but not linked yet (mips2c.py, as `s07b`): `s11a`, `s11g`, `s11d`, `s11i`, `s11e`, `s14e`, `s15c`, `d18a`, `s19b`. Needs a splitter for the unsplit ones (the stage binary from the disc into functions and data, then mips2c.py): asked the user (2026-11-03).
 - [x] The PS1's 5 draws at loop 20,979 (0:11:16.60): the tank's right tread reads `svect3.vy` unset, which is `s05a_800DA940`'s `verts[9].vy` on the PS1's stack. `M1E1StaleVy` reproduces it; the 20,980 resync is gone.
 - [x] Hangs right after stage loads with some builds (loops 6,668, 11,520, 24,537, 26,136, 27,185), fixed 2026-11-03: a vertical blank thread switch suspended the game thread inside `printf` holding newlib's lock; the sound interrupt task's `printf` then waited on it for good (thread dump: TCB 6 waiting on semaphore 1, its stack `IntSdMain → printf → __retarget_lock_acquire_recursive`). HAL `thread_ps2.c` now holds interrupt switches while the current PS1 thread holds a libc lock (link `--wrap`) or the SPU lock, and makes them at the release. The `tas_replay.c` padding shortcut is gone. Check: no padding to 35,095, and 386,541 game-thread `printf`s (rand log, loops 300-30,000) in sync to 30,000.

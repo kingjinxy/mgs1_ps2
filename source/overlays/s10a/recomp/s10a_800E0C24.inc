@@ -46,7 +46,7 @@ int G_s10a_800E0C24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
 extern char R_GV_PassageTime[] __asm__("GV_PassageTime");
@@ -135,7 +135,7 @@ int G_s10a_rc_800E0CCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
 int G_s10a_rc_800E0E3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E0E3C");
@@ -149,5 +149,5 @@ int G_s10a_rc_800E0E3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[2] = r[2] & r[4];
     *(int *)((u)r[3] + (int)R_GM_GameStatus) = r[2]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

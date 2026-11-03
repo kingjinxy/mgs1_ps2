@@ -131,7 +131,7 @@ int G_s10a_800DF790(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 24);
     r[29] = (u)r[29] + 64; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GV_PauseLevel[] __asm__("GV_PauseLevel");
 extern char R_s10a_dat_800C381C[] __asm__("s10a_dat_800C381C");
@@ -229,5 +229,5 @@ int G_s10a_rc_800DF9A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

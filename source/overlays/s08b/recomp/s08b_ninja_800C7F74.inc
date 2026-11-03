@@ -42,7 +42,7 @@ int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_Camera[] __asm__("GM_Camera");
 extern char R_s08b_dword_800E371C[] __asm__("s08b_dword_800E371C");
@@ -117,5 +117,5 @@ int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 24);
     r[29] = (u)r[29] + 32; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

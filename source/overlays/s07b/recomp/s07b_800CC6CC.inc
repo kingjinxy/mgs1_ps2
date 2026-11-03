@@ -21,5 +21,5 @@ int G_s07b_800CC6CC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = 0;
     *(int *)((u)r[2] + ((int)R_picture_alive + 4)) = r[3]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

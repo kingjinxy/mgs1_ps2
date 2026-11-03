@@ -64,7 +64,7 @@ int G_s10a_800E28B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 56; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_DG_Chanls[] __asm__("DG_Chanls");
 extern char R_GV_Clock[] __asm__("GV_Clock");
@@ -115,5 +115,5 @@ int G_s10a_rc_800E29AC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[3] = r[3] | r[2];
     *(int *)((u)r[7] + 0) = r[3]; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

@@ -1,0 +1,61 @@
+extern char R_GCL_ExecProc[] __asm__("GCL_ExecProc");
+extern char R_GCL_ForceExecProc[] __asm__("GCL_ForceExecProc");
+extern char R_GM_FreeControl[] __asm__("GM_FreeControl");
+extern char R_GM_FreeObject[] __asm__("GM_FreeObject");
+extern char R_GV_DestroyOtherActor[] __asm__("GV_DestroyOtherActor");
+int G_s10a_800C70A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C70A8");
+int G_s10a_800C70A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 3672);
+    r[2] = r[2] & 1;
+    c = ((r[2] == 0));  if (c) goto L800c70d4;
+    r[4] = (u)r[16] + 32; CALL(R_GM_FreeControl);
+    L800c70d4:;
+    r[2] = *(int *)((u)r[16] + 3672);
+    r[2] = r[2] & 2;
+    c = ((r[2] == 0));  if (c) goto L800c70f0;
+    r[4] = (u)r[16] + 156; CALL(R_GM_FreeObject);
+    L800c70f0:;
+    r[2] = *(int *)((u)r[16] + 3672);
+    r[2] = r[2] & 8;
+    c = ((r[2] == 0));  if (c) goto L800c710c;
+    r[4] = (u)r[16] + 2364; CALL(R_GM_FreeObject);
+    L800c710c:;
+    r[2] = *(int *)((u)r[16] + 3672);
+    r[2] = r[2] & 4;
+    c = ((r[2] == 0));  if (c) goto L800c712c;
+    r[4] = *(int *)((u)r[16] + 3604);
+     CALL(R_GV_DestroyOtherActor);
+    L800c712c:;
+    r[2] = *(int *)((u)r[16] + 3672);
+    r[2] = r[2] & 16;
+    c = ((r[2] == 0));  if (c) goto L800c714c;
+    r[4] = *(int *)((u)r[16] + 2592);
+     CALL(R_GV_DestroyOtherActor);
+    L800c714c:;
+    r[2] = *(int *)((u)r[16] + 3672);
+    r[2] = r[2] & 32;
+    c = ((r[2] == 0));  if (c) goto L800c716c;
+    r[4] = *(int *)((u)r[16] + 3588);
+     CALL(R_GV_DestroyOtherActor);
+    L800c716c:;
+    r[4] = *(int *)((u)r[16] + 3676);
+    c = (((int)r[4] < 0));  if (c) goto L800c71a4;
+    r[2] = *(short *)((u)r[16] + 3712);
+    c = ((r[2] == 0));  if (c) goto L800c719c;
+    r[5] = (u)0 + (u)0; CALL(R_GCL_ExecProc);
+     goto L800c71a4;
+    L800c719c:;
+    r[5] = (u)0 + (u)0; CALL(R_GCL_ForceExecProc);
+    L800c71a4:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

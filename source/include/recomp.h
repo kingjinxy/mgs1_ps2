@@ -2,6 +2,12 @@
 #ifndef RECOMP_H
 #define RECOMP_H
 typedef unsigned int u;
+/* the GTE, for translated cop2 instructions (the HAL's software GTE, port/gte.h) */
+void Gte_DataWrite(unsigned int reg, unsigned int value);
+unsigned int Gte_DataRead(unsigned int reg);
+void Gte_CtrlWrite(unsigned int reg, unsigned int value);
+unsigned int Gte_CtrlRead(unsigned int reg);
+void Gte_Command(unsigned int cmd);
 #define RECOMP_ENTRY(frame)                                                                  \
     int r[32], c, t, hi_ = 0, lo_ = 0; long long mul = 0;                                    \
     unsigned char stk[(frame) + 32] __attribute__((aligned(8)));                             \

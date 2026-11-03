@@ -17271,3 +17271,205 @@ Most docs were updated with each commit. I'll check what's still missing, mainly
 
 - tool `Bash`: Read the Planning Doc's overlay status section
 
+- tool `Bash`: Update the Planning Doc, TAS Progress and conversation archive, then commit
+
+## Claude
+
+All the docs and the conversation archive are up to date and committed as `49eeda7c7`. The working tree is clean.
+
+- **`Claude Conversation.md`:** regenerated from all session logs. It added 38 lines and removed none.
+- **`docs/Planning Doc.md`:** updated the overlay status, since `s08b` and `s07b` are now linked through `mips2c.py`. It also gained:
+  - a note on today's translator fixes and the stage-load data reset;
+  - a note on the BizHawk checkpoints;
+  - a new open item for the unsplit stages, starting with `s10a`.
+- **`docs/TAS Progress.md`:** ends with a note on where the TAS stands, 45,078 (0:23:58.70, 27.53%), and on the `s10a` blocker.
+- **`docs/Running Walkthrough.md` and `docs/TAS Testing Plan.md`:** they already had a section for each fix, plus the `s10a` note, from the earlier commits. They didn't need anything more.
+
+The open question is still the splitter for `s10a` and the six other unsplit stages on the route.
+
+## User
+
+Take a look at the stages and estimate how much decomp work needs to be done. Are there any patterns of code or data that can be reused to ease the process?
+
+## Claude
+
+I'll start with the stage tables. Each lists the actors its overlay provides, so they show how much of each stage is already-decompiled shared code.
+
+- tool `Bash`: Count stage table entries and literal addresses
+
+- tool `Bash`: Locate STAGE.DIR and any extraction tooling
+
+- tool `Bash`: Search the repo for STAGE.DIR handling
+
+## Claude
+
+The disc has `STAGE.DIR`, but nothing in the repo extracts it. I'll read `cdstage.c` for its format, then pull the seven stage binaries out of the disc image.
+
+- tool `Bash`: Read the STAGE.DIR format and find the disc image
+
+- tool `Bash`: Read the stage file tag layout
+
+- tool `Bash`: Read the DATACNF and tag structs
+
+## Claude
+
+I'll write a small extractor: ISO9660 on the raw disc, then `STAGE.DIR`'s table, then each stage's tag list. I'll check it against `s07b`, whose built binary I have.
+
+- tool `Bash`: Extract stage binaries from the disc and verify one
+
+## Claude
+
+`STAGE.DIR` isn't in the root directory. Listing the root:
+
+- tool `Bash`: List the disc's root directory
+
+- tool `Bash`: Extract from the MGS folder and verify against built binaries
+
+## Claude
+
+The extractor is verified: `s07b` and `s08b` come out byte-identical to the matching build's binaries. Now the seven unsplit stages:
+
+- tool `Bash`: Extract the seven unsplit stage binaries
+
+- tool `Bash`: Measure how much of each stage matches known functions
+
+- tool `Bash`: Split known code into C and asm-only, by source folder
+
+- tool `Bash`: Split the known code into C and asm-only per stage
+
+## Claude
+
+About 80% of the code in the seven stages already exists in the decomp, mostly as matching C. The rest is small enough that I wouldn't decompile it for the port at all.
+
+## The numbers
+I pulled each stage binary off the disc; the extractor reproduces `s07b`/`s08b` byte for byte. I then searched each one for every function of the 79 built overlays, with link-dependent fields masked. That method finds 97–100% of `s07b` and `s08b`, which are in the database, so it's reliable.
+
+| Stage | Code | Already exists as C | Only as asm | New code | Mostly shared with |
+|---|---:|---:|---:|---:|---|
+| `s10a` | 127 KB | 104 KB | 6 KB | **17 KB** | common actors (`okajima`, `takabe`, `enemy`) |
+| `s11b` | 92 KB | 60 KB | 23 KB | **8 KB** | `s11g` (the Hind) |
+| `s11h` | 92 KB | 58 KB | 18 KB | **16 KB** | `s11g` (the Hind) |
+| `s15a` | 83 KB | 55 KB | 28 KB | **0 KB** | `s15c` (`dyncon`, crows) |
+| `s17a` | 126 KB | 51 KB | 3 KB | **72 KB** | mostly its own code |
+| `s18a` | 123 KB | 45 KB | 30 KB | **48 KB** | `d18a` (`snake18`) |
+| `s19a` | 115 KB | 61 KB | 9 KB | **45 KB** | `s14e`/`s19b`, `animal`, `enemy` |
+| **Total** | **~1,020 KB** | **~434 KB** | **~117 KB** | **~209 KB** | |
+
+The "New code" column is my estimate of what nothing else has, about 52,000 instructions. Decompiling that to matching C would be about half the size of everything upstream still has left in `INCLUDE_ASM`. That would take months, so it isn't the route for the TAS.
+
+## Patterns that make it easier
+1. **Most of each stage is shared actors.** Overlays are built by linking the same object files again: fades, cinema bars, walls, footstep sounds, the common soldiers. Those are already matching C, so the match positions also give each stage's link order, nearly a linker command file.
+2. **Sister stages.** `s11b`/`s11h` are mostly `s11g`, `s15a` is entirely `s15c`'s code, and `s18a` builds on `d18a`. When the decomp finishes the sister stage's asm, the sibling gets it for free.
+3. **The port doesn't need decompiled C at all.** `mips2c.py` already turns asm into exact-behaviour C. The simplest route is to run it over each whole stage binary, without splitting it into source files:
+   - **Functions:** cut at prologues and at the stage table's constructors, which the translator already does for multi-function stubs.
+   - **Names:** resident references resolve through the main map, which is already complete.
+   - **Data:** keep the stage's `.data`/`.rodata` as one block in the PS1's layout, with pointer-looking words turned into symbols. "Nearest symbol + offset" is then always correct, which rules out this morning's `chair_alive` bug by construction.
+   - **Jump tables:** read from the binary, as now.
+
+   The cost is one new tool (the stage splitter plus data relocation), probably one session, then per-stage TAS debugging like `s07b`.
+4. **Hybrid, if readability matters later.** Use the existing C for the shared 79% and translate only the new 21%. It's cleaner, but it needs link order and data placement to match the PS1, so it's more work up front. It could replace the translated version stage by stage later, without changing behaviour.
+
+**My recommendation is option 3**, starting with `s10a` since the TAS is stopped there. It has one risk to name: deciding which data words are pointers. A wrong guess either breaks a pointer or relocates a plain number. Overlay and resident addresses fall in narrow ranges (0x800C3208 to the stage's end, and 0x80010000 to 0x800C3208), and code references show where the tables are, so I expect few mistakes. The TAS would catch any that remain. Shall I go ahead?
+
+## User
+
+Alright, proceed with #3. After that, make a commit and proceed with the TAS testing as before until 2:30 pm
+
+## Claude
+
+Starting on option 3. First, what `mips2c.py` takes as input today, so the new stage splitter can feed it the same way.
+
+- tool `Bash`: Read mips2c's inputs and output stages
+
+- tool `Bash`: Read how overlay source lists are built
+
+- tool `Bash`: Check build.py deletions and git ignore rules
+
+- tool `Bash`: Find build.py's asm cleanup and whether asm is tracked
+
+- tool `Bash`: Find where build.py removes asm files
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/tools/port/stage_split.py
+
+## Claude
+
+Before running it on `s10a`, I'll check its code detection against `s07b`, where the real map is known. A `CHECK=1` mode compares and exits before writing anything.
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/tools/port/stage_split.py
+
+- tool `Bash`: Check code detection against three split overlays
+
+- tool `Bash`: Fix the code end and measure data pointers into code
+
+- tool `Bash`: Evaluate the after-a-return rule on five overlays
+
+- tool `Bash`: Identify jump tables and check the classification
+
+## Claude
+
+The jump-table finder works: none of its entries is a real function. In `s07b` 13 other data words still point into code at non-functions, so I'll look at them.
+
+- tool `Bash`: List the unexplained data pointers into code
+
+## Claude
+
+These all fall where `static` functions would be. The map doesn't list statics, so "not in the map" doesn't mean "not a function". I'll check whether the targets look like function starts.
+
+- tool `Bash`: Check whether those targets start functions
+
+- tool `Bash`: Apply the function-pointer rule and recheck
+
+## Claude
+
+Detection is now validated on five overlays. Running the splitter on `s10a`:
+
+- tool `Bash`: Split s10a from the disc
+
+- tool `Bash`: Inspect the generated stage table
+
+- tool `Bash`: Hook the stage table in and translate s10a
+
+- tool `Bash`: Find the HAL's GTE interface
+
+- tool `Bash`: Read the HAL's GTE emulator and recomp runtime
+
+- tool `Bash`: List the GTE emulator's public functions
+
+- tool `Bash`: Add GTE instructions to mips2c
+
+- tool `Bash`: Declare the GTE calls and retranslate s10a
+
+## Claude
+
+All 532 functions translated, and the survey shows `s10a` as linkable: no stubs and no literal addresses. Now the port build and the TAS:
+
+- tool `Bash`: Build with s10a and run the TAS
+
+## Claude
+
+`s10a` built and ran on the first try. The TAS is in sync to **loop 47,499 (0:25:21.89)**, 2,421 loops into `s10a`. I'll check TLB misses and the matching build, then commit.
+
+- tool `Bash`: Check TLB misses and both matching builds
+
+## Claude
+
+The port is fine and the TLB misses are only the known ones, but **both matching builds now fail (0 OK)**. Looking at the error:
+
+- tool `Bash`: Find the matching build's error
+
+## Claude
+
+The matching build picks up the generated `source/overlays/s10a/s10a.c` even though `s10a` is off in its overlay list. I'll see how `build.py` collects sources.
+
+- tool `Bash`: See how build.py collects source files
+
+- tool `Bash`: Read build.py's file walk
+
+- tool `Bash`: Move generated stubs out of asm and rebuild both matching variants
+
+## Claude
+
+Both matching builds pass again: 80 OK, and `vr_exe` 2 OK. I'll rerun the TAS to confirm the port is unchanged, then commit.
+
+- tool `Bash`: Rerun the TAS and review changes
+

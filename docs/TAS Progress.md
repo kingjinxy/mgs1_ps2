@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 45,078 (0:23:58.70), 27.53%.
+Current: loop 47,499 (0:25:21.89), 29.13%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -41,6 +41,7 @@ Current: loop 45,078 (0:23:58.70), 27.53%.
 | 38,579 | 0:20:26.61 | 23.47% | `s07b` (Psycho Mantis) linked in: 157 stubs through mips2c.py, stage table and state table by symbol; the boss life bar now drawn | Nov 3 |
 | 39,732 | 0:21:06.15 | 24.23% | mips2c.py forgets a register's lui at a call (Meryl's turn of Snake read GV_VecDir2() + 0x800 as an address) | Nov 3 |
 | 45,078 | 0:23:58.70 | 27.53% | overlay statics read by translated code by name: `chair_alive` etc. were `dword_800C3404`+124 (Psycho Mantis through) | Nov 3 |
+| 47,499 | 0:25:21.89 | 29.13% | `s10a` (not split by the decomp) linked in through the new stage_split.py and mips2c.py, with GTE instructions | Nov 3 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

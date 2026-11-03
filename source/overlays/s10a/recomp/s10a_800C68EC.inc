@@ -1,0 +1,36 @@
+extern char R_s10a_dat_800E36CC[] __asm__("s10a_dat_800E36CC");
+extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
+extern char R_fprintf[] __asm__("fprintf");
+extern char R_s10a_800C682C[] __asm__("s10a_800C682C");
+int G_s10a_800C68EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C68EC");
+int G_s10a_800C68EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[3] = (u)0 + 4;
+    r[2] = (u)r[16] + 16;
+    *(int *)((u)r[29] + 20) = r[31];
+    L800c6904:;
+    *(int *)((u)r[2] + 3048) = 0;
+    r[3] = (u)r[3] + -1;
+    c = (((int)r[3] >= 0)); r[2] = (u)r[2] + -4; if (c) goto L800c6904;
+    r[4] = (u)0 + 115; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0)); r[4] = (u)r[2] + (u)0; if (c) goto L800c6950;
+    r[5] = (u)r[16] + 3048; CALL(R_s10a_800C682C);
+    r[2] = (int)r[2] < 5;
+    c = ((r[2] != 0)); r[2] = (u)0 + (u)0; if (c) goto L800c6954;
+    r[4] = (u)0 + (u)0;
+    r[5] = 0;
+    r[5] = (u)r[5] + ((int)R_s10a_dat_800E36CC + 100); CALL(R_fprintf);
+    r[2] = (u)0 + -1; goto L800c6954;
+    L800c6950:;
+    r[2] = (u)0 + (u)0;
+    L800c6954:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

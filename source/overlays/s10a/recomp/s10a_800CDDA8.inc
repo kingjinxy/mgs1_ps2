@@ -1,0 +1,62 @@
+extern char R_GV_Clock[] __asm__("GV_Clock");
+int G_s10a_800CDDA8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CDDA8");
+int G_s10a_800CDDA8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(0)
+    r[8] = (u)r[4] + (u)0;
+    r[2] = *(int *)((u)r[8] + 56);
+    r[3] = (u)0 + 5;
+    r[7] = (u)r[3] - (u)r[2];
+    r[2] = (int)r[7] < 3;
+    c = ((r[2] != 0));  if (c) goto L800cddc8;
+    r[7] = (u)r[7] + -3;
+    L800cddc8:;
+    r[6] = *(int *)((u)r[8] + 60);
+    r[5] = *(unsigned char *)((u)r[6] + 10);
+    r[5] = (u)r[5] + 1;
+    mul = (long long)(int)r[5] * (int)r[7]; hi_ = mul >> 32; lo_ = mul;
+    r[3] = lo_;
+    r[4] = 0x55550000;
+    r[4] = r[4] | 21846;
+    mul = (long long)(int)r[3] * (int)r[4]; hi_ = mul >> 32; lo_ = mul;
+    r[10] = hi_;
+    r[2] = (u)r[7] + 1;
+    mul = (long long)(int)r[5] * (int)r[2]; hi_ = mul >> 32; lo_ = mul;
+    r[5] = lo_;
+    r[3] = (int)r[3] >> 31;
+    r[2] = 0;
+    mul = (long long)(int)r[5] * (int)r[4]; hi_ = mul >> 32; lo_ = mul;
+    r[2] = *(int *)((u)r[2] + (int)R_GV_Clock);
+    r[3] = (u)r[10] - (u)r[3];
+    r[2] = (u)r[2] << 2;
+    r[4] = *(int *)((u)r[8] + 40);
+    r[5] = (int)r[5] >> 31;
+    r[4] = (u)r[4] + (u)r[2];
+    r[2] = *(unsigned char *)((u)r[6] + 8);
+    r[4] = *(int *)((u)r[4] + 64);
+    r[3] = (u)r[2] + (u)r[3];
+    *(char *)((u)r[4] + 28) = r[3];
+    *(char *)((u)r[4] + 12) = r[3];
+    r[7] = hi_;
+    r[5] = (u)r[7] - (u)r[5];
+    r[2] = (u)r[2] + (u)r[5];
+    r[2] = (u)r[2] + -1;
+    *(char *)((u)r[4] + 36) = r[2];
+    *(char *)((u)r[4] + 20) = r[2];
+    r[2] = *(unsigned char *)((u)r[6] + 9);
+    r[3] = *(unsigned char *)((u)r[6] + 11);
+    r[3] = (u)r[3] + (u)r[2];
+    *(char *)((u)r[4] + 21) = r[2];
+    *(char *)((u)r[4] + 13) = r[2];
+    *(char *)((u)r[4] + 37) = r[3];
+    *(char *)((u)r[4] + 29) = r[3];
+    r[2] = *(unsigned short *)((u)r[6] + 4);
+    *(short *)((u)r[4] + 22) = r[2];
+    r[2] = r[2] & 65439;
+    r[3] = *(unsigned short *)((u)r[6] + 6);
+    r[2] = r[2] | 32;
+    *(short *)((u)r[4] + 22) = r[2];
+    *(short *)((u)r[4] + 14) = r[3]; goto out;
+out:
+    return r[2];
+}

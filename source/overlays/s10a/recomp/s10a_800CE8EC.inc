@@ -1,0 +1,64 @@
+extern char R_s10a_dat_800E4970[] __asm__("s10a_dat_800E4970");
+extern char R_s10a_800CE4B0[] __asm__("s10a_800CE4B0");
+extern char R_s10a_800CE600[] __asm__("s10a_800CE600");
+extern char R_s10a_800CE72C[] __asm__("s10a_800CE72C");
+extern char R_s10a_800CE744[] __asm__("s10a_800CE744");
+extern char R_s10a_800CE7A8[] __asm__("s10a_800CE7A8");
+extern char R_s10a_800CE8DC[] __asm__("s10a_800CE8DC");
+extern char R_s10a_800CE8E4[] __asm__("s10a_800CE8E4");
+int G_s10a_800CE8EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CE8EC");
+int G_s10a_800CE8EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(48)
+    r[29] = (u)r[29] + -48;
+    *(int *)((u)r[29] + 40) = r[31];
+    *(int *)((u)r[29] + 36) = r[21];
+    *(int *)((u)r[29] + 32) = r[20];
+    *(int *)((u)r[29] + 28) = r[19];
+    *(int *)((u)r[29] + 24) = r[18];
+    *(int *)((u)r[29] + 20) = r[17];
+    *(int *)((u)r[29] + 16) = r[16]; CALL(R_s10a_800CE8DC);
+    r[17] = (u)0 + (u)0; CALL(R_s10a_800CE8E4);
+    r[2] = 0;
+    r[3] = (u)r[2] + (int)R_s10a_dat_800E4970;
+    r[2] = *(int *)((u)r[3] + 12);
+    c = (((int)r[2] <= 0)); r[19] = (u)r[17] + (u)0; if (c) goto L800ce994;
+    r[21] = (u)0 + 2;
+    r[20] = (u)r[3] + (u)0;
+    r[18] = (u)r[20] + 144;
+    r[16] = (u)r[20] + (u)0;
+    L800ce940:;
+    r[3] = *(int *)((u)r[16] + 148);
+    c = ((r[3] != r[21])); r[2] = (u)0 + 1; if (c) goto L800ce96c;
+    r[2] = *(int *)((u)r[16] + 156);
+    r[5] = *(int *)((u)r[2] + 2964);
+    r[4] = (u)r[19] + (u)0; CALL(R_s10a_800CE72C);
+    r[19] = (u)r[2] + (u)0; goto L800ce97c;
+    L800ce96c:;
+    c = ((r[3] != r[2])); r[4] = (u)r[18] + (u)0; if (c) goto L800ce97c;
+    r[5] = (u)r[17] + (u)0; CALL(R_s10a_800CE600);
+    L800ce97c:;
+    r[18] = (u)r[18] + 16;
+    r[2] = *(int *)((u)r[20] + 12);
+    r[17] = (u)r[17] + 1;
+    r[2] = (int)r[17] < (int)r[2];
+    c = ((r[2] != 0)); r[16] = (u)r[16] + 16; if (c) goto L800ce940;
+    L800ce994:;
+    r[4] = (u)r[19] + (u)0;
+    r[16] = 0;
+    r[16] = (u)r[16] + (int)R_s10a_dat_800E4970;
+    r[5] = (u)r[16] + (u)0; CALL(R_s10a_800CE744);
+    r[4] = (u)r[16] + (u)0; CALL(R_s10a_800CE7A8);
+    r[4] = (u)r[16] + (u)0; CALL(R_s10a_800CE4B0);
+    *(int *)((u)r[16] + 272) = 0;
+    r[31] = *(int *)((u)r[29] + 40);
+    r[21] = *(int *)((u)r[29] + 36);
+    r[20] = *(int *)((u)r[29] + 32);
+    r[19] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 48; goto out;
+out:
+    return r[2];
+}

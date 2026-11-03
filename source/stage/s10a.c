@@ -1,6 +1,9 @@
 #define DECLARE_NEWCHARA_PROTOS
 #include "charalst.h"
 
+#ifdef MGS_PORT
+#include "overlays/s10a/stage_table.inc"
+#else
 CHARA _StageCharacterEntries[] = {
     { 0x51c6, (NEWCHARA *)0x800e3478 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
     { 0x02c4, (NEWCHARA *)0x800c521c }, //  CHARA_ASIATOKUN,    /* chara 足跡君 */
@@ -46,3 +49,4 @@ CHARA _StageCharacterEntries[] = {
 
     CHARA_END
 };
+#endif

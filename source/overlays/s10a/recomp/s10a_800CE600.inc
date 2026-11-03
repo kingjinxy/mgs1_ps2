@@ -1,0 +1,67 @@
+extern char R_s10a_dat_800E4970[] __asm__("s10a_dat_800E4970");
+extern char R_s10a_800CE3C0[] __asm__("s10a_800CE3C0");
+int G_s10a_800CE600(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CE600");
+int G_s10a_800CE600(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 24) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = *(int *)((u)r[16] + 8);
+    r[4] = (u)0 + 1;
+    c = ((r[17] == r[4])); r[2] = (int)r[17] < 2; if (c) goto L800ce680;
+    c = ((r[2] == 0));  if (c) goto L800ce63c;
+    c = ((r[17] == 0));  if (c) goto L800ce650;
+     goto L800ce718;
+    L800ce63c:;
+    r[2] = (u)0 + 2;
+    c = ((r[17] == r[2])); r[2] = 0; if (c) goto L800ce6a4;
+     goto L800ce718;
+    L800ce650:;
+    r[2] = *(int *)((u)r[16] + 4);
+    c = ((r[2] != r[4])); r[3] = 0; if (c) goto L800ce718;
+    r[3] = (u)r[3] + (int)R_s10a_dat_800E4970;
+    *(int *)((u)r[16] + 8) = r[4];
+    *(int *)((u)r[16] + 0) = r[4];
+    r[2] = *(int *)((u)r[3] + 100);
+    r[2] = (u)r[2] + 1;
+    *(int *)((u)r[3] + 100) = r[2]; goto L800ce718;
+    L800ce680:;
+    r[2] = *(int *)((u)r[16] + 0);
+    r[2] = (u)r[2] + -1;
+    c = (((int)r[2] > 0)); *(int *)((u)r[16] + 0) = r[2]; if (c) goto L800ce718;
+    r[2] = (u)0 + 2;
+    *(int *)((u)r[16] + 8) = r[2];
+    *(int *)((u)r[16] + 0) = 0; goto L800ce718;
+    L800ce6a4:;
+    r[2] = (u)r[2] + (int)R_s10a_dat_800E4970;
+    r[3] = *(int *)((u)r[2] + 32);
+    c = ((r[3] == 0));  if (c) goto L800ce6c8;
+    c = ((r[3] == r[4]));  if (c) goto L800ce6e4;
+     goto L800ce718;
+    L800ce6c8:;
+    r[2] = *(int *)((u)r[2] + 272);
+    r[2] = r[2] & 1;
+    c = ((r[2] == 0));  if (c) goto L800ce718;
+     goto L800ce708;
+    L800ce6e4:;
+    r[2] = *(int *)((u)r[2] + 100);
+    r[3] = *(int *)((u)r[16] + 12);
+    r[2] = (int)r[2] < 255;
+    c = ((r[2] == 0)); r[2] = (u)0 + 255; if (c) goto L800ce718;
+    r[3] = *(unsigned char *)((u)r[3] + 2936);
+    c = ((r[3] != r[2]));  if (c) goto L800ce718;
+    L800ce708:;
+     CALL(R_s10a_800CE3C0);
+    *(int *)((u)r[16] + 4) = r[17];
+    *(int *)((u)r[16] + 8) = 0;
+    L800ce718:;
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    return r[2];
+}

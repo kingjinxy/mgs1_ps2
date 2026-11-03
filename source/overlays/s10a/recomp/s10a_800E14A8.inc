@@ -1,0 +1,68 @@
+extern char R_DG_GetTexture[] __asm__("DG_GetTexture");
+extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
+extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
+extern char R_GCL_StrToInt[] __asm__("GCL_StrToInt");
+extern char R_GV_Malloc[] __asm__("GV_Malloc");
+extern char R_s10a_800E0104[] __asm__("s10a_800E0104");
+extern char R_s10a_800E0FE0[] __asm__("s10a_800E0FE0");
+int G_s10a_800E14A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E14A8");
+int G_s10a_800E14A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(48)
+    r[29] = (u)r[29] + -48;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[4] = (u)0 + 110;
+    r[5] = (u)0 + 1;
+    *(int *)((u)r[29] + 44) = r[31];
+    *(int *)((u)r[29] + 40) = r[20];
+    *(int *)((u)r[29] + 36) = r[19];
+    *(int *)((u)r[29] + 32) = r[18];
+    *(int *)((u)r[29] + 28) = r[17]; CALL(R_s10a_800E0104);
+    r[4] = (u)r[2] << 5;
+    r[4] = (u)r[4] + (u)r[2];
+    r[4] = (u)r[4] << 2;
+    *(int *)((u)r[16] + 36) = r[2]; CALL(R_GV_Malloc);
+    r[19] = (u)r[2] + (u)0;
+    c = ((r[19] == 0)); *(int *)((u)r[16] + 32) = r[19]; if (c) goto L800e1504;
+    r[4] = (u)0 + 100; CALL(R_GCL_GetOption);
+    c = ((r[2] != 0));  if (c) goto L800e150c;
+    L800e1504:;
+    r[2] = (u)0 + -1; goto L800e15a4;
+    L800e150c:;
+    r[20] = *(int *)((u)r[16] + 36);
+    c = (((int)r[20] <= 0)); r[18] = (u)r[19] + 120; if (c) goto L800e15a0;
+    L800e151c:;
+    r[20] = (u)r[20] + -1; CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    r[17] = (u)r[2] + (u)0; CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    r[16] = (u)r[2] + (u)0; CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    r[2] = (u)r[2] << 1;
+    *(int *)((u)r[18] + -4) = r[2]; CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    r[2] = (u)r[2] + -16;
+    *(int *)((u)r[18] + 0) = r[2]; CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    r[4] = (u)r[2] + (u)0; CALL(R_DG_GetTexture);
+    r[4] = (u)r[19] + (u)0;
+    r[5] = (u)r[17] + (u)0;
+    r[6] = (u)r[16] + (u)0;
+    r[7] = (u)r[2] + (u)0;
+    *(int *)((u)r[29] + 16) = r[2]; CALL(R_s10a_800E0FE0);
+    r[18] = (u)r[18] + 132;
+    c = (((int)r[20] > 0)); r[19] = (u)r[19] + 132; if (c) goto L800e151c;
+    L800e15a0:;
+    r[2] = (u)0 + (u)0;
+    L800e15a4:;
+    r[31] = *(int *)((u)r[29] + 44);
+    r[20] = *(int *)((u)r[29] + 40);
+    r[19] = *(int *)((u)r[29] + 36);
+    r[18] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 48; goto out;
+out:
+    return r[2];
+}

@@ -1,0 +1,64 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_s10a_dat_800C368C[] __asm__("s10a_dat_800C368C");
+extern char R_s10a_dat_800E3E40[] __asm__("s10a_dat_800E3E40");
+extern char R_DG_GetTexture[] __asm__("DG_GetTexture");
+extern char R_DG_MakePrim[] __asm__("DG_MakePrim");
+extern char R_DG_QueuePrim[] __asm__("DG_QueuePrim");
+extern char R_GV_StrCode[] __asm__("GV_StrCode");
+extern char R_s10a_800D2BB8[] __asm__("s10a_800D2BB8");
+int G_s10a_800D2C30(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D2C30");
+int G_s10a_800D2C30(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 32) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    r[4] = (u)0 + 1042;
+    r[5] = (u)0 + 1;
+    r[6] = (u)0 + (u)0;
+    r[2] = (u)0 + -90;
+    *(int *)((u)r[29] + 36) = r[31];
+    *(int *)((u)r[29] + 28) = r[17];
+    *(int *)((u)r[29] + 24) = r[16];
+    *(short *)((u)r[18] + 792) = r[2];
+    r[2] = (u)0 + 300;
+    *(short *)((u)r[18] + 794) = r[2];
+    r[2] = (u)0 + 350;
+    *(short *)((u)r[18] + 796) = r[2];
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s10a_dat_800C368C;
+    r[7] = (u)r[18] + 792;
+    *(int *)((u)r[29] + 16) = r[2]; CALL(R_DG_MakePrim);
+    r[17] = (u)r[2] + (u)0;
+    c = ((r[17] == 0));  if (c) goto L800d2ca4;
+    r[4] = (u)r[17] + (u)0; CALL(R_DG_QueuePrim);
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_CurrentMap);
+    *(short *)((u)r[17] + 40) = r[2];
+    L800d2ca4:;
+    c = ((r[17] == 0)); *(int *)((u)r[18] + 808) = r[17]; if (c) goto L800d2cfc;
+    r[4] = 0;
+    r[4] = (u)r[4] + (int)R_s10a_dat_800E3E40;
+    r[2] = (u)0 + 500;
+    *(short *)((u)r[17] + 46) = r[2]; CALL(R_GV_StrCode);
+    r[4] = (u)r[2] + (u)0; CALL(R_DG_GetTexture);
+    r[16] = (u)r[2] + (u)0;
+    c = ((r[16] == 0)); *(int *)((u)r[18] + 812) = r[16]; if (c) goto L800d2cfc;
+    r[5] = (u)r[16] + (u)0;
+    r[4] = *(int *)((u)r[17] + 64);
+    r[6] = (u)0 + 128; CALL(R_s10a_800D2BB8);
+    r[5] = (u)r[16] + (u)0;
+    r[4] = *(int *)((u)r[17] + 68);
+    r[6] = (u)0 + 100; CALL(R_s10a_800D2BB8);
+    r[2] = (u)0 + (u)0; goto L800d2d00;
+    L800d2cfc:;
+    r[2] = (u)0 + -1;
+    L800d2d00:;
+    r[31] = *(int *)((u)r[29] + 36);
+    r[18] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}

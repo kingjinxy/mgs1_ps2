@@ -1,0 +1,31 @@
+extern char R_s10a_800CC998[] __asm__("s10a_800CC998");
+int G_s10a_800CCEFC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CCEFC");
+int G_s10a_800CCEFC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 2856);
+    r[2] = r[2] & 31;
+    c = ((r[2] != 0)); r[2] = (u)0 + -1; if (c) goto L800ccf2c;
+    *(int *)((u)r[16] + 3080) = r[2];
+    *(int *)((u)r[16] + 3052) = r[2]; CALL(R_s10a_800CC998);
+    L800ccf2c:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s10a_800CC998);
+    *(short *)((u)r[16] + 2888) = r[2];
+    r[2] = (u)r[2] << 16;
+    c = (((int)r[2] < 0)); r[2] = (u)0 + (u)0; if (c) goto L800ccf58;
+    r[3] = *(int *)((u)r[16] + 2856);
+    r[3] = (u)r[3] + 1;
+    *(int *)((u)r[16] + 2856) = r[3]; goto L800ccf5c;
+    L800ccf58:;
+    r[2] = (u)0 + 1;
+    L800ccf5c:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

@@ -1,0 +1,19 @@
+int G_s10a_800D5EC8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D5EC8");
+int G_s10a_800D5EC8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(0)
+    r[2] = (u)0 + (u)0;
+    *(int *)((u)r[4] + 32) = r[5];
+    *(int *)((u)r[4] + 36) = r[6];
+    *(int *)((u)r[4] + 56) = 0; goto out;
+out:
+    return r[2];
+}
+int G_s10a_rc_800D5EDC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800D5EDC");
+int G_s10a_rc_800D5EDC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(0)
+     goto out;
+out:
+    return r[2];
+}

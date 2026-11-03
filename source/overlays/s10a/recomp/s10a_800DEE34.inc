@@ -1,0 +1,64 @@
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
+extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
+extern char R_GCL_StrToInt[] __asm__("GCL_StrToInt");
+extern char R_GCL_StrToSV[] __asm__("GCL_StrToSV");
+int G_s10a_800DEE34(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DEE34");
+int G_s10a_800DEE34(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[2] = 0;
+    r[4] = (u)0 + 112;
+    *(int *)((u)r[29] + 20) = r[31];
+    *(int *)((u)r[2] + (int)R_GM_CurrentMap) = r[6]; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0)); r[4] = (u)0 + 104; if (c) goto L800dee88;
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = (u)r[16] + 104; CALL(R_GCL_StrToSV);
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = (u)r[16] + 112; CALL(R_GCL_StrToSV);
+    r[4] = (u)0 + 104;
+    L800dee88:;
+    r[2] = *(short *)((u)r[16] + 106);
+    r[5] = *(short *)((u)r[16] + 114);
+    r[3] = (u)0 + 4096;
+    *(short *)((u)r[16] + 134) = r[3];
+    r[2] = (u)r[2] + (u)r[5];
+    r[3] = (u)r[2] >> 31;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (int)r[2] >> 1;
+    *(short *)((u)r[16] + 132) = r[2]; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0));  if (c) goto L800deecc;
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    *(short *)((u)r[16] + 132) = r[2];
+    L800deecc:;
+    r[4] = (u)0 + 115; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0)); r[3] = 0; if (c) goto L800deef4;
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0; CALL(R_GCL_StrToInt);
+    *(short *)((u)r[16] + 134) = r[2];
+    r[3] = 0;
+    L800deef4:;
+    *(short *)((u)r[16] + 130) = 0;
+    r[10] = (u)r[3] + (int)R_DG_ZeroVector;
+    r[7] = LWL(((u)r[10] + 3), r[7]);
+    r[7] = LWR(((u)r[10] + 0), r[7]);
+    r[8] = LWL(((u)r[10] + 7), r[8]);
+    r[8] = LWR(((u)r[10] + 4), r[8]);
+    SWL(((u)r[16] + 123), r[7]);
+    SWR(((u)r[16] + 120), r[7]);
+    SWL(((u)r[16] + 127), r[8]);
+    SWR(((u)r[16] + 124), r[8]);
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[2] = (u)0 + (u)0;
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

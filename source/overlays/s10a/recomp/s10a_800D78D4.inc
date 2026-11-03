@@ -1,0 +1,65 @@
+extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
+extern char R_DG_DequeuePrim[] __asm__("DG_DequeuePrim");
+extern char R_DG_FreePrim[] __asm__("DG_FreePrim");
+extern char R_GM_FreeControl[] __asm__("GM_FreeControl");
+extern char R_GM_FreeObject[] __asm__("GM_FreeObject");
+extern char R_GM_FreeTarget[] __asm__("GM_FreeTarget");
+extern char R_GV_DelayedFree[] __asm__("GV_DelayedFree");
+extern char R_s10a_800D66E8[] __asm__("s10a_800D66E8");
+extern char R_s10a_800D674C[] __asm__("s10a_800D674C");
+int G_s10a_800D78D4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D78D4");
+int G_s10a_800D78D4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    r[5] = 0xefff0000;
+    r[5] = r[5] | 65535;
+    r[3] = 0;
+    r[2] = *(int *)((u)r[3] + (int)R_GM_GameStatus);
+    r[4] = (u)r[17] + 36;
+    *(int *)((u)r[29] + 24) = r[31];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[2] = r[2] & r[5];
+    *(int *)((u)r[3] + (int)R_GM_GameStatus) = r[2]; CALL(R_GM_FreeControl);
+    r[4] = (u)r[17] + 160; CALL(R_GM_FreeObject);
+    r[4] = (u)r[17] + 388; CALL(R_GM_FreeObject);
+    r[4] = *(int *)((u)r[17] + 1628);
+     CALL(R_GM_FreeTarget);
+    r[4] = *(int *)((u)r[17] + 1632);
+     CALL(R_GM_FreeTarget);
+    r[16] = *(int *)((u)r[17] + 1868);
+    c = ((r[16] == 0));  if (c) goto L800d7950;
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_DequeuePrim);
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_FreePrim);
+    L800d7950:;
+    r[16] = *(int *)((u)r[17] + 2016);
+    c = ((r[16] == 0));  if (c) goto L800d7970;
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_DequeuePrim);
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_FreePrim);
+    L800d7970:;
+    r[4] = *(int *)((u)r[17] + 32);
+    c = ((r[4] == 0));  if (c) goto L800d7988;
+     CALL(R_GV_DelayedFree);
+    L800d7988:;
+    r[3] = *(int *)((u)r[17] + 2492);
+    r[2] = (u)0 + 1;
+    c = ((r[3] != r[2]));  if (c) goto L800d79b8;
+    r[2] = *(int *)((u)r[17] + 2500);
+    c = ((r[2] != r[3]));  if (c) goto L800d79b8;
+    r[4] = (u)r[17] + (u)0; CALL(R_s10a_800D66E8);
+     goto L800d79d0;
+    L800d79b8:;
+    r[3] = *(int *)((u)r[17] + 2532);
+    r[2] = (u)0 + -1;
+    c = ((r[3] == r[2]));  if (c) goto L800d79d0;
+    r[4] = (u)r[17] + (u)0; CALL(R_s10a_800D674C);
+    L800d79d0:;
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    return r[2];
+}

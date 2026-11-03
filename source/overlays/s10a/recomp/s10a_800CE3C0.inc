@@ -1,0 +1,68 @@
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_s10a_dat_800E4970[] __asm__("s10a_dat_800E4970");
+extern char R_s10a_dat_800E49AA[] __asm__("s10a_dat_800E49AA");
+extern char R_GV_DiffVec3[] __asm__("GV_DiffVec3");
+int G_s10a_800CE3C0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CE3C0");
+int G_s10a_800CE3C0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(56)
+    r[29] = (u)r[29] + -56;
+    *(int *)((u)r[29] + 36) = r[19];
+    r[19] = (u)0 + (u)0;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[19] + (u)0;
+    r[2] = 0;
+    r[3] = (u)r[2] + (int)R_s10a_dat_800E4970;
+    *(int *)((u)r[29] + 48) = r[31];
+    *(int *)((u)r[29] + 44) = r[21];
+    *(int *)((u)r[29] + 40) = r[20];
+    *(int *)((u)r[29] + 32) = r[18];
+    *(int *)((u)r[29] + 28) = r[17];
+    r[2] = *(short *)((u)r[3] + 56);
+    c = (((int)r[2] <= 0)); r[18] = (u)r[19] + (u)0; if (c) goto L800ce484;
+    r[2] = 0;
+    r[21] = (u)r[2] + (int)R_GM_PlayerPosition;
+    r[20] = (u)r[3] + (u)0;
+    r[17] = (u)r[20] + (u)0;
+    L800ce410:;
+    r[2] = *(int *)((u)r[20] + 104);
+    r[4] = *(short *)((u)r[17] + 60);
+    r[3] = *(int *)((u)r[2] + 8);
+    r[2] = (u)r[4] << 1;
+    r[3] = *(int *)((u)r[3] + 0);
+    r[2] = (u)r[2] + (u)r[4];
+    r[3] = *(int *)((u)r[3] + 20);
+    r[2] = (u)r[2] << 3;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(unsigned short *)((u)r[21] + 2);
+    r[4] = *(unsigned short *)((u)r[3] + 0);
+    r[5] = (u)r[21] + (u)0;
+    *(short *)((u)r[29] + 18) = r[2];
+    *(short *)((u)r[29] + 16) = r[4];
+    r[2] = *(unsigned short *)((u)r[3] + 2);
+    r[4] = (u)r[29] + 16;
+    *(short *)((u)r[29] + 20) = r[2]; CALL(R_GV_DiffVec3);
+    r[3] = (u)r[2] + (u)0;
+    r[2] = (int)r[19] < (int)r[3];
+    c = ((r[2] == 0));  if (c) goto L800ce470;
+    r[19] = (u)r[3] + (u)0;
+    r[18] = (u)r[16] + (u)0;
+    L800ce470:;
+    r[2] = *(short *)((u)r[20] + 56);
+    r[16] = (u)r[16] + 1;
+    r[2] = (int)r[16] < (int)r[2];
+    c = ((r[2] != 0)); r[17] = (u)r[17] + 2; if (c) goto L800ce410;
+    L800ce484:;
+    r[31] = *(int *)((u)r[29] + 48);
+    r[21] = *(int *)((u)r[29] + 44);
+    r[20] = *(int *)((u)r[29] + 40);
+    r[19] = *(int *)((u)r[29] + 36);
+    r[2] = 0;
+    *(short *)((u)r[2] + (int)R_s10a_dat_800E49AA) = r[18];
+    r[18] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 56; goto out;
+out:
+    return r[2];
+}

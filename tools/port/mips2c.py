@@ -7,6 +7,8 @@ crash there needs that call by hand."""
 import bisect, os, re, struct, sys
 ovl = sys.argv[1]
 ad, out = 'asm/overlays/' + ovl, 'source/overlays/%s/recomp' % ovl
+if not os.path.isdir(ad):
+    ad = 'obj_ps2/stage_split/' + ovl  # an overlay the decomp hasn't split (tools/port/stage_split.py)
 os.makedirs(out, exist_ok=True)
 names = {}
 for l in open('obj/asm_%s_lhs.map' % ovl, errors='ignore'):
@@ -93,6 +95,18 @@ def translate(path, seg=None):
                 seen[rs, si] = hi[rs]
                 a = (hi[rs] << 16) + (si if o != 13 else imm)
                 ea = sym(a & 0xffffffff, used)
+        if o == 18:  # the GTE, through the HAL's software one (port/gte.h)
+            if w >> 25 & 1: return 'Gte_Command(0x%x);' % (w & 0x1FFFFFF)
+            if rs == 0: hi.pop(rt, None); return wr(rt, 'Gte_DataRead(%d)' % rd)
+            if rs == 2: hi.pop(rt, None); return wr(rt, 'Gte_CtrlRead(%d)' % rd)
+            if rs == 4: return 'Gte_DataWrite(%d, %s);' % (rd, R(rt))
+            if rs == 6: return 'Gte_CtrlWrite(%d, %s);' % (rd, R(rt))
+            raise SystemExit('%s: cop2 %08x at %x' % (name, w, pc))
+        if o in (50, 58):  # lwc2, swc2
+            base = ea if ea else '(u)%s + %d' % (R(rs), si)
+            if ea and rs: base = '(u)%s + %s' % (R(rs), ea)
+            if o == 50: return 'Gte_DataWrite(%d, *(int *)(%s));' % (rt, base)
+            return '*(int *)(%s) = Gte_DataRead(%d);' % (base, rt)
         if o == 15:
             if isaddr(imm): hi[rt] = imm; return wr(rt, '0;')[:-1]
             hi.pop(rt, None); return wr(rt, '0x%x' % (imm << 16))

@@ -1,0 +1,65 @@
+extern char R_s10a_dat_800C380C[] __asm__("s10a_dat_800C380C");
+extern char R_s10a_dat_800C381C[] __asm__("s10a_dat_800C381C");
+extern char R_DG_MovePos[] __asm__("DG_MovePos");
+extern char R_DG_RotatePos[] __asm__("DG_RotatePos");
+extern char R_DG_SetPos[] __asm__("DG_SetPos");
+extern char R_GV_RandS[] __asm__("GV_RandS");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+extern char R_NewBlood[] __asm__("NewBlood");
+extern char R_ReadRotMatrix[] __asm__("ReadRotMatrix");
+extern char R_s10a_800DE54C[] __asm__("s10a_800DE54C");
+int G_s10a_800DD284(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DD284");
+int G_s10a_800DD284(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(72)
+    r[29] = (u)r[29] + -72;
+    *(int *)((u)r[29] + 60) = r[17];
+    r[17] = (u)r[6] + (u)0;
+    r[2] = (u)r[5] << 1;
+    r[2] = (u)r[2] + (u)r[5];
+    r[2] = (u)r[2] << 3;
+    r[2] = (u)r[2] - (u)r[5];
+    r[2] = (u)r[2] << 2;
+    *(int *)((u)r[29] + 64) = r[31];
+    *(int *)((u)r[29] + 56) = r[16];
+    r[4] = *(int *)((u)r[4] + 160);
+    r[2] = (u)r[2] + 72;
+    r[4] = (u)r[4] + (u)r[2]; CALL(R_DG_SetPos);
+    r[4] = 0;
+    r[4] = (u)r[4] + ((int)R_s10a_dat_800C380C + 8); CALL(R_DG_MovePos);
+    r[4] = (u)0 + 128; CALL(R_GV_RandS);
+    r[16] = 0;
+    r[3] = *(unsigned short *)((u)r[16] + (int)R_s10a_dat_800C381C);
+    r[4] = (u)0 + 128;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[16] + (int)R_s10a_dat_800C381C) = r[3];
+    r[16] = (u)r[16] + (int)R_s10a_dat_800C381C; CALL(R_GV_RandS);
+    r[3] = *(unsigned short *)((u)r[16] + 2);
+    r[4] = (u)0 + 512;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[16] + 2) = r[3]; CALL(R_GV_RandS);
+    r[3] = *(unsigned short *)((u)r[16] + 4);
+    r[4] = (u)r[16] + (u)0;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[4] + 4) = r[3]; CALL(R_DG_RotatePos);
+    r[4] = (u)r[29] + 16; CALL(R_ReadRotMatrix);
+    r[4] = (u)r[29] + 16;
+    r[5] = (u)r[17] + (u)0; CALL(R_NewBlood);
+    r[4] = (u)0 + 256;
+    r[3] = *(unsigned short *)((u)r[29] + 36);
+    r[5] = *(unsigned short *)((u)r[29] + 44);
+    r[2] = (u)0 + -30000;
+    *(short *)((u)r[29] + 50) = r[2];
+    *(short *)((u)r[29] + 48) = r[3];
+    *(short *)((u)r[29] + 52) = r[5]; CALL(R_GV_RandU);
+    r[4] = (u)r[29] + 48;
+    r[5] = (u)0 + (u)0;
+    r[6] = (u)r[2] + 256;
+    r[7] = (u)0 + 60; CALL(R_s10a_800DE54C);
+    r[31] = *(int *)((u)r[29] + 64);
+    r[17] = *(int *)((u)r[29] + 60);
+    r[16] = *(int *)((u)r[29] + 56);
+    r[29] = (u)r[29] + 72; goto out;
+out:
+    return r[2];
+}

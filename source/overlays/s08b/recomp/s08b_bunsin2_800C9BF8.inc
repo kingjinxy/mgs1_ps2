@@ -1,26 +1,9 @@
-extern char R_s08b_aJumpfctrlturnvyd_800E3920[] __asm__("s08b_aJumpfctrlturnvyd_800E3920");
-extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
-extern char R_s08b_bunsin2_800CEB40[] __asm__("s08b_bunsin2_800CEB40");
-extern char R_s08b_dword_800C33A0[] __asm__("s08b_dword_800C33A0");
-extern char R_s08b_dword_800C33A4[] __asm__("s08b_dword_800C33A4");
-extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
-extern char R_s08b_dword_800C33AC[] __asm__("s08b_dword_800C33AC");
-extern char R_s08b_dword_800C33B0[] __asm__("s08b_dword_800C33B0");
-extern char R_s08b_dword_800C33C8[] __asm__("s08b_dword_800C33C8");
-extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
-extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
-extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
-extern char R_printf[] __asm__("printf");
-extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
-extern char R_s08b_bunsin2_800C9120[] __asm__("s08b_bunsin2_800C9120");
-extern char R_s08b_bunsin2_800C9548[] __asm__("s08b_bunsin2_800C9548");
-extern char R_s08b_bunsin2_800C9BF8[] __asm__("s08b_bunsin2_800C9BF8");
 int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C9BF8");
 int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
-    RECOMP_ENTRY(40)
+    RECOMP_ENTRY(0)
     r[2] = *(unsigned short *)((u)r[4] + 0);
-    r[2] = (u)r[2] + ((int)R_s08b_bunsin2_800CEB40 + 311);
+    r[2] = (u)r[2] + -5001;
     r[2] = (u)r[2] < (u)749;
     c = ((r[2] == 0));  if (c) goto L800c9c2c;
     r[5] = *(short *)((u)r[4] + 4);
@@ -41,6 +24,23 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[2] = (u)0 + (u)0;
     L800c9c6c:;
      goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33A0[] __asm__("s08b_dword_800C33A0");
+extern char R_s08b_dword_800C33A4[] __asm__("s08b_dword_800C33A4");
+extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
+extern char R_s08b_dword_800C33B0[] __asm__("s08b_dword_800C33B0");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
+extern char R_s08b_bunsin2_800C9120[] __asm__("s08b_bunsin2_800C9120");
+extern char R_s08b_bunsin2_800C9548[] __asm__("s08b_bunsin2_800C9548");
+extern char R_s08b_bunsin2_800C9BF8[] __asm__("s08b_bunsin2_800C9BF8");
+int G_s08b_rc_800C9C74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800C9C74");
+int G_s08b_rc_800C9C74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 24) = r[16];
     r[16] = (u)r[4] + (u)0;
@@ -203,6 +203,20 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[17] = *(int *)((u)r[29] + 28);
     r[16] = *(int *)((u)r[29] + 24);
     r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_aJumpfctrlturnvyd_800E3920[] __asm__("s08b_aJumpfctrlturnvyd_800E3920");
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_printf[] __asm__("printf");
+extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
+int G_s08b_rc_800C9F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800C9F74");
+int G_s08b_rc_800C9F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 16) = r[16];
     r[16] = (u)r[4] + (u)0;
@@ -301,6 +315,18 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[17] = *(int *)((u)r[29] + 20);
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33AC[] __asm__("s08b_dword_800C33AC");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
+int G_s08b_rc_800CA11C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800CA11C");
+int G_s08b_rc_800CA11C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 16) = r[16];
     r[16] = (u)r[4] + (u)0;
@@ -389,6 +415,18 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[17] = *(int *)((u)r[29] + 20);
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33AC[] __asm__("s08b_dword_800C33AC");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
+int G_s08b_rc_800CA298(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800CA298");
+int G_s08b_rc_800CA298(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 16) = r[16];
     r[16] = (u)r[4] + (u)0;
@@ -477,6 +515,18 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[17] = *(int *)((u)r[29] + 20);
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33C8[] __asm__("s08b_dword_800C33C8");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
+int G_s08b_rc_800CA414(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800CA414");
+int G_s08b_rc_800CA414(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 20) = r[17];
     r[17] = (u)r[4] + (u)0;
@@ -580,6 +630,19 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[17] = *(int *)((u)r[29] + 20);
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
+extern char R_s08b_bunsin2_800C9548[] __asm__("s08b_bunsin2_800C9548");
+int G_s08b_rc_800CA5D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800CA5D8");
+int G_s08b_rc_800CA5D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 16) = r[16];
     r[16] = (u)r[4] + (u)0;
@@ -718,6 +781,18 @@ int G_s08b_bunsin2_800C9BF8(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[17] = *(int *)((u)r[29] + 20);
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33A8[] __asm__("s08b_dword_800C33A8");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_s08b_bunsin2_800C8FF8[] __asm__("s08b_bunsin2_800C8FF8");
+int G_s08b_rc_800CA858(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800CA858");
+int G_s08b_rc_800CA858(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 16) = r[16];
     r[16] = (u)r[4] + (u)0;

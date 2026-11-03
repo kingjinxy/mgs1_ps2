@@ -3,7 +3,7 @@ extern char R_s08b_dword_800E4314[] __asm__("s08b_dword_800E4314");
 extern char R_s08b_dword_800E4318[] __asm__("s08b_dword_800E4318");
 extern char R_s08b_dword_800E431C[] __asm__("s08b_dword_800E431C");
 extern char R_s08b_dword_800E4320[] __asm__("s08b_dword_800E4320");
-extern char R_s08b_ninja_800C7F74[] __asm__("s08b_ninja_800C7F74");
+extern char R_s08b_rc_800C800C[] __asm__("s08b_rc_800C800C");
 extern char R_GM_SetCameraCallbackFunc[] __asm__("GM_SetCameraCallbackFunc");
 int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_ninja_800C8848");
 int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -23,7 +23,7 @@ int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6
     r[2] = 0;
     r[5] = 0;
     r[4] = (u)0 + 1;
-    r[5] = (u)r[5] + ((int)R_s08b_ninja_800C7F74 + 152);
+    r[5] = (u)r[5] + (int)R_s08b_rc_800C800C;
     *(int *)((u)r[29] + 20) = r[31];
     *(int *)((u)r[2] + (int)R_s08b_dword_800E4320) = 0; CALL(R_GM_SetCameraCallbackFunc);
     r[2] = 0;

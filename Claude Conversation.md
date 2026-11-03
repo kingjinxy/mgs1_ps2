@@ -15642,3 +15642,89 @@ All threads are idle again, the same deadlock signature as the 6,668 hang. To se
 
 - tool `Bash`: Commit, compare state at 27,191
 
+- tool `Bash`: Propagate delay-slot lui; rerun
+
+- tool `Bash`: Try layout padding to dodge the deadlock
+
+- tool `Bash`: Find last translated function at the freeze
+
+## Claude
+
+Thanks, I'll work to 10:30 PM. With the recorder in, this build passes the freeze and shows the TLB store at `0x4320` is still happening, so I'll find that exact instruction.
+
+- tool `Bash`: Locate the bad store
+
+- tool `Bash`: Resolve repeated addresses; rerun
+
+- tool `Bash`: Keep recorder, rerun
+
+- tool `Bash`: See how port status evolves after 27,191
+
+- tool `Bash`: Read Ninja actor setup
+
+- tool `Bash`: Clean wrappers; read alert code
+
+- tool `Bash`: Trace Ninja functions around load end
+
+## Claude
+
+The constructor's six functions run, then no translated function runs at all, so the actor's `Act` either isn't running or the actor was destroyed. Reading the constructor's end and `Act`.
+
+- tool `Bash`: Read constructor and Act
+
+- tool `Bash`: Split stubs at function boundaries; rerun
+
+## Claude
+
+Clean build with all entry points real. One leftover warning needs handling: the last piece of a stub can still continue into the next file. Then the main question: why `Act` doesn't run.
+
+- tool `Bash`: Fix continuation; read constructor
+
+- tool `Bash`: Read end of constructor
+
+- tool `Bash`: Log constructor result and Act
+
+## Claude
+
+The constructor succeeds, but `Act` hasn't run by the desync. I'll let the run continue past it to see whether `Act` ever starts.
+
+- tool `Bash`: Run past desync to see if Act runs
+
+- tool `Bash`: Check actor header after construction
+
+- tool `Bash`: Find who calls the alert code
+
+- tool `Bash`: List symbol-plus-offset references
+
+- tool `Bash`: Add taken-address entry points; rerun
+
+## Claude
+
+The callback is a real function now, and the port sets one of the missing bits (`0x8000`), so the Ninja code is progressing. New TLB misses: a NULL read in main-executable code. I'll find it.
+
+- tool `Bash`: Resolve NULL read site
+
+- tool `Bash`: Find stub calls to DG_GetLightMatrix
+
+## Claude
+
+No translated function calls it, so a C actor is passing a NULL it got from translated code. One logging run will show the caller.
+
+- tool `Bash`: Log the caller passing NULL
+
+## Claude
+
+The search found no file, so nothing was patched, and that run is a plain one I don't need. I'll stop it and find where `DG_GetLightMatrix` is defined.
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Clean up and locate the function
+
+## Claude
+
+Before the next experiment I'll commit the translator improvements, since they're a clear step forward. Then I'll log the caller in `light.c`.
+
+- tool `Bash`: Commit; log NULL caller
+

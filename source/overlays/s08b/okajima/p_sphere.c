@@ -31,19 +31,7 @@ void s08b_p_sphere_800D8F20(void *unused, MATRIX **m, int scale)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_p_sphere_800D8F50.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_p_sphere_800D8F50.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_p_sphere_800D8F50.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_p_sphere_800D8F50.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_p_sphere_800D8F50.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_p_sphere_800D9574(Work *work)
 {
@@ -58,19 +46,7 @@ void s08b_p_sphere_800D9574(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_p_sphere_800D95CC.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_p_sphere_800D95CC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_p_sphere_800D95CC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_p_sphere_800D95CC.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_p_sphere_800D95CC.s")
-#endif
-#endif
-#endif
 #endif
 
 const char s08b_aPspherec_800E40CC[] = "p_sphere.c";

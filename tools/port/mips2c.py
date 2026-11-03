@@ -26,22 +26,40 @@ def sym(addr, used):
     used.add(n)
     return '((int)R_%s + %d)' % (n, off) if off else '(int)R_%s' % n
 
-def translate(path):
+def targets(start, ws):
+    for i, w in enumerate(ws):
+        if w >> 26 in (1, 4, 5, 6, 7): yield i, start + i * 4 + 4 + s16(w & 0xffff) * 4
+        if w >> 26 == 2: yield i, ((start + i * 4 + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2)
+
+def cuts(start, ws):
+    """Where a new function starts in a stub: after a jr ra that no earlier branch jumps past."""
+    out = []
+    for i in range(len(ws) - 2):
+        p = start + (i + 2) * 4
+        if ws[i] == 0x03E00008 and (ws[i + 2] >> 16 == 0x27BD or p in taken):
+            if not any(n < i and t >= p for n, t in targets(start, ws)):
+                out.append(i + 2)
+    return out
+
+def translate(path, seg=None):
     t = open(path, errors='ignore').read()
     m = re.search(r'dw 0x[0-9A-Fa-f]{8} ; ([0-9A-Fa-f]{8})', t)
     start = int(m.group(1), 16)
     ws = [int(x, 16) for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', t)]
+    if seg:
+        ws, start = ws[seg[0]:seg[1]], start + seg[0] * 4  # the last piece can run on into the next file
     # the split can cut a function: a branch past the end pulls in the following stubs
     files = sorted((g for g in os.listdir(ad) if g.endswith('.s')), key=lambda g: g.split('_')[-1])
     while True:
         last = start + 4 * len(ws)
         far = [start + i * 4 + 4 + s16(w & 0xffff) * 4 for i, w in enumerate(ws) if w >> 26 in (4, 5, 6, 7) or w >> 26 == 1]
         far += [((start + i * 4 + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2) for i, w in enumerate(ws) if w >> 26 == 2]
-        if not any(last <= x < last + 0x2000 for x in far): break
+        if (seg and not seg[2]) or not any(last <= x < last + 0x2000 for x in far): break
         nxt = [g for g in files if int(g[:-2].split('_')[-1], 16) == last]
         if not nxt: break
         ws += [int(x, 16) for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', open(os.path.join(ad, nxt[0]), errors='ignore').read())]
     name = re.search(r'xdef (\S+)', t).group(1)
+    if seg and seg[0]: name = names[start]
     used, funcs, labels, hi = set(), set(), set(), {}
     end = start + 4 * len(ws)
     frame = 0
@@ -65,7 +83,10 @@ def translate(path):
                 if x >> 16 == 0x3C00 | rt and isaddr(x & 0xffff):
                     hi[rs] = x & 0xffff
         if o in (8, 9) or o >= 32 or o == 13:
+            if rs not in hi and (rs, si) in seen and o >= 32:
+                hi[rs] = seen[rs, si]  # the same address on another path
             if rs in hi:
+                seen[rs, si] = hi[rs]
                 a = (hi[rs] << 16) + (si if o != 13 else imm)
                 ea = sym(a & 0xffffffff, used)
         if o == 15:
@@ -127,10 +148,14 @@ def translate(path):
         if o == 14: return wr(rt, '%s ^ %d' % (R(rs), imm))
         raise SystemExit('%s: op %08x at %x' % (name, w, pc))
     lines, i = [], 0
+    pending = {}
+    seen = {}
     n = len(ws)
     while i < n:
         pc = start + i * 4; w = ws[i]; o = w >> 26
-        if pc in labels: lines.append('L%x:;' % pc)
+        if pc in labels:
+            lines.append('L%x:;' % pc)
+            hi.update(pending.get(pc, {}))  # a lui in the delay slot of a branch here
         rs, rt, fn = (w >> 21) & 31, (w >> 16) & 31, w & 63
         R = lambda x: '0' if x == 0 else 'r[%d]' % x
         ctrl = None
@@ -167,6 +192,10 @@ def translate(path):
         elif o == 1 and rt == 0: ctrl = 'if ((int)%s < 0) goto L%x;' % (R(rs), tgt)
         elif o == 1 and rt == 1: ctrl = 'if ((int)%s >= 0) goto L%x;' % (R(rs), tgt)
         if ctrl:
+            d = ws[i + 1]
+            if d >> 26 == 15 and isaddr(d & 0xffff) and (o in (1, 2, 4, 5, 6, 7)):
+                to = ((pc + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2) if o == 2 else tgt
+                pending.setdefault(to, {})[(d >> 16) & 31] = d & 0xffff
             if ctrl.startswith('if'):
                 # the condition is taken before the delay slot
                 c = ctrl[3:ctrl.index(') goto')+1]; g = ctrl[ctrl.index('goto'):]
@@ -199,18 +228,44 @@ out:
 ''' % (dec, name, name, name, frame, body)
 
 made = []
+parts = {}
+taken = set()  # code addresses the stubs take (callbacks): each one an entry point
+for f in os.listdir(ad):
+    for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', open(os.path.join(ad, f), errors='ignore').read()) if f.endswith('.s') else []:
+        pass
+for f in os.listdir(ad):
+    if not f.endswith('.s'): continue
+    w = [int(x, 16) for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', open(os.path.join(ad, f), errors='ignore').read())]
+    h = {}
+    for x in w:
+        if x >> 26 == 15: h[(x >> 16) & 31] = x & 0xffff
+        elif x >> 26 == 9 and ((x >> 21) & 31) in h: taken.add(((h[(x >> 21) & 31] << 16) + s16(x & 0xffff)) & 0xffffffff)
+for f in sorted(os.listdir(ad)):
+    if not f.endswith('.s'): continue
+    t = open(os.path.join(ad, f), errors='ignore').read()
+    m = re.search(r'dw 0x[0-9A-Fa-f]{8} ; ([0-9A-Fa-f]{8})', t)
+    if not m or 'xdef' not in t: continue
+    st = int(m.group(1), 16); ws = [int(x, 16) for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', t)]
+    c = cuts(st, ws); parts[f] = [0] + c + [len(ws)]
+    for k in c:
+        a = st + k * 4
+        if a not in names: names[a] = '%s_rc_%X' % (ovl, a)
+keys[:] = sorted(names)
+print(sum(len(v) - 2 for v in parts.values()), 'extra entry points')
 for f in sorted(os.listdir(ad)):
     if not f.endswith('.s'): continue
     t = open(os.path.join(ad, f), errors='ignore').read()
     if 'dw 0x' not in t or 'xdef' not in t: continue
-    open(os.path.join(out, f[:-2] + '.inc'), 'w').write(translate(os.path.join(ad, f)))
+    pp = parts[f]
+    txt = translate(os.path.join(ad, f)) if len(pp) == 2 else ''.join(translate(os.path.join(ad, f), (pp[k], pp[k + 1], k == len(pp) - 2)) for k in range(len(pp) - 1))
+    open(os.path.join(out, f[:-2] + '.inc'), 'w').write(txt)
     made.append(f)
 print(len(made), 'functions')
 for root, _, fs in os.walk('source/overlays/' + ovl):
     for f in fs:
         if not f.endswith('.c'): continue
         p = os.path.join(root, f); s = open(p, errors='surrogateescape', encoding='utf-8').read()
-        n = re.sub(r'^#pragma INCLUDE_ASM\("asm/overlays/%s/(\S+)\.s"\)$' % ovl,
+        n = re.sub(r'(?<!#else\n)^#pragma INCLUDE_ASM\("asm/overlays/%s/(\S+)\.s"\)$' % ovl,
                    lambda m: '#ifdef MGS_PORT\n#include "overlays/%s/recomp/%s.inc"\n#else\n%s\n#endif' % (ovl, m.group(1), m.group(0)), s, flags=re.M)
         if n != s:
             if '#include "recomp.h"' not in n:

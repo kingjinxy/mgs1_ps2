@@ -2,12 +2,9 @@ extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_s08b_dword_800C3598[] __asm__("s08b_dword_800C3598");
 extern char R_s08b_dword_800C35B4[] __asm__("s08b_dword_800C35B4");
 extern char R_s08b_dword_800C35D0[] __asm__("s08b_dword_800C35D0");
-extern char R_s08b_dword_800C35EC[] __asm__("s08b_dword_800C35EC");
 extern char R_s08b_dword_800C3608[] __asm__("s08b_dword_800C3608");
 extern char R_s08b_dword_800C360C[] __asm__("s08b_dword_800C360C");
 extern char R_s08b_dword_800E3FC0[] __asm__("s08b_dword_800E3FC0");
-extern char R_s08b_dword_800E3FE0[] __asm__("s08b_dword_800E3FE0");
-extern char R_s08b_dword_800E4000[] __asm__("s08b_dword_800E4000");
 extern char R_NewAnime[] __asm__("NewAnime");
 int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D4FBC");
 int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -82,6 +79,21 @@ int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[6] + 20) = r[2]; CALL(R_NewAnime);
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
+out:
+    return r[2];
+}
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_s08b_dword_800C3598[] __asm__("s08b_dword_800C3598");
+extern char R_s08b_dword_800C35B4[] __asm__("s08b_dword_800C35B4");
+extern char R_s08b_dword_800C35D0[] __asm__("s08b_dword_800C35D0");
+extern char R_s08b_dword_800C3608[] __asm__("s08b_dword_800C3608");
+extern char R_s08b_dword_800C360C[] __asm__("s08b_dword_800C360C");
+extern char R_s08b_dword_800E3FE0[] __asm__("s08b_dword_800E3FE0");
+extern char R_NewAnime[] __asm__("NewAnime");
+int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800D50F0");
+int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
     r[7] = (u)r[4] + (u)0;
     r[6] = (u)0 + (u)0;
@@ -152,6 +164,21 @@ int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[6] + 20) = r[2]; CALL(R_NewAnime);
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
+out:
+    return r[2];
+}
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_s08b_dword_800C3598[] __asm__("s08b_dword_800C3598");
+extern char R_s08b_dword_800C35B4[] __asm__("s08b_dword_800C35B4");
+extern char R_s08b_dword_800C35D0[] __asm__("s08b_dword_800C35D0");
+extern char R_s08b_dword_800C3608[] __asm__("s08b_dword_800C3608");
+extern char R_s08b_dword_800C360C[] __asm__("s08b_dword_800C360C");
+extern char R_s08b_dword_800E4000[] __asm__("s08b_dword_800E4000");
+extern char R_NewAnime[] __asm__("NewAnime");
+int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800D5228");
+int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
     r[7] = (u)r[4] + (u)0;
     r[6] = (u)0 + (u)0;
@@ -223,6 +250,16 @@ int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[6] + 20) = r[2]; CALL(R_NewAnime);
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
+out:
+    return r[2];
+}
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_s08b_dword_800C35EC[] __asm__("s08b_dword_800C35EC");
+extern char R_NewAnime[] __asm__("NewAnime");
+int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800D5364");
+int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
     r[2] = 0;
     *(int *)((u)r[29] + 40) = r[31];

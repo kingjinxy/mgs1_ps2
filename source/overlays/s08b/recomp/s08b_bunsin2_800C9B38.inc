@@ -1,5 +1,5 @@
-extern char R_s08b_bunsin2_800C9BF8[] __asm__("s08b_bunsin2_800C9BF8");
 extern char R_s08b_dword_800C33A0[] __asm__("s08b_dword_800C33A0");
+extern char R_s08b_rc_800C9C74[] __asm__("s08b_rc_800C9C74");
 extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
 extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
 extern char R_s08b_bunsin2_800C9120[] __asm__("s08b_bunsin2_800C9120");
@@ -37,7 +37,7 @@ int G_s08b_bunsin2_800C9B38(int a0, int a1, int a2, int a3, int a4, int a5, int 
     L800c9bc4:;
     r[2] = *(int *)((u)r[16] + 6580);
     c = (((int)r[2] < 0)); r[2] = 0; if (c) goto L800c9be8;
-    r[2] = (u)r[2] + ((int)R_s08b_bunsin2_800C9BF8 + 124);
+    r[2] = (u)r[2] + (int)R_s08b_rc_800C9C74;
     *(int *)((u)r[16] + 6548) = r[2];
     *(int *)((u)r[16] + 6556) = 0;
     L800c9be0:;

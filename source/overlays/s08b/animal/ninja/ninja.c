@@ -392,19 +392,7 @@ void s08b_ninja_800C7ED8(void)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C7F74.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C7F74.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C7F74.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C7F74.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C7F74.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_ninja_800C811C(Work *work)
@@ -507,54 +495,18 @@ void s08b_ninja_800C8354(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C83CC.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C83CC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C83CC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C83CC.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C83CC.s")
-#endif
-#endif
-#endif
 #endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C8558.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8558.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8558.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8558.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C8558.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8624.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8624.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8624.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C8624.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C8624.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_ninja_800C8798(Work *work) // Die
@@ -581,19 +533,7 @@ void s08b_ninja_800C8798(Work *work) // Die
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C8848.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8848.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8848.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8848.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C8848.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_ninja_800C8930(char *unused, int *out)
@@ -645,37 +585,13 @@ int s08b_ninja_800C89E8(char *unused, char *out)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C8A40.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8A40.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8A40.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8A40.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C8A40.s")
-#endif
-#endif
-#endif
 #endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_ninja_800C8BE8.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8BE8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8BE8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_ninja_800C8BE8.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_ninja_800C8BE8.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_ninja_800C8BE8(Work *work, int name, int where); // GetResources
 
@@ -737,19 +653,7 @@ int Bunsin2_800C8F04(void)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C8F0C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C8F0C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C8F0C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C8F0C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C8F0C.s")
-#endif
-#endif
-#endif
 #endif
 void NewWindcrcl_800CF784(MATRIX *world, int arg1, int arg2, int arg3, int time);
 void s08b_bunsin2_800C8FF8(Work *work)
@@ -779,37 +683,13 @@ void s08b_bunsin2_800C908C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C9120.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9120.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9120.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9120.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C9120.s")
-#endif
-#endif
-#endif
 #endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C933C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C933C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C933C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C933C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C933C.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800C933C(Work *work);
 
@@ -840,563 +720,167 @@ int s08b_bunsin2_800C9548(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C9588.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9588.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9588.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9588.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C9588.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9978.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9978.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9978.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C9978.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C9978.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9B38.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9B38.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9B38.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C9B38.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C9B38.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9BF8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9BF8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800C9BF8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800C9BF8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800C9BF8.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CA8F8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CA8F8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CA8F8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CA8F8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CA8F8.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAA78.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAA78.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAA78.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAA78.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAA78.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAB50.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAB50.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAB50.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAB50.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAB50.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAC3C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAC3C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAC3C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAC3C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAC3C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAD28.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAD28.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAD28.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAD28.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAD28.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAE14.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAE14.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAE14.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAE14.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAE14.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAF6C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAF6C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAF6C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAF6C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAF6C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAFF8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAFF8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CAFF8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CAFF8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CAFF8.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB0A8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB0A8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB0A8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB0A8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB0A8.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB158.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB158.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB158.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB158.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB158.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB210.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB210.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB210.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB210.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB210.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB2AC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB2AC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB2AC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB2AC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB2AC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB38C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB38C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB38C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB38C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB38C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB444.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB444.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB444.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB444.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB444.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB52C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB52C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB52C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB52C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB52C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB7A0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB7A0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB7A0.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB7A0.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB7A0.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB914.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB914.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CB914.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CB914.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CB914.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBAA4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBAA4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBAA4.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CBAA4.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CBAA4.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBCEC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBCEC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBCEC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CBCEC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CBCEC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBE30.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBE30.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CBE30.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CBE30.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CBE30.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC080.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC080.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC080.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC080.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC080.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC2F8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC2F8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC2F8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC2F8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC2F8.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC434.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC434.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC434.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC434.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC434.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC578.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC578.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC578.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC578.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC578.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC71C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC71C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC71C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC71C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC71C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC7EC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC7EC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC7EC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC7EC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC7EC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC90C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC90C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CC90C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CC90C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CC90C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCA4C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCA4C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCA4C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CCA4C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CCA4C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCAF0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCAF0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCAF0.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CCAF0.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CCAF0.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800CCD18(Work *work)
@@ -1445,19 +929,7 @@ void s08b_bunsin2_800CCDBC(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CCE34.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCE34.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCE34.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CCE34.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CCE34.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800CCF8C(Work *work)
 {
@@ -1476,19 +948,7 @@ void s08b_bunsin2_800CCF8C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD000.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD000.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD000.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD000.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD000.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800CD000(Work *work);
 
@@ -1509,121 +969,37 @@ int s08b_bunsin2_800CD2C0(int a, int b, int c)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD2E8.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD2E8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD2E8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD2E8.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD2E8.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD544.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD544.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD544.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD544.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD544.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD5AC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD5AC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD5AC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD5AC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD5AC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD614.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD614.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD614.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD614.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD614.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD690.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD690.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD690.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD690.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD690.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD770.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD770.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD770.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD770.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD770.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD808.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD808.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CD808.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CD808.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CD808.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800CD87C(Work *work)
@@ -1714,19 +1090,7 @@ void s08b_bunsin2_800CD9F0(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CDA40.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CDA40.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CDA40.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CDA40.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CDA40.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800CDA40(Work *work);
 
@@ -1825,19 +1189,7 @@ void s08b_bunsin2_800CDDD8(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CDE74.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CDE74.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CDE74.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CDE74.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CDE74.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800CDF68(Work *work)
@@ -1875,144 +1227,48 @@ void s08b_bunsin2_800CE064(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE0A4.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE0A4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE0A4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE0A4.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE0A4.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE180.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE180.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE180.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE180.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE180.s")
 #endif
-#endif
-#endif
-#endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE21C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE21C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE21C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE21C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE21C.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800CE21C(Work *work);
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE2E8.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE2E8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE2E8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE2E8.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE2E8.s")
-#endif
-#endif
-#endif
 #endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE398.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE398.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE398.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE398.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE398.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800CE398(Work *work);
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE584.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE584.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE584.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE584.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE584.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE800.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE800.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE800.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE800.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE800.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE8A0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE8A0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CE8A0.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CE8A0.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CE8A0.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800CE9BC(Work *work)
@@ -2030,54 +1286,18 @@ void s08b_bunsin2_800CE9BC(Work *work);
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CEA34.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEA34.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEA34.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEA34.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CEA34.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEB40.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEB40.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEB40.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CEB40.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CEB40.s")
 #endif
-#endif
-#endif
-#endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CECB4.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CECB4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CECB4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CECB4.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CECB4.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800CECB4(Work *work);
 
@@ -2178,129 +1398,45 @@ void s08b_bunsin2_800CEFC0(NinjaClone *clones, int val, short *out_count, short 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CEFF4.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEFF4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEFF4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CEFF4.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CEFF4.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF150.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF150.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF150.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF150.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF150.s")
 #endif
-#endif
-#endif
-#endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF254.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF254.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF254.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF254.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF254.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800CF254(Work *work);
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF354.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF354.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF354.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF354.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF354.s")
-#endif
-#endif
-#endif
 #endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF464.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF464.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF464.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF464.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF464.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800CF464(Work *work);
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF54C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF54C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF54C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF54C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF54C.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800CF54C(Work *work);
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF660.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF660.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF660.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF660.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF660.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800CF704(Work *work)
@@ -2404,19 +1540,7 @@ int s08b_bunsin2_800CF958(void)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CF960.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF960.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF960.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CF960.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CF960.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800CFA30(Work *work)
@@ -2479,19 +1603,7 @@ int s08b_bunsin2_800CFA80(Work *work);
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CFB98.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CFB98.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CFB98.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CFB98.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CFB98.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800CFC64(Work *work)
@@ -2571,19 +1683,7 @@ int s08b_bunsin2_800CFDE0(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800CFE54.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CFE54.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CFE54.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800CFE54.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800CFE54.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800D0004(Work *work)
@@ -2604,19 +1704,7 @@ int s08b_bunsin2_800D0004(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0078.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0078.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0078.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0078.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0078.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800D018C(Work *work)
@@ -2735,19 +1823,7 @@ int s08b_bunsin2_800D0410(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D044C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D044C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D044C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D044C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D044C.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800D044C(Work *work);
 
@@ -2765,19 +1841,7 @@ int s08b_bunsin2_800D0530(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0550.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0550.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0550.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0550.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0550.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800D0688(Work *work)
@@ -2836,19 +1900,7 @@ int s08b_bunsin2_800D072C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0784.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0784.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0784.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0784.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0784.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800D0814(Work *work)
@@ -2885,19 +1937,7 @@ int s08b_bunsin2_800D0864(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D08C8.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D08C8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D08C8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D08C8.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D08C8.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800D093C(Work *work)
 {
@@ -3024,19 +2064,7 @@ void s08b_bunsin2_800D0B1C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0B4C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0B4C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0B4C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0B4C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0B4C.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D0CD8(Work *work)
 {
@@ -3068,36 +2096,12 @@ void s08b_bunsin2_800D0CD8(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0D80.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0D80.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0D80.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0D80.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0D80.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0EB8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0EB8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0EB8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0EB8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0EB8.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800D0F54(Work *work)
@@ -3115,19 +2119,7 @@ int s08b_bunsin2_800D0F54(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D0F88.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0F88.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0F88.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D0F88.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D0F88.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800D1014(Work *work)
 {
@@ -3293,19 +2285,7 @@ int s08b_bunsin2_800D125C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D12A0.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D12A0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D12A0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D12A0.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D12A0.s")
-#endif
-#endif
-#endif
 #endif
 
 int s08b_bunsin2_800D12EC(Work *work)
@@ -3664,19 +2644,7 @@ void s08b_bunsin2_800D1D44(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D1DE0.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D1DE0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D1DE0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D1DE0.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D1DE0.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D1EC8(Work *work)
 {
@@ -3717,19 +2685,7 @@ void s08b_bunsin2_800D1EC8(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D1F9C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D1F9C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D1F9C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D1F9C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D1F9C.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800D2104(Work *work)
@@ -3880,138 +2836,42 @@ void s08b_bunsin2_800D231C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2420.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2420.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2420.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2420.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2420.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2510.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2510.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2510.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2510.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2510.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2600.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2600.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2600.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2600.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2600.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2860.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2860.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2860.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2860.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2860.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D29DC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D29DC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D29DC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D29DC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D29DC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2AB4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2AB4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2AB4.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2AB4.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2AB4.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2B24.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2B24.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2B24.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2B24.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2B24.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2BFC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2BFC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2BFC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2BFC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2BFC.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800D2D3C(Work *work)
@@ -4074,36 +2934,12 @@ void s08b_bunsin2_800D2DB0(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2EA0.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2EA0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2EA0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2EA0.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2EA0.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2F80.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2F80.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D2F80.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D2F80.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D2F80.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D3064(Work *work)
 {
@@ -4185,104 +3021,32 @@ void s08b_bunsin2_800D3160(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D31EC.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D31EC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D31EC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D31EC.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D31EC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3394.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3394.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3394.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D3394.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D3394.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3468.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3468.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3468.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D3468.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D3468.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D367C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D367C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D367C.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D367C.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D367C.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D37F0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D37F0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D37F0.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D37F0.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D37F0.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D38F0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D38F0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D38F0.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D38F0.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D38F0.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D39F8(Work *work)
 {
@@ -4340,19 +3104,7 @@ void s08b_bunsin2_800D3A84(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D3B00.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3B00.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3B00.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3B00.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D3B00.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D3B00(Work *work);
 
@@ -4400,53 +3152,17 @@ void s08b_bunsin2_800D3C44(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D3CCC.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3CCC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3CCC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3CCC.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D3CCC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3DBC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3DBC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3DBC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D3DBC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D3DBC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3EA4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3EA4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D3EA4.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D3EA4.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D3EA4.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D3F5C(Work *work)
 {
@@ -4478,19 +3194,7 @@ void s08b_bunsin2_800D3F5C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D401C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D401C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D401C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D401C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D401C.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D4128(Work *work)
 {
@@ -4531,37 +3235,13 @@ void s08b_bunsin2_800D4128(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D41DC.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D41DC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D41DC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D41DC.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D41DC.s")
-#endif
-#endif
-#endif
 #endif
 
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D42D8.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D42D8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D42D8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D42D8.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D42D8.s")
-#endif
-#endif
-#endif
 #endif
 int s08b_bunsin2_800D42D8(Work *work);
 
@@ -4630,19 +3310,7 @@ void s08b_bunsin2_800D44D0(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D452C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D452C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D452C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D452C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D452C.s")
-#endif
-#endif
-#endif
 #endif
 
 void s08b_bunsin2_800D4638(Work *work)
@@ -4662,19 +3330,7 @@ void s08b_bunsin2_800D4638(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D468C.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D468C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D468C.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D468C.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D468C.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D47E0(Work *work)
 {
@@ -4745,70 +3401,22 @@ void s08b_bunsin2_800D4884(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D4984.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4984.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4984.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4984.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D4984.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4A34.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4A34.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4A34.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D4A34.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D4A34.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4AF4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4AF4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4AF4.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D4AF4.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D4AF4.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4BD4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4BD4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4BD4.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D4BD4.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D4BD4.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D4C84(Work *work)
 {
@@ -4883,53 +3491,17 @@ void s08b_bunsin2_800D4E3C(Work *work)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D4ED0.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4ED0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4ED0.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4ED0.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D4ED0.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4FBC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4FBC.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D4FBC.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D4FBC.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D4FBC.s")
 #endif
-#endif
-#endif
-#endif
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D53E8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D53E8.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_bunsin2_800D53E8.inc"
-#else
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_bunsin2_800D53E8.inc"
 #else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_bunsin2_800D53E8.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_bunsin2_800D5434(void)
 {

@@ -147,6 +147,8 @@ static unsigned int pads_time(void)
     return (unsigned int)GV_Time;
 }
 
+const char* Port_RecompLast[8]; /* recomp.h: the mips2c.py functions last entered */
+int         Port_RecompN;
 static const unsigned char* s_PadRecord; /* Port_TasPads' record */
 static int          s_LoadEnded;    /* a load started or ended in this loop: the seed becomes the PS1's at its end */
 static unsigned int s_StreamStarts; /* the streams started (FS_StreamTickStart), against the PS1's count */

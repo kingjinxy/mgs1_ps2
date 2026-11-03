@@ -6,6 +6,7 @@ typedef unsigned int u;
     int r[32], c, t, hi_ = 0, lo_ = 0; long long mul = 0;                                    \
     unsigned char stk[(frame) + 32] __attribute__((aligned(8)));                             \
     (void)c; (void)t; (void)hi_; (void)lo_; (void)mul;                                       \
+    { extern const char *Port_RecompLast[8]; extern int Port_RecompN; Port_RecompLast[Port_RecompN++ & 7] = __func__; } /* shortcut: also keeps the layout past the deadlock in the TAS plan, drop it once that is found */ \
     r[4] = a0; r[5] = a1; r[6] = a2; r[7] = a3; r[2] = 0; r[3] = 0;                          \
     r[29] = (int)stk + (frame);                                                              \
     ((int *)r[29])[4] = a4; ((int *)r[29])[5] = a5; ((int *)r[29])[6] = a6; ((int *)r[29])[7] = a7;

@@ -39,7 +39,7 @@ int G_s08b_bunsin2_800C933C(int a0, int a1, int a2, int a3, int a4, int a5, int 
     c = ((r[3] == r[2])); r[2] = 0; if (c) goto L800c93fc;
     r[2] = (u)0 + 1; goto L800c9490;
     L800c93cc:;
-    r[11] = (u)r[2] + -19556;
+    r[11] = (u)r[2] + (int)R_DG_ZeroVector;
     r[8] = LWL(((u)r[11] + 3), r[8]);
     r[8] = LWR(((u)r[11] + 0), r[8]);
     r[9] = LWL(((u)r[11] + 7), r[9]);

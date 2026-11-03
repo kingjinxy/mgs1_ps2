@@ -1,24 +1,10 @@
 extern char R_GM_Camera[] __asm__("GM_Camera");
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
-extern char R_s08b_dword_800E371C[] __asm__("s08b_dword_800E371C");
-extern char R_s08b_dword_800E4318[] __asm__("s08b_dword_800E4318");
 extern char R_s08b_dword_800E4320[] __asm__("s08b_dword_800E4320");
-extern char R_GM_CameraBoundTrace[] __asm__("GM_CameraBoundTrace");
-extern char R_GM_CameraLimitTrace[] __asm__("GM_CameraLimitTrace");
-extern char R_GV_DirVec3[] __asm__("GV_DirVec3");
 extern char R_GV_NearExp2[] __asm__("GV_NearExp2");
 extern char R_GV_NearExp4[] __asm__("GV_NearExp4");
 extern char R_GV_NearExp8V[] __asm__("GV_NearExp8V");
-extern char R_s08b_ninja_800C7914[] __asm__("s08b_ninja_800C7914");
 extern char R_s08b_ninja_800C79D4[] __asm__("s08b_ninja_800C79D4");
-extern char R_s08b_ninja_800C79F0[] __asm__("s08b_ninja_800C79F0");
-extern char R_s08b_ninja_800C7A3C[] __asm__("s08b_ninja_800C7A3C");
-extern char R_s08b_ninja_800C7B68[] __asm__("s08b_ninja_800C7B68");
-extern char R_s08b_ninja_800C7BC8[] __asm__("s08b_ninja_800C7BC8");
-extern char R_s08b_ninja_800C7CF4[] __asm__("s08b_ninja_800C7CF4");
-extern char R_s08b_ninja_800C7E14[] __asm__("s08b_ninja_800C7E14");
-extern char R_s08b_ninja_800C7ED8[] __asm__("s08b_ninja_800C7ED8");
-extern char R_s08b_ninja_800C7F74[] __asm__("s08b_ninja_800C7F74");
 int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_ninja_800C7F74");
 int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
@@ -50,11 +36,33 @@ int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6
     r[4] = (u)0 + 1; CALL(R_s08b_ninja_800C79D4);
      goto L800c7ffc;
     L800c7ff8:;
-    *(int *)((u)r[4] + 17184) = r[2];
+    *(int *)((u)r[4] + (int)R_s08b_dword_800E4320) = r[2];
     L800c7ffc:;
     r[31] = *(int *)((u)r[29] + 20);
     r[16] = *(int *)((u)r[29] + 16);
     r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}
+extern char R_GM_Camera[] __asm__("GM_Camera");
+extern char R_s08b_dword_800E371C[] __asm__("s08b_dword_800E371C");
+extern char R_s08b_dword_800E4318[] __asm__("s08b_dword_800E4318");
+extern char R_GM_CameraBoundTrace[] __asm__("GM_CameraBoundTrace");
+extern char R_GM_CameraLimitTrace[] __asm__("GM_CameraLimitTrace");
+extern char R_GV_DirVec3[] __asm__("GV_DirVec3");
+extern char R_s08b_ninja_800C7914[] __asm__("s08b_ninja_800C7914");
+extern char R_s08b_ninja_800C79F0[] __asm__("s08b_ninja_800C79F0");
+extern char R_s08b_ninja_800C7A3C[] __asm__("s08b_ninja_800C7A3C");
+extern char R_s08b_ninja_800C7B68[] __asm__("s08b_ninja_800C7B68");
+extern char R_s08b_ninja_800C7BC8[] __asm__("s08b_ninja_800C7BC8");
+extern char R_s08b_ninja_800C7CF4[] __asm__("s08b_ninja_800C7CF4");
+extern char R_s08b_ninja_800C7E14[] __asm__("s08b_ninja_800C7E14");
+extern char R_s08b_ninja_800C7ED8[] __asm__("s08b_ninja_800C7ED8");
+extern char R_s08b_ninja_800C7F74[] __asm__("s08b_ninja_800C7F74");
+int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800C800C");
+int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(32)
     r[2] = 0;
     r[2] = *(int *)((u)r[2] + (int)R_s08b_dword_800E4318);
     r[29] = (u)r[29] + -32;

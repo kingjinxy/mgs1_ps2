@@ -175,19 +175,7 @@ void s08b_plasma_l_800D9F1C(Work *work, int arg1, int arg2)
 #ifdef MGS_PORT
 #include "overlays/s08b/recomp/s08b_plasma_l_800D9FB4.inc"
 #else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_plasma_l_800D9FB4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_plasma_l_800D9FB4.inc"
-#else
-#ifdef MGS_PORT
-#include "overlays/s08b/recomp/s08b_plasma_l_800D9FB4.inc"
-#else
 #pragma INCLUDE_ASM("asm/overlays/s08b/s08b_plasma_l_800D9FB4.s")
-#endif
-#endif
-#endif
 #endif
 void s08b_plasma_l_800D9FB4(Work *);
 

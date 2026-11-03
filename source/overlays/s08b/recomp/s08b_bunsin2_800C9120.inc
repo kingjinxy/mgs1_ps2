@@ -1,4 +1,3 @@
-extern char R_s08b_bunsin2_800C9BF8[] __asm__("s08b_bunsin2_800C9BF8");
 extern char R_s08b_bunsin2_800CAA78[] __asm__("s08b_bunsin2_800CAA78");
 extern char R_s08b_bunsin2_800CAB50[] __asm__("s08b_bunsin2_800CAB50");
 extern char R_s08b_bunsin2_800CAC3C[] __asm__("s08b_bunsin2_800CAC3C");
@@ -23,6 +22,12 @@ extern char R_s08b_bunsin2_800CC2F8[] __asm__("s08b_bunsin2_800CC2F8");
 extern char R_s08b_bunsin2_800CC434[] __asm__("s08b_bunsin2_800CC434");
 extern char R_s08b_bunsin2_800CCA4C[] __asm__("s08b_bunsin2_800CCA4C");
 extern char R_s08b_dword_800E3800[] __asm__("s08b_dword_800E3800");
+extern char R_s08b_rc_800C9F74[] __asm__("s08b_rc_800C9F74");
+extern char R_s08b_rc_800CA11C[] __asm__("s08b_rc_800CA11C");
+extern char R_s08b_rc_800CA298[] __asm__("s08b_rc_800CA298");
+extern char R_s08b_rc_800CA414[] __asm__("s08b_rc_800CA414");
+extern char R_s08b_rc_800CA5D8[] __asm__("s08b_rc_800CA5D8");
+extern char R_s08b_rc_800CA858[] __asm__("s08b_rc_800CA858");
 int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C9120");
 int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
@@ -38,7 +43,7 @@ int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int 
     t = r[2];  switch ((u)t) {  default: goto out; }
     r[2] = (u)0 + 1;
     r[3] = 0;
-    r[3] = (u)r[3] + ((int)R_s08b_bunsin2_800C9BF8 + 892);
+    r[3] = (u)r[3] + (int)R_s08b_rc_800C9F74;
     L800c9160:;
     *(int *)((u)r[4] + 6548) = r[3];
     *(int *)((u)r[4] + 6556) = 0;
@@ -46,19 +51,19 @@ int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(short *)((u)r[4] + 108) = 0; goto out;
     r[2] = (u)0 + 1;
     r[3] = 0;
-    r[3] = (u)r[3] + ((int)R_s08b_bunsin2_800C9BF8 + 1316); goto L800c9160;
+    r[3] = (u)r[3] + (int)R_s08b_rc_800CA11C; goto L800c9160;
     r[2] = (u)0 + 1;
     r[3] = 0;
-    r[3] = (u)r[3] + ((int)R_s08b_bunsin2_800C9BF8 + 1696); goto L800c9160;
+    r[3] = (u)r[3] + (int)R_s08b_rc_800CA298; goto L800c9160;
     r[2] = (u)0 + 1;
     r[3] = 0;
-    r[3] = (u)r[3] + ((int)R_s08b_bunsin2_800C9BF8 + 2076); goto L800c9160;
+    r[3] = (u)r[3] + (int)R_s08b_rc_800CA414; goto L800c9160;
     r[2] = (u)0 + 1;
     r[3] = 0;
-    r[3] = (u)r[3] + ((int)R_s08b_bunsin2_800C9BF8 + 2528); goto L800c9160;
+    r[3] = (u)r[3] + (int)R_s08b_rc_800CA5D8; goto L800c9160;
     r[2] = (u)0 + 1;
     r[3] = 0;
-    r[3] = (u)r[3] + ((int)R_s08b_bunsin2_800C9BF8 + 3168); goto L800c9160;
+    r[3] = (u)r[3] + (int)R_s08b_rc_800CA858; goto L800c9160;
     r[2] = (u)0 + 1;
     r[3] = 0;
     r[3] = (u)r[3] + (int)R_s08b_bunsin2_800CAA78; goto L800c9160;

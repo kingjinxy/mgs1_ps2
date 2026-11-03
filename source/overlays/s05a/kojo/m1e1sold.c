@@ -1046,6 +1046,17 @@ int s05a_800E00EC(GV_ACT *actor)
     {
         if (s05a_dword_800C362C->field_EB0 != NULL)
         {
+#ifdef MGS_PORT
+            if (s05a_dword_800C362C->field_EB0->field_1C0 == NULL)
+            {
+                /* the PS1 reads its RAM at 8 and 12 (BizHawk, to loop 22,600) */
+                pos.vx = 8;
+                pos.vy = 0x340;
+                pos.vz = 0;
+                pos.pad = 0;
+            }
+            else
+#endif
             pos = s05a_dword_800C362C->field_EB0->field_1C0->center;
         }
         else

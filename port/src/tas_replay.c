@@ -147,6 +147,7 @@ static unsigned int pads_time(void)
     return (unsigned int)GV_Time;
 }
 
+static const unsigned char* s_PadRecord; /* Port_TasPads' record */
 static int          s_LoadEnded;    /* a load started or ended in this loop: the seed becomes the PS1's at its end */
 static unsigned int s_StreamStarts; /* the streams started (FS_StreamTickStart), against the PS1's count */
 static int          s_LoopTick;     /* the vertical blank the loop began at (Port_TasTrace) */
@@ -563,6 +564,20 @@ void Port_TasPadsDone(void)
         }
         s_RawHeld = 0;
     }
+    /* A loop with two updates (the codec's end, script.c's PadCmd, loop 22,669): the first took a release the
+       PS1's second reported. */
+    if (s_PadRecord)
+    {
+        int i;
+        for (i = 0; i < 64; i += 16)
+        {
+            unsigned char* p = GV_PadData + i;
+            if (p[0] == s_PadRecord[i] && p[1] == s_PadRecord[i + 1] && !p[4] && !p[5])
+            {
+                memcpy(p + 4, s_PadRecord + i + 4, 2);
+            }
+        }
+    }
 #endif
 }
 
@@ -590,6 +605,7 @@ void Port_TasPads(void)
            but the game still copies the sticks (loop 2,462) */
         const unsigned char* r = mgs_tas_pads + next * RECORD + 4;
         int                  port;
+        s_PadRecord = r;
         memcpy(s_RawSaved, pad_800C14E0, 16);
         s_RawHeld = 1;
         for (port = 0; port < 2; port++)

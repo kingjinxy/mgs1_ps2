@@ -15152,3 +15152,17 @@ The hook hangs at 6,668 again, which at least makes the hang reproducible on dem
 
 - tool `Bash`: Commit, inspect TLB site and pad difference
 
+- tool `Bash`: Read code sites and PS1 low RAM values
+
+- tool `Bash`: Pad update callers and NULL site source
+
+- tool `Bash`: Read NULL site and pads-done hook
+
+- tool `Bash`: Fix NULL read and lost release, rerun
+
+## Claude
+
+**Loop 23,572 (0:12:39.38), 14.53%**, now in `s07a`, which the plan lists as one of the unlinked overlays. There's also one new TLB site. I'll commit and check both.
+
+- tool `Bash`: Commit; inspect TLB and s07a status
+

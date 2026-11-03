@@ -171,7 +171,7 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 - [x] Hook: `libfs/cdstage.c` (the `.bin` tag of a stage read) and `GM_LoadInitBin` call
       `Port_SetStage(id)` (`game/chara.c`): the stage's linked CHARA table by `GV_StrCode(name)`. The
       binary is still read into the arena's overlay area, unused. `GM_ResetChara` switches to an empty table
-- [ ] Reset an overlay's `.data`/`.bss` when its stage loads again (SH1 needed it for a map loaded twice)
+- [x] Reset an overlay's `.data`/`.bss` when its stage loads again (2026-11-03: `game/chara.c` `Port_SetStage`, ranges from `build/overlays_ps2.py`; commons left out) (SH1 needed it for a map loaded twice)
 - [x] Overlay data in the PS1's layout (code reaches variables through others' addresses): split strings and
       initialized arrays `PS1_ALIGN`ed (`source/include/ps1align.h`), explicit zeros kept in `.data`
       (`-fno-zero-initialized-in-bss` for overlay files), `s03d`'s `overlay3.c` words in their own section
@@ -262,7 +262,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 35,095 (0:18:39.13; was 12,101, 0:06:42.1,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 37,813 (0:20:00.70; was 12,101, 0:06:42.1,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair,
       `lit_mdl.c`'s dropped model initializer,
       chafgrnd.c's NULL `RECT` (`prim.c`).

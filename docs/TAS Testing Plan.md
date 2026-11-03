@@ -355,7 +355,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: `s08b` translated by mips2c.py and running (jump tables, entry points).
 - [x] Fixed: lip sync holds the counter on a loop the PS1's field_30 held.
 - [x] Fixed: the lip sync hold never goes past the counter (a new stream reused the old one's).
-- [ ] Next desync: rand seed at loop 35,095 (0:18:39.13, `s08a`).
+- [x] Fixed: the gun cameras' check phase at loop 35,095 (0:18:39.13): overlay `.data`/`.bss` reset on a stage load (`s08a` revisit).
+- [ ] Next desync: `GM_GameStatus` at loop 37,813 (0:20:00.70, `s07b`): port 10000000, PS1 10008000.
 - [x] The PS1's 5 draws at loop 20,979 (0:11:16.60): the tank's right tread reads `svect3.vy` unset, which is `s05a_800DA940`'s `verts[9].vy` on the PS1's stack. `M1E1StaleVy` reproduces it; the 20,980 resync is gone.
 - [x] Hangs right after stage loads with some builds (loops 6,668, 11,520, 24,537, 26,136, 27,185), fixed 2026-11-03: a vertical blank thread switch suspended the game thread inside `printf` holding newlib's lock; the sound interrupt task's `printf` then waited on it for good (thread dump: TCB 6 waiting on semaphore 1, its stack `IntSdMain → printf → __retarget_lock_acquire_recursive`). HAL `thread_ps2.c` now holds interrupt switches while the current PS1 thread holds a libc lock (link `--wrap`) or the SPU lock, and makes them at the release. The `tas_replay.c` padding shortcut is gone. Check: no padding to 35,095, and 386,541 game-thread `printf`s (rand log, loops 300-30,000) in sync to 30,000.
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.

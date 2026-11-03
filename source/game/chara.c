@@ -23,6 +23,8 @@ void GM_InitChara(void)
 
 #ifdef MGS_PORT
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* PS2 port: the overlays are linked in (build/overlays_ps2.py), so the stage's CHARA table is the linked
  * one of that stage, not the copy of its binary at StageCharacterEntries (which still receives the read:
@@ -31,6 +33,8 @@ extern struct
 {
     const char *name;
     CHARA      *charas;
+    char       *data, *data_end, *bss, *bss_end;
+    void       *initial; /* the .data's initial values */
 } Port_Stages[];
 
 static CHARA  port_no_charas[1];
@@ -45,6 +49,19 @@ void Port_SetStage(int id)
     {
         if ((GV_StrCode(Port_Stages[i].name) & 0xFFFF) == (id & 0xFFFF))
         {
+            /* As the PS1's copy of the binary: .data back to its initial values (kept at the overlay's first
+             * load, before its code runs), .bss cleared. Overlay counters that start at 0 (guncame.c's) set
+             * the TAS's sync. Commons aren't reset (build/overlays_ps2.py). */
+            int size = Port_Stages[i].data_end - Port_Stages[i].data;
+            if (Port_Stages[i].initial)
+            {
+                memcpy(Port_Stages[i].data, Port_Stages[i].initial, size);
+            }
+            else if ((Port_Stages[i].initial = malloc(size ? size : 1)))
+            {
+                memcpy(Port_Stages[i].initial, Port_Stages[i].data, size);
+            }
+            memset(Port_Stages[i].bss, 0, Port_Stages[i].bss_end - Port_Stages[i].bss);
             printf("port: stage %s\n", Port_Stages[i].name);
             port_stage_charas = Port_Stages[i].charas;
             return;

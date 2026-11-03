@@ -58,3 +58,7 @@ changes.
    - Run the attract/demo sequences twice, since that's the case that broke SH1.
    - Run the matching build, which must still hash OK.
 6. **Turn it on** once the checks pass. Update `Planning Doc.md` and `Running Walkthrough.md`.
+
+## Status (2026-11-03)
+
+Done: steps 1-3, on by default (no flag). Ranges come from an `ld -r` script per overlay; `.data` is kept at its first load (no startup pass), commons are left out (on the PS1 they resolve against the main executable). Verified by the TAS replay (s08a revisit, loop 35,095). Steps 4-5 (poison, demo runs twice) not done.

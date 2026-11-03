@@ -16351,3 +16351,209 @@ Both runs pass. Now the docs and commits.
 
 - tool `Bash`: Update the TAS plan, planning doc, progress and walkthrough
 
+## Claude
+
+Now the conversation archive, then the commits in all three repos:
+
+- tool `Bash`: Regenerate the conversation archive and check for removed lines
+
+- tool `Bash`: Commit the fix in the HAL, SH1 and MGS repos
+
+## Claude
+
+The deadlock is fixed and committed in all three repos: HAL `f48c2da`, SH1 `fa5ff44c1`, MGS `8aab8da5d`.
+
+**Fix (HAL [thread_ps2.c](../psx-to-ps2-HAL/src/ps2/thread_ps2.c)):**
+- While the current PS1 thread holds a C library lock or the SPU lock, a vblank thread switch waits. It's made the moment the lock is released, before that thread runs any more game code.
+- The C library's lock calls are routed through the HAL with linker `--wrap` flags, added in [build/link_ps2.py](build/link_ps2.py). The SPU lock in `spu_ps2.c` counts the same way.
+- The 64-byte padding shortcut in `tas_replay.c` is gone.
+
+**Tests:**
+- With no padding, the TAS plays in sync to the known desync at loop 35,095 (0:18:39.13, still 21.42%), with no hang.
+- A stress build with a `printf` in every game `rand` call made 386,541 prints over loops 300 to 30,000. It stayed in sync to 30,000 without hanging. Tonight, much lighter logging was enough to bring the hang back.
+- The PS1 matching build passes: 80 OK.
+
+**SH1 port:** I added the same `--wrap` flags to its `port_link.py`, because the HAL now needs them to link. I haven't rebuilt or tested SH1.
+
+**Console:** the 2026-10-28 hang in the opening looks like the same bug, so it's worth a run on the console when you have time.
+
+Docs are updated: the walkthrough's Step 27, the TAS plan item, the planning doc and TAS progress. The conversation archive removed no lines.
+
+Next is the desync at loop 35,095 (the gun camera's random draws), with the save-state checkpoints added to `run_port.py` so each test doesn't replay from the start.
+
+## User
+
+Commit
+
+- tool `Bash`: Check for uncommitted changes in all three repos
+
+## Claude
+
+There was nothing left to commit. All three repos are clean, and the deadlock fix is already committed in each:
+
+| Repo | Commit | What |
+|---|---|---|
+| `mgs1_ps2` | `8aab8da5d` | Docs, the `--wrap` link flags, padding removed |
+| `psx-to-ps2-HAL` | `f48c2da` | The thread switch fix |
+| `silent-hill-1-ps2-port` | `fa5ff44c1` | The same link flags for SH1 |
+
+Nothing has been pushed.
+
+## User
+
+Follow these instructions until 13 pm or until the TAS reaches 100%, whichever comes first.
+I want you to keep working on fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible when issues arise, using the Ponytail philosophy where available, and use your best judgement. If there’s a large issue that arises, notify me and I’ll see to it. After each desync is fixed, update docs and then commit before continuing.
+
+- tool `Bash`: Check the current time
+
+## User
+
+[Request interrupted by user]
+
+## User
+
+Follow these instructions until 12 pm or until the TAS reaches 100%, whichever comes first.
+I want you to keep working on fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible when issues arise, using the Ponytail philosophy where available, and use your best judgement. If there’s a large issue that arises, notify me and I’ll see to it. After each desync is fixed, update docs and then commit before continuing.
+
+## Claude
+
+Working until 12 PM. First up is the desync at loop 35,095 (0:18:39.13): a gun camera in `s08a` draws `GV_RandU(32)` twice on the port and three times on the PS1.
+
+- tool `Bash`: Find the gun camera's random draws and turn checks
+
+- tool `Bash`: Read the camera turn logic
+
+- tool `Bash`: Read the rand caller logger and camera init draws
+
+## Claude
+
+I'll log every random-number caller on the port over loops 34,000 to 35,095 and compare per-loop draw counts with the PS1. That should show where the camera's sweep timing drifts.
+
+- tool `Bash`: Log rand callers for loops 33,500 to 35,095
+
+- tool `Bash`: Show camera draws and step comparison lines
+
+- tool `Bash`: Read the step-count script
+
+- tool `Bash`: Find the camera constructor's random and sweep setup
+
+- tool `Bash`: List TAS tools and PS1 memory-read options
+
+- tool `Bash`: Read how PS1 actor state was logged before
+
+- tool `Bash`: Find CONTROL layout and the camera's Act function
+
+- tool `Bash`: Locate CONTROL struct and camera overlay placement
+
+- tool `Bash`: Find which overlay holds guncame.c
+
+- tool `Bash`: Find the guncame object and the s08a map
+
+- tool `Bash`: Look up the camera Act address in s08a
+
+- tool `Bash`: Get the camera Act address in s08a
+
+- tool `Bash`: View the start of the camera Act
+
+- tool `Bash`: Add a temporary per-loop camera log on the port
+
+- tool `Bash`: Run the port with the camera log and restore the source
+
+- tool `Bash`: Filter the camera lines and count per camera
+
+## Claude
+
+Seven cameras, but each one's `Act` ran on only 94 of the 240 loops. Something gates when they act. I'll see which loops.
+
+- tool `Bash`: Show one camera's per-loop states
+
+- tool `Bash`: Summarise each camera's start and last states
+
+- tool `Bash`: Read GV_DiffDirS and GV_DiffDirAbs
+
+## Claude
+
+To confirm, I'll log the same cameras on the PS1 in BizHawk, adding the centre (`field_330.vy`) and limit (`field_36C`).
+
+- tool `Bash`: Read the rest of the zako logger and the BizHawk runner
+
+- tool `Bash`: Log the PS1 cameras in BizHawk around the desync
+
+- tool `Monitor`: 5-minute status of the BizHawk camera log
+
+## Claude
+
+The PS1 camera log is running in BizHawk. It takes a while, because BizHawk replays the movie from the start.
+
+- tool `Bash`: Read the PS1 camera states
+
+## Claude
+
+The PS1 log settles it. On the PS1, cameras 6 and 7 both flip at loop 35,094. On the port, camera 6 (8ffa90) is in state 1 instead of sweeping. I'll find when it left the sweep.
+
+- tool `Bash`: Find when the port's camera 6 changed state
+
+## Claude
+
+On the port, camera 6 switches to state 5 at loop 35,050 (0:18:37) and then to state 1, turning toward something. On the PS1 it keeps sweeping. I'll check what puts a camera into state 5.
+
+- tool `Bash`: Read the conditions that set state 5
+
+## Claude
+
+The camera spotted something on the port that it didn't on the PS1. I'll read the sight check, `GunCame_800C7224`.
+
+- tool `Bash`: Read the camera's sight check
+
+- tool `Bash`: Log the port camera's sight test inputs around 35,050
+
+## Claude
+
+No lines printed, probably because the camera's address moved in this build. I'll drop the address filter and log all cameras.
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Log all cameras' sight gate and tests
+
+- tool `Bash`: Show camera 6's sight tests
+
+- tool `Bash`: Find where the camera's check phase is set
+
+- tool `Bash`: Read how the phase counter is assigned
+
+- tool `Bash`: Look for existing overlay data reset handling
+
+- tool `Bash`: Read the overlay data reset plan
+
+- tool `Bash`: Inspect overlay merging and the stage hook
+
+- tool `Bash`: Read overlay build and the PS2 linker script
+
+- tool `Bash`: List sections in a merged overlay object
+
+- tool `Bash`: Measure overlay data, bss and commons
+
+- tool `Bash`: Bracket overlay data/bss and extend the stage table
+
+- tool `Bash`: Fix the docstring and view the stage hook
+
+- tool `Bash`: Read both Port_SetStage call sites
+
+## Claude
+
+Both calls are points where the PS1 copies the overlay: the stage read, and `GM_LoadInitBin`'s copy from a cached buffer. Now the reset itself:
+
+- tool `Bash`: Restore overlay data and clear bss on a stage load
+
+- tool `Bash`: Keep the snapshot pointer in the generated table
+
+## Claude
+
+Now a build and a TAS run past 35,095:
+
+- tool `Bash`: Run the TAS with the overlay reset and check the ranges
+
+- tool `Bash`: Run the matching build and read the commit helper
+
+- tool `Bash`: Update the plan checkbox and the reset doc's status
+

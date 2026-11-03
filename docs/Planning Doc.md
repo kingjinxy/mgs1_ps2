@@ -178,11 +178,15 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 - [ ] The same for common symbols in shared actor files (`enemy/asiato.c`, `takabe/findtrap.c`, ...): they stay in
       the linker's order (they must stay common: see Running Walkthrough Step 21)
 - [x] Policy: an overlay is linked in once it has no `INCLUDE_ASM` and no literal addresses of its own
-      code/data (`tools/port/overlay_survey.py`); the link prints the rest. Left out now (17): brf, camera,
-      d18a/d18ar, s07b, s08b/s08br, s11d, s11g, s15c, s19b/s19br (stubs); s11a, s11e,
+      code/data (`tools/port/overlay_survey.py`); the link prints the rest. `s08b` and `s07b` are now linked
+      through `tools/port/mips2c.py` (exact-behaviour C from the stubs, port only; 2026-11-02/03). Left out now:
+      brf, camera, d18a/d18ar, s08br, s11d, s11g, s15c, s19b/s19br (stubs); s11a, s11e,
       s11i (literal addresses: `NEWCHARA` tables, string/function pointer tables); rank, s14e (an
       object's source missing). Not in the matching build at all: s10a, s11b, s11h, s15a, s17a-s19a and
       some `r` variants
+- [ ] A splitter for the overlays the decomp hasn't split (s10a, s11b, s11h, s15a, s17a, s18a, s19a are on the
+      TAS route; the TAS stops at s10a, loop 45,078): the stage binary from the disc into functions and data,
+      then mips2c.py. Waiting on the user's decision (2026-11-03)
 - [ ] First playable path: dock (s00a) → heliport (s01a) are both linked in. Dock gameplay reached (2026-10-27);
       heliport not yet
 - [ ] Reduce the overlays' memory use by deduplicating: each overlay now has its own copy of every shared
@@ -195,6 +199,11 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
   `CdControl`/`CdControlB` report a closed drive
 - To fix: `takabe/elevator.c`, `thing.c` test or set bit 31 of pointers (kseg0 on the PS1; EE pointers
   don't have it). Done for GCL: `GCL_IsBlock` (`libgcl.h`) in `delay.c`, `item.c` (proc id vs block address)
+- Fixed (2026-11-03): mips2c.py: a `lui` is forgotten at a call (caller-saved registers); overlay `static`s
+  that translated code reads are `STATIC` (global, so the map names them; `chair_alive` etc. in `s07b`), and
+  the translator warns on "word symbol + 4 or more". Overlay `.data`/`.bss` reset on each stage load.
+- BizHawk checkpoints (2026-11-03): a state every 1,000 loops (`tools/port/tas/checkpoints.lua`, `seek.lua`),
+  so PS1 memory queries (`work_dump.lua`, `cam_log.lua`) start near their loop: about 50 s instead of 20 min.
 - Fixed (2026-11-03): post-load deadlock (HAL `thread_ps2.c`): an interrupt switch suspended a PS1 thread holding newlib's `printf`/`malloc` lock or the SPU lock; switches now wait for the release. Likely also the 2026-10-28 console opening hang (to confirm on hardware).
 - Fixed (2026-10-27): intro hang/crash (HAL `ChangeTh` window deferred an interrupt switch mts had already made);
   New Game (`GCL_IsBlock`); dock NULL reads (`sna_init.c` bullets, `script.c FuncCmd`). Scripted pad presses for

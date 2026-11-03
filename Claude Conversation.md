@@ -17233,3 +17233,41 @@ Only the stage table (`source/stage/s10a.c`) exists. No overlay code has been sp
 
 - tool `Bash`: List the TAS route's stages and their link status
 
+- tool `Bash`: Record the unsplit-overlay blocker and commit
+
+- tool `PushNotification`: 
+
+## Claude
+
+I've stopped at 11:30. The TAS is in sync to **loop 45,078 (0:23:58.70), 27.53%**, up from 21.42% this morning. Everything is committed and the docs are updated.
+
+**The next desync needs your decision.** It's in `s10a`, which the port can't run yet because the decomp has never split it. There's no assembly for it, it's commented out of `build.py`, and only its stage table exists. The way I've handled stages so far (`s08b`, `s07b`) needs that assembly to start from. Six more stages on the TAS route are in the same state: `s11b`, `s11h`, `s15a`, `s17a`, `s18a` and `s19a`. Nine more are split but not linked yet; those can go through the existing translator like `s07b`.
+
+The options:
+- **A splitter of our own (my recommendation):** take each stage binary from the disc and cut it into functions and data, then translate it as before. It's port-only and nothing goes upstream. It's a real piece of work, probably a session or two, and it unblocks all seven stages.
+- **Skip those stages in the replay:** resync the game state after each unsplit stage. Fast, but the regression test would no longer cover about a third of the game.
+
+## Fixed today
+| In sync to loop | Movie time | % | Fix |
+|---:|---:|---:|---|
+| 37,813 | 0:20:00.70 | 22.98% | The port now resets a stage's variables on each load, as the PS1 does by reloading it. A camera's leftover counter had shifted when it looks for Snake. |
+| 38,579 | 0:20:26.61 | 23.47% | `s07b` (Psycho Mantis) runs in the port: 157 functions through the translator (`mips2c.py`) |
+| 39,732 | 0:21:06.15 | 24.23% | Translator bug: a value kept across a function call made a plain number look like an address, so Snake turned the wrong way |
+| 45,078 | 0:23:58.70 | 27.53% | Translator bug: five `static` variables were read at the wrong address. They're now named in the map, and the translator warns if it happens again. |
+
+Two more things:
+- **Deadlock:** fixed in the HAL first thing this morning; it hasn't come back in about 15 runs since.
+- **PS1 checkpoints:** a state every 1,000 loops, 159 in all, taking 300 MB. A PS1 memory query now takes about 50 seconds instead of 20 minutes.
+
+## User
+
+Update all the docs and conversation trackers
+
+## Claude
+
+Most docs were updated with each commit. I'll check what's still missing, mainly in the Planning Doc and TAS Progress.
+
+- tool `Bash`: Check what the Planning Doc and TAS Progress still lack
+
+- tool `Bash`: Read the Planning Doc's overlay status section
+

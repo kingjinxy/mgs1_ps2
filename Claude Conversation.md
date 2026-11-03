@@ -15174,3 +15174,19 @@ The hook hangs at 6,668 again, which at least makes the hang reproducible on dem
 
 - tool `Bash`: Symbolize s07a, match, link, run
 
+## Claude
+
+**Loop 24,704 (0:13:15.64), 15.23%**, with `s07a` linked and matching. I'll commit, then deal with the leftover TLB site and the seed in `s08a`.
+
+- tool `Bash`: Commit; read TLB site; log draws at 24,704
+
+- tool `Bash`: Gate codec static draw; record PS1 RAM in background
+
+## Claude
+
+That run hit my time limit, probably because BizHawk was using the same machine. I'll wait for the recording to finish and rerun alone.
+
+- tool `Bash`: Wait for recording, then rerun alone
+
+- tool `Bash`: Check window setup, apply fix, commit, check s08b
+

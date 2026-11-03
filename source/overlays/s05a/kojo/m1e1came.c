@@ -432,7 +432,12 @@ void s05a_800E1D7C(void)
         u_short base = s05a_dword_800C38CC->field_54;
 
         off.vz = base;
+#ifdef MGS_PORT
+        /* the tank's gone: the PS1 reads its RAM at 0xE5C, 0x8C960024 (BizHawk, to loop 21,500) */
+        if ((s05a_dword_800C362C ? s05a_dword_800C362C->field_E5C : (int)0x8C960024) <= s05a_dword_800C38CC->field_5C)
+#else
         if (s05a_dword_800C362C->field_E5C <= s05a_dword_800C38CC->field_5C)
+#endif
         {
             off.vz = base + s05a_dword_800C38CC->field_58;
         }
@@ -472,7 +477,12 @@ void s05a_800E1F0C(void)
         u_short base = s05a_dword_800C38CC->field_38;
 
         off.vz = base;
+#ifdef MGS_PORT
+        /* the tank's gone: the PS1 reads its RAM at 0xE5C, 0x8C960024 (BizHawk, to loop 21,500) */
+        if ((s05a_dword_800C362C ? s05a_dword_800C362C->field_E5C : (int)0x8C960024) <= s05a_dword_800C38CC->field_5C)
+#else
         if (s05a_dword_800C362C->field_E5C <= s05a_dword_800C38CC->field_5C)
+#endif
         {
             off.vz = base + s05a_dword_800C38CC->field_58;
         }

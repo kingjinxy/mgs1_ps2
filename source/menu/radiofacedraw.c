@@ -215,6 +215,12 @@ void menu_radio_draw_face_helper3_800487DC(menu_chara_struct *pStru, int idx)
     // It looks like this is a trick to quickly get
     // a pseudorandom noise. But, maybe this match is not correct
     // and 0x80010000 should not be hardcoded.
+#ifdef MGS_PORT
+    {
+        extern int Port_TasCodecDraw( void ); /* port/src/tas_replay.c: in TAS replays, as the PS1 drew */
+        if ( !Port_TasCodecDraw() ) return; /* the static's frame a loop early (24,703): it only shows */
+    }
+#endif
     LoadImage(&rect, (u_long *)(PSX_ADDR(0x80010000) + (rand() % 32) * 0x2000 + GV_Clock * 0x1000));
 }
 

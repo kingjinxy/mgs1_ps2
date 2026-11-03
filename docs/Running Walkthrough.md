@@ -888,3 +888,5 @@ The 5-draw bursts were the tank tread dust. A small HAL ring of `rand` return ad
 The TLB miss at s05a_800E00EC reads RAM at 8 and 12 (8, 0x340, 0, 0). The pad difference at 22,669: the codec end updates the pads twice, and the first took the release; `Port_TasPadsDone` restores the recorded one. In sync to loop 23,572 (0:12:39.38).
 
 `s07a` wasn't linked in; its 7 literal pointers are now symbols. In sync to loop 24,704 (0:13:15.64).
+
+The seed at 24,704 was the codec static a loop early, gated like the signal bars. `s05a_800E1F0C` read 0xE5C through NULL; the PS1 value is 0x8C960024. In sync to loop 27,191 (0:14:34.37). `s08b` is still a stub overlay.

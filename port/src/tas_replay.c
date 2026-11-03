@@ -753,8 +753,7 @@ void Port_TasTrace(void)
         printf("tas: seed at loop %d: port %08x, PS1 %08x%s\n", GV_Time, Hal_RandSeed(), read_u32(r + 16),
                s_LoadEnded ? " (load: overwritten)" : "");
     }
-    /* shortcut: 5 PS1 draws here with no caller found in the port (s05a after its load), find them if it matters */
-    if ((s_LoadEnded || GV_Time == 20980) && r)
+    if (s_LoadEnded && r)
     {
         srand(read_u32(r + 16));
     }

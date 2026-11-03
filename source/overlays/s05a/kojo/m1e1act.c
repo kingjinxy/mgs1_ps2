@@ -2355,6 +2355,12 @@ void s05a_800DA940(Work *work)
     {
         GM_MoveTarget((TARGET *)&work->field_A84[i], &verts[i]);
     }
+#ifdef MGS_PORT
+    {
+        extern short M1E1StaleVy; /* kojo/m1e1catr.c */
+        M1E1StaleVy = verts[9].vy;
+    }
+#endif
 
     s0 = (*(int *)((char *)work + 0x8C8) * 3) >> 2;
     s1 = (*(int *)((char *)work + 0x95C) * 3) >> 2;

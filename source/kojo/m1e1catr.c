@@ -36,6 +36,10 @@ extern void demothrd_2_8007DA94(SVECTOR *pPosition, SVECTOR *pRotation);
  * publics
  */
 
+#ifdef MGS_PORT
+short M1E1StaleVy; /* s05a_800DA940's verts[9].vy, which the PS1's stack holds where svect3.vy is: the right tread reads it unset */
+#endif
+
 void M1E1Caterpiller(LPM1E1ACTOR lpAct)
 {
     SVECTOR svect1;
@@ -153,6 +157,9 @@ void M1E1Caterpiller(LPM1E1ACTOR lpAct)
     }
     else
     {
+#ifdef MGS_PORT
+        svect3.vy = M1E1StaleVy;
+#endif
         memset(&svect1, 0, 8);
 
         model2 = lpAct->field_46C[0].objs->objs[0].model;

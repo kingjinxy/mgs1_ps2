@@ -882,3 +882,5 @@ The seed at 20,980 follows a reload: the port lacks 5 PS1 draws in loop 20,979, 
 
 At 21,126 the port makes a burst of 5 draws two loops before the PS1, the same size as the 20,979 mystery. `GV_Rand`, the
 raw `rand()` sites tagged so far and `snowarea.c` are ruled out; the function list with many `rand` calls is the next lead.
+
+The 5-draw bursts were the tank tread dust. A small HAL ring of `rand` return addresses named the caller without the hang. The right tread reads `svect3.vy` unset; PS1 disassembly puts that slot on `s05a_800DA940`'s `verts[9].vy`. The port now saves that value, and the 20,980 resync is removed. In sync to loop 22,669 (0:12:12.48).

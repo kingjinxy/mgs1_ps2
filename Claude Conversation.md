@@ -17203,3 +17203,33 @@ The matching build still passes (80 OK), and the map now lists `chair_alive` at 
 
 - tool `Bash`: Check warnings and run the TAS with the static fix
 
+## Claude
+
+A big jump: the Psycho Mantis fight now plays through. In sync to **loop 45,078 (0:23:58.70)** in `s10a`, 27.53%, with no new TLB misses. Committing:
+
+- tool `Bash`: Update docs, archive conversation, and commit
+
+- tool `Bash`: Check s10a's link status and log rand callers
+
+## Claude
+
+Stage binary 0x4A9B isn't linked in, and `s10a` has no linker command file in the matching build, so it isn't built at all. I'll confirm which stage 0x4A9B is and what state it's in.
+
+- tool `Bash`: Check how s10a is set up in the build
+
+- tool `Bash`: Confirm 0x4A9B is s10a and see why it's excluded
+
+## Claude
+
+`s10a` is commented out of the matching build, and there's neither `source/overlays/s10a` nor `asm/overlays/s10a`. I'll check whether the decomp has any split config for it.
+
+- tool `Bash`: Look for any s10a split configuration
+
+## Claude
+
+Only the stage table (`source/stage/s10a.c`) exists. No overlay code has been split out. I'll check how the decomp produces an overlay's asm.
+
+- tool `Bash`: Look for the decomp's overlay splitting tool
+
+- tool `Bash`: List the TAS route's stages and their link status
+

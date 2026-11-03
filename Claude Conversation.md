@@ -18214,3 +18214,49 @@ That fixed it: in sync to loop 47,556 (0:25:23.79). Running the matching builds,
 
 - tool `Bash`: Run matching builds
 
+- tool `Bash`: Docs and commit the argument fix
+
+## Claude
+
+Committed (`639a5f470`). Now on loop 47,556 (0:25:23.79).
+
+- tool `Bash`: Draw counts near 47556
+
+## Claude
+
+The PS1 makes one more draw than the port in loop 47,555. Logging the port's draw callers there.
+
+- tool `Bash`: Log port draw callers 47553-47555
+
+- tool `Bash`: Resolve draw callers
+
+## Claude
+
+In loop 47,555 the port makes one `ScriptA` draw and the PS1 makes two. Logging the port's new anime actors and comparing with the PS1's actor lists.
+
+- tool `Bash`: Port anime log and PS1 actor changes
+
+## Claude
+
+The PS1's bullet hits as a wall (`seg_flag` 1, two sparks); the port's hits as a floor (`seg_flag` 2, smoke). `seg_flag` comes from the constructor's collision ray. Reading how it's set.
+
+- tool `Bash`: Find seg_flag computation
+
+- tool `Bash`: Read CalculateHit
+
+## Claude
+
+The wall test is `(unsigned int)work->seg & 0x80000000`, which relies on PS1 pointers having the high bit set. Checking how the HZD code marks walls versus floors.
+
+- tool `Bash`: Find HZD pointer tagging
+
+- tool `Bash`: Read floor tagging and other high-bit tests
+
+- tool `Bash`: List all wall/floor tag users
+
+- tool `Bash`: Inspect remaining tag users
+
+- tool `Bash`: Read elevator floor comparison
+
+- tool `Bash`: Document diagnosis and commit
+

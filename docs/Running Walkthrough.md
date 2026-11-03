@@ -968,3 +968,11 @@ Loop 47,546 (0:25:23.46): in loop 47,545, Wolf fires. The port made two anime ac
 Fix: `recomp.h`'s `CALL` passes the stack's words up to sp+44 (12 arguments; `stk`'s 32 bytes of padding keep the reads inside the frame). Shortcut: translated callees still take 8 (`RECOMP_ENTRY`'s a0-a7). In sync to loop 47,556 (0:25:23.79). Matching builds 80 and 2 OK.
 
 On the way: `bullet_count` (whose parity gates the other smoke) matched, 84 on both sides; I had misread the port's dump.
+
+## Step 36: the HZD wall/floor tag, diagnosed (Nov 3)
+
+Loop 47,556 (0:25:23.79): in loop 47,555, Wolf's bullet hits a wall. The PS1 makes two sparks (`spark.c`), and the port makes a smoke puff (`AN_RecoilSmoke`, whose anime script draws a `rand()`). The bullet's `seg_flag` was 1 (wall) on the PS1 and 2 (floor) in the port. `HZD_GetOnlineHazard` returns a wall's pointer as is, and a floor's with bit 31 cleared (`online.c:455`). On the PS1 a cleared pointer is still valid, since KUSEG mirrors KSEG0. Callers test bit 31 for "wall": `okajima/bullet.c:337`, `takabe/revbullt.c:178`, `okajima/claymore.c:196` (`< 0`), `s19b jbullet.c:221`. `takabe/elevator.c:944` puts the bit back to compare a floor. Port pointers are all below 0x02000000, so in the port every hit reads as a floor, and elevator.c's floor match fails.
+
+Open, because the fix needs a choice:
+- Tag floors with the EE's uncached mirror (`| 0x20000000`, still a valid address) instead, and make the tests `HZD_IS_WALL(p)`. That's one macro, 6 call sites and `online.c`. The risk: a floor read through the uncached mirror can be stale while its cache line is dirty (elevators move floors), so it might need a `SyncDCache` at the tag.
+- Have `HZD_GetOnlineHazard` report wall versus floor separately: no aliasing, but every caller changes.

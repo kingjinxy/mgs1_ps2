@@ -900,3 +900,5 @@ More `mips2c.py` fixes: stubs that hold several functions are split at each entr
 mips2c.py's jump tables took the offset from the `lw` instead of the `addiu`, so every switch fell through; with that fixed the Ninja's state machine matches the PS1 to 27,232. The post-load deadlock struck again at 24,537 (`s08a`); 64 bytes of code padding in `tas_replay.c` (a marked shortcut) moves past it. TLB misses (NULL+0/2/4) in `DG_GetLightMatrix` are still open.
 
 At 27,232 the port read the voice counter one higher than the PS1 on a loop the PS1's field_30 held; `Port_TasStrCounter` now holds the last value when a move follows. In sync to loop 29,057 (0:15:36.67).
+
+At 29,057 the hold carried the previous stream's large counter into a new one, ending its mouth data at once; it is now bounded by the estimate. The Ninja fight then plays through: in sync to loop 35,095 (0:18:39.13). The intermittent 11,520 hang showed up again with a logging build: the same post-load deadlock.

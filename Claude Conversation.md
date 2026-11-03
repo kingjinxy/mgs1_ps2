@@ -15794,3 +15794,25 @@ The raw `rand` hook triggered the deadlock again. I'll use the ring-buffer versi
 
 - tool `Bash`: Commit; log draws at 29,057
 
+## Claude
+
+The PS1 makes one extra draw here with no `GV_Rand` caller on the port, so I'll use the HAL ring logger, made into a reusable script this time.
+
+- tool `Bash`: Ring-log raw rand near 29,057
+
+- tool `Bash`: Vary padding for the logging build
+
+## Claude
+
+The port makes no draws at all in that window, while the PS1 makes one. So it's again a PS1 code path the port doesn't take. I'll look at the game state there for a candidate.
+
+- tool `Bash`: State around 29,057
+
+- tool `Bash`: Bound the hold; rerun
+
+## Claude
+
+A big jump: **loop 35,095 (0:18:39.13), 21.42%**. That's through the whole Ninja fight and back in `s08a`. Committing.
+
+- tool `Bash`: Commit; log draws at 35,095
+

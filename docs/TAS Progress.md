@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 29,057 (0:15:36.67), 17.93%.
+Current: loop 35,095 (0:18:39.13), 21.42%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -36,5 +36,6 @@ Current: loop 29,057 (0:15:36.67), 17.93%.
 | 27,191 | 0:14:34.37 | 16.73% | the codec static follows the PS1 seed; NULL read at 0xE5C | Nov 2 |
 | 27,232 | 0:14:35.77 | 16.76% | `s08b` translated by mips2c.py and running (jump tables, entry points) | Nov 2 |
 | 29,057 | 0:15:36.67 | 17.93% | lip sync holds the counter on a loop the PS1's field_30 held | Nov 2 |
+| 35,095 | 0:18:39.13 | 21.42% | the lip sync hold never goes past the counter (a new stream reused the old one's) | Nov 2 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.

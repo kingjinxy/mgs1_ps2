@@ -1,0 +1,67 @@
+extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
+extern char R_s08b_dword_800E3960[] __asm__("s08b_dword_800E3960");
+extern char R_s08b_bunsin2_800CDE74[] __asm__("s08b_bunsin2_800CDE74");
+int G_s08b_bunsin2_800CF354(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CF354");
+int G_s08b_bunsin2_800CF354(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 6708);
+    c = ((r[2] == 0)); r[3] = (u)r[2] + -1; if (c) goto L800cf40c;
+    r[2] = (u)r[3] < (u)6;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800cf404;
+    r[2] = (u)r[2] + (int)R_s08b_dword_800E3960;
+    r[3] = (u)r[3] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(int *)((u)r[3] + 0);
+    t = r[2];  switch ((u)t) {  default: goto out; }
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CDE74);
+    r[2] = (u)0 + 7;
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 5;
+    *(int *)((u)r[16] + 6604) = r[2];
+    r[2] = (u)0 + 2; goto L800cf400;
+    r[2] = (u)0 + 7;
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 23;
+    *(int *)((u)r[16] + 6604) = r[2];
+    r[2] = (u)0 + 1; goto L800cf400;
+    r[2] = (u)0 + 7;
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 23;
+    *(int *)((u)r[16] + 6604) = r[2];
+    r[2] = (u)0 + 3; goto L800cf400;
+    r[2] = (u)0 + 7;
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 34;
+    *(int *)((u)r[16] + 6604) = r[2];
+    r[2] = (u)0 + 6;
+    L800cf400:;
+    *(int *)((u)r[16] + 6712) = r[2];
+    L800cf404:;
+    r[2] = (u)0 + 1; goto L800cf454;
+    L800cf40c:;
+    r[2] = *(int *)((u)r[16] + 6604);
+    r[2] = (u)r[2] + -3;
+    r[2] = (u)r[2] < (u)2;
+    c = ((r[2] != 0)); r[2] = (u)0 + (u)0; if (c) goto L800cf454;
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_GameStatus);
+    r[2] = r[2] & 1;
+    c = ((r[2] == 0)); r[2] = (u)0 + 1; if (c) goto L800cf450;
+    r[3] = (u)0 + 9;
+    *(int *)((u)r[16] + 6600) = r[3];
+    r[3] = (u)0 + 29;
+    *(int *)((u)r[16] + 6604) = r[3]; goto L800cf454;
+    L800cf450:;
+    r[2] = (u)0 + (u)0;
+    L800cf454:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

@@ -1,0 +1,66 @@
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_s08b_dword_800C3568[] __asm__("s08b_dword_800C3568");
+int G_s08b_bunsin2_800D37F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D37F0");
+int G_s08b_bunsin2_800D37F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(0)
+    r[3] = 0;
+    r[2] = *(short *)((u)r[3] + (int)R_GM_PlayerPosition);
+    r[2] = (int)r[2] < -1999;
+    c = ((r[2] != 0)); r[3] = (u)r[3] + (int)R_GM_PlayerPosition; if (c) goto L800d387c;
+    r[2] = *(short *)((u)r[3] + 4);
+    r[2] = (int)r[2] < 2501;
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800d384c;
+    r[8] = (u)r[2] + (int)R_s08b_dword_800C3568;
+    r[5] = LWL(((u)r[8] + 3), r[5]);
+    r[5] = LWR(((u)r[8] + 0), r[5]);
+    r[6] = LWL(((u)r[8] + 7), r[6]);
+    r[6] = LWR(((u)r[8] + 4), r[6]);
+    SWL(((u)r[4] + 6507), r[5]);
+    SWR(((u)r[4] + 6504), r[5]);
+    SWL(((u)r[4] + 6511), r[6]);
+    SWR(((u)r[4] + 6508), r[6]);
+    r[2] = (u)0 + 10280;
+    *(int *)((u)r[4] + 6512) = r[2]; goto out;
+    L800d384c:;
+    r[2] = (u)r[2] + (int)R_s08b_dword_800C3568;
+    r[5] = LWL(((u)r[2] + 11), r[5]);
+    r[5] = LWR(((u)r[2] + 8), r[5]);
+    r[6] = LWL(((u)r[2] + 15), r[6]);
+    r[6] = LWR(((u)r[2] + 12), r[6]);
+    SWL(((u)r[4] + 6507), r[5]);
+    SWR(((u)r[4] + 6504), r[5]);
+    SWL(((u)r[4] + 6511), r[6]);
+    SWR(((u)r[4] + 6508), r[6]);
+    r[2] = (u)0 + 7967;
+    *(int *)((u)r[4] + 6512) = r[2]; goto out;
+    L800d387c:;
+    r[2] = *(short *)((u)r[3] + 4);
+    r[2] = (int)r[2] < 2501;
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800d38c0;
+    r[2] = (u)r[2] + (int)R_s08b_dword_800C3568;
+    r[5] = LWL(((u)r[2] + 19), r[5]);
+    r[5] = LWR(((u)r[2] + 16), r[5]);
+    r[6] = LWL(((u)r[2] + 23), r[6]);
+    r[6] = LWR(((u)r[2] + 20), r[6]);
+    SWL(((u)r[4] + 6507), r[5]);
+    SWR(((u)r[4] + 6504), r[5]);
+    SWL(((u)r[4] + 6511), r[6]);
+    SWR(((u)r[4] + 6508), r[6]);
+    r[2] = (u)0 + 514;
+    *(int *)((u)r[4] + 6512) = r[2]; goto out;
+    L800d38c0:;
+    r[2] = (u)r[2] + (int)R_s08b_dword_800C3568;
+    r[5] = LWL(((u)r[2] + 27), r[5]);
+    r[5] = LWR(((u)r[2] + 24), r[5]);
+    r[6] = LWL(((u)r[2] + 31), r[6]);
+    r[6] = LWR(((u)r[2] + 28), r[6]);
+    SWL(((u)r[4] + 6507), r[5]);
+    SWR(((u)r[4] + 6504), r[5]);
+    SWL(((u)r[4] + 6511), r[6]);
+    SWR(((u)r[4] + 6508), r[6]);
+    r[2] = (u)0 + 16448;
+    *(int *)((u)r[4] + 6512) = r[2]; goto out;
+out:
+    return r[2];
+}

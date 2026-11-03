@@ -1,0 +1,65 @@
+extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
+extern char R_s08b_bunsin2_800CF150[] __asm__("s08b_bunsin2_800CF150");
+extern char R_s08b_bunsin2_800D3B00[] __asm__("s08b_bunsin2_800D3B00");
+int G_s08b_bunsin2_800D401C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D401C");
+int G_s08b_bunsin2_800D401C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    *(int *)((u)r[29] + 20) = r[31];
+    r[16] = (u)r[4] + (u)0; CALL(R_s08b_bunsin2_800D3B00);
+    r[3] = *(int *)((u)r[16] + 6604);
+    r[2] = (u)0 + 3;
+    c = ((r[3] == r[2]));  if (c) goto L800d40bc;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CF150);
+    r[3] = (u)r[2] + (u)0;
+    c = ((r[3] == 0)); r[2] = (u)0 + 6; if (c) goto L800d40bc;
+    r[4] = (u)0 + 13;
+    c = ((r[3] == r[4])); *(int *)((u)r[16] + 6600) = r[2]; if (c) goto L800d40a0;
+    r[2] = (int)r[3] < 14;
+    c = ((r[2] == 0)); r[2] = (u)0 + 12; if (c) goto L800d407c;
+    c = ((r[3] == r[2])); r[2] = (u)0 + 19; if (c) goto L800d4098;
+    *(int *)((u)r[16] + 6604) = r[2]; goto L800d4110;
+    L800d407c:;
+    r[2] = (u)0 + 16;
+    c = ((r[3] == r[2])); r[2] = (u)0 + 17; if (c) goto L800d40a8;
+    c = ((r[3] == r[2])); r[2] = (u)0 + 19; if (c) goto L800d40b0;
+    *(int *)((u)r[16] + 6604) = r[2]; goto L800d4110;
+    L800d4098:;
+    *(int *)((u)r[16] + 6604) = r[4]; goto L800d4110;
+    L800d40a0:;
+    r[2] = (u)0 + 14; goto L800d40b4;
+    L800d40a8:;
+    *(int *)((u)r[16] + 6604) = r[2]; goto L800d4110;
+    L800d40b0:;
+    r[2] = (u)0 + 18;
+    L800d40b4:;
+    *(int *)((u)r[16] + 6604) = r[2]; goto L800d4110;
+    L800d40bc:;
+    r[2] = *(int *)((u)r[16] + 6592);
+    r[3] = *(int *)((u)r[16] + 6708);
+    r[2] = r[2] | 4;
+    c = ((r[3] == 0)); *(int *)((u)r[16] + 6592) = r[2]; if (c) goto L800d4118;
+    r[4] = *(int *)((u)r[16] + 6680);
+    r[2] = (u)0 + 7;
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 25;
+    c = ((r[4] == 0)); *(int *)((u)r[16] + 6604) = r[2]; if (c) goto L800d40f4;
+     CALL(R_GV_DestroyActor);
+    *(int *)((u)r[16] + 6680) = 0;
+    L800d40f4:;
+    r[4] = *(int *)((u)r[16] + 6684);
+    c = ((r[4] == 0));  if (c) goto L800d4110;
+     CALL(R_GV_DestroyActor);
+    *(int *)((u)r[16] + 6684) = 0;
+    L800d4110:;
+    *(int *)((u)r[16] + 6608) = 0;
+    *(int *)((u)r[16] + 6612) = 0;
+    L800d4118:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

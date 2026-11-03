@@ -892,3 +892,5 @@ The TLB miss at s05a_800E00EC reads RAM at 8 and 12 (8, 0x340, 0, 0). The pad di
 The seed at 24,704 was the codec static a loop early, gated like the signal bars. `s05a_800E1F0C` read 0xE5C through NULL; the PS1 value is 0x8C960024. In sync to loop 27,191 (0:14:34.37). `s08b` is still a stub overlay.
 
 Emulator windows now run on an invisible Xvfb display by default (`tools/port/offscreen`); `--show` or `MGS_SHOW=1` shows them.
+
+`s08b` (122 INCLUDE_ASM stubs, 119 in ninja.c) isn't hand-decompiled. `tools/port/mips2c.py` turns each stub into exact-behaviour C for the port only: PS1 registers and stack frame, addresses mapped to symbols through the link map, jump tables read from the PS1 binary. Its 260 literals are symbols or (unused jump tables) decimals. The matching build is unchanged. Bugs on the way: a `lui` in a branch's delay slot, and functions split across two stubs. `link_ps2.py` now picks the Integral discs: other game versions in `ps1-original/` had been extracted instead (19:26), which showed as `illegal DISK`. The freeze at loop 27,185 is layout-sensitive like the 6,668 hang: all threads idle, gone with a one-word build change.

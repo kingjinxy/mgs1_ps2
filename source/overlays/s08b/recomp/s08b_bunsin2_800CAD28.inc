@@ -1,0 +1,63 @@
+extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
+extern char R_s08b_dword_800C33DC[] __asm__("s08b_dword_800C33DC");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_SeSet2[] __asm__("GM_SeSet2");
+extern char R_s08b_bunsin2_800C9120[] __asm__("s08b_bunsin2_800C9120");
+int G_s08b_bunsin2_800CAD28(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CAD28");
+int G_s08b_bunsin2_800CAD28(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[5] + (u)0;
+    c = ((r[16] != 0)); *(int *)((u)r[29] + 24) = r[31]; if (c) goto L800cad64;
+    r[4] = (u)r[17] + 156;
+    r[6] = (u)0 + (u)0;
+    r[2] = (u)0 + 31;
+    *(int *)((u)r[17] + 6564) = r[2];
+    r[2] = 0;
+    r[5] = *(short *)((u)r[2] + ((int)R_s08b_dword_800C33DC + 2));
+    r[7] = (u)0 + 4; CALL(R_GM_ConfigObjectAction);
+    L800cad64:;
+    r[2] = (u)0 + 2;
+    *(int *)((u)r[17] + 6648) = r[2];
+    r[2] = (u)r[16] + -1;
+    r[2] = (u)r[2] < (u)6;
+    c = ((r[2] != 0)); r[2] = (u)0 + 1; if (c) goto L800cad9c;
+    r[2] = (u)r[16] + -20;
+    r[2] = (u)r[2] < (u)16;
+    c = ((r[2] != 0)); r[2] = (u)0 + 1; if (c) goto L800cad9c;
+    r[2] = (u)r[16] + -101;
+    r[2] = (u)r[2] < (u)5;
+    c = ((r[2] == 0)); r[2] = (u)0 + 1; if (c) goto L800cada0;
+    L800cad9c:;
+    *(int *)((u)r[17] + 6652) = r[2];
+    L800cada0:;
+    r[2] = (u)0 + 22;
+    c = ((r[16] == r[2])); r[2] = (u)0 + 30; if (c) goto L800cadbc;
+    c = ((r[16] == r[2])); r[2] = (u)0 + 100; if (c) goto L800cadbc;
+    c = ((r[16] != r[2]));  if (c) goto L800cadcc;
+    L800cadbc:;
+    r[4] = (u)0 + (u)0;
+    r[5] = (u)0 + 63;
+    r[6] = (u)0 + 180; CALL(R_GM_SeSet2);
+    L800cadcc:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s08b_bunsin2_800C9120);
+    c = ((r[2] != 0));  if (c) goto L800cae00;
+    r[2] = *(short *)((u)r[17] + 182);
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800cae00;
+    r[2] = (u)r[2] + (int)R_s08b_bunsin2_800C9B38;
+    *(int *)((u)r[17] + 6548) = r[2];
+    *(int *)((u)r[17] + 6556) = 0;
+    *(short *)((u)r[17] + 112) = 0;
+    *(short *)((u)r[17] + 108) = 0;
+    L800cae00:;
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    return r[2];
+}

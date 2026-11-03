@@ -1,0 +1,62 @@
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_GV_Time[] __asm__("GV_Time");
+extern char R_GV_DiffDirAbs[] __asm__("GV_DiffDirAbs");
+extern char R_HZD_OnlineHazardCheck[] __asm__("HZD_OnlineHazardCheck");
+int G_s08b_bunsin2_800CF150(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CF150");
+int G_s08b_bunsin2_800CF150(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 28) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 32) = r[31];
+    *(int *)((u)r[29] + 24) = r[16];
+    r[2] = *(int *)((u)r[17] + 6700);
+    r[2] = (int)r[2] < 1000;
+    c = ((r[2] == 0)); r[16] = (u)r[17] + 32; if (c) goto L800cf1d8;
+    r[4] = *(short *)((u)r[16] + 10);
+    r[5] = *(int *)((u)r[17] + 6696);
+     CALL(R_GV_DiffDirAbs);
+    r[2] = (int)r[2] < 1024;
+    c = ((r[2] == 0)); r[5] = 0; if (c) goto L800cf1d8;
+    r[5] = (u)r[5] + (int)R_GM_PlayerPosition;
+    r[6] = (u)r[16] + (u)0;
+    r[3] = *(int *)((u)r[6] + 44);
+    r[2] = (u)0 + 2;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[4] = *(int *)((u)r[3] + 8);
+    r[7] = (u)0 + 15; CALL(R_HZD_OnlineHazardCheck);
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800cf23c;
+    r[3] = *(int *)((u)r[2] + (int)R_GV_Time);
+    r[3] = r[3] & 1;
+    c = ((r[3] != 0)); r[2] = (u)0 + 13; if (c) goto L800cf240;
+    r[2] = (u)0 + 16; goto L800cf240;
+    L800cf1d8:;
+    r[2] = *(int *)((u)r[17] + 6700);
+    r[2] = (int)r[2] < 2000;
+    c = ((r[2] == 0)); r[2] = (u)0 + (u)0; if (c) goto L800cf240;
+    r[4] = *(short *)((u)r[16] + 10);
+    r[5] = *(int *)((u)r[17] + 6696);
+     CALL(R_GV_DiffDirAbs);
+    r[2] = (int)r[2] < 512;
+    c = ((r[2] == 0)); r[5] = 0; if (c) goto L800cf23c;
+    r[5] = (u)r[5] + (int)R_GM_PlayerPosition;
+    r[6] = (u)r[16] + (u)0;
+    r[3] = *(int *)((u)r[6] + 44);
+    r[2] = (u)0 + 2;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[4] = *(int *)((u)r[3] + 8);
+    r[7] = (u)0 + 15; CALL(R_HZD_OnlineHazardCheck);
+    r[3] = (u)r[2] + (u)0;
+    c = ((r[3] != 0)); r[2] = (u)0 + 18; if (c) goto L800cf240;
+    r[2] = (u)0 + 12; goto L800cf240;
+    L800cf23c:;
+    r[2] = (u)0 + (u)0;
+    L800cf240:;
+    r[31] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    return r[2];
+}

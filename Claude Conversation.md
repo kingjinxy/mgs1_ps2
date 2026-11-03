@@ -6653,6 +6653,156 @@ Each extra voice language adds about **600–775 MB**, which is my estimate rath
 
 ## User
 
+How much data in Integral is deduplicated by moving from 2 CDs to 1 DVD?
+
+## Claude
+
+**About 165 MB is truly shared between the two discs.** Removing all repeated sectors, including repeats within a single disc, saves about **221 MB** in total, or 18% of the 1,223 MB of real file data. That takes Integral down to the 1.00 GB I used in the estimate.
+
+My earlier "about a third" overstated what deduplication does. That figure compared 1.46 GB raw images with 1.00 GB, so it also counted sector overhead and padding, neither of which is duplicated game data.
+
+| Source of saving | Size |
+|---|---|
+| `VOX.DAT` shared between discs | 82.7 MB |
+| `STAGE.DIR` shared between discs | 54.8 MB |
+| `DEMO.DAT` shared between discs | 10.6 MB |
+| `RADIO.DAT` shared between discs | 7.1 MB |
+| `BRF.DAT` shared between discs | 5.4 MB |
+| `FACE.DAT` shared between discs | 3.2 MB |
+| Executable shared between discs | 0.6 MB |
+| `ZMOVIE.STR` shared between discs | about 0 MB |
+| **Shared between discs** | **164.6 MB** |
+| Repeats within a disc (mostly `STAGE.DIR`) | about 56 MB |
+| **Total** | **about 221 MB** |
+
+- **Not included:** the two `DUMMY3M.DAT` padding files (27.6 MB each, all zeros) simply get dropped, saving another 55 MB. Going from CD-format sectors to DVD saves about 187 MB more in overhead.
+- **Possible undercount:** this only matches identical sectors at the same alignment. Identical data that starts at a different offset within a sector isn't caught, so the real saving could be somewhat higher, especially in `DEMO.DAT` and `VOX.DAT`.
+- **Practical limit:** the within-disc repeats may be harder to remove than the cross-disc ones. Sharing whole files is simple, but removing individual sectors needs a remapping table. `VOX.DAT`, `DEMO.DAT` and `RADIO.DAT` differ between discs, so they would need that table too; only `BRF.DAT`, `FACE.DAT`, the executable and most of `STAGE.DIR` are close to whole-file matches.
+
+## User
+
+To answer some questions, I want all 6 language releases on one disc. All 6 will have full voice, subtitle, and menu support, as they do in their respective regions' PS1 discs. Other subtitle languages may come later. I'm not sure how much related data corresponds to each language, such as "lip sync" or codec facial animation data. That's something we can figure out when I have all 6 language releases ready for analysis. The VR disc should be included, and there are separate language versions of it too, but there is much less audio data for that disc. The target will be a dual-layer DVD with no extra compression beyond what the PS1 disc has.
+
+## Claude
+
+**With those decisions, the disc comes to about 4.6–5.7 GB, which fits on a dual-layer DVD (8.5 GB) with about 2.8–3.9 GB to spare.** Even my worst case, about 8.2 GB, still fits, though with only about 0.3 GB left. Compression isn't needed.
+
+| Part | Size | Basis |
+|---|---|---|
+| Discs 1–2, first language | 1.0 GB | Measured |
+| Discs 1–2, five more languages | 3.0–3.9 GB | Estimated, 600–775 MB each |
+| VR disc, first language | 0.36 GB | Measured |
+| VR disc, five more languages | 0.25–0.4 GB | Estimated, 50–80 MB each |
+| **Total** | **4.6–5.7 GB** | |
+
+The VR per-language figure is about 45 MB of movie audio, plus some text and up to about 35 MB of stage data. It assumes the VR movie video can be shared.
+
+**Worst case:** each of these adds to the 5.7 GB total:
+- **Main game FMVs:** burned-in text in every FMV would need 166 MB of video per extra language, adding about 0.8 GB.
+- **VR movies:** the same problem would add about 1.4 GB, at about 280 MB of video per language.
+- **Stage data:** if `STAGE.DIR` turned out to be fully separate per language, that would add about 0.3 GB.
+
+**Lip sync and codec faces:** these shouldn't change the estimate much. `FACE.DAT` is only 3 MB, and any cutscene lip sync sits inside `DEMO.DAT`, which the per-language figure already counts at up to 100%.
+
+**What could break the sharing:** these aren't size risks so much as design risks:
+- **Integral vs. regional releases:** Integral changed some game content from the earlier releases, so regional versions may differ in more than language. Stage data and cutscenes may need to be compared per release, and any that can't be shared will add to the total.
+- **Language in the base:** I treated Integral as one complete language, but it may not match any regional release exactly. Choosing one version as the base for all six could therefore change how much data can be shared.
+
+When you have all six releases, comparing them against each other will replace the estimated rows with measured ones. The main unknown to settle is how much of `DEMO.DAT` is voice audio.
+
+## User
+
+I am fairly certain that none of the FMVs are changed between regions, except in PAL where they are modified to be 12.5 or 25 FPS. I want to keep the NTSC frame rate videos anyways. Integral is special because it has English voices and a choice of English or Japanese subtitles. I want to leverage this functionality to allow for other choices of voices and subtitles. For voice data calculation purposes, you can treat Integral as 99% similar to the US English or UK English releases. Later I want to look more closely at the differences between versions, but that can wait for another time.
+
+## Claude
+
+**The estimate stays at about 4.6–5.7 GB, but the worst case drops from about 8.2 GB to about 6.0 GB, leaving roughly 2.5 GB spare on a dual-layer DVD.** The extra 2.2 GB in the old worst case was entirely separate FMV video for each language. With your confirmation, one NTSC copy of the video covers every language. This assumes the VR movies are also unchanged between regions, which you didn't mention specifically.
+
+Treating Integral as English also confirms the base of the estimate:
+- **English:** Integral is the first language, so English voices and text are already in the 1.0 GB. English needs no extra data for the 1% difference at this level of estimate.
+- **Japanese:** subtitles and text are already on the disc, so this language only adds voices. It may therefore come in slightly below the per-language figure, though the difference is small because text is so small next to voice data.
+- **French, German, Italian and Spanish:** each needs voices and text, so these are the full per-language cost.
+
+**PAL FMV audio:** keeping the NTSC video means pairing it with audio taken from the PAL movies. This should cost about the same space, since it's still about 27 MB per language at the same audio bitrate. The catch is that the audio could drift out of sync if the PAL movies run at a different length or speed, so check that when you have those discs.
+
+Separately choosing voices and subtitles fits Integral's design, since it already lets those two differ. Supporting four more languages is mainly a matter of selecting the right data files, but I haven't looked at how the code does it. The largest remaining uncertainty in the size is still how much of `DEMO.DAT` is voice audio, which accounts for most of the 1.1 GB range.
+
+## User
+
+Let's add all of this to the planning doc with medium priority
+
+- tool `Bash`: Show planning doc structure and priority conventions
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/Planning Doc.md
+
+## Claude
+
+I've added the plan to [Planning Doc.md](docs/Planning Doc.md) under "To do: medium priority". It covers the goal, the size estimate with measured and estimated figures marked, your assumptions, and the open follow-up tasks. The edit isn't committed.
+
+## User
+
+I put more MGS1 ISOs in this folder: /home/alex/Documents/mgs1_ps2/ps1-original
+It doesn't include all the different VR Missions/Special Missions discs, but this should be enough to at least get some more accurate numbers for size. Perform an analysis with these new ISOs.
+
+- tool `Bash`: List the new disc images with sizes and free space
+
+- tool `Bash`: Hash every sector of every disc, one image at a time
+
+## Claude
+
+The hashing is running in the background across all 19 discs. I'll do the size analysis as soon as it finishes.
+
+- tool `Bash`: Compute cumulative unique data per release and category
+
+- tool `Bash`: Search for shifted shared data and total the six-language set
+
+- tool `Bash`: Print the six-language totals
+
+## Claude
+
+The analysis is finished: **your six languages plus VR come to about 5.4 GB on a dual-layer DVD, leaving about 3.1 GB spare.** Of that, 5.03 GB is measured, and about 0.33 GB is my projection for the VR language versions you don't have yet. That's within the 4.6–5.7 GB range I gave earlier. I processed all 16 discs (I wrongly said 19 earlier) and haven't changed the Planning Doc.
+
+Each row shows the new data that release adds, in MB, using exact sector matching and one copy of the NTSC FMV video:
+
+| Release | `DEMO.DAT` | `VOX.DAT` | FMV video | FMV audio | `STAGE.DIR` | Other | **New** | **Running total** |
+|---|---|---|---|---|---|---|---|---|
+| Integral (English) | 442 | 289 | 166 | 27 | 56 | 22 | **1,002** | 1,002 |
+| Japan | 434 | 287 | 0 | 12 | 35 | 7 | **774** | 1,777 |
+| France | 421 | 252 | dropped | 12 | 23 | 5 | **712** | 2,489 |
+| Germany | 407 | 253 | dropped | 12 | 20 | 4 | **696** | 3,185 |
+| Italy | 405 | 268 | dropped | 12 | 20 | 4 | **710** | 3,894 |
+| Spain | 403 | 264 | dropped | 12 | 14 | 4 | **697** | 4,591 |
+| Integral VR | 0 | 0 | 278 | 45 | 35 | 1 | **358** | 4,949 |
+| VR Missions (USA) | 0 | 8 | 51 | 0 | 22 | 1 | **82** | 5,031 |
+
+## What this shows
+- **Each extra main-game language costs about 700–775 MB.** That's at the top of my 600–775 MB estimate, so most of `DEMO.DAT` needs a separate copy per language.
+- **Shifted data barely changes this.** Searching for data at any offset found only 12–18% of the Japanese, French and Spanish `DEMO.DAT` (disc 1) in Integral's, and 0–3% of their `VOX.DAT`. A smarter dedupe would therefore save little on voice data. `STAGE.DIR` is the exception at 74–81% shared, but it's small enough that this matters little.
+- **FMV sharing holds up for the main game.** Integral, USA and Japan have byte-identical NTSC video, which supports your memory. Only 12 MB of the 27 MB FMV audio is new per language, so the rest is shared.
+- **VR languages cost more than the audio alone.** VR Missions (USA) has 51 MB of FMV video that differs from Integral's VR disc, so VR video isn't fully shared. The 0.33 GB projection assumes each of the other four languages costs about the same 82 MB as USA, and those discs may differ.
+
+## English needs a closer look
+Integral is not byte-identical to USA. USA would add 734 MB by sector matching, and only 12% of disc 1's `VOX.DAT` samples and 62% of its `DEMO.DAT` samples were found in Integral at any offset. The voices may still sound the same, because these tests only detect byte-identical data, so the likely cause is re-encoding or remastering rather than new recordings.
+
+This doesn't affect the total, as long as Integral serves as the English version and USA stays off the disc.
+
+The other languages also have to work with Integral's game code and data, and these results show that their files aren't simple drop-in matches. That's the main question for the later version comparison.
+
+## User
+
+Update the planning doc with these findings
+
+- tool `Bash`: Replace the estimate section with measured findings
+
+## Claude
+
+I've updated the language section of [Planning Doc.md](docs/Planning Doc.md) with the measured findings, and it isn't committed. The old estimate table is now the per-release table, alongside the size of about 5.4 GB and the findings on sharing, FMV video and Integral vs. USA.
+
+- **Tasks:** I ticked off the six-release comparison and added two new tasks: get the other VR language versions, and check that the other languages' files work with Integral's code and data. The `DEMO.DAT` task now asks only whether music and effects are mixed with the voices.
+- **Assumptions:** I removed your 99% Integral/English assumption because the byte comparison now covers that question, and the doc says the voices may still sound the same. Your note about PAL frame rates stays in.
+
+## User
+
 In this folder I have a TAS for MGS1: "/home/alex/Downloads/submission5139". I believe this could greatly assist in automated testing of the game. Create a plan to use it with our remake and check it against a PS1 emulator.
 
 - tool `Bash`: Inspect TAS submission files
@@ -15324,4 +15474,171 @@ As for Xvfb, I've installed it. Change the scripts to run through that, but also
 - tool `Bash`: Add offscreen wrapper and test BizHawk and PCSX2
 
 - tool `Bash`: Finish switch, smoke test, commit
+
+- tool `Bash`: Clean docs and diagnose DuckStation abort
+
+- tool `Bash`: Fix wrapper, verify DuckStation isolation, retest, commit
+
+- tool `Bash`: Confirm DuckStation is on the Xvfb display
+
+## Claude
+
+Done and committed (`689ed37d5`): emulator windows are now invisible by default, with a switch to show them for a single run.
+
+All launches go through one small wrapper, `tools/port/offscreen`, which gives the emulator its own invisible Xvfb display.
+
+**To show the window for one run:**
+- `python3 tools/port/tas/run_port.py --show`
+- `python3 tools/port/compare_frames.py --show ...`
+- `MGS_SHOW=1 tools/port/tas/run_bizhawk.sh`
+
+The Redux control run inside `run_port.py` follows the same `--show` switch.
+
+**What I tested:**
+- **BizHawk:** ran its movie to loop 300 invisibly.
+- **PCSX2:** replayed the TAS in sync to loop 1,500 under the first wrapper, then to 1,000 after the final wrapper change. Xvfb closed itself afterwards.
+- **DuckStation:** runs on the Xvfb display (`DISPLAY=:2`) with no Wayland variable set.
+- **Redux:** started and kept running, but I didn't confirm which display it used.
+- **Not tested:** a full `compare_frames.py` comparison, screenshots under Xvfb, and `--show` itself.
+
+**One thing that doesn't affect these runs:** DuckStation printed "Aborting application" in the smoke tests. It looks like its response to being stopped by the test, but I didn't confirm that.
+
+My docs script added placeholder `x` entries to the progress and plan docs, and I removed them. `CLAUDE.md` now describes the default and the switches. The `s08b` decision is still yours, and I've stopped work on the TAS until you make it.
+
+## User
+
+Let's get started on s08b's decompilation. Follow these instructions until 9 pm or unti the TAS reached 100%, whichever comes first.
+I want you to keep working on fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible when issues arise, using the Ponytail philosophy where available, and use your best judgement. If there’s a large issue that arises, notify me and I’ll see to it. After each desync is fixed, update docs and then commit before continuing.
+
+- tool `Bash`: Survey s08b stubs and decomp tooling
+
+- tool `Bash`: Count instruction set in s08b stubs
+
+## User
+
+[Request interrupted by user]
+
+## User
+
+Don't worry about completing the decompilation before 9 pm, just take it as far as you can
+
+- tool `Bash`: Write the MIPS to C translator and find overlay base
+
+- tool `Bash`: Generate C and view literals left
+
+- tool `Bash`: Fix splits, symbols, stage table; try linking
+
+## Claude
+
+My rewrite dropped the `=` and `;` on those lines, so I'll fix that and get the compile error.
+
+- tool `Bash`: Repair overlay2 and see compile errors
+
+- tool `Bash`: Show compile errors
+
+- tool `Bash`: Fix declarations and recompile
+
+- tool `Bash`: Link s08b and run matching
+
+- tool `Bash`: See matching and compile errors
+
+- tool `Bash`: Get the PSY-Q compile error
+
+- tool `Bash`: Check matching and link
+
+## Claude
+
+`s08b` now links with all 122 functions translated, and the PS1 matching build still passes (80 OK). Now for the real test: the Ninja section in the TAS.
+
+- tool `Bash`: Run TAS with s08b
+
+- tool `Bash`: Inspect crash site
+
+- tool `Bash`: Keep lui tracking across labels and rerun
+
+## Claude
+
+Will do: the next TAS run gets `--show`, once only. One bad pointer remains (0x37BC), so I'll find it in the generated code first.
+
+- tool `Bash`: Find the unresolved pointer
+
+- tool `Bash`: Fix delay-slot lui; run TAS once with window shown
+
+- tool `Bash`: Sample true hang PC
+
+## Claude
+
+No stall report, so `VSync` is still being called and the game loop or some wait is alive but not drawing. I'll drop the watchdog's gate to sample the PC during this freeze.
+
+- tool `Bash`: Sample PC during the freeze
+
+## Claude
+
+That patch disturbed the run early (loop 315), since the code past the gate also writes display registers. I'll gate it by time instead, so it only activates right around the freeze.
+
+- tool `Bash`: Sample PC only around the freeze
+
+- tool `Bash`: Diagnose early desync at save load
+
+- tool `Bash`: Back up cards and test with fresh ones
+
+## Claude
+
+Not the cards, so I'll restore them. The other change was my temporary HAL patches, so the likely culprit is a stale cached HAL object. I'll force a clean HAL rebuild.
+
+- tool `Bash`: Restore cards; inspect HAL build cache
+
+- tool `Bash`: Clean HAL objects and retest
+
+- tool `Bash`: Check PCSX2 ini state
+
+- tool `Bash`: Look for what persisted across runs
+
+- tool `Bash`: Check config changes and loop 315 state
+
+## Claude
+
+Now I see it's not a save problem: the port's stage is empty and its seed is 0 at loop 315, so it never reached the title screen. Something stops it during boot.
+
+- tool `Bash`: Read boot log
+
+## Claude
+
+`illegal DISK`: the game's disc check is failing, and the port then sits idle. So the disc data in the built image is wrong, or a read in the check is. I'll look at that check and the image.
+
+- tool `Bash`: Inspect disc check and image build
+
+- tool `Bash`: Read the position table code and disc packing
+
+- tool `Bash`: Is illegal DISK normal; read disk id logic
+
+- tool `Bash`: Check the disc image files
+
+- tool `Bash`: Pin Integral discs, re-extract, rerun
+
+## Claude
+
+Back to normal, and the freeze at 27,185 reproduces. Now I'll do the PC sampling I intended, active only around the freeze.
+
+- tool `Bash`: Sample PC during freeze
+
+## Claude
+
+All threads are idle again, the same deadlock signature as the 6,668 hang. To see what blocks, I'll log entries into the translated functions just before the freeze.
+
+- tool `Bash`: Trace recomp entries before freeze
+
+- tool `Bash`: Retry entry trace
+
+- tool `Bash`: Dump thread states at deadlock, restore
+
+- tool `Bash`: Get thread status struct fields
+
+- tool `Bash`: Dump thread states at the hang, restore
+
+- tool `Bash`: Read thread dump compactly
+
+- tool `Bash`: Record last translated functions at hang
+
+- tool `Bash`: Commit, compare state at 27,191
 

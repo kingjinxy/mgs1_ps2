@@ -1,0 +1,63 @@
+extern char R_DG_ZeroMatrix[] __asm__("DG_ZeroMatrix");
+extern char R_linkvarbuf[] __asm__("linkvarbuf");
+extern char R_NewWindcrcl_800CF784[] __asm__("NewWindcrcl_800CF784");
+int G_s08b_bunsin2_800C8F0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C8F0C");
+int G_s08b_bunsin2_800C8F0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(64)
+    r[29] = (u)r[29] + -64;
+    r[2] = 0;
+    *(int *)((u)r[29] + 56) = r[31];
+    r[11] = (u)r[2] + (int)R_DG_ZeroMatrix;
+    r[8] = *(int *)((u)r[11] + 0);
+    r[9] = *(int *)((u)r[11] + 4);
+    r[10] = *(int *)((u)r[11] + 8);
+    *(int *)((u)r[29] + 24) = r[8];
+    *(int *)((u)r[29] + 28) = r[9];
+    *(int *)((u)r[29] + 32) = r[10];
+    r[8] = *(int *)((u)r[11] + 12);
+    r[9] = *(int *)((u)r[11] + 16);
+    r[10] = *(int *)((u)r[11] + 20);
+    *(int *)((u)r[29] + 36) = r[8];
+    *(int *)((u)r[29] + 40) = r[9];
+    *(int *)((u)r[29] + 44) = r[10];
+    r[8] = *(int *)((u)r[11] + 24);
+    r[9] = *(int *)((u)r[11] + 28);
+    *(int *)((u)r[29] + 48) = r[8];
+    *(int *)((u)r[29] + 52) = r[9];
+    r[3] = *(short *)((u)r[4] + 32);
+    r[2] = (u)0 + 20;
+    *(int *)((u)r[29] + 48) = r[2];
+    *(int *)((u)r[29] + 44) = r[3];
+    r[2] = *(short *)((u)r[4] + 36);
+    *(int *)((u)r[29] + 52) = r[2];
+    r[2] = 0;
+    r[3] = *(short *)((u)r[2] + ((int)R_linkvarbuf + 2));
+    r[2] = (u)0 + 1;
+    c = ((r[3] != r[2])); r[4] = (u)r[29] + 24; if (c) goto L800c8fa4;
+    r[2] = (u)0 + 10;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[5] = (u)0 + 200;
+    r[6] = (u)0 + 100;
+    r[7] = (u)0 + 300; goto L800c8fe0;
+    L800c8fa4:;
+    c = (((int)r[3] <= 0)); r[2] = (int)r[3] < 4; if (c) goto L800c8fc8;
+    c = ((r[2] == 0)); r[2] = (u)0 + 10; if (c) goto L800c8fc8;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[5] = (u)0 + 200;
+    r[6] = (u)0 + 100;
+    r[7] = (u)0 + 400; goto L800c8fe0;
+    L800c8fc8:;
+    r[2] = (u)0 + 10;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[4] = (u)r[29] + 24;
+    r[5] = (u)0 + 200;
+    r[6] = (u)0 + 100;
+    r[7] = (u)r[5] + (u)0;
+    L800c8fe0:;
+     CALL(R_NewWindcrcl_800CF784);
+    r[31] = *(int *)((u)r[29] + 56);
+    r[29] = (u)r[29] + 64; goto out;
+out:
+    return r[2];
+}

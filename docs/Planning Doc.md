@@ -286,6 +286,44 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 - [ ] **Neutrino reset issues.** A remote reset can leave the PS2 hung until a power cycle (RESET has never brought
       Neutrino back on the user's console). Goal: the PS2 stays on all day and never hard crashes, however many
       times it is reset remotely.
+- [ ] **All six language releases on one dual-layer DVD, with the VR disc.** Voice, subtitles and menus each get a
+      language option, building on Integral's separate English/Japanese subtitle choice: all six languages get full
+      voice, subtitle and menu support as on their regions' PS1 discs. Other subtitle languages may come later.
+      No compression beyond what the PS1 discs have; duplicated data is shared (one disc, one copy of each FMV's video).
+  - Size (2026-11-02, from 16 discs: Integral, USA, Japan, France, Germany, Italy, Spain, USA VR Missions): about
+    5.4 GB of the 8.5 GB. 5.03 GB is measured; about 0.33 GB is projected for four VR language versions not yet
+    available, at the 82 MB VR Missions (USA) adds. New data per release in MB, by exact sector match, with one copy
+    of the NTSC FMV video (PAL video dropped):
+    | Release | `DEMO.DAT` | `VOX.DAT` | FMV video | FMV audio | `STAGE.DIR` | Other | New | Running total |
+    |---|---|---|---|---|---|---|---|---|
+    | Integral (English) | 442 | 289 | 166 | 27 | 56 | 22 | 1,002 | 1,002 |
+    | Japan | 434 | 287 | 0 | 12 | 35 | 7 | 774 | 1,777 |
+    | France | 421 | 252 | dropped | 12 | 23 | 5 | 712 | 2,489 |
+    | Germany | 407 | 253 | dropped | 12 | 20 | 4 | 696 | 3,185 |
+    | Italy | 405 | 268 | dropped | 12 | 20 | 4 | 710 | 3,894 |
+    | Spain | 403 | 264 | dropped | 12 | 14 | 4 | 697 | 4,591 |
+    | Integral VR | 0 | 0 | 278 | 45 | 35 | 1 | 358 | 4,949 |
+    | VR Missions (USA) | 0 | 8 | 51 | 0 | 22 | 1 | 82 | 5,031 |
+  - Sharing at any offset (64-byte samples from disc 1, searched in Integral's file): Japan, France and Spain 12-18% of
+    `DEMO.DAT`, 0-3% of `VOX.DAT`, 74-81% of `STAGE.DIR`. A smarter dedupe saves little on voice data.
+  - Integral, USA and Japan have byte-identical FMV video. VR Missions (USA) has 51 MB of FMV video that differs from
+    Integral's VR disc, so VR video isn't fully shared.
+  - Integral is not byte-identical to USA: USA would add 734 MB by sector match, and only 12% of `VOX.DAT` and 62% of
+    `DEMO.DAT` samples (disc 1) were found in Integral at any offset. Integral serves as English; USA stays off the
+    disc. The voices may still sound the same (re-encoding or remastering is the likely cause; untested).
+  - Moving Integral to one disc removes about 221 MB of repeated sectors (165 MB shared between discs 1 and 2, the
+    rest repeats within a disc), counting only identical, sector-aligned data. Dropping the two `DUMMY3M.DAT` paddings
+    saves 55 MB more.
+  - From the user: PAL FMVs differ only in reduced frame rates (12.5 or 25 fps); keep the NTSC video.
+  - [x] Compare the six releases' discs and USA VR Missions; replace the main-game estimates above.
+  - [ ] Get the other VR language versions and replace the 0.33 GB projection.
+  - [ ] Find out whether music and effects are mixed with the voices in `DEMO.DAT`. First attempt walking its chunks
+        lost sync.
+  - [ ] Check the other languages' files work with Integral's code and data; they aren't simple drop-in matches.
+  - [ ] Find which data follows each language, such as lip sync and codec facial animation, and whether stage data,
+        cutscenes and timing differ between releases in more than language.
+  - [ ] Check PAL FMV audio stays in sync when paired with the NTSC video.
+  - [ ] Look more closely at the differences between versions (later).
 
 ## Known visual issues
 

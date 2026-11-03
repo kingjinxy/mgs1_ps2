@@ -246,7 +246,7 @@ def ps1_discs():
     os.makedirs(os.path.join(OUT, "ps1"), exist_ok=True)
     entries = []
     for name, suffix in PS1_DISCS:
-        chd = [c for c in chds if c.endswith(suffix)]
+        chd = [c for c in chds if c.endswith(suffix) and "Integral" in c]  # the folder holds other versions too
         if not chd:
             print("no %s in ps1-original/: %s left off the disc image" % (suffix, name))
             continue

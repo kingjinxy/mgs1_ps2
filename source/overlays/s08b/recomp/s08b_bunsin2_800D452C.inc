@@ -1,0 +1,65 @@
+extern char R_s08b_dword_800E4340[] __asm__("s08b_dword_800E4340");
+extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
+extern char R_s08b_bunsin2_800D42D8[] __asm__("s08b_bunsin2_800D42D8");
+int G_s08b_bunsin2_800D452C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D452C");
+int G_s08b_bunsin2_800D452C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    *(int *)((u)r[29] + 20) = r[31];
+    r[16] = (u)r[4] + (u)0; CALL(R_s08b_bunsin2_800D42D8);
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800d45ac;
+    r[4] = *(int *)((u)r[16] + 6680);
+    *(int *)((u)r[2] + (int)R_s08b_dword_800E4340) = 0;
+    r[2] = (u)0 + 7;
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 23;
+    c = ((r[4] == 0)); *(int *)((u)r[16] + 6604) = r[2]; if (c) goto L800d4570;
+     CALL(R_GV_DestroyActor);
+    *(int *)((u)r[16] + 6680) = 0;
+    L800d4570:;
+    r[4] = *(int *)((u)r[16] + 6684);
+    c = ((r[4] == 0));  if (c) goto L800d458c;
+     CALL(R_GV_DestroyActor);
+    *(int *)((u)r[16] + 6684) = 0;
+    L800d458c:;
+    r[2] = *(int *)((u)r[16] + 156);
+    r[3] = *(int *)((u)r[2] + 40);
+    r[4] = (u)0 + -129;
+    r[3] = r[3] & r[4];
+    *(int *)((u)r[2] + 40) = r[3];
+    *(int *)((u)r[16] + 6608) = 0; goto L800d4628;
+    L800d45ac:;
+    r[2] = *(int *)((u)r[16] + 6708);
+    c = ((r[2] == 0)); r[2] = (u)0 + 7; if (c) goto L800d4618;
+    r[4] = *(int *)((u)r[16] + 6680);
+    *(int *)((u)r[16] + 6600) = r[2];
+    r[2] = (u)0 + 25;
+    c = ((r[4] == 0)); *(int *)((u)r[16] + 6604) = r[2]; if (c) goto L800d45dc;
+     CALL(R_GV_DestroyActor);
+    *(int *)((u)r[16] + 6680) = 0;
+    L800d45dc:;
+    r[4] = *(int *)((u)r[16] + 6684);
+    c = ((r[4] == 0));  if (c) goto L800d45f8;
+     CALL(R_GV_DestroyActor);
+    *(int *)((u)r[16] + 6684) = 0;
+    L800d45f8:;
+    r[2] = *(int *)((u)r[16] + 156);
+    *(int *)((u)r[16] + 6608) = 0;
+    *(int *)((u)r[16] + 6612) = 0;
+    r[3] = *(int *)((u)r[2] + 40);
+    r[4] = (u)0 + -129;
+    r[3] = r[3] & r[4];
+    *(int *)((u)r[2] + 40) = r[3]; goto L800d4628;
+    L800d4618:;
+    r[2] = *(int *)((u)r[16] + 6592);
+    r[2] = r[2] | 4;
+    *(int *)((u)r[16] + 6592) = r[2];
+    L800d4628:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

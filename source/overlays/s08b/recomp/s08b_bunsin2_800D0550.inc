@@ -1,0 +1,72 @@
+extern char R_GM_GameOverTimer[] __asm__("GM_GameOverTimer");
+extern char R_linkvarbuf[] __asm__("linkvarbuf");
+extern char R_s08b_dword_800C344C[] __asm__("s08b_dword_800C344C");
+extern char R_s08b_dword_800E39C8[] __asm__("s08b_dword_800E39C8");
+extern char R_GM_StreamStatus[] __asm__("GM_StreamStatus");
+extern char R_GM_VoxStream[] __asm__("GM_VoxStream");
+int G_s08b_bunsin2_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D0550");
+int G_s08b_bunsin2_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 24) = r[31];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[2] = *(int *)((u)r[17] + 6608);
+    c = ((r[2] != 0)); r[16] = (u)0 + 7; if (c) goto L800d0640;
+     CALL(R_GM_StreamStatus);
+    r[3] = (u)0 + -1;
+    c = ((r[2] != r[3])); r[2] = 0; if (c) goto L800d063c;
+    r[3] = *(int *)((u)r[2] + (int)R_s08b_dword_800C344C);
+    r[2] = (u)r[3] < (u)r[16];
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800d05dc;
+    r[2] = (u)r[2] + (int)R_s08b_dword_800E39C8;
+    r[3] = (u)r[3] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(int *)((u)r[3] + 0);
+    t = r[2];  switch ((u)t) {  default: goto out; }
+    r[16] = (u)0 + 9; goto L800d05dc;
+    r[16] = (u)0 + 4; goto L800d05dc;
+    r[16] = (u)0 + 12; goto L800d05dc;
+    r[16] = (u)0 + 7; goto L800d05dc;
+    r[16] = (u)0 + 8;
+    L800d05dc:;
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_GameOverTimer);
+    c = ((r[2] != 0)); r[3] = 0; if (c) goto L800d0618;
+    r[2] = 0;
+    r[2] = *(short *)((u)r[2] + ((int)R_linkvarbuf + 22));
+    c = (((int)r[2] <= 0)); r[2] = (u)r[16] << 2; if (c) goto L800d0618;
+    r[2] = (u)r[17] + (u)r[2];
+    r[4] = *(int *)((u)r[2] + 6808);
+    r[5] = (u)0 + (u)0; CALL(R_GM_VoxStream);
+    r[3] = 0;
+    L800d0618:;
+    r[2] = *(int *)((u)r[3] + (int)R_s08b_dword_800C344C);
+    r[2] = (u)r[2] + 1;
+    *(int *)((u)r[3] + (int)R_s08b_dword_800C344C) = r[2];
+    r[2] = (int)r[2] < 6;
+    c = ((r[2] != 0)); r[2] = (u)0 + 4; if (c) goto L800d0664;
+    *(int *)((u)r[3] + (int)R_s08b_dword_800C344C) = r[2]; goto L800d0664;
+    L800d063c:;
+    r[2] = *(int *)((u)r[17] + 6608);
+    L800d0640:;
+    r[2] = (int)r[2] < 61;
+    c = ((r[2] != 0));  if (c) goto L800d0664;
+     CALL(R_GM_StreamStatus);
+    r[3] = (u)0 + -1;
+    c = ((r[2] == r[3])); r[2] = (u)0 + 1; if (c) goto L800d0674;
+    L800d0664:;
+    r[3] = *(int *)((u)r[17] + 6608);
+    r[2] = (u)0 + (u)0;
+    r[3] = (u)r[3] + 1;
+    *(int *)((u)r[17] + 6608) = r[3];
+    L800d0674:;
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    return r[2];
+}

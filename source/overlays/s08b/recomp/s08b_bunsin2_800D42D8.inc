@@ -1,0 +1,61 @@
+extern char R_s08b_dword_800E3AE8[] __asm__("s08b_dword_800E3AE8");
+extern char R_s08b_bunsin2_800D0688[] __asm__("s08b_bunsin2_800D0688");
+extern char R_s08b_bunsin2_800D1014[] __asm__("s08b_bunsin2_800D1014");
+extern char R_s08b_bunsin2_800D10C4[] __asm__("s08b_bunsin2_800D10C4");
+extern char R_s08b_bunsin2_800D1138[] __asm__("s08b_bunsin2_800D1138");
+extern char R_s08b_bunsin2_800D11A8[] __asm__("s08b_bunsin2_800D11A8");
+extern char R_s08b_bunsin2_800D1218[] __asm__("s08b_bunsin2_800D1218");
+extern char R_s08b_bunsin2_800D125C[] __asm__("s08b_bunsin2_800D125C");
+extern char R_s08b_bunsin2_800D12A0[] __asm__("s08b_bunsin2_800D12A0");
+int G_s08b_bunsin2_800D42D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D42D8");
+int G_s08b_bunsin2_800D42D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 6604);
+    r[3] = (u)r[2] + -13;
+    r[2] = (u)r[3] < (u)11;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800d43c4;
+    r[2] = (u)r[2] + (int)R_s08b_dword_800E3AE8;
+    r[3] = (u)r[3] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(int *)((u)r[3] + 0);
+    t = r[2];  switch ((u)t) {  default: goto out; }
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D1014);
+     goto L800d4384;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D10C4);
+     goto L800d4384;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D1138);
+     goto L800d4384;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D11A8);
+     goto L800d4384;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D1218);
+     goto L800d4384;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D125C);
+     goto L800d4384;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D12A0);
+    L800d4384:;
+    c = ((r[2] == 0)); r[2] = (u)0 + -1; if (c) goto L800d43c4;
+    *(int *)((u)r[16] + 6576) = r[2];
+    r[2] = (u)0 + 23;
+    *(int *)((u)r[16] + 6604) = r[2];
+    *(int *)((u)r[16] + 6608) = 0; goto L800d43c4;
+    r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D0688);
+    r[2] = (int)r[2] < 6;
+    c = ((r[2] != 0)); r[2] = (u)0 + 8; if (c) goto L800d43c0;
+    *(int *)((u)r[16] + 6608) = 0;
+    r[2] = (u)0 + 1; goto L800d43c8;
+    L800d43c0:;
+    *(int *)((u)r[16] + 6576) = r[2];
+    L800d43c4:;
+    r[2] = (u)0 + (u)0;
+    L800d43c8:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    return r[2];
+}

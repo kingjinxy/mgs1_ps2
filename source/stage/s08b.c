@@ -1,10 +1,14 @@
 #define DECLARE_NEWCHARA_PROTOS
 #include "charalst.h"
 
+void *NewBlurSet(int name, int where);
+void *NewGlassSet(int name, int where);
+void *NewKetchap_s(int name, int where);
+
 CHARA _StageCharacterEntries[] = {
     CHARA_ASIOTOKUN,    /* chara 足音君 */
     CHARA_FADEIO,       /* chara フェードイン・アウト */
-    { 0x8e70, (NEWCHARA *)0x800DB50C }, //  CHARA_GLASS,        /* chara ガラス */
+    { 0x8e70, (NEWCHARA *)NewGlassSet }, //  CHARA_GLASS,        /* chara ガラス */
     CHARA_PAPER,        /* chara 書類 */
     CHARA_CHAIR,        /* chara 椅子 */
     CHARA_PANEL2,       /* chara パネル２ */
@@ -30,8 +34,8 @@ CHARA _StageCharacterEntries[] = {
     DEMO_OPTICSCAMOUFLAGE,
     DEMO_OPTICSCAMOUFLAGE2,
     DEMO_UNSHAPEVIEW,
-    { 0x0023, (NEWCHARA *)0x800D6AF4 }, //  DEMO_URINATIONCIRCLE,
-    { 0x0025, (NEWCHARA *)0x800D8D84 }, //  DEMO_BLUR,
+    { 0x0023, (NEWCHARA *)NewKetchap_s }, //  DEMO_URINATIONCIRCLE,
+    { 0x0025, (NEWCHARA *)NewBlurSet }, //  DEMO_BLUR,
     DEMO_NINJASWORD,
     DEMO_GUSEFFECT,
     DEMO_TEXT2,

@@ -334,7 +334,7 @@ skip_clamp_z:
             work->seg = HZD_GetOnlineHazard();
             work->seg_atr = HZD_GetOnlineHazardAtr();
 
-            if ((unsigned int)work->seg & 0x80000000) // Wall
+            if (HZD_IS_WALL(work->seg)) // Wall
             {
                 work->seg_flag = 1;
                 HZD_NormalVector(work->seg, &work->normal);

@@ -218,7 +218,7 @@ static int FindIntersection(Work *work, MATRIX *world, int mode2)
             work->hit_surface = HZD_GetOnlineHazard();
             work->hit_flag = HZD_GetOnlineHazardAtr();
 
-            if ((int)work->hit_surface & 0x80000000)
+            if (HZD_IS_WALL(work->hit_surface))
             {
                 /* hit wall */
                 work->hit_type = 1;

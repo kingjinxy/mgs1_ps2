@@ -186,6 +186,27 @@ int HZD_GetRoute( HZD_HDL *hzd, int zone1, int zone2 );
 /* online.c */
 int HZD_OnlineHazardCheck( HZD_HDL *hzd, SVECTOR *from, SVECTOR *to, int chk_flag, int seg_flag );
 void *HZD_GetOnlineHazard( void );
+
+/* HZD_GetOnlineHazard's result tells a wall from a floor by the pointer: a wall's is as is, a floor's is tagged. The PS1
+ * clears bit 31 (KUSEG, still the same RAM); port pointers never have it, so the port tags floors with the EE's
+ * uncached mirror (| 0x20000000, also the same RAM, still dereferenced as is: online.c writes the floor's cache lines
+ * back when it tags one, so an uncached read isn't stale). HZD_IS_WALL tests a result, HZD_UNTAG_FLOOR gives a tagged
+ * floor's plain pointer (to compare with the map's).
+ * Option 2, if the mirror ever causes trouble (a floor written after it was tagged and read uncached, or slower reads):
+ * have online.c leave floors untagged and record the kind in a static next to the pointer (HZD_GetOnlineHazardIsWall()),
+ * then give every struct that stores a result a flag beside it, set where it's stored and carried wherever it's copied:
+ * okajima/bullet.c (seg), takabe/revbullt.c, okajima/claymore.c, takabe/elevator.c's ptr argument, s19b's jbullet.c
+ * (hit_surface), control.c and s05a m1e1sold.c (segs[0]; sna_init.c copies it to dword_800ABBB0); HZD_IS_WALL then
+ * reads that flag. Grep HZD_GetOnlineHazard for all callers. */
+#ifdef MGS_PORT
+#define HZD_IS_WALL( p )        ( !( (unsigned int)( p ) & 0x20000000 ) )
+#define HZD_TAG_FLOOR( p )      ( (void *)( (unsigned int)( p ) | 0x20000000 ) )
+#define HZD_UNTAG_FLOOR( p )    ( (void *)( (unsigned int)( p ) & ~0x20000000 ) )
+#else
+#define HZD_IS_WALL( p )        ( ( (unsigned int)( p ) & 0x80000000 ) != 0 )
+#define HZD_TAG_FLOOR( p )      ( (void *)( (unsigned int)( p ) & ~0x80000000 ) )
+#define HZD_UNTAG_FLOOR( p )    ( (void *)( (unsigned int)( p ) | 0x80000000 ) )
+#endif
 int HZD_GetOnlineHazardAtr( void );
 void HZD_GetOnlineVector( SVECTOR *vect_ptr );
 void HZD_GetOnlinePoint( SVECTOR *ptp_ptr );

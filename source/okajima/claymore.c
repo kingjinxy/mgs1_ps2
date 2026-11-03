@@ -193,7 +193,7 @@ STATIC int claymore_loader_helper_800735A0(Work *work, SVECTOR *arg1, SVECTOR *a
         HZD_GetOnlinePoint(&vec2);
         floor = HZD_GetOnlineHazard();
 
-        if ((int)floor < 0)
+        if (HZD_IS_WALL(floor))
         {
             HZD_NormalVector(floor, &work->field_118);
         }

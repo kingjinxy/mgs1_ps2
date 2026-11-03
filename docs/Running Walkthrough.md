@@ -976,3 +976,11 @@ Loop 47,556 (0:25:23.79): in loop 47,555, Wolf's bullet hits a wall. The PS1 mak
 Open, because the fix needs a choice:
 - Tag floors with the EE's uncached mirror (`| 0x20000000`, still a valid address) instead, and make the tests `HZD_IS_WALL(p)`. That's one macro, 6 call sites and `online.c`. The risk: a floor read through the uncached mirror can be stale while its cache line is dirty (elevators move floors), so it might need a `SyncDCache` at the tag.
 - Have `HZD_GetOnlineHazard` report wall versus floor separately: no aliasing, but every caller changes.
+
+## Step 37: HZD floor tag, option 1 (Nov 3)
+
+The user chose option 1 from Step 36. `libhzd.h` now has `HZD_IS_WALL`, `HZD_TAG_FLOOR` and `HZD_UNTAG_FLOOR`. In the port, a floor is tagged with the EE's uncached mirror (`| 0x20000000`, the same RAM, already used by the HAL's agent mailbox on hardware), and `online.c` writes the floor's cache lines back (`SyncDCache`) when it tags one, so uncached reads aren't stale. The PS1 versions are the original bit-31 expressions. Call sites: `okajima/bullet.c`, `takabe/revbullt.c`, `okajima/claymore.c`, `takabe/elevator.c` (test and untag) and `s19b`'s `jbullet.c`. A comment in `libhzd.h` describes option 2 (a separate wall flag stored next to each pointer) and where it would have to go. No translated stage code calls `HZD_GetOnlineHazard`.
+
+Matching builds 80 and 2 OK. In sync to loop 56,569 (0:29:45.27, `s09a`). This fixed Wolf's walls, and `elevator.c`'s floor match had been failing too.
+
+Found in the run log, still to fix: 50 TLB misses (NULL loads) in `DG_GetLightMatrix` from about loop 27,150 (0:14:16), which predate this change.

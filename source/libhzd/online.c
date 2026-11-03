@@ -452,7 +452,13 @@ static void CheckOneFloor( HZD_FLR *flr )
         *HIT += 1;
         *MINCROSS = *CROSS;
         *MINLEN = length;
-        *HZD = (void *)( (u_int)flr & ~0x80000000 );
+#ifdef MGS_PORT
+        {
+            extern void SyncDCache( void *start, void *end ); /* ps2sdk: write back, so the uncached reads see it */
+            SyncDCache( flr, (char *)flr + sizeof( *flr ) );
+        }
+#endif
+        *HZD = HZD_TAG_FLOOR( flr );
     }
 }
 

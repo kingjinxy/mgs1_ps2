@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 47,556 (0:25:23.79), 29.16%.
+Current: loop 56,569 (0:29:45.27), 34.17%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -44,6 +44,7 @@ Current: loop 47,556 (0:25:23.79), 29.16%.
 | 47,499 | 0:25:21.89 | 29.13% | `s10a` (not split by the decomp) linked in through the new stage_split.py and mips2c.py, with GTE instructions | Nov 3 |
 | 47,546 | 0:25:23.46 | 29.16% | loop 47,499 (Wolf's tick burn read mid-loop: trace_to_pads.py's TICK_AT, 90,359 at loop 47,488) | Nov 3 |
 | 47,556 | 0:25:23.79 | 29.16% | loop 47,546 (translated calls passed 8 arguments: NewBulletEx's 9th, speed, was garbage; CALL passes 12) | Nov 3 |
+| 56,569 | 0:29:45.27 | 34.17% | loop 47,556 (HZD floors tagged with the EE's uncached mirror instead of bit 31: HZD_IS_WALL/HZD_TAG_FLOOR/HZD_UNTAG_FLOOR in libhzd.h) | Nov 3 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

@@ -18260,3 +18260,96 @@ The wall test is `(unsigned int)work->seg & 0x80000000`, which relies on PS1 poi
 
 - tool `Bash`: Document diagnosis and commit
 
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+The TAS is now in sync to **loop 47,556 (0:25:23.79)**, up from 47,499 at the start of this window. I've stopped at the next desync because the fix needs a decision from you, and the window is almost over. Everything is committed; the last commit is `cbff740cd`.
+
+## Fixed
+- **Loop 47,499: Wolf's random burn.** When Wolf is created she makes "game tick % 256" throwaway `rand()` calls. On the PS1 she reads the tick partway through a long stage-load loop, 2 ticks before the end. The trace only records the tick at loop ends, so the port's burn was 2 calls too long. `trace_to_pads.py` now has a hand-made override table, `TICK_AT`, with one entry: loop 47,488 → tick 90359. It's marked as a shortcut: if more of these come up, `trace.lua` should record the tick itself.
+- **Loop 47,546: the 9th function argument.** Calls from translated stage code passed only 8 arguments. `NewBulletEx` takes 9, so Wolf's bullet got a garbage speed, hit the moment it was fired and made an extra smoke puff. `CALL` in `recomp.h` now passes 12. Both matching builds still pass (80 OK, and 2 OK for `vr_exe`).
+- My earlier "Wolf enters state 0" theory was wrong; she stays in state 6. Step 34 in the walkthrough records what was actually going on.
+
+## Decision needed (loop 47,556)
+In loop 47,555, Wolf's bullet hits a wall. The PS1 treats it as a wall and makes sparks; the port treats it as a floor and makes smoke.
+
+The cause is how the collision code tells walls from floors:
+- A wall comes back as a normal pointer, and a floor comes back with its top bit (bit 31) cleared. On the PS1 that cleared address still points to the same memory.
+- Callers check bit 31 to mean "wall". Port pointers never have that bit set, so every hit reads as a floor. The same bug also breaks `elevator.c`'s floor matching.
+- The affected places are `okajima/bullet.c`, `revbullt.c`, `claymore.c`, `jbullet.c`, `elevator.c` and the tagging line in `online.c`.
+
+The options:
+1. **(Recommended)** Mark floors with the PS2's uncached memory mirror (`| 0x20000000`), which is still a valid address on the PS2. The checks become one `HZD_IS_WALL()` macro across those 6 places, plus the change in `online.c`. The risk is on real hardware: a floor read through the uncached address can return stale data if its cache line hasn't been written back yet. Elevators move floors, so the tagging may need a cache flush (`SyncDCache`).
+2. Have the collision code report wall or floor separately. There's no memory trick or cache risk, but every caller changes.
+
+New this session: `tools/port/tas/write_watch.lua` and `exec_watch.lua` turned out to be unusable (BizHawk's memory callbacks don't fire on this PS1 core) and are deleted.
+
+## User
+
+Why do you recommend option 1 over 2?
+
+## Claude
+
+Mainly because in this code the wall/floor flag travels with the pointer, and option 1 keeps it that way.
+
+**Why that matters**
+- The hit pointer doesn't stay in the function that asked for it. It gets stored, for example in `ctrl->segs[0]`, `work->seg` and `work->hit_surface`, and copied on (`dword_800ABBB0 = work->control.segs[0]` in `sna_init.c`). It's tested or dereferenced later, sometimes in other files.
+- With option 1, every stored copy still says "floor" or "wall" by itself. Only the places that test the bit change: one macro, about 6 test sites and the tagging line in `online.c`. The decomp code keeps its shape.
+- With option 2, that information would have to travel separately. Every struct that stores one of these pointers would need an extra field, and every copy would have to carry it along. That's a larger change, and a missed copy fails silently, like this desync did.
+
+**What option 1 costs**
+- **Stale reads on hardware.** A floor read through the uncached address goes straight to RAM and can miss a recent write still in the cache. That matters only for floors the game changes at runtime, such as elevators. A cache flush when the pointer is tagged would rule it out.
+- **Unchecked assumption.** I haven't confirmed that the 0x20000000 mirror is readable from the port, which runs in user mode, under PCSX2 and Neutrino. That needs a quick test first. If it isn't readable, option 1 is out and option 2 is the way.
+- **Speed.** Uncached reads are slower, but there are only a few collision hits per frame, so it shouldn't matter.
+
+A low-bit tag wouldn't work either: floors are dereferenced directly after the test, and an odd address would be misaligned.
+
+So I'd go with option 1 if the mirror test passes, and option 2 if it doesn't.
+
+## User
+
+Let’s go with option 1 for now and leave a comment near its code explaining how to implement option 2
+
+- tool `Bash`: Find HZD header and HAL uncached usage
+
+- tool `Bash`: Check other tag consumers
+
+- tool `Bash`: Check header placement and includes
+
+## Claude
+
+Writing the macros, with the option-2 notes, in `libhzd.h`, then changing the tag site and the test sites.
+
+- tool `Bash`: Add HZD tag macros and use them
+
+## Claude
+
+Running the matching builds: the PS1 versions of the macros have to compile to the same code as before.
+
+- tool `Bash`: Matching builds and recomp callers
+
+## Claude
+
+Matching builds pass (80 and 2 OK), and no translated stage code calls `HZD_GetOnlineHazard`. Replaying the TAS.
+
+- tool `Bash`: Replay with HZD tag fix
+
+## Claude
+
+Big jump: in sync to **loop 56,569 (0:29:45.27, `s09a`)**, past Wolf. The log also shows a TLB miss at pc 0x10c478, so I'm checking whether it's new.
+
+- tool `Bash`: Identify TLB miss site and history
+
+- tool `Bash`: Summarize TLB PCs and read DG_GetLightMatrix
+
+- tool `Bash`: Locate source and loop of first TLB miss
+
+## Claude
+
+The misses start around loop 27,150, long before this change's area, so they predate it. They're still real and need fixing. Reading `DG_GetLightMatrix`.
+
+- tool `Bash`: Read DG_GetLightMatrix
+

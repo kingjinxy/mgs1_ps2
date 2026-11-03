@@ -927,7 +927,7 @@ int Elevator_800DA464(Work *work, void *ptr)
     int      i;
     HZD_FLR *floor;
 
-    if ((int)ptr & 0x80000000)
+    if (HZD_IS_WALL(ptr))
     {
         wall = work->walls;
         for (i = work->n_walls; i > 0; i--)
@@ -942,7 +942,7 @@ int Elevator_800DA464(Work *work, void *ptr)
     }
     else
     {
-        ptr = (HZD_FLR *)((int)ptr | 0x80000000);
+        ptr = (HZD_FLR *)HZD_UNTAG_FLOOR(ptr);
 
         floor = work->floors;
         for (i = work->n_floors; i > 0; i--)

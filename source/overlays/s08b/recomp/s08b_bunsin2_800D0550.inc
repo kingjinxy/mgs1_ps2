@@ -25,11 +25,16 @@ int G_s08b_bunsin2_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[3] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800d05b8: goto L800d05b8; case 0x800d05c0: goto L800d05c0; case 0x800d05c8: goto L800d05c8; case 0x800d05d0: goto L800d05d0; case 0x800d05d8: goto L800d05d8; default: goto out; }
+    L800d05b8:;
     r[16] = (u)0 + 9; goto L800d05dc;
+    L800d05c0:;
     r[16] = (u)0 + 4; goto L800d05dc;
+    L800d05c8:;
     r[16] = (u)0 + 12; goto L800d05dc;
+    L800d05d0:;
     r[16] = (u)0 + 7; goto L800d05dc;
+    L800d05d8:;
     r[16] = (u)0 + 8;
     L800d05dc:;
     r[2] = 0;

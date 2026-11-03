@@ -15728,3 +15728,51 @@ Before the next experiment I'll commit the translator improvements, since they'r
 
 - tool `Bash`: Commit; log NULL caller
 
+## Claude
+
+`pos` isn't NULL, so the NULL comes from something else the function reads. I'll disassemble the faulting instruction.
+
+- tool `Bash`: Disassemble the faulting load
+
+- tool `Bash`: Check whether the miss reproduced
+
+- tool `Bash`: List library calls from translated code
+
+- tool `Bash`: Pin the faulting instruction
+
+## Claude
+
+The faulting store is through `light`, not `pos`, so I'll hook that one.
+
+- tool `Bash`: Log caller with NULL light
+
+- tool `Bash`: Hook DG_GetLightMatrix2 for NULL light
+
+- tool `Bash`: Read the actor list structure
+
+- tool `Bash`: List running actors near 27,190
+
+- tool `Bash`: Read the Ninja state dispatch
+
+- tool `Bash`: Find the bunsin2 actor and CDB10
+
+- tool `Bash`: Read CDB10 state driver
+
+- tool `Bash`: Read the D4ED0 dispatcher
+
+## Claude
+
+That trace was taken before my last translator fixes, and `D4ED0` is translated, so a fresh run with the ring printed will show how far the state machine gets.
+
+- tool `Bash`: Ring trace with current translator
+
+- tool `Bash`: Read translated D4ED0
+
+- tool `Bash`: Fix jump-table detection; rerun
+
+- tool `Bash`: Check the early stop
+
+- tool `Bash`: Try code padding to dodge the deadlock
+
+- tool `Bash`: Commit; find the reseed and draw
+

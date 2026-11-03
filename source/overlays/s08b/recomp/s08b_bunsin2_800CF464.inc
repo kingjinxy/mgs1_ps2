@@ -12,22 +12,26 @@ int G_s08b_bunsin2_800CF464(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[3] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800cf49c: goto L800cf49c; case 0x800cf4b4: goto L800cf4b4; case 0x800cf4cc: goto L800cf4cc; case 0x800cf4e4: goto L800cf4e4; case 0x800cf4fc: goto L800cf4fc; default: goto out; }
+    L800cf49c:;
     r[2] = (u)0 + 4;
     *(int *)((u)r[4] + 6600) = r[2];
     r[2] = (u)0 + 10;
     *(int *)((u)r[4] + 6604) = r[2];
     r[2] = (u)0 + 2; goto L800cf4f8;
+    L800cf4b4:;
     r[2] = (u)0 + 7;
     *(int *)((u)r[4] + 6600) = r[2];
     r[2] = (u)0 + 23;
     *(int *)((u)r[4] + 6604) = r[2];
     r[2] = (u)0 + 1; goto L800cf4f8;
+    L800cf4cc:;
     r[2] = (u)0 + 7;
     *(int *)((u)r[4] + 6600) = r[2];
     r[2] = (u)0 + 23;
     *(int *)((u)r[4] + 6604) = r[2];
     r[2] = (u)0 + 3; goto L800cf4f8;
+    L800cf4e4:;
     r[2] = (u)0 + 7;
     *(int *)((u)r[4] + 6600) = r[2];
     r[2] = (u)0 + 34;

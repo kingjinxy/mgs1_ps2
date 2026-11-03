@@ -352,9 +352,10 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: NULL read in m1e1sold.c, and a release lost on a two-update loop.
 - [x] Fixed: `s07a` linked in (7 pointers by symbol).
 - [x] Fixed: the codec static follows the PS1 seed; NULL read at 0xE5C.
-- [ ] Next desync: `GM_GameStatus` at loop 27,191 (0:14:34.37, `s08b`): `s08b` is linked in through `tools/port/mips2c.py`; bits 0xAA060 missing on the port.
+- [x] Fixed: `s08b` translated by mips2c.py and running (jump tables, entry points).
+- [ ] Next desync: rand seed at loop 27,232 (0:14:35.77, `s08b`): the PS1 draws once after a reseed to 1.
 - [x] The PS1's 5 draws at loop 20,979 (0:11:16.60): the tank's right tread reads `svect3.vy` unset, which is `s05a_800DA940`'s `verts[9].vy` on the PS1's stack. `M1E1StaleVy` reproduces it; the 20,980 resync is gone.
-- [ ] Hang near loop 6,668 (0:03:52.2, `s01a`) with some builds: a HAL `rand` log and a two-loop seed resync after every load both repeat it; clean builds pass. True EPC is the kernel's idle loop (0x81fe0): every thread blocked, a deadlock, last log between `add map 1` and `end scenario`. `hang_watch`'s EPC is stale (read it at the handler's entry). Cause unknown.
+- [ ] Hangs right after stage loads with some builds (loop 6,668 `s01a`, 24,537 `s08a`, 27,185 `s08b`); a code padding in `tas_replay.c` (shortcut) moves the link past it. Before that, at 6,668: a HAL `rand` log and a two-loop seed resync after every load both repeat it; clean builds pass. True EPC is the kernel's idle loop (0x81fe0): every thread blocked, a deadlock, last log between `add map 1` and `end scenario`. `hang_watch`'s EPC is stale (read it at the handler's entry). Cause unknown.
 - [ ] Explain the timeline's 293,407 loops against the reference's 163,838.
 
 ## Phase 4: segments, so one bug doesn't stop the whole run

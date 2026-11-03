@@ -24,23 +24,32 @@ int G_s08b_bunsin2_800D4AF4(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[3] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800d4b34: goto L800d4b34; case 0x800d4b44: goto L800d4b44; case 0x800d4b54: goto L800d4b54; case 0x800d4b64: goto L800d4b64; case 0x800d4b74: goto L800d4b74; case 0x800d4b84: goto L800d4b84; case 0x800d4b94: goto L800d4b94; case 0x800d4ba4: goto L800d4ba4; case 0x800d4bb4: goto L800d4bb4; case 0x800d4bbc: goto L800d4bbc; default: goto out; }
+    L800d4b34:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D1EC8);
      goto L800d4bbc;
+    L800d4b44:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D367C);
      goto L800d4bbc;
+    L800d4b54:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D3DBC);
      goto L800d4bbc;
+    L800d4b64:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D3EA4);
      goto L800d4bbc;
+    L800d4b74:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D41DC);
      goto L800d4bbc;
+    L800d4b84:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D4460);
      goto L800d4bbc;
+    L800d4b94:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D2860);
      goto L800d4bbc;
+    L800d4ba4:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D2510);
      goto L800d4bbc;
+    L800d4bb4:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D2F80);
     L800d4bbc:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CDBAC);

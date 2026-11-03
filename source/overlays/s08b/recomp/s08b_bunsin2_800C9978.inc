@@ -21,10 +21,12 @@ int G_s08b_bunsin2_800C9978(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[3] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800c99cc: goto L800c99cc; case 0x800c99dc: goto L800c99dc; case 0x800c9a04: goto L800c9a04; case 0x800c9a14: goto L800c9a14; case 0x800c9a24: goto L800c9a24; case 0x800c9a44: goto L800c9a44; default: goto out; }
+    L800c99cc:;
     r[4] = (u)r[16] + (u)0;
     r[5] = (u)0 + 3;
     r[6] = (u)0 + 1; goto L800c99e8;
+    L800c99dc:;
     r[4] = (u)r[16] + (u)0;
     r[5] = (u)0 + 5;
     r[6] = (u)0 + 6;
@@ -34,12 +36,15 @@ int G_s08b_bunsin2_800C9978(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[29] + 16) = 0;
     *(int *)((u)r[29] + 20) = r[2]; CALL(R_NewPlasma_800CD1A4);
     r[2] = (u)0 + 1; goto L800c9a48;
+    L800c9a04:;
     r[4] = (u)r[16] + (u)0;
     r[5] = (u)0 + 7;
     r[6] = (u)0 + 8; goto L800c9a30;
+    L800c9a14:;
     r[4] = (u)r[16] + (u)0;
     r[5] = (u)0 + 8;
     r[6] = (u)0 + 9; goto L800c9a30;
+    L800c9a24:;
     r[4] = (u)r[16] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 5;

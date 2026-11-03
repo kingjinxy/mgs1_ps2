@@ -26,7 +26,8 @@ int G_s08b_bunsin2_800D31EC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[3] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800d3230: goto L800d3230; case 0x800d3270: goto L800d3270; case 0x800d3280: goto L800d3280; case 0x800d32c0: goto L800d32c0; case 0x800d32f0: goto L800d32f0; case 0x800d3310: goto L800d3310; case 0x800d3320: goto L800d3320; case 0x800d333c: goto L800d333c; default: goto out; }
+    L800d3230:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D0814);
     r[3] = (u)r[2] + (u)0;
     r[2] = (u)0 + 1;
@@ -38,8 +39,10 @@ int G_s08b_bunsin2_800D31EC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     L800d3260:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CDFA0);
     r[2] = (u)0 + 3; goto L800d3334;
+    L800d3270:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800D0864);
      goto L800d3328;
+    L800d3280:;
      CALL(R_s08b_bunsin2_800D0A54);
     c = ((r[2] == 0)); r[2] = 0; if (c) goto L800d333c;
     r[5] = *(int *)((u)r[2] + (int)R_GM_PlayerAddress);
@@ -51,6 +54,7 @@ int G_s08b_bunsin2_800D31EC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[16] + 6604) = r[2];
     r[2] = (u)0 + -1;
     *(int *)((u)r[16] + 6576) = r[2]; goto L800d3338;
+    L800d32c0:;
      CALL(R_s08b_bunsin2_800D08C8);
     r[3] = (u)r[2] + (u)0;
     r[2] = (u)0 + 1;
@@ -58,12 +62,15 @@ int G_s08b_bunsin2_800D31EC(int a0, int a1, int a2, int a3, int a4, int a5, int 
     c = ((r[3] != r[2]));  if (c) goto L800d333c;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CDFA0);
     r[2] = (u)0 + 4; goto L800d3334;
+    L800d32f0:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CFC90);
     c = ((r[2] == 0));  if (c) goto L800d333c;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CDFF8);
     r[2] = (u)0 + 26; goto L800d3334;
+    L800d3310:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CFC90);
      goto L800d3328;
+    L800d3320:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CFD88);
     L800d3328:;
     c = ((r[2] == 0));  if (c) goto L800d333c;

@@ -812,3 +812,6 @@ void Port_TasTrace(void)
     }
 #endif
 }
+
+/* shortcut: code padding that moves the link past the layout-sensitive deadlock (TAS plan), until it is found */
+__asm__(".text\n.space 64\n");

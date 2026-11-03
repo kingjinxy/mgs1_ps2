@@ -172,11 +172,13 @@ def translate(path, seg=None):
             else:
                 # a jump table: the labels in the PS1's rodata, read at the jr
                 tb = None
-                for j in range(i - 1, max(i - 6, -1), -1):
+                for j in range(i - 1, max(i - 12, -1), -1):
                     if ws[j] >> 26 == 15 and isaddr(ws[j] & 0xffff):
-                        h = ws[j] & 0xffff
-                        for k in range(j, i):
-                            if ws[k] >> 26 == 35: tb = (h << 16) + s16(ws[k] & 0xffff)
+                        h, hr = ws[j] & 0xffff, (ws[j] >> 16) & 31
+                        for k in range(j + 1, i):
+                            if ws[k] >> 26 in (9, 35) and (ws[k] >> 21) & 31 == hr:
+                                tb = (h << 16) + s16(ws[k] & 0xffff); break
+                        break
                 L = []
                 a = tb
                 while tb and start <= word(a) < end: L.append(word(a)); a += 4

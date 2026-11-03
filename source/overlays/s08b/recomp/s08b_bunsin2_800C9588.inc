@@ -175,7 +175,8 @@ int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[22] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800c9828: goto L800c9828; case 0x800c9854: goto L800c9854; case 0x800c986c: goto L800c986c; case 0x800c9898: goto L800c9898; case 0x800c98c4: goto L800c98c4; case 0x800c98dc: goto L800c98dc; default: goto out; }
+    L800c9828:;
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 2;
@@ -185,11 +186,13 @@ int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[29] + 16) = r[2];
     *(int *)((u)r[29] + 20) = r[16]; CALL(R_GM_SetPowerTarget);
     r[4] = (u)r[29] + 32; goto L800c9930;
+    L800c9854:;
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 2;
     r[7] = *(unsigned char *)((u)r[16] + 6958);
     r[2] = (u)0 + 1; goto L800c991c;
+    L800c986c:;
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 2;
@@ -199,6 +202,7 @@ int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[29] + 16) = r[2];
     *(int *)((u)r[29] + 20) = r[16]; CALL(R_GM_SetPowerTarget);
     r[4] = (u)r[29] + 48; goto L800c9930;
+    L800c9898:;
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 2;
@@ -208,11 +212,13 @@ int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int 
     *(int *)((u)r[29] + 16) = r[2];
     *(int *)((u)r[29] + 20) = r[16]; CALL(R_GM_SetPowerTarget);
     r[4] = (u)r[29] + 32; goto L800c9930;
+    L800c98c4:;
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 2;
     r[7] = *(unsigned char *)((u)r[16] + 6959);
     r[2] = (u)0 + 1; goto L800c991c;
+    L800c98dc:;
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)0 + (u)0;
     r[6] = (u)0 + 2;

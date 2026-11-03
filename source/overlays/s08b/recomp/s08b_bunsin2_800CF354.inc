@@ -17,23 +17,27 @@ int G_s08b_bunsin2_800CF354(int a0, int a1, int a2, int a3, int a4, int a5, int 
     r[3] = (u)r[3] << 2;
     r[3] = (u)r[3] + (u)r[2];
     r[2] = *(int *)((u)r[3] + 0);
-    t = r[2];  switch ((u)t) {  default: goto out; }
+    t = r[2];  switch ((u)t) { case 0x800cf39c: goto L800cf39c; case 0x800cf3bc: goto L800cf3bc; case 0x800cf3d4: goto L800cf3d4; case 0x800cf3ec: goto L800cf3ec; case 0x800cf404: goto L800cf404; default: goto out; }
+    L800cf39c:;
     r[4] = (u)r[16] + (u)0; CALL(R_s08b_bunsin2_800CDE74);
     r[2] = (u)0 + 7;
     *(int *)((u)r[16] + 6600) = r[2];
     r[2] = (u)0 + 5;
     *(int *)((u)r[16] + 6604) = r[2];
     r[2] = (u)0 + 2; goto L800cf400;
+    L800cf3bc:;
     r[2] = (u)0 + 7;
     *(int *)((u)r[16] + 6600) = r[2];
     r[2] = (u)0 + 23;
     *(int *)((u)r[16] + 6604) = r[2];
     r[2] = (u)0 + 1; goto L800cf400;
+    L800cf3d4:;
     r[2] = (u)0 + 7;
     *(int *)((u)r[16] + 6600) = r[2];
     r[2] = (u)0 + 23;
     *(int *)((u)r[16] + 6604) = r[2];
     r[2] = (u)0 + 3; goto L800cf400;
+    L800cf3ec:;
     r[2] = (u)0 + 7;
     *(int *)((u)r[16] + 6600) = r[2];
     r[2] = (u)0 + 34;

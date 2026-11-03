@@ -39,3 +39,5 @@ Current: loop 35,095 (0:18:39.13), 21.42%.
 | 35,095 | 0:18:39.13 | 21.42% | the lip sync hold never goes past the counter (a new stream reused the old one's) | Nov 2 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
+
+Nov 3: the post-load deadlock (hit at 6,668, 11,520, 24,537, 26,136, 27,185) fixed in the HAL's thread layer; the code padding shortcut is removed. Still in sync to 35,095 (0:18:39.13, 21.42%).

@@ -167,6 +167,7 @@ def defined_names(files):
 def final_link(elf, objs):
     return run([CC, "-T", os.path.join(PORT, "linkfile"), "-L", os.path.join(PS2SDK, "ee", "lib"),
                 "-Wl,-zmax-page-size=128", "-Wl,--wrap=_write", "-Wl,--wrap=SifLoadModule",
+                *("-Wl,--wrap=__retarget_lock_" + n for n in ("acquire", "acquire_recursive", "release", "release_recursive")),  # thread_ps2.c
                 "-Wl,--unresolved-symbols=report-all", "-o", elf, *objs,
                 "-L" + os.path.join(GSKIT, "lib"), *["-l" + n for n in LIBS]], check=False)
 

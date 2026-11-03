@@ -15816,3 +15816,538 @@ A big jump: **loop 35,095 (0:18:39.13), 21.42%**. That's through the whole Ninja
 
 - tool `Bash`: Commit; log draws at 35,095
 
+## Claude
+
+The port's gun camera (`GunCame_800C7994`) draws twice where the PS1 draws three times, so I'll read its draw logic.
+
+- tool `Bash`: Read gun camera draw logic
+
+- tool `Bash`: Read the camera checks
+
+## Claude
+
+I'm stopping here at about 9:58 PM to leave time to wrap up properly. The TAS is in sync to **loop 35,095 (0:18:39.13), 21.42%**. That's through the whole Ninja fight, up from 16.73% when you asked me to start on `s08b`. All of it is committed, the docs are updated, and the main matching build passes (80 OK).
+
+## How `s08b` got done
+I didn't decompile the 122 functions by hand. A new tool, `tools/port/mips2c.py`, mechanically turns each PS1 assembly stub into C that behaves exactly the same. It even reproduces stack quirks like the tank's, which is good for TAS sync. It's only used by the port, so the PS1 matching build is unchanged. Getting the Ninja to play through meant fixing several translator bugs, mainly broken jump tables, callbacks pointing into the middle of other functions, and lost addresses.
+
+The cost is that it isn't readable decompiled source. That's fine for the port and the TAS, but if you want real C for `s08b` someday, it's still to be written.
+
+## Fixed this stretch
+| In sync to loop | Movie time | % | Fix |
+|---:|---:|---:|---|
+| 27,232 | 0:14:35.77 | 16.76% | `s08b` running through `mips2c.py` |
+| 29,057 | 0:15:36.67 | 17.93% | Lip sync holds the counter on loops where the PS1 holds it |
+| 35,095 | 0:18:39.13 | 21.42% | That hold can no longer carry a previous voice line's counter |
+
+**One unrelated catch:** at 19:26, other versions of the game were added to `ps1-original/`, and the build started using the wrong disc. That showed up as an `illegal DISK` boot failure. `link_ps2.py` now picks the Integral discs. I didn't touch the files you added.
+
+## Needs your attention: the post-load deadlock
+This is the large issue. Some builds deadlock right after a stage load: every thread blocks and frames stop. I've now seen it at loops 6,668, 11,520 (the old intermittent hang), 24,537 and 27,185. Small changes to the code's layout make it appear or disappear, which looks like memory corruption or a race in the port's thread switching.
+
+The TAS currently runs only because of 64 bytes of code padding in `tas_replay.c`, which is a marked shortcut. Any code change can bring the hang back, as several logging builds did tonight. It would also matter on the console. I'd make finding it the next priority before going much further.
+
+## Also open
+- **Next desync:** at loop 35,095, a gun camera in `s08a` draws twice on the port but three times on the PS1. The camera logic is deterministic, so one camera's timer is probably out of step from when the cameras start.
+- **TLB misses:** about 50 NULL reads (+0/+2/+4) in `DG_GetLightMatrix` around the Ninja fight. My checks for NULL `pos` and `light` didn't fire, so I don't know the source yet.
+
+## Your save-state question
+Yes, it would help a lot. The replay always plays from the start, so each test now takes about 3 to 6 minutes to reach the Ninja fight. Starting from a saved state near the desync would cut that to seconds.
+
+The catch is that a PCSX2 save state is tied to the build it was made with. The game code lives inside the saved memory, so any code change makes the state stale, and most of what I change between runs is code. It would work best as a cached checkpoint: the harness saves a state just before the area being worked on, and reuses it only while the code before that point is unchanged.
+
+There's a second catch. A rebuild changes the layout that this deadlock depends on, so restored states could hide or trigger it. I'd fix the deadlock first, then add the checkpoint switch to `run_port.py`.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Overall goal: use TASVideos #5139 as a regression test for the MGS1 PS2 port in `/home/alex/Documents/mgs1_ps2`, branch `ps2-port`.
+   - Latest standing instructions from the user:
+     - "Let's get started on s08b's decompilation. Follow these instructions until 9 pm or until the TAS reached 100%… keep working on fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible when issues arise, using the Ponytail philosophy where available, and use your best judgement. If there's a large issue that arises, notify me and I'll see to it. After each desync is fixed, update docs and then commit before continuing."
+     - "Don't worry about completing the decompilation before 9 pm, just take it as far as you can."
+     - "I'm extending your time limit to 10:30 pm."
+   - Open question from the user, not yet answered: "To consider: is it possible to use save states to speed up testing? That way we don't have to play through sections we've already fixed over and over".
+   - One-time override, already used: "The next time you run the TAS in PCSX2, please leave the window up. This will be a one time override." It was used on one run with `--show`. All later runs stay invisible.
+   - Standing constraints (CLAUDE.md and memory):
+     - GitHub only without asking. "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run the matching build after port changes, from `build/`: `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py`. Expect 80 OK; `--variant=vr_exe` gives 2 OK.
+     - Before commits, update `docs/Running Walkthrough.md`, `docs/Planning Doc.md`, `docs/TAS Testing Plan.md`, `docs/TAS Progress.md` and `Claude Conversation.md`. For the conversation: concatenate all session `.jsonl` files by `ls -tr`, then run `tools/port/archive_conversation.py`; it must remove no lines.
+     - No `pkill -f <pattern>` in a command that contains the pattern.
+     - Give TAS loops with their movie timestamp.
+     - Never dismiss TLB misses.
+     - Print a status line every 5 minutes during windowless runs.
+     - Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+     - Use they/them for unnamed people.
+     - Ponytail rules are in CLAUDE.md.
+     - Emulator windows are invisible by default (Xvfb).
+
+2. Key Technical Concepts:
+   - TAS harness:
+     - `run_port.py` (`--show`, `--last`, `--ignore "FIELD@a-b"`, `--no-link`).
+     - Tables live in `~/emu/tas`: `pads.bin`, `time.bin` (40-byte records: r+4 status, r+12 passage, r+16 seed, r+20 clock, r+36 total), `timeline.bin` (8 bytes per loop: low byte is the actor kind, 0x100 flag means str_tick -1; then the field_30 counter if it moved, else -1).
+     - Trace line t is the state at the end of loop t-1.
+   - Movie length is about 313,200 frames (1:27:05). Percent = frame / 313204.
+   - `tools/port/mips2c.py`: translates an overlay's INCLUDE_ASM stubs into exact-behaviour C, port only.
+     - Keeps the PS1 register file and stack frame.
+     - Maps hi/lo address pairs to symbols through `__asm__` aliases (`R_name`).
+     - Jump tables are read from `build/OVL.matching.bin` (base 0x800C3208 for s08b/s05a).
+     - Each pragma is wrapped in `#ifdef MGS_PORT #include "overlays/s08b/recomp/X.inc" #else pragma #endif`.
+     - `source/include/recomp.h` provides `RECOMP_ENTRY`, `CALL` (8 args, stack args at sp+16) and LWL/LWR/SWL/SWR.
+   - Post-load deadlock: layout-sensitive, every thread idle, kernel idle PC 0x81fe0. It hit at loops 6,668, 11,520, 24,537 and 27,185.
+     - Workaround (marked shortcut): `__asm__(".text\n.space 64\n");` at the end of `port/src/tas_replay.c`.
+     - The PCSX2 watchdog's EPC is stale; read EPC at handler entry instead.
+   - Diagnostic scripts in the scratchpad (`/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8/scratchpad`):
+     - `ck.sh "loop" "time" frame "fix" "next plan line" "walkthrough text" "commit msg"`: updates docs and commits. It breaks on multi-line arguments.
+     - `rl.sh A B`: logs GV_Rand callers.
+     - `ring.sh A B`: HAL rand return-address ring.
+     - `rr.sh`: HAL printf hook. It tends to trigger the deadlock, so avoid it.
+     - `steps.py A B`: per-loop draw counts.
+     - `co.py`: compiles one file and shows its errors.
+
+3. Files and Code Sections:
+   - `tools/port/mips2c.py` (new). Features:
+     - Merges stubs whose branches run into the next file.
+     - Splits stubs at entry points: after `jr ra`, when the next word is `addiu sp` or an address in the `taken` set (addresses built from lui+addiu).
+     - Carries a `lui` in a branch's delay slot to the branch target via `pending`.
+     - Reuses an address seen once in a function on other paths via `seen[(rs,si)]`.
+     - Heuristic for `addiu rs==rt` with `|si|>=0x1000`.
+     - Jump-table address comes from the addiu/lw that follows the lui (fixed bug).
+     - A missing label is turned into a return.
+     - Run: `python3 tools/port/mips2c.py s08b 0x800C3208`.
+   - `source/include/recomp.h`: macros, plus a ring of last-entered functions:
+     ```
+     { extern const char *Port_RecompLast[8]; extern int Port_RecompN; Port_RecompLast[Port_RecompN++ & 7] = __func__; } /* shortcut … */
+     ```
+   - `port/src/tas_replay.c`:
+     - `Port_TasStreamPlayEnd`, `Port_TasHikituri` (reverted), `Port_TasCodecDraw`, `Port_TasMovieMayEnd`.
+     - Restores the lost release on two-update loops via `s_PadRecord`.
+     - Sets `gTotalFrameTime` from the record each loop.
+     - `Port_TasStrCounter`: returns -1 on the PS1 sound-end loop, holds the counter on the end loop (`last`), and holds when the next loop moved:
+       ```
+       else if ((unsigned int)GV_Time + 2 < size_mgs_tas_timeline / 8 &&
+                (int)read_u32(mgs_tas_timeline + (GV_Time + 2) * 8 + 4) >= 0 && last > 0 && last <= *counter)
+       { *counter = last; }
+       ```
+     - Defines `Port_RecompLast[8]` and `Port_RecompN`.
+     - Code padding at the end of the file.
+   - `source/game/strctrl.c`: the end condition goes through `Port_TasStreamPlayEnd(ended, idle)`.
+   - `source/game/jimctrl.c`: `Port_TasStrCounter` is called right after `get_str_counter()`.
+   - `source/game/movie.c`: under MGS_PORT, movies are skipped (`Port_TasMovieMayEnd`, `DG_UnDrawFrameCount = 2`).
+   - `source/menu/radio.c` and `source/menu/radiofacedraw.c`: the codec draws are gated by `Port_TasCodecDraw()`.
+   - `source/kojo/m1e1catr.c` and `source/overlays/s05a/kojo/m1e1act.c`: `M1E1StaleVy` (PS1 stale stack value).
+   - `m1e1sold.c` and `m1e1came.c`: NULL reads use PS1 RAM values (8, 0x340, 0, 0) and 0x8C960024.
+   - `zakocom.c`: NULL guard read.
+   - s05a, s07a and s08b overlays: pointers and stage tables converted to symbols. In s08b's `overlay2.c`, the unused jump-table literals are written as decimal.
+   - `build/link_ps2.py`: picks the Integral discs (`"Integral" in c`). The user had added other regions to `ps1-original/`.
+   - `tools/port/offscreen` (Xvfb wrapper); `run_port.py` and `compare_frames.py` take `--show`; `run_bizhawk.sh` honours `MGS_SHOW=1`.
+   - `tools/port/tas/compare_trace.py`: `fix_clock`.
+   - `tools/port/tas/trace_to_pads.py`: recovers presses using the press field and the raw pads from line t+1.
+   - `tools/port/tas/timeline_to_bin.py`: adds the 0x100 flag.
+   - CLAUDE.md: Ponytail section and the offscreen note.
+
+4. Errors and fixes:
+   - Wrong disc extracted (other regions now in `ps1-original/`) caused `illegal DISK`. Fixed by filtering for Integral in `link_ps2.py`.
+   - mips2c bugs, all fixed:
+     - Labels cleared hi tracking.
+     - `lui` in a delay slot.
+     - Functions split across files.
+     - Callbacks pointing inside a stub (`+152`).
+     - Jump-table base taken from the `lw` offset.
+     - Nested wrapper re-application (the regex now skips lines already wrapped).
+     - Declaration type conflicts (everything declared as `extern char R_x[]`).
+   - The `ck.sh` placeholder "x" was written into the docs; cleaned up.
+   - The DuckStation abort was from `QT_QPA_PLATFORM=xcb`. Removed; the wrapper uses `XDG_SESSION_TYPE=x11`.
+   - Lip-sync hold reused the previous stream's counter. Bounded with `last <= *counter`.
+
+5. Problem Solving:
+   - In sync to loop 35,095 (0:18:39.13), 21.42%. This is through the whole Ninja fight.
+   - Latest commit: `a944699d0`.
+   - Open issues:
+     - The post-load deadlock. It is the large issue to report.
+     - TLB misses in `DG_GetLightMatrix` (pc 0x10c478 and nearby, addr 0/2/4). Hooking `pos`/`light` for NULL didn't fire; source unknown.
+     - Current desync at 35,095.
+
+6. All user messages:
+   - "Has the timeline recording finished yet?"
+   - "How long is the TAS supposed to take in real time?"
+   - "Proceed"
+   - "Commit, update docs, and proceed"
+   - "Give me a timeline of all the TAS loop fixes we've made and how far along we are in the TAS. Show timestamps and percentages."
+   - "Save this to a TAS progress doc and then commit changes. After, move to fix the TLN miss"
+   - "Proceed"
+   - "Commit and then proceed"
+   - "Commit the changes"
+   - "Firstly, is the Ponytail philosophy part of your rules? If not, download it from GitHub and incorporate it. Then follow the instructions below. I want you to keep working on fixing the desync issues… Continue working autonomously until 5:00 PM or we reach 100% TAS completion, whichever comes first."
+   - "Can I log in again? Proceed, but continue until 6 pm, not 5 pm"
+   - "Follow the same rules as before, but stop at 7:30 pm"
+   - "When we're scripting BizHawk, DuckStation, and PCSX2, is there any way to have their windows in the background or otherwise minimized…"
+   - "Is there a map name associated with s08b?"
+   - "As for Xvfb, I've installed it. Change the scripts to run through that, but also add a switch to show the window for a specific run. By default the windows should be invisible."
+   - "Let's get started on s08b's decompilation. Follow these instructions until 9 pm or unti the TAS reached 100%… [same rules]"
+   - "Don't worry about completing the decompilation before 9 pm, just take it as far as you can"
+   - "The next time you run the TAS in PCSX2, please leave the window up. This will be a one time override…"
+   - "I'm extending your time limit to 10:30 pm"
+   - "To consider: is it possible to use save states to speed up testing?…"
+
+7. Pending Tasks:
+   - Keep fixing desyncs until 10:30 PM. Update docs and commit after each fix.
+   - Answer the save-states question. Suggested answer: possible, using PCSX2 save states at known-good loops with the harness resuming from that loop. Caveats: states must be redone after every code or layout change, harness state such as static counters must be captured too, and the deadlock is layout-sensitive.
+   - Notify the user about the large issue: the post-load deadlock.
+
+8. Current Work:
+   Desync at loop 35,095 (0:18:39.13, `s08a`). `rl.sh` showed `GunCame_800C7994` (source/okajima/guncame.c) drawing `GV_RandU(32)` twice in loop 35,094 on the port, while the PS1 drew 3 times. I was reading `GunCame_800C7994` and its turn checks `GunCame_800C7740` and `GunCame_800C77D4`. A camera flips state when `field_34C > 60` and `field_36C < GV_DiffDirAbs(field_330.vy, turn.vy)`. A third camera probably flips on the PS1 a loop earlier or later.
+
+9. Optional Next Step:
+   Find which camera's state differs at 35,094. Log each camera's `field_344`, `field_34C` and `turn.vy` around loops 35,085 to 35,095. The likely cause is a per-camera counter or turn that drifted, for example from `field_414` or initial randomness. Then fix it, run `ck.sh`/commit, and continue until 10:30 PM. In the final message, answer the save-states question and flag the deadlock.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Let's use save states where we can, and start from the beginning where we have to. Now, as for the deadlock, let's investigate this further. What is the root cause? Is it related to how the port is structured, or the harness, or the HAL?
+
+## Claude
+
+I'll start with what's already recorded about the deadlock, then look at how the port switches threads.
+
+- tool `Bash`: Search docs for deadlock notes and list port sources
+
+- tool `Bash`: Read prior hang notes and find thread primitives in port code
+
+## Claude
+
+The console hang from Step 6 matches this one: mts had runnable tasks, but the CPU sat in idle. I'll check how that was handled and read the HAL's thread layer.
+
+- tool `Bash`: Find thread-switch notes and locate thread_ps2.c
+
+- tool `Bash`: Read the earlier ChangeTh fix notes and thread file size
+
+- tool `Read`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/thread_ps2.c
+
+- tool `Bash`: Find all EE thread wait/wake calls in the HAL
+
+- tool `Bash`: Read the vblank handler and VSync wait
+
+- tool `Bash`: Read the HAL hang watchdog
+
+- tool `Bash`: Check sio_puts, HAL build linkage, and mts task symbols
+
+- tool `Bash`: Read the mts task struct and check HAL repo state
+
+- tool `Bash`: Locate sio_puts definition
+
+- tool `Bash`: Find the sio_puts header
+
+## Claude
+
+I'll add a one-shot dump, temporary and diagnostic only. The HAL side goes in `thread_ps2.c`. The mts side goes behind a weak hook in the port's `tas_replay.c`, where I'll also remove the padding.
+
+- tool `Bash`: Add a one-shot thread state dump to the HAL hang watch
+
+- tool `Bash`: Fix dump label and find the padding in tas_replay.c
+
+- tool `Bash`: Replace padding with the mts state dump hook
+
+- tool `Bash`: Check run_port.py options
+
+- tool `Bash`: Show the TAS runner options
+
+- tool `Bash`: See how run_port handles logs and stalls
+
+## Claude
+
+I've added a one-shot thread and mts state dump to the hang watch and removed the 64-byte padding. Now I'm running the TAS to reproduce the deadlock, which was last seen at loop 24,537 (`s08a`).
+
+- tool `Bash`: Find where PCSX2's log goes
+
+- tool `Bash`: Run the TAS without padding to reproduce the deadlock
+
+- tool `ToolSearch`: 
+
+- tool `Monitor`: 5-minute TAS deadlock-run status
+
+- tool `Bash`: Show the failed run's output
+
+- tool `Bash`: Fix field names and rerun the deadlock reproduction
+
+## Claude
+
+The first build failed because I used the wrong ps2sdk field names. That's fixed, and the reproduction run has restarted. The 5-minute status monitor is still watching it.
+
+- tool `Bash`: Show run result and any thread dump
+
+## Claude
+
+`tas_replay.c` is compiled against ps2sdk headers, not the game's, so I'll read the task fields by their offsets instead (36-byte tasks).
+
+- tool `Bash`: Use raw offsets for mts tasks and rerun
+
+## Claude
+
+I got the struct size wrong: `MTS_TASK` is 32 bytes, not 36. I'll stop that run and restart it.
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Kill leftover PCSX2, fix task size, rerun
+
+## Claude
+
+While that runs, I'll check what mts's idle task does. On the console it was the "current" task while the CPU sat idle.
+
+- tool `Bash`: Find mts idle task code
+
+- tool `Bash`: Read the mts idle task body
+
+- tool `Bash`: Read idle loop and any port overrides
+
+## Claude
+
+The idle task busy-polls SIO and never blocks in the EE kernel. So "EE in the kernel's idle loop" can only mean one thing: the EE thread for the PS1 thread mts made current is asleep or suspended, while the HAL treats it as running. That's a lost wakeup or resume in `thread_ps2.c`. It doesn't point to the harness or the game logic. The dump should show which thread it is and how it got parked.
+
+- tool `Bash`: Show run result and thread dump
+
+- tool `Bash`: Read the SPU lock code
+
+- tool `Bash`: Print the SPU lock's semaphore id and rerun
+
+## Claude
+
+While it runs, here's the fix I have in mind if it's confirmed. Deferring the switch to the next vblank caused an earlier bug, because the old thread kept running game code as the wrong task. Instead, `switch_check` will hold off only while the SPU lock is held, and `unlock()` will make the pending switch the moment the lock is released. The old thread is then parked before it runs any more game code.
+
+## Claude
+
+Still waiting on the run that confirms the semaphore. That status line is from the earlier file.
+
+- tool `Bash`: Check the semaphore id dump
+
+## Claude
+
+This build didn't hang, because the layout moved again; it ran to the known desync at 35,095. I'll confirm the semaphore id with a short run that prints `s_Lock` when it's created.
+
+- tool `Bash`: View SPU lock creation
+
+- tool `Bash`: Print the SPU lock id at creation in a short run
+
+## Claude
+
+The SPU lock is semaphore 33, so it isn't the culprit. Semaphore 1 was created very early. I'll look for every `CreateSema` to identify it.
+
+- tool `Bash`: List every semaphore creation in HAL and port
+
+- tool `Bash`: Find ps2sdk code that creates semaphores
+
+- tool `Bash`: Look for libc lock symbols in ps2sdk and the port ELF
+
+- tool `Bash`: Symbolize the hang watch PC
+
+- tool `Bash`: Find the function at the stale hang PC
+
+## Claude
+
+The hang watch's PC is stale, as noted before, so it can't say where TCB 6 blocked. I'll check whether the EE thread status gives a saved stack, so I can walk TCB 6's return addresses.
+
+- tool `Bash`: Check thread status struct fields
+
+- tool `Bash`: Add a stack scan for return addresses to the dump
+
+- tool `Bash`: Find end-of-text symbol
+
+- tool `Bash`: Rerun with the stack scan
+
+## Claude
+
+These runs use **PCSX2**, headless on Xvfb. `run_port.py` launches it through the SH1 port's `pcsx2_run.py` with the software renderer, boots the port's `obj_ps2/mgs_ps2.iso`, and compares the game's trace with the PS1 reference trace.
+
+Where the deadlock stands:
+- **Reproduced** at loop 11,520 (0:06:24) with all the padding removed.
+- **Cause, partly found:** the thread mts considers current is TCB 6 (the `SOUND_INT` task). Its EE thread is blocked on **semaphore 1**, while the thread that probably holds that semaphore (GAME, TCB 3) was suspended by a vblank thread switch. Nobody can ever release it.
+- **What semaphore 1 is:** not the SPU lock (that's 33), and not any other HAL semaphore. ps2sdk creates it before `main`, so it's most likely newlib's `stdio`/`malloc` lock.
+
+My current theory: GAME gets suspended mid-`printf` (or `malloc`), and the sound task then prints, for example the `*` that `sd_str.c` prints on a stream underrun. That would explain why logging builds hit it more often. The run that's going now scans both threads' stacks for return addresses to confirm which call each one is parked in.
+
+So to your question: it's the **HAL's thread layer** (`thread_ps2.c`), not the harness and not how the port is structured. Switching a PS1 thread out by suspending it inside an interrupt is safe on the PS1, where there are no locks. On the PS2, the suspended thread can be holding a lock.
+
+- tool `TaskStop`: 
+
+- tool `Monitor`: 5-minute status of the stack-scan run
+
+## Claude
+
+That status was from the old run's file. I've pointed the 5-minute monitor at the stack-scan run, which is still going.
+
+- tool `Bash`: Read the stack-scan dump
+
+## Claude
+
+Same deadlock again, this time at loop 26,136 (0:13:59). I'll symbolize the stacks.
+
+- tool `Bash`: Symbolize return addresses on both stacks
+
+- tool `Bash`: Symbolize return addresses with Python
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+The deadlock is in the **HAL's thread layer** (`psx-to-ps2-HAL/src/ps2/thread_ps2.c`). Neither the harness nor the way the port is structured causes it. The tables and comparisons only change the code layout, and that shifts when the timing window lines up. I reproduced it twice with the padding removed, at loops 11,520 (0:06:24) and 26,136 (0:13:59). Both dumps show the same thing.
+
+**What happens:**
+1. The GAME thread is in the middle of a `printf` from the game's own debug output. ps2sdk's C library takes a lock for that `printf`.
+2. A vertical blank (vblank) interrupt comes in, and mts switches to the sound interrupt task. The HAL makes that switch by suspending GAME, which is still holding the lock.
+3. The sound task's `IntSdMain` calls `printf`, waits for the lock, and blocks.
+4. Only GAME could release the lock, and it stays suspended until the sound task gives up the CPU. Nothing is left to run, so the CPU sits idle forever.
+
+The stack scans show this directly:
+- Sound task: `IntSdMain → printf → _vfprintf_r → __sbprintf → _malloc_r → __retarget_lock_acquire_recursive`, blocked on semaphore 1. Semaphore 1 is the C library's lock, which ps2sdk creates before `main`.
+- GAME: suspended inside `_vfprintf_r`/`_malloc_r`, called from the game's GCL/doll code.
+
+On the PS1 this can't happen, because there are no locks to hold across a switch. On the PS2, any lock held when an interrupt switch comes is a trap. The C library's `stdio`/`malloc` lock is the one that bites. That's why logging builds hit it more often, and probably why the console hung in the opening on 2026-10-28, which showed the same "mts has runnable tasks, the CPU stays idle" state.
+
+**Proposed fix:** while a PS1 thread holds one of the C library's locks, hold off the interrupt switch. Make it as soon as that lock is released, before the thread runs any more game code.
+- That means wrapping the library's lock acquire and release with linker `--wrap` in `link_ps2.py`, plus about 20 lines in `thread_ps2.c`.
+- It doesn't repeat the earlier deferral bug, where the woken thread ran game code as the wrong task, because here the thread is still inside a C library call.
+- The 64-byte padding shortcut then comes out.
+
+**I'm stopping for your OK** because `thread_ps2.c` is shared with the SH1 port, which would get the same change. The simpler options are worse. Making the locks do nothing is unsafe, because the HAL's own PS2 threads print and allocate memory. Silencing the game's `printf` calls would only hide this one case.
+
+The diagnostic dump code isn't committed. It's in the HAL's `thread_ps2.c`, `libetc_ps2.c` and `spu_ps2.c`, and in `port/src/tas_replay.c`, which also has the padding removed. I'll take it out when the fix goes in.
+
+On save states: I'll use them where they're valid and start from the beginning where they aren't. I'd add that to `run_port.py` after this fix, so the layout-sensitive hang can't hide in a restored state.
+
+## User
+
+Are there any other deeper issues like this that are plain as day?
+
+## Claude
+
+I'll check for the same pattern elsewhere: any lock, semaphore or in-flight I/O that a PS1 thread can hold when an interrupt switch suspends it.
+
+- tool `Bash`: Look for I/O and RPC paths callable from PS1 threads
+
+- tool `Bash`: Read how the CD task reads the disc
+
+- tool `Bash`: Check libcdvd use and SPU RPC paths
+
+- tool `Bash`: Read the console log write path
+
+## Claude
+
+Yes, one more of the same kind, and it's plain from the code: **the SPU lock** (`spu_ps2.c` `lock()`/`unlock()`, semaphore 33).
+
+- It's a mutex shared by every PS1 thread that drives sound and by the HAL's sound tick thread. The code comment still assumes only "the game thread and the sound tick thread" use it, which held on SH1. In MGS, GAME and the mts sound tasks both call SPU functions.
+- If a vblank switch suspends GAME inside an SPU call, and the sound task then makes one, the result is the same deadlock as the `printf` one. Here a send also waits on SIF DMA (data transfer to the IOP) while holding the lock, which makes the window wider.
+- It hasn't shown in the dumps yet, but nothing prevents it.
+
+The same fix covers both: hold off the interrupt switch while the current PS1 thread holds the C library's lock or the SPU lock, then make the switch on release. That's one counter in `thread_ps2.c`, raised and lowered by both locks.
+
+There's also a second symptom of the C library lock. The HAL's log thread runs above the game's priority and calls `sprintf`. If it ever needs that lock while a suspended PS1 thread holds it, console output stops for good, but the game keeps going. On hardware that would look like a dead log rather than a hang. The same fix covers it too.
+
+I checked these and they're fine:
+- **Disc reads (libcdvd):** only the CDBIOS task calls them. A suspended read just resumes, because no other PS1 thread is waiting on it.
+- **VSync, pad, log and agent semaphores:** they're counting signals from the interrupt, or they're only waited on by their own HAL thread. A suspended PS1 thread can't block anyone with them.
+- **Critical sections:** they turn interrupts off, so a vblank switch can't land inside one.
+
+The console opening hang from 2026-10-28 looks like this same family. mts had runnable tasks while the CPU stayed idle, and the voice stream was printing `*` right as it hung. That's a `printf` from the sound side, so I'd expect this fix to cover it as well.
+
+Nothing else is obvious from reading. The TLB misses in `DG_GetLightMatrix` are a different class (bad pointers, not threading) and still open.
+
+I still need your OK, since `thread_ps2.c` is shared with the SH1 port. Shall I implement the fix and remove the padding?
+
+## User
+
+Yes
+
+## Claude
+
+Implementing it now: one hold counter in `thread_ps2.c`, raised and lowered by both the C library's locks (through linker `--wrap`) and the SPU lock.
+
+- tool `Bash`: Find link flags and the libc lock prototypes
+
+- tool `Bash`: Remove the diagnostics and the padding
+
+## Claude
+
+Now the fix in `thread_ps2.c`:
+
+- tool `Edit`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/thread_ps2.c
+
+- tool `Edit`: /home/alex/Documents/psx-to-ps2-HAL/src/ps2/thread_ps2.c
+
+- tool `Bash`: Check try_acquire's return convention
+
+- tool `Bash`: Disassemble try_acquire to see its return value
+
+- tool `Bash`: Drop try wrappers, add state and underflow guard
+
+## Claude
+
+Now the SPU lock and the link flags:
+
+- tool `Bash`: Count the SPU lock and wrap the libc locks at link
+
+## Claude
+
+Without `--wrap`, the SH1 port's link would fail on the `__real_` symbols, so its link gets the same flags. I'll find its link step.
+
+- tool `Bash`: Find the SH1 port's link flags
+
+- tool `Bash`: Add the lock wraps to SH1's link
+
+## Claude
+
+Next, a build and a full TAS run with no padding. This layout hung on every diagnostic build tonight.
+
+- tool `Bash`: Run the TAS with the lock fix and no padding
+
+- tool `Monitor`: 5-minute status of the lock-fix TAS run
+
+## Claude
+
+Meanwhile, the PS1 matching build:
+
+- tool `Bash`: Run the PS1 matching build
+
+## Claude
+
+The matching build passes: 80 OK.
+
+- tool `Bash`: Check the fix run's result
+
+- tool `Bash`: Read the printf-hook stress script
+
+- tool `Bash`: Stress run with printf in rand for loops 300 to 30,000
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Check repo branches and doc spots to update
+
+## Claude
+
+Both runs pass. Now the docs and commits.
+
+- tool `Bash`: Update the TAS plan, planning doc, progress and walkthrough
+

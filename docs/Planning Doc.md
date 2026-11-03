@@ -195,6 +195,7 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
   `CdControl`/`CdControlB` report a closed drive
 - To fix: `takabe/elevator.c`, `thing.c` test or set bit 31 of pointers (kseg0 on the PS1; EE pointers
   don't have it). Done for GCL: `GCL_IsBlock` (`libgcl.h`) in `delay.c`, `item.c` (proc id vs block address)
+- Fixed (2026-11-03): post-load deadlock (HAL `thread_ps2.c`): an interrupt switch suspended a PS1 thread holding newlib's `printf`/`malloc` lock or the SPU lock; switches now wait for the release. Likely also the 2026-10-28 console opening hang (to confirm on hardware).
 - Fixed (2026-10-27): intro hang/crash (HAL `ChangeTh` window deferred an interrupt switch mts had already made);
   New Game (`GCL_IsBlock`); dock NULL reads (`sna_init.c` bullets, `script.c FuncCmd`). Scripted pad presses for
   PCSX2 runs: `MGS_PAD_SCRIPT` (`port/src/pad_script.c`)

@@ -6,4 +6,4 @@
 fifo=$(mktemp -u); mkfifo "$fifo"
 Xvfb -displayfd 3 -screen 0 1920x1200x24 -nolisten tcp -terminate 3>"$fifo" >/dev/null 2>&1 &
 read -r n <"$fifo"; rm -f "$fifo"
-exec env -u WAYLAND_DISPLAY DISPLAY=":$n" GDK_BACKEND=x11 QT_QPA_PLATFORM=xcb "$@"
+exec env -u WAYLAND_DISPLAY DISPLAY=":$n" GDK_BACKEND=x11 XDG_SESSION_TYPE=x11 "$@"

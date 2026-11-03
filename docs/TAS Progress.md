@@ -34,6 +34,5 @@ Current: loop 27,191 (0:14:34.37), 16.73%.
 | 23,572 | 0:12:39.38 | 14.53% | NULL read in m1e1sold.c, and a release lost on a two-update loop | Nov 2 |
 | 24,704 | 0:13:15.64 | 15.23% | `s07a` linked in (7 pointers by symbol) | Nov 2 |
 | 27,191 | 0:14:34.37 | 16.73% | the codec static follows the PS1 seed; NULL read at 0xE5C | Nov 2 |
-| 27,191 | 0:14:34.37 | 16.73% | x | Nov 2 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.

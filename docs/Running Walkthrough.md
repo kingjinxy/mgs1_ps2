@@ -950,3 +950,13 @@ Loop 47,499 (0:25:21.89): Wolf's constructor burns `mts_get_tick_count() % 256` 
 Tried and dropped: one emulated PS1 stack shared by the translated functions (stack arguments past the 8th, reads of never-written slots). It moved this desync without fixing it and isn't needed here: reverted (`RECOMP_RETURN` stays, a plain return).
 
 The desync itself is still open: in loop 47,498 the PS1's Wolf enters state 0 (3 draws), the port's doesn't, with her Work, TARGETs, the actor lists, the overlay data and the resident globals equal at the loop's start. New tools for it: `ram_dump.lua` + `host:tas_ramdump.txt` + `ram_diff.py` (both sides' data per symbol in one pass), `actor_list.lua`. Matching builds 80 and 2 OK.
+
+## Step 34: Wolf's burn tick, read mid-loop (Nov 3)
+
+Loop 47,499 (0:25:21.89) was not Wolf's state machine, which is what I had suspected. At loop 47,499, a dump of both sides' RAM (`ram_dump.lua`, `host:tas_ramdump.txt`) showed her Work differing in two words: +2008 (her blink step, `RandU(2)+1` when `GV_Time & 63 == 0`: PS1 1, port 2) and +2012 (the counter it advances: 11 against 22). She is made in loop 47,488, a multiple of 64, and acts in it, so the blink draw comes right after the constructor's `tick % 256` burn. That loop is the stage's load end, where the port's seed is overwritten with the PS1's at the loop's end, so the different draw count didn't show as a seed desync until her state diverged ten loops later. From the PS1's seeds, its blink was an even draw: a burn of 247, not the 249 from the next trace line's tick (90,361). The scenario runs late in a 30-blank loop and the constructor read the tick 2 blanks before the loop's end.
+
+Fix: `trace_to_pads.py`'s `TICK_AT`, a per-loop override of `ticks.bin` (shortcut: found by hand, since the trace samples ticks only between loops; record the tick in `trace.lua` if more are needed). It has one entry, 47,488 → 90,359. In sync to loop 47,546 (0:25:23.46).
+
+Tried and dropped:
+- BizHawk's `event.onmemorywrite`/`onmemoryexecute`: no callbacks on this core, and with the System Bus scope the run stalls.
+- Setting the PS1's seed when the scenario runs (`gamed.c`): the seeds already matched there; reverted.

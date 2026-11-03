@@ -100,8 +100,12 @@ for i, f in enumerate(rows):
     time[t] = struct.pack("<iIIiIiiIii", tick, int(n[4], 16), int(f[11]), int(f[3]), int(f[5], 16), int(f[2]),
                           int(n[19]), starts, int(n[20]), int(f[21]))
 # ticks.bin: for each loop, the PS1's mts tick when its actors ran, as game logic reads it (s10a's Wolf burns
-# tick % 256 rand() calls when made, late in a 30-blank loop: the next line's sample, 249 at loop 47,488; port Port_GameTick)
-ticks_bin = b"".join(struct.pack("<I", int(n[14])) for f, n in zip(rows, rows[1:]))
+# tick % 256 rand() calls when made; port Port_GameTick): the next line's sample, but for the loops in TICK_AT.
+# shortcut: TICK_AT is the tick read mid-loop, found by hand (the trace only samples between loops; a stage's
+# scenario can take 30 blanks: 90,361 at the end of loop 47,488, Wolf's burn at 90,359). Add a loop when a
+# tick-dependent burn desyncs; record the tick in trace.lua if they become common.
+TICK_AT = {47488: 90359}
+ticks_bin = b"".join(struct.pack("<I", TICK_AT.get(int(f[1]), int(n[14]))) for f, n in zip(rows, rows[1:]))
 open(os.path.join(out_dir, "ticks.bin"), "wb").write(ticks_bin)
 # loads.bin: at each PS1 load end (the line whose GM_LoadRequest is back to 0), a u32 GV_Time and that line's
 # GV_PadData as recorded (pads.bin's records can have [2]/[3] rebuilt): tas_replay.c's realign at the load's end

@@ -17719,3 +17719,350 @@ Both matching builds pass (80 and 2 OK). The shared-stack header is reverted, so
 
 - tool `Bash`: Remove the unused emulated stack and recheck the TAS
 
+- tool `Bash`: Update docs, archive conversation, and commit
+
+## Claude
+
+I've stopped. The TAS is in sync to **loop 47,499 (0:25:21.89), 29.1%**, up from 45,078 this morning. Everything is committed and the docs are updated; the last commit is `34566527b`.
+
+## On Ponytail
+It's in my rules (CLAUDE.md), and I didn't apply it consistently this afternoon:
+- I put in a speculative shared emulated stack before measuring anything. It turned out to be irrelevant to this desync and cost two detours, so it's reverted.
+- I asked one small question per 10-minute run instead of one wide comparison per run.
+
+The change that fixed that is now a tool. One RAM dump on each side at a loop, diffed symbol by symbol, replaces most of the one-off logging runs. It's `ram_dump.lua` plus `ram_diff.py`, with the port writing its data to the host.
+
+## Done since 12 PM
+- **`stage_split.py`** builds the port's version of a stage the decomp has never split, straight from the disc. The stage's data keeps its PS1 layout, which rules out the "wrong static" bug class from this morning.
+- **`s10a`** went in that way: 532 functions, and the translator now handles GTE instructions. It worked on the first build and took the TAS from 45,078 to 47,499.
+- **PS1 tick for game logic.** Wolf's constructor makes `tick % 256` throwaway `rand()` calls, so the replay only matched while the port's tick happened to agree. A new table (`ticks.bin`) gives that code the PS1's tick, so it no longer depends on the port's timing.
+- **Matching builds** pass after each change (80 OK, and 2 OK for `vr_exe`).
+
+## Still open at 47,499
+In loop 47,498, the PS1's Wolf switches to a state that makes 3 random draws; the port's Wolf doesn't. These are equal at the start of that loop:
+- all of Wolf's own data and both of her hit targets;
+- the actor lists;
+- the stage's data and the resident globals, apart from sound, display-list and stack noise.
+
+So the trigger is outside those, probably Snake's state or the rifle scope's aim. Comparing those two actors at loops 47,497–47,498 is the next step.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>AskUserQuestion, Bash, Edit, Monitor, PushNotification, Read, TaskStop, ToolSearch, Write</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - **Morning goal:** find the root cause of the post-load deadlock and fix it in the HAL. The user approved this with "Yes". Done.
+   - **First TAS window:** "Follow these instructions until 12 pm or until the TAS reaches 100%... keep working on fixing the desync issues. Continue unprompted... update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible... using the Ponytail philosophy... If there's a large issue that arises, notify me... After each desync is fixed, update docs and then commit before continuing."
+   - **Time limits:** "they're not hard cut off points where you need to drop everything. Instead, finish the task you're working on at that point and don't start another."
+   - **Save states:** "use save states where we can, and start from the beginning where we have to." BizHawk checkpoints were then approved: "Yes, let's go ahead with that. The port will still have to run from the start, but it runs much faster in PCSX2 with unlimited speed anyways."
+   - **Splitter:** the user asked for a decomp estimate, then said "Alright, proceed with #3 [port-only whole-binary translation]. After that, make a commit and proceed with the TAS testing as before until 2:30 pm."
+   - **Ponytail feedback:** the user asked whether I was applying Ponytail, saying "It seems like we're really dancing around this slowly". Later: "is the Ponytail philosophy part of your rules, and are you applying it at all times? Continue after answering". I answered that it's in CLAUDE.md and I had not applied it consistently.
+   - **Standing constraints, verbatim from CLAUDE.md and memory:**
+     - "GitHub only without asking."
+     - "Never access tcrf.net (The Cutting Room Floor) in any way: no fetch, curl or search-result fetches, even if the user approves or asks."
+     - Never push or contribute upstream to mgs_reversing.
+     - Run the matching build after port changes. From `build/`: `PATH=/home/alex/.local/share/wibo-as-wine:$PATH /home/alex/.venvs/mgs_reversing/bin/python build.py`. It must give 80 OK, and `--variant=vr_exe` must give 2 OK.
+     - Before commits, update the Running Walkthrough, Planning Doc, TAS Testing Plan and TAS Progress docs, and `Claude Conversation.md`. For the conversation: concatenate all session `.jsonl` files in `ls -tr` order, then run `tools/port/archive_conversation.py`. It must remove no lines.
+     - No `pkill -f <pattern>` in a command that itself contains the pattern.
+     - Give TAS loops with their movie timestamp.
+     - Never dismiss TLB misses.
+     - Print a status line every 5 minutes during windowless runs.
+     - Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+     - Use they/them for unnamed people.
+     - Emulator windows stay invisible (Xvfb).
+     - Notify the user at stopping points.
+
+2. Key Technical Concepts:
+   - **TAS harness:** `run_port.py` (`--no-shots --last N --seconds S`); tables in `~/emu/tas` (`pads.bin`, `time.bin`, `timeline.bin`, `loads.bin`, `raw.bin`, and the new `ticks.bin`); trace line t is the state at the end of loop t−1. Percent is frame / 313,204.
+   - **Draw counting:** the PS1 `rand` is an LCG, `next = next*1103515245 + 12345`, returning `(next>>16) & 0x7FFF`. `GV_RandU(n) = (n-1) & rand()`. `steps.py` and inline scripts count draws per loop from the seeds.
+   - **BizHawk checkpoints:** a state every 1,000 loops in `~/emu/tas/states/`, 159 states, about 300 MB with compression level 6. `seek.lua` loads the nearest one, so a PS1 query takes about 50 s instead of about 20 min.
+   - **`mips2c.py`:** turns asm into exact-behaviour C. Today it gained:
+     - forgetting a register's `lui` at a call;
+     - a warning on "word symbol + offset ≥ 4";
+     - GTE instructions through the HAL's software GTE;
+     - a fallback asm directory, `obj_ps2/stage_split/OVL`;
+     - calls to `mts_get_tick_count` renamed to `Port_GameTick`;
+     - a `RECOMP_RETURN` template.
+   - **`stage_split.py`:** splits a stage straight from the disc's `STAGE.DIR` and generates everything `mips2c.py` and `overlays_ps2.py` need. Its data is kept in the PS1 layout. Jump tables are found from a `lui`/`addiu` before a `jr` and keep their PS1 values. A data word pointing into code counts as a function pointer if its target is a frame setup or follows a `jr ra`.
+   - **Overlay data reset:** `.data`/`.bss` are restored on each stage load, with ranges between `Port_Ovl_<ovl>_*` symbols. Commons are excluded.
+   - **HAL deadlock fix:** an interrupt thread switch waits while the current PS1 thread holds a libc lock (counted through `--wrap`) or the SPU lock, and happens on release through `ChangeTh`.
+
+3. Files and Code Sections:
+   - **`../psx-to-ps2-HAL/src/ps2/thread_ps2.c`** (commit `f48c2da`): adds `s_Held`, `s_SwitchPending`, `Port_ThreadLockHold`/`Port_ThreadLockDrop`, and `WRAP_LOCK`/`WRAP_UNLOCK` for `__retarget_lock_{acquire,release}[_recursive]`. `switch_check` returns with `s_SwitchPending = 1` while `s_Held` is set.
+   - **`../psx-to-ps2-HAL/src/ps2/spu_ps2.c`:** `lock()`/`unlock()` call Hold/Drop, with an `s_LockHeld` flag.
+   - **`build/link_ps2.py` and SH1's `tools/port/port_link.py`** (commit `fa5ff44c1`): add the `--wrap=__retarget_lock_*` flags. `link_ps2.py` also copies `ticks.bin` to `tas_ticks.bin`.
+   - **`build/overlays_ps2.py`:** a per-overlay `ld -r` script brackets `.data`/`.bss`. `stages.c` struct: `{name, charas, data, data_end, bss, bss_end, initial}`.
+   - **`source/game/chara.c` `Port_SetStage`:** keeps a `.data` snapshot on an overlay's first load, restores it on later loads, and clears `.bss`.
+   - **`s07b`:**
+     - `source/stage/s07b.c` uses symbols instead of literal addresses, plus four prototypes.
+     - In `psyco.c` and `meryl07b.c`, the jump tables became decimals and the state table at 0x800C33AC became symbols (`extern char s07b_800C...[]`).
+     - `chair_alive`, `pot_alive`, `statue_alive` and `ox_alive` (in `source/chara/psyco/*.c`) and `desert_damage` (`desert.c`) are now `STATIC`.
+   - **`tools/port/stage_split.py`** (new, about 230 lines): writes the generated files and wraps `source/stage/OVL.c`'s table in `#ifdef MGS_PORT #include "overlays/OVL/stage_table.inc" #else ... #endif`. Its `CHECK=1` mode validates against split overlays.
+   - **`source/overlays/s10a/`** (generated): `s10a.c` (all under `#ifdef MGS_PORT`: an `__asm__` data block plus `#include`s of the 532 recomp files), `stage_table.inc` and `recomp/*.inc`.
+   - **`source/include/recomp.h`:** has Gte_* declarations. The final version is back to private frames, with `#define RECOMP_RETURN return r[2]`:
+     ```
+     #define RECOMP_ENTRY(frame) int r[32], c, t, hi_ = 0, lo_ = 0; long long mul = 0; unsigned char stk[(frame) + 32] __attribute__((aligned(8))); ... r[29] = (int)stk + (frame); ...
+     ```
+   - **`port/src/tas_replay.c`:**
+     - `Port_GameTick()`: in TAS replays, returns `read_u32(mgs_tas_ticks + GV_Time*4)`, otherwise `mts_get_tick_count()`.
+     - Loads `host:tas_ticks.bin`.
+     - A RAM dump hook: `host:tas_ramdump.txt` gives `s_RamLoop`, and `host:tas_ram.bin` receives a u32 base followed by `_fdata` to `_end`.
+     - The 64-byte padding was removed. The shared-stack buffer was removed.
+   - **`source/okajima/wolf/wolf2.c:757` and `key_item.c:79`:** under `#ifdef MGS_PORT`, `Port_GameTick() % 256`.
+   - **`tools/port/tas/trace_to_pads.py`:** writes `ticks.bin` as `struct.pack("<I", int(n[14]))` for each pair of consecutive rows (the next line's mts tick).
+   - **New Lua and tools:**
+     - `checkpoints.lua` (resumable);
+     - `seek.lua`;
+     - `work_dump.lua` (`TAS_ACT`, `TAS_PTR`/`TAS_PTROFF`, `TAS_FIELD`, `TAS_SIZE`, `TAS_LOOPS`);
+     - `cam_log.lua`;
+     - `actor_list.lua`;
+     - `ram_dump.lua` (`TAS_LOOP`);
+     - `ram_diff.py PS1_RAM PORT_RAM OVL`.
+   - **`run_bizhawk.sh`:** sets `SaveStateCompressionLevelNormal = 6`.
+   - **Docs:** Running Walkthrough Steps 27–33, the TAS plan, the Planning Doc (splitter item, fixes), TAS Progress, and the status section of `docs/Overlay Data Reset.md`.
+   - **Scratchpad helpers:** `ck.sh` (its date is now Nov 3, and its TAS-plan edit is done in Python), `rl.sh`, `stagex.py`, `cover.py`, `deflate.py`.
+
+4. Errors and fixes:
+   - **ps2sdk field names:** the struct uses `waitType`/`waitId`/`wakeupCount`.
+   - **`mts_new.h` not found:** worked around with raw offsets. `MTS_TASK` is 32 bytes, not the 36 I first assumed.
+   - **The SPU lock wasn't semaphore 1:** it's semaphore 33. Semaphore 1 is newlib's.
+   - **`ck.sh` and `/`:** its `sed` broke on a `/` in the text. Fixed by using Python.
+   - **`RECOMP_ENTRY` printf:** declaring `printf` conflicted with the existing prototype; the declaration was removed.
+   - **`build.py` picked up the generated `s10a`:** it compiled the generated C and `.s` files ("INCLUDE_ASM func too small"). Fixed by moving the stubs to `obj_ps2/stage_split` and putting all of `s10a.c` under `MGS_PORT` with no pragmas.
+   - **`s08b` code end:** a rodata word looked like `jr ra`. The code now ends at the first referenced address past the last frame setup.
+   - **Shared emulated stack:** a speculative change that moved the desync without fixing it, so it was reverted. The user criticized the slow approach.
+   - **Redux screenshot run:** timed out (interpreter too slow at loop 38k), so screenshots aren't usable that deep.
+
+5. Problem Solving:
+   - **Progress today:** 35,095 → 37,813 → 38,579 → 39,732 → 45,078 → 47,499, which is 0:25:21.89 in `s10a`.
+   - **Open desync at 47,499:**
+     - In loop 47,498 the PS1's Wolf enters state 0 (Work+1748) and draws 3 (her `RandU(4)` at line 64 of `9E1C`, then `9A4C`, then `RandU(16)` at line 195). The port's Wolf doesn't.
+     - Equal at the loop's start: Wolf's Work, her TARGETs at +1628/+1632, the actor lists, the `s10a` data, and the resident globals apart from noise. Message lists are inconclusive.
+     - The `ram_diff` noise: pointers to port code, sound, OT tags, stacks, `jimaku_work`, `MemorySystems`/`which_buffer` parity, GM_Camera's high halves, and `padbuf` (overwritten by the raw pads).
+     - Next candidates: Snake's Work and the rifle-sight actor at 47,497–47,498.
+   - **Wolf's Work (2,676 bytes):**
+     - PS1 `Act` address 0x800D6C50; the port version lives in `s10a_800D6ABC.inc` as `G_s10a_rc_800D6C50`.
+     - +2008 is set to `RandU(2)+1` whenever `GV_Time & 63 == 0`.
+     - +2176 is an index set in `DBD54` from `RandU(4096) % work[2044]`.
+
+6. All user messages:
+   - "Let's use save states where we can, and start from the beginning where we have to. Now, as for the deadlock, let's investigate this further. What is the root cause? Is it related to how the port is structured, or the harness, or the HAL?"
+   - "What application is this run using?"
+   - "Are there any other deeper issues like this that are plain as day?"
+   - "Yes"
+   - "Commit"
+   - "Follow these instructions until 13 pm..." (interrupted), then "Follow these instructions until 12 pm or until the TAS reaches 100%, whichever comes first. I want you to keep working on fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Try to choose the easiest solutions possible when issues arise, using the Ponytail philosophy where available, and use your best judgement. If there's a large issue that arises, notify me and I'll see to it. After each desync is fixed, update docs and then commit before continuing."
+   - "How viable would it be to have a memory dump for every frame of the TAS? ... smarter way to store a dump."
+   - "Yes, let's go ahead with that. The port will still have to run from the start, but it runs much faster in PCSX2 with unlimited speed anyways."
+   - "To clarify the time limits I keep giving you: they're not hard cut off points where you need to drop everything. Instead, finish the task you're working on at that point and don't start another."
+   - "Update all the docs and conversation trackers"
+   - "Take a look at the stages and estimate how much decomp work needs to be done. Are there any patterns of code or data that can be reused to ease the process?"
+   - "Alright, proceed with #3. After that, make a commit and proceed with the TAS testing as before until 2:30 pm"
+   - "I'm stopping you for a second. Are you applying the Ponytail philosophy while solving this issue? It seems like we're really dancing around this slowly trying to find the solution. After you answer this question, proceed"
+   - "To think about: is the Ponytail philosophy part of your rules, and are you applying it at all times? Continue after answering this question"
+
+7. Pending Tasks:
+   - Desync at loop 47,499 (0:25:21.89, `s10a`) is unresolved. The 2:30 PM window has essentially ended. The final report to the user, with a status summary, hasn't been given yet.
+   - Later: link the remaining unsplit stages (`s11b`, `s11h`, `s15a`, `s17a`, `s18a`, `s19a`) with `stage_split.py`, and the split-but-unlinked ones with `mips2c.py`, as the TAS reaches them.
+   - Confirm the console opening hang is gone, on hardware.
+
+8. Current Work:
+   - **Last commit:** `34566527b`, "TAS: the PS1's tick for game logic (Wolf's rand burn); whole-RAM diff tools; 47,499 still open", at 2:21 PM.
+   - **Commit contents:** the tick table, `Port_GameTick`, the RAM-diff tools, `actor_list.lua`, the reverted shared stack (`RECOMP_RETURN` kept as a plain return), and docs Step 33. Both matching builds pass (80 and 2 OK).
+   - **TAS:** still desyncs at 47,499 with port seed 501d9992 against PS1 0502f419.
+   - **What was ruled out:** Wolf's own state matches at the start of loop 47,498, so her switch to state 0 is driven by something outside her Work.
+
+9. Optional Next Step:
+   - The 2:30 PM limit has been reached, and the user said to "finish the task you're working on at that point and don't start another." The next step is to report to the user: the state at 47,499 (0:25:21.89), what was ruled out, and the suggested next diagnostic (diff Snake's and the rifle sight's Work at 47,497–47,498 with `work_dump.lua`/`ram_diff.py`).
+   - After that, continue the 47,499 investigation only if the user asks.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/6f19c49a-11ea-4540-940b-56bfc27d47c8.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Continue until 4:30 pm or until the TAS reaches 100%, whichever comes first.
+Keep fixing the desync issues. Continue unprompted by me and continue to update docs such as the Claude conversation, the running walkthrough, and the TAS docs. Choose the simplest solutions possible when issues arise, using the Ponytail philosophy where applicable, and use your best judgement. If there’s a large issue that arises, notify me and I’ll see to it. After each desync is fixed, update docs and then commit before continuing.
+
+- tool `Bash`: Check time and list dump tools
+
+- tool `Bash`: Find writes to Wolf state field
+
+- tool `Bash`: Read Wolf state function head
+
+- tool `Bash`: Look at state setter and its callers
+
+- tool `Bash`: Find other writes to state field
+
+## Claude
+
+Tracing which function sets Wolf's state to 0 in loop 47,498; checking the candidates (`DCA7C`, `DAE04`, `D9790`, `D991C`).
+
+- tool `Bash`: Read state writes in DCA7C and DAE04
+
+- tool `Bash`: Check existing PS1 dumps
+
+- tool `Bash`: Locate Wolf's Work in PS1 RAM dump
+
+- tool `Bash`: Read Wolf state 6 handler
+
+- tool `Bash`: Read D9790 and 9E1C tail
+
+- tool `Bash`: Find calls setting state 0
+
+## Claude
+
+Narrowed it to two call sites in Wolf's state function that can set state 0; reading them now.
+
+- tool `Bash`: Read the two state-0 call sites
+
+- tool `Bash`: More state-0 sources and 9E1C callers
+
+- tool `Bash`: Read D9790 state-0 site and DAAAC
+
+- tool `Bash`: See dump loop end and write-hook usage
+
+- tool `Bash`: Watch PS1 writes to Wolf's state
+
+- tool `Bash`: Find PS1 rand addresses
+
+## Claude
+
+The PS1's Wolf stays in state 6 through loop 47,498, so my earlier "state 0" guess was wrong. Next I'm logging the PS1's `rand` callers in that loop to see where the 3 extra draws come from.
+
+- tool `Bash`: Log PS1 rand callers at 47497-47498
+
+- tool `Bash`: Check BizHawk log for callback errors
+
+- tool `Bash`: Retry exec callback with System Bus scope
+
+- tool `Bash`: Guard scopes call and check errors
+
+- tool `Bash`: Rerun exec watch
+
+- tool `Bash`: Drop failed watch scripts, recall dump usage
+
+- tool `Bash`: Check how port RAM dump is requested
+
+- tool `Bash`: See where port reads the dump request
+
+- tool `Bash`: Dump RAM at 47499 on PS1 and port
+
+- tool `Bash`: Diff Wolf's Work at 47499
+
+- tool `Bash`: Find port's Wolf act symbol
+
+- tool `Bash`: Diff Wolf's Work at 47499
+
+## Claude
+
+Wolf's Work differs in only two fields at 47,499: +2008 (1 vs 2) and +2012 (11 vs 22), both random-derived. Finding what writes them.
+
+- tool `Bash`: Find writers of Wolf +2008/+2012
+
+- tool `Bash`: Read +2008/+2012 logic in Wolf act
+
+- tool `Bash`: Read D712C and PS1 values at 47498
+
+- tool `Bash`: Log port rand callers 47486-47498
+
+- tool `Bash`: Recall steps.py usage
+
+- tool `Bash`: Find steps.py in scratchpad
+
+- tool `Bash`: Count PS1 vs port draws per loop
+
+## Claude
+
+Both sides make 255 draws in loop 47,488, but the blink draw lands at a different position in that loop. Adding a temporary print of the seed at Wolf's blink draw in the port.
+
+- tool `Bash`: Back up Wolf act, find rand seed name
+
+- tool `Bash`: Read HAL rand
+
+- tool `Bash`: Mark Wolf's blink draw in port
+
+- tool `Bash`: Find blink's position among port draws
+
+- tool `Bash`: Order of draws and blink
+
+- tool `Bash`: Parities of PS1 draws in loop 47488
+
+- tool `Bash`: Show parities near the burn end
+
+- tool `Bash`: PS1 draws in trace segment 47490
+
+## Claude
+
+On the PS1, Wolf's first act seems to run one loop after the port's, so the PS1 skips the GV_Time&63 blink draw. Checking when Wolf appears in the PS1's actor lists.
+
+- tool `Bash`: PS1 actor lists at 47487-47489
+
+## Claude
+
+On the PS1, Wolf and the other stage actors are created during loop 47,488 but don't act until 47,489. Looking at how the port handles stage-load completion.
+
+- tool `Bash`: Find load-end handling in replay
+
+- tool `Bash`: Read load-end sync logic
+
+- tool `Bash`: Read loader hooks in replay
+
+- tool `Bash`: Read loader.c port hooks
+
+- tool `Bash`: Find where stage actors are made
+
+- tool `Bash`: Read gamed.c load completion
+
+- tool `Bash`: Add PS1 seed at scenario start
+
+- tool `Bash`: Replay with scenario seed fix
+
+## Claude
+
+Still desyncs at the same spot. Checking whether the load-end loop's draws now match.
+
+- tool `Bash`: Check load-end seed messages
+
+- tool `Bash`: Seed messages near the s10a load
+
+- tool `Bash`: Debug scenario seed hook
+
+- tool `Bash`: Inspect PS1 tick table near 47488
+
+- tool `Bash`: Test tick hypothesis at 47488
+
+- tool `Bash`: Restore table, view tick writer
+
+- tool `Bash`: Add tick override to trace_to_pads
+
+- tool `Bash`: Regenerate tables and compare
+
+## Claude
+
+The override puts 90359 at loop 47,488 and every other table is unchanged. The scenario-seed hook made no difference (the seeds already matched), so I'm reverting it.
+
+- tool `Bash`: Revert hook, install ticks table
+
+## Claude
+
+Next: docs and a commit for this fix. Checking my doc-update helper first.
+
+- tool `Bash`: View doc helper and current doc mentions
+

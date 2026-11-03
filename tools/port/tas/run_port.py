@@ -36,6 +36,7 @@ REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 TRACE = os.path.join(REPO, "obj_ps2", "tas_trace.log")
 PCSX2_RUN = os.path.join(REPO, "..", "silent-hill-1-ps2-port", "tools", "port", "pcsx2_run.py")
 SHOTS = os.path.join(REPO, "obj_ps2", "shots")
+OFFSCREEN = os.path.join(REPO, "tools", "port", "offscreen")
 REDUX = os.path.expanduser("~/emu/pcsx-redux/PCSX-Redux-HEAD-x86_64.AppImage")
 BIOS = os.path.expanduser("~/emu/bizhawk-1.11.4/Firmware/ps-10j.bin")
 DISC1 = os.path.expanduser("~/emu/mgs-integral/disc1.cue")
@@ -48,7 +49,7 @@ def redux(tables, t):
         open(os.path.join(SHOTS, "card%d.mcd" % (i + 1)), "wb").write(cards[i * 131072:(i + 1) * 131072])
     env = dict(os.environ, TAS_DIR=tables, TAS_LAST=str(t + 1), TAS_SHOT=str(t), TAS_SHOT_DIR=SHOTS,
                TAS_OUT=os.path.join(SHOTS, "redux_trace.log"))
-    return subprocess.Popen([REDUX, "-no-ui", "-debugger", "-run", "-noupdate", "-safe", "-interpreter", "-fastboot",
+    return subprocess.Popen([OFFSCREEN, REDUX, "-no-ui", "-debugger", "-run", "-noupdate", "-safe", "-interpreter", "-fastboot",
                              "-bios=" + BIOS, "-memcard1=" + os.path.join(SHOTS, "card1.mcd"),
                              "-memcard2=" + os.path.join(SHOTS, "card2.mcd"), "-iso=" + DISC1,
                              "-dofile=" + os.path.join(REPO, "tools", "port", "tas", "redux_replay.lua")],
@@ -167,8 +168,11 @@ def main():
     ap.add_argument("--ignore", action="append", default=[])
     ap.add_argument("--no-link", action="store_true")
     ap.add_argument("--no-shots", action="store_true")
+    ap.add_argument("--show", action="store_true", help="the emulator windows on the desktop")
     ap.add_argument("--shot", type=int, default=0)
     a = ap.parse_args()
+    if a.show:
+        os.environ["MGS_SHOW"] = "1"
     rules = parse_ignore(a.ignore)
     tables = os.path.expanduser(a.tables)
 
@@ -198,7 +202,7 @@ def main():
     if os.path.exists(TRACE):
         os.remove(TRACE)
     log = open(os.path.join(REPO, "obj_ps2", "run_port.log"), "w")
-    run = subprocess.Popen([sys.executable, "-u", PCSX2_RUN, os.path.join(REPO, "obj_ps2", "mgs_ps2.iso"),
+    run = subprocess.Popen([OFFSCREEN, sys.executable, "-u", PCSX2_RUN, os.path.join(REPO, "obj_ps2", "mgs_ps2.iso"),
                             "--seconds", str(a.seconds), "--stall", "15"], stdout=log, stderr=subprocess.STDOUT)
     first, ignored_first, last_t, desync, buf, f = {}, {}, -1, None, "", None
     try:

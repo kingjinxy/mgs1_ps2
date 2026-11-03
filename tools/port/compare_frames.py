@@ -35,6 +35,7 @@ ISO = os.path.join(OUT, "mgs_ps2.iso")
 CUE = os.path.join(REPO, "ps1-original", "Metal Gear Solid - Integral (Japan, Asia) (En,Ja)",
                    "Metal Gear Solid - Integral (Japan, Asia) (En,Ja) (Disc 1).chd")
 DUCKSTATION = os.path.expanduser("~/Downloads/DuckStation-x64.AppImage")
+OFFSCREEN = os.path.join(REPO, "tools", "port", "offscreen")
 PCSX2_RUN = os.path.join(REPO, "..", "silent-hill-1-ps2-port", "tools", "port", "pcsx2_run.py")
 sys.path.insert(0, os.path.join(REPO, "..", "silent-hill-1-ps2-port", "tools", "port", "gdb"))
 import warp_sweep  # noqa: E402  (DuckStation settings patching: GDB server, unlimited speed, muted)
@@ -44,7 +45,7 @@ def capture_ps1(frames, stage):
     backup = warp_sweep.patch_settings()
     ds = None
     try:
-        ds = subprocess.Popen([DUCKSTATION, "-batch", "-fastboot", "-nofullscreen", "--", CUE],
+        ds = subprocess.Popen([OFFSCREEN, DUCKSTATION, "-batch", "-fastboot", "-nofullscreen", "--", CUE],
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL,
                               start_new_session=True)  # own process group: the AppImage doesn't forward signals
         if not warp_sweep.wait_port(2345, 30):
@@ -74,7 +75,7 @@ def run_ps2(frames, live, stage):
     else:
         open(path, "w").write(" ".join("replay=%d" % f for f in frames) + "\n")
     try:
-        out = subprocess.run([sys.executable, PCSX2_RUN, "--seconds", "600", "--until", "capture: all frames done", ISO],
+        out = subprocess.run([OFFSCREEN, sys.executable, PCSX2_RUN, "--seconds", "600", "--until", "capture: all frames done", ISO],
                              capture_output=True, text=True).stdout
     finally:
         os.remove(path)
@@ -160,9 +161,12 @@ def main():
     ap.add_argument("--frames", required=True)
     ap.add_argument("--stage", default="opening")
     ap.add_argument("--live", action="store_true", help="the port's own frames instead of a replay")
+    ap.add_argument("--show", action="store_true", help="the emulator windows on the desktop")
     ap.add_argument("--skip-ps1", action="store_true", help="reuse the DuckStation captures")
     ap.add_argument("--skip-ps2", action="store_true", help="reuse the PCSX2 captures")
     args = ap.parse_args()
+    if args.show:
+        os.environ["MGS_SHOW"] = "1"
     frames = sorted(int(x) for x in args.frames.split(","))
     os.makedirs(CAP, exist_ok=True)
     if not args.skip_ps1:

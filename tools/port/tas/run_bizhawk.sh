@@ -1,6 +1,6 @@
 #!/bin/sh
 # Plays the MGS Integral TAS in BizHawk 1.11.4 under 32-bit Wine, with the sync-check Lua script loaded.
-# Usage: run_bizhawk.sh [script.lua]   (default: synccheck.lua next to this file)
+# Usage: run_bizhawk.sh [script.lua]   (default: synccheck.lua next to this file). MGS_SHOW=1 shows the window.
 # Setup (docs/TAS Testing Plan.md, Phase 1): BizHawk 1.11.4 in ~/emu/bizhawk-1.11.4, Wine prefix ~/emu/wine-bizhawk,
 # discs as cue/bin in ~/emu/mgs-integral, and in ~/emu/tas the movie (mgs.bk2) and mgs.xml from this folder.
 # Logs go to ~/emu/tas/<script>.log.
@@ -34,7 +34,7 @@ EOF
 LOG=$TAS/$(basename "$LUA" .lua).log   # written by the Lua script; ends with END at the movie's last frame
 rm -f "$LOG"
 cd "$BH" || exit 1
-WINEPREFIX=~/emu/wine-bizhawk WINEDEBUG=-all wine EmuHawk.exe \
+WINEPREFIX=~/emu/wine-bizhawk WINEDEBUG=-all "$HERE/../offscreen" wine EmuHawk.exe \
     "--movie=$(winpath "$TAS/mgs.bk2")" "$(winpath "$TAS/mgs.xml")" >"$TAS/emuhawk.log" 2>&1 &
 PID=$!
 

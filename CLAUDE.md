@@ -58,6 +58,8 @@ Add `--variant=vr_exe` for `SLPM_862.49`. The PSY-Q toolchain is `../psyq_sdk`. 
 
 ## Emulator testing
 
+- **Windows are invisible by default** (`tools/port/offscreen`, Xvfb). `--show` on `run_port.py` and `compare_frames.py`,
+  or `MGS_SHOW=1 tools/port/tas/run_bizhawk.sh`, puts them on the desktop for that run.
 - **PCSX2 uses the software GS renderer** (`PCSX2.ini` `[EmuCore/GS] Renderer = 13`), enforced by
   any run script. The hardware renderer's host-GPU load distorts performance measurements. Measure
   frame rates in emulated time.

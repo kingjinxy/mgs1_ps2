@@ -1,0 +1,9 @@
+#!/bin/bash
+# Runs a command on its own invisible X display, so emulator windows can't appear or take focus.
+# MGS_SHOW=1 (run_port.py and compare_frames.py: --show) runs it on the desktop instead.
+# exec keeps the PID for callers that kill it; -terminate ends Xvfb with its last client.
+[ -n "$MGS_SHOW" ] && exec "$@"
+fifo=$(mktemp -u); mkfifo "$fifo"
+Xvfb -displayfd 3 -screen 0 1920x1200x24 -nolisten tcp -terminate 3>"$fifo" >/dev/null 2>&1 &
+read -r n <"$fifo"; rm -f "$fifo"
+exec env -u WAYLAND_DISPLAY DISPLAY=":$n" GDK_BACKEND=x11 QT_QPA_PLATFORM=xcb "$@"

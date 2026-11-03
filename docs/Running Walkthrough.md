@@ -890,3 +890,5 @@ The TLB miss at s05a_800E00EC reads RAM at 8 and 12 (8, 0x340, 0, 0). The pad di
 `s07a` wasn't linked in; its 7 literal pointers are now symbols. In sync to loop 24,704 (0:13:15.64).
 
 The seed at 24,704 was the codec static a loop early, gated like the signal bars. `s05a_800E1F0C` read 0xE5C through NULL; the PS1 value is 0x8C960024. In sync to loop 27,191 (0:14:34.37). `s08b` is still a stub overlay.
+
+Emulator windows now run on an invisible Xvfb display by default (`tools/port/offscreen`); `--show` or `MGS_SHOW=1` shows them.

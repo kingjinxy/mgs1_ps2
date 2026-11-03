@@ -6572,6 +6572,87 @@ Each commit contains only the new plan. In MGS1 I also committed the updated `Cl
 
 ## User
 
+One of the things on my long term plan for the MGS1 PS2 port is to allow for voice, menu, and subtitle language options. We can make a better estimate later when I have all the different versions of the game, but I want you to estimate how much space the game would take up if we had it on a PS2 DVD. Assume that we do everything we can to save space (e.g. no duplicated FMVs between languages because only the audio differs, no duplicated game assets because we use only one disc). Prompt me for any further clarification needed.
+
+## Claude
+
+I'll start by measuring what's on your disc images and how the port packs them, so the estimate rests on real numbers.
+
+- tool `Bash`: Survey disc images, game data files and planning notes
+
+- tool `Bash`: Search docs and tools for FMV and voice handling
+
+- tool `Bash`: List files and sizes on both PS1 disc images
+
+## Claude
+
+The file tables are in. Next I'm classifying every sector (video, audio or data) and measuring how much is shared between the discs, because that decides how much really needs to be stored.
+
+- tool `Bash`: Classify sector types and measure cross-disc duplication
+
+- tool `Bash`: Locate the DEMO and VOX stream format in the decomp
+
+- tool `Bash`: Read the stream chunk header handling
+
+- tool `Bash`: Dump stream headers and inspect the VR disc image
+
+- tool `Bash`: Walk DEMO and VOX chunks and list VR disc files
+
+- tool `Bash`: Measure unique VR disc data against discs 1 and 2
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+**Estimate: a six-language disc would be about 4.0–4.9 GB uncompressed, or about 4.4–5.3 GB with the VR disc.** That straddles the 4.7 GB limit of a single-layer DVD. With lossless compression it fits comfortably, at about 3.1–3.8 GB including VR. Dual-layer (8.5 GB) fits every case.
+
+This assumes six voice languages (Japanese, English, French, German, Italian, Spanish). That list is from my memory of the releases, not checked.
+
+## What I measured
+This is Integral's unique data, with sectors deduplicated across discs 1 and 2 and the padding files dropped:
+
+| Data | Size | Separate copy per language? |
+|---|---|---|
+| `DEMO.DAT` (cutscenes) | 442 MB | Mostly: the audio, not the animation |
+| `VOX.DAT` (codec and in-game voice) | 289 MB | Nearly all |
+| `ZMOVIE.STR` video | 166 MB | No, if the video has no burned-in text |
+| `ZMOVIE.STR` audio | 27 MB | Yes |
+| `STAGE.DIR` | 56 MB | Only the text inside it |
+| `RADIO.DAT` | 13 MB | Yes |
+| `BRF.DAT` + `FACE.DAT` + executable | 9 MB | Partly |
+| **Total** | **1.00 GB** | |
+
+Those two discs take up 1.46 GB as raw images, so deduplication alone saves about a third of that.
+
+The VR disc adds about **360 MB** of new data, almost all of it its own movies (323 MB) and stages (35 MB).
+
+## Per-language cost
+Each extra voice language adds about **600–775 MB**, which is my estimate rather than a measurement. It's made up of `VOX.DAT`, `RADIO.DAT`, movie audio and text, plus 60–100% of `DEMO.DAT`. That wide `DEMO.DAT` range is the biggest uncertainty, because my attempt to parse the audio out of it failed.
+
+| Voice languages | Uncompressed | Compressed | Uncompressed + VR |
+|---|---|---|---|
+| 2 | 1.6–1.8 GB | 1.2–1.3 GB | 2.0–2.1 GB |
+| 4 | 2.8–3.3 GB | 2.1–2.5 GB | 3.2–3.7 GB |
+| 6 | 4.0–4.9 GB | 2.9–3.6 GB | 4.4–5.3 GB |
+
+- **Compression:** the compressed column uses about 0.72× the uncompressed size, based on zlib samples of 0.62–0.79 for `DEMO.DAT` and `VOX.DAT`. It adds a decompression cost while streaming, which hasn't been tested on the EE. The VR movies only add about 200 MB in the compressed case, because that video mostly doesn't shrink as far.
+- **Menu and subtitle-only languages:** these are nearly free, likely a few MB each, unless the text is baked into images.
+
+## What could move the estimate
+- **Lower:** sharing music and effects would cut the cost a lot, but only if they're stored separately from the voices in `DEMO.DAT`. If they're mixed together, each language needs its own full copy of the audio.
+- **Lower:** re-encoding the speech with a tighter codec would also help, but it risks audio quality and CPU budget.
+- **Higher:** any FMV with burned-in text needs a separate video copy of that section for each language.
+- **Higher:** localized releases may have different cutscene timing, so language files might not line up with one shared set of game logic.
+
+## Questions for you
+1. **Which voice languages do you want?** This is the biggest factor, and I'd also like to know about any subtitle-only languages.
+2. **Should the VR disc content be included?** The Integral VR disc adds about 360 MB, and Western VR Missions may need separate language data.
+3. **What's your target: single-layer, dual-layer, or just a file for Neutrino/USB?** If it's dual-layer or Neutrino, I'd skip compression because 8.5 GB fits everything uncompressed. If it's single-layer with six languages, compression is effectively required.
+
+## User
+
 In this folder I have a TAS for MGS1: "/home/alex/Downloads/submission5139". I believe this could greatly assist in automated testing of the game. Create a plan to use it with our remake and check it against a PS1 emulator.
 
 - tool `Bash`: Inspect TAS submission files
@@ -15189,4 +15270,58 @@ That run hit my time limit, probably because BizHawk was using the same machine.
 - tool `Bash`: Wait for recording, then rerun alone
 
 - tool `Bash`: Check window setup, apply fix, commit, check s08b
+
+- tool `PushNotification`: 
+
+## Claude
+
+I stopped early, at about 6:40 PM, because the TAS has hit a large issue that needs your decision. It's in sync to **loop 27,191 (0:14:34.37), 16.73%**, up from 13.04% this session. Everything is committed, the docs are up to date, and the main matching build passes (80 OK).
+
+## The blocker: `s08b`
+The next stage's overlay isn't in the port: it still has **122 assembly stubs and 260 hardcoded addresses**. `s03d` needed about 21 functions, and `s05a` and `s07a` only needed pointer tables, so this is much bigger than anything so far. It's mechanical work, but too large to fit in the remaining 50 minutes, and you asked me to flag anything this size.
+
+**Your decision:** should I decompile `s08b` next? I recommend yes: the TAS can't progress without it, and it's also needed for normal play.
+
+## Fixed this stretch
+| In sync to loop | Movie time | % | Fix |
+|---:|---:|---:|---|
+| 22,669 | 0:12:12.48 | 14.02% | Tank's right tread reads an uninitialized value; the port now reproduces the PS1's |
+| 23,572 | 0:12:39.38 | 14.53% | NULL read in `m1e1sold.c`; button release lost on two-update loops |
+| 24,704 | 0:13:15.64 | 15.23% | `s07a` linked in |
+| 27,191 | 0:14:34.37 | 16.73% | Codec static follows the PS1's seed (visual only); NULL read at 0xE5C |
+
+- **Shortcut removed:** the tread fix explains the mystery draws, so the seed resync at 20,980 is gone.
+- **Still open:** the deadlock near loop 6,668, which I reproduced but didn't solve. The kernel's idle loop shows every thread blocked, so it needs its own investigation. It appears to depend on code layout, so any new build could trigger it, and it may also explain the intermittent hang at 11,520.
+- **Last run:** it predates the final 0xE5C fix, so I haven't confirmed that site is clear.
+
+## Keeping the emulator windows out of your way
+Yes, an invisible virtual display can do this, and it doesn't change how the emulators behave:
+
+- **Xvfb:** each emulator gets a private invisible screen, so no window can appear on your desktop or take focus. PCSX2 uses the software renderer, BizHawk runs under Wine, and DuckStation stays on its software renderer, so none of them should need your GPU. Screenshots and frame dumps should still work, but I haven't tested it on these three.
+- **Setup:** your session is Wayland and Xvfb isn't installed. Run `sudo apt install xvfb`, and I'll change the run scripts to launch through `xvfb-run` and test all three.
+- **Downside:** you won't be able to watch a run live unless I add a switch to show the window for that run.
+
+Minimizing wouldn't help as much, because Wayland doesn't let apps reliably minimize themselves, and windows could still appear and take focus on launch.
+
+## User
+
+Is there a map name associated with s08b?
+
+## Claude
+
+I don't know of an official map name for `s08b`; the game uses these stage codes internally, and I haven't found a name in this repo. It looks like the **Cyborg Ninja fight, in the Nuke Building B2 lab area** (the corridor outside Otacon's lab).
+
+The evidence is that its source includes `source/overlays/s08b/animal/ninja/ninja.c`. It also comes right after `s07a` and `s08a`, and the TAS reaches it at about 0:14:34, which fits that point in the game's order. The ninja file is solid, but the location is my inference from memory of the game, not something I've confirmed. A frame from the TAS at that loop would confirm it.
+
+## User
+
+As for Xvfb, I've installed it. Change the scripts to run through that, but also add a switch to show the window for a specific run. By default the windows should be invisible.
+
+- tool `Bash`: Find every emulator launch site
+
+- tool `Bash`: Inspect the PCSX2 launcher and process handling
+
+- tool `Bash`: Add offscreen wrapper and test BizHawk and PCSX2
+
+- tool `Bash`: Finish switch, smoke test, commit
 

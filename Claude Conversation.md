@@ -15776,3 +15776,21 @@ That trace was taken before my last translator fixes, and `D4ED0` is translated,
 
 - tool `Bash`: Commit; find the reseed and draw
 
+## Claude
+
+The raw `rand` hook triggered the deadlock again. I'll use the ring-buffer version instead, which worked last time, and look for the reseed's caller.
+
+- tool `Bash`: Ring-log rand and srand around 27,232
+
+- tool `Bash`: Context of srand and draw caller
+
+- tool `Bash`: Log port's lip counter vs the timeline
+
+- tool `Bash`: Hold counter on held loops; rerun
+
+## Claude
+
+**Loop 29,057 (0:15:36.67), 17.93%**, about 1,800 loops into the Ninja fight. Committing.
+
+- tool `Bash`: Commit; log draws at 29,057
+

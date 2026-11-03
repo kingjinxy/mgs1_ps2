@@ -236,6 +236,11 @@ void Port_TasStrCounter(int* counter)
             {
                 *counter = recorded << 2;
             }
+            else if ((unsigned int)GV_Time + 2 < size_mgs_tas_timeline / 8 &&
+                     (int)read_u32(mgs_tas_timeline + (GV_Time + 2) * 8 + 4) >= 0 && last > 0)
+            {
+                *counter = last; /* a loop the PS1's field_30 held, with a move after it (27,231's lip sync) */
+            }
             last = *counter;
         }
     }

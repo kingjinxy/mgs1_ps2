@@ -1218,3 +1218,13 @@ It now tries disc 1, then disc 2 (s10a regenerates unchanged). Then `stage_split
 
 In sync from 100,000 to 101,734 (0:54:00.52, s15a), the rand seed.
 
+**101,734 (0:54:00.52, s15a), open.** A single `NewSpark` draw (spark.c's `InitRandamTable`) happens at 101,728 on the PS1 and at
+101,730 in the port: a bullet hits 2 loops later. Bullet Works dumped on both sides (port printf in bullet.c's Act; on the PS1 a
+scratch BizHawk script scanning RAM for the Act pointer 0x80075DD4 at actor +8, in 4 KB `readbyterange` chunks: one call over
+1.4 MB returned nothing). Field offsets on the PS1: pos 0x110, hitpos 0x118, step 0x120, hit_dist 0x138, dist 0x13C. Every
+bullet fired from 101,693 on (the shooter is `s15a_800CB2F8`'s actor, every 5 loops, with `s15a_800CB24C`'s 4-draw spread)
+starts about 20 units off and points slightly differently (step z -155 against -166, ...), and some hit different surfaces
+(hit_dist 22,620 against 20,272). The rand seed matches all along, so the spread draws are the same: the shooter's own
+position and aim differ in the port, from before 101,690. Next: dump that actor's Work on both sides, going back to find
+when it starts to differ.
+

@@ -21860,3 +21860,249 @@ The swap works: disc 2 is found, "THIS IS DISC 2!!", s13a loads, and the run sta
 
 - tool `Bash`: Matching builds and full replay
 
+- tool `Bash`: Document, archive, commit
+
+## Claude
+
+Automatic disc switching works: the replay now goes through the disc 1 → 2 change and stays in sync to **loop 97,879 (0:51:47.37, s14e)**, up from 95,874.
+
+On the `change` screen, the port now swaps to the other disc file as soon as the screen waits for the tray to open, with no player action. The rest of the screen runs normally: it waits for START (the TAS presses it), checks the disc, and prints `THIS IS DISC 2!!`. Then s13a loads. I hooked the swap to that screen rather than to the "stop drive" command, because the demo-select, opening and abst screens also send that command. The swap function's comment notes it goes away once every file is on one DVD.
+
+Matching builds pass (80 and 2 OK) and a full replay from the start reaches the same loop. It's committed in 90aeb101c, with the walkthrough (Step 51), the Planning Doc entry and `Claude Conversation.md` updated.
+
+The next desync is at 97,879 in s14e: Snake's position is slightly off on one axis. s13a also loads with "stage binary 4B1F is not linked in", which may be related; I haven't looked yet. The only TLB miss left is still the s11h cutscene shadow that reads a freed parent, which only affects drawing.
+
+## User
+
+Continue as before until 6:30 PM
+
+## Claude
+
+Continuing until 6:30. First, the unlinked stage binary 4B1F that s13a loads.
+
+- tool `Bash`: Which stage binary is 4B1F
+
+## Claude
+
+It's s14e (left out: "no source for source/overlays/s14e/s14e_800D8470.c").
+
+- tool `Bash`: Inspect the missing s14e source
+
+- tool `Bash`: How s14e_800D8470 is built
+
+## Claude
+
+s14e links some asm-only objects (no C file). Counting them and seeing how mips2c could take them.
+
+- tool `Bash`: Count asm-only objects; read survey
+
+- tool `Bash`: INCLUDE_ASM stub format and build rules
+
+- tool `Bash`: How build.py picks .s vs .c
+
+- tool `Bash`: mips2c's stub discovery
+
+- tool `Bash`: Read mips2c main loop
+
+## Claude
+
+mips2c already translates every .s of an overlay into an .inc, so a port-only C file just needs to include those. Running mips2c on s14e.
+
+- tool `Bash`: Translate s14e
+
+## Claude
+
+Now the port-only file for the 30 asm-only objects, and the survey change.
+
+- tool `Bash`: Port-only asm_objects.c and survey mapping
+
+- tool `Bash`: Link s14e and replay
+
+## Claude
+
+Still not linked; asking the survey why.
+
+- tool `Bash`: Survey s14e directly
+
+## Claude
+
+57 literal addresses now. Listing them.
+
+- tool `Bash`: List s14e literal addresses
+
+- tool `Bash`: stage_split.py purpose and outputs
+
+- tool `Bash`: Symbolize s14e data literals
+
+- tool `Bash`: Survey after symbolizing
+
+## Claude
+
+Only the stage table's 25 remain. s11a's table used the `CHARA_*` names; looking at both.
+
+- tool `Bash`: s14e stage table vs s11a's
+
+## Claude
+
+Rewriting it with the commented `CHARA_*`/`DEMO_*` macros, as s11a's, and letting the matching build check.
+
+- tool `Bash`: Use CHARA macros in s14e table
+
+## Claude
+
+They're in `source/include/charalst.h` (my path was wrong). Checking the ones s14e uses aren't `?`.
+
+- tool `Bash`: Check macros; matching builds
+
+- tool `Bash`: Matching build errors
+
+- tool `Bash`: Why zako14_data fails
+
+## Claude
+
+The declaration check was fooled by the names appearing elsewhere in the file. Adding the missing declarations directly.
+
+- tool `Bash`: Declare names; matching builds
+
+- tool `Bash`: Where the declarations landed
+
+## Claude
+
+Both passes inserted after a recomp include deep in the file. Moving the declarations after `game/game.h`.
+
+- tool `Bash`: Relocate declarations
+
+- tool `Bash`: Matching builds after s14e edits
+
+- tool `Bash`: Compiler message
+
+- tool `Bash`: The later definitions
+
+- tool `Bash`: Fix const types; rebuild matching
+
+- tool `Bash`: Linker error for s14e
+
+## Claude
+
+Linking s14e into the port: the matching build fails because `CHARA_FOG` names `NewFog`, but s14e's fog is one of the asm-only objects (`s14e_800D8604`). Using that symbol for this one entry.
+
+- tool `Bash`: Fog entry by symbol; matching builds
+
+## Claude
+
+Matching builds pass (80 and 2). Now linking s14e into the port and replaying.
+
+- tool `Bash`: Port replay with s14e
+
+## Claude
+
+In sync to **101,236 (0:53:40.90, s15a)**. The new TLB misses (same 0xC2C/0xBFC pattern) are presumably s14e's commander. Resolving them.
+
+- tool `Bash`: Resolve s14e TLB PCs
+
+- tool `Bash`: ChangePrio in zako14com.c
+
+- tool `Bash`: Guard NULL soldier in s14e commander
+
+## Claude
+
+Also checking which stage 4B3B is.
+
+- tool `Bash`: Identify 4B3B; replay
+
+## Claude
+
+s15a is next and it's one of the unsplit stages, so that's the likely cause. First a full replay from the start, then commit s14e.
+
+- tool `Bash`: Full replay, matching, status
+
+- tool `Bash`: Document and commit s14e
+
+## Claude
+
+Committed. Next s15a, which `stage_split.py` has to read from disc 2; it only knows disc 1. Looking at its disc lookup.
+
+- tool `Bash`: Disc images and stage lookup code
+
+- tool `Bash`: Disc 2 support in stage_split; split s15a
+
+## Claude
+
+s10a regenerates unchanged and s15a splits from disc 2 (274 functions). Matching builds, then the replay.
+
+- tool `Bash`: Matching, then replay with s15a
+
+## Claude
+
+In sync to 101,734 (0:54:00.52). Committing s15a.
+
+- tool `Bash`: Document and commit s15a
+
+- tool `Bash`: Draw counts and callers at 101,734
+
+- tool `Bash`: Rand callers 101,718–101,729
+
+## Claude
+
+On the PS1, `InitRandamTable` runs in loop 101,728; in the port it runs two loops later, at 101,730. Finding its caller.
+
+- tool `Bash`: Who calls InitRandamTable
+
+- tool `Bash`: Spark creation and s15a callers
+
+## Claude
+
+Sparks come from `NewSpark`, which bullet.c calls when a bullet hits. So the bullet fired at 101,723 hits 2 loops later in the port. Looking at how bullet.c decides the hit.
+
+- tool `Bash`: Bullet act and hit logic
+
+- tool `Bash`: Read bullet flight and hit
+
+- tool `Bash`: Bullet symbols in PS1 map
+
+- tool `Bash`: Symbols around bullet.c in PS1 map
+
+- tool `Bash`: Find bullet Act address in PS1 exe
+
+## Claude
+
+PS1 bullet Act is 0x80075DD4. Dumping every live bullet's Work on both sides for loops 101,723–101,730.
+
+- tool `Bash`: Bullet Work layout
+
+- tool `Bash`: Bullet state on both sides
+
+## Claude
+
+The PS1 scan found no bullets, so 0x80075DD4 may not be the Act. Scanning for both addresses NewBulletEx loads.
+
+- tool `Bash`: Rescan PS1 RAM for bullets
+
+## Claude
+
+Probably `readbyterange` on a large range; switching to 4 KB chunks as `ram_dump.lua` does.
+
+- tool `Bash`: Chunked PS1 bullet scan
+
+- tool `Bash`: Inspect the edited script
+
+## Claude
+
+Shell escaping broke the newline; fixing it.
+
+- tool `Bash`: Fix newline and rerun
+
+## Claude
+
+Found them (each Work matches twice; I'll use the rows where the Act is at +8). Locating the fields by the known values (speed 1000, length 30000).
+
+- tool `Bash`: Locate fields in PS1 bullet Work
+
+- tool `Bash`: Dump tail of a PS1 bullet Work
+
+- tool `Bash`: Bullets per loop: PS1 vs port
+
+- tool `Bash`: PS1 bullet vectors
+
+- tool `Bash`: New bullets per loop on both sides
+

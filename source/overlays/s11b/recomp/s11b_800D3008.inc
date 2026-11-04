@@ -1,6 +1,4 @@
 extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
-extern char R_TexSets[] __asm__("TexSets");
-extern char R___bss_obj[] __asm__("__bss_obj");
 extern char R_GV_RandS[] __asm__("GV_RandS");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_s11b_800D25F0[] __asm__("s11b_800D25F0");
@@ -79,9 +77,9 @@ int G_s11b_800D3008(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] + 2000;
     *(int *)((u)r[16] + 1548) = r[2]; CALL(R_GV_RandU);
     r[4] = (u)0 + 2048;
-    r[2] = (u)r[2] + ((int)R_TexSets + 984);
+    r[2] = (u)r[2] + 9000;
     *(int *)((u)r[16] + 1552) = r[2]; CALL(R_GV_RandS);
-    r[2] = (u)r[2] + ((int)R___bss_obj + 2424);
+    r[2] = (u)r[2] + -15000;
     *(int *)((u)r[16] + 1556) = r[2]; goto L800d3328;
     L800d316c:;
     r[2] = *(int *)((u)r[16] + 1492);
@@ -157,7 +155,7 @@ int G_s11b_800D3008(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] + 2000;
     *(int *)((u)r[16] + 1548) = r[2]; CALL(R_GV_RandU);
     r[4] = (u)0 + 2048;
-    r[2] = (u)r[2] + ((int)R_TexSets + 3984);
+    r[2] = (u)r[2] + 12000;
     *(int *)((u)r[16] + 1552) = r[2]; CALL(R_GV_RandS);
     r[2] = (u)r[2] + -2000;
     *(int *)((u)r[16] + 1556) = r[2]; goto L800d3318;

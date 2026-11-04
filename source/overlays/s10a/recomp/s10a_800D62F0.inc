@@ -1,7 +1,6 @@
 extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
 extern char R_GV_Time[] __asm__("GV_Time");
-extern char R_TexSets[] __asm__("TexSets");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_GM_SeSet2[] __asm__("GM_SeSet2");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
@@ -75,7 +74,7 @@ int G_s10a_800D62F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     SWL(((u)r[16] + 63), r[9]);
     SWR(((u)r[16] + 60), r[9]);
     r[2] = *(unsigned short *)((u)r[16] + 58);
-    r[2] = (u)r[2] + ((int)R_TexSets + 1984);
+    r[2] = (u)r[2] + 10000;
     *(short *)((u)r[16] + 58) = r[2];
     r[8] = LWL(((u)r[16] + 59), r[8]);
     r[8] = LWR(((u)r[16] + 56), r[8]);

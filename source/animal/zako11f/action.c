@@ -24,10 +24,14 @@ SVECTOR s11i_800C33C4 = {0, 0, 100, 0};
 SVECTOR s11i_800C33CC = {-1024, 0, 0, 0};
 
 
+extern const char s11i_dword_800D5260[];
+extern const char s11i_aSocombullet_800D524C[];
+extern const char s11i_aFamasbullet_800D5238[];
+
 const char *s11i_dword_800C33D4[3] = {
-    (const char *)0x800D5260,
-    (const char *)0x800D524C,
-    (const char *)0x800D5238
+    s11i_dword_800D5260,
+    s11i_aSocombullet_800D524C,
+    s11i_aFamasbullet_800D5238
 };
 
 void ZAKO11F_PutSound_800CD2C0( Zako11FWork *work );

@@ -1059,3 +1059,34 @@ Now in sync to 76,316 (0:40:10.44, s11b): `STATE_CUT_IN` (0x40) set on the PS1 f
 
 Matching builds 80 and 2 OK after each; no TLB misses. Next desync: 79,264 (0:41:44.05, s11i), the rand seed. s11i is still left out (3 literal addresses).
 
+
+## Step 45: s11i, s11h, and mips2c's constants (Nov 4)
+
+- **79,264 (0:41:44.05, s11i):** s11i was left out for 3 literal addresses: zako11f/action.c's item-name table gave
+  its strings as `0x800D5260` etc. They're now the strings' symbols (`s11i_dword_800D5260`, ...); the matching build
+  still matches and s11i links in.
+- **84,331 (0:44:22.39, s11h):** "stage binary 4AC2 is not linked in": s11h had no source. `stage_split.py s11h`,
+  `mips2c.py s11h 0x800C3208` (235 functions, no warnings).
+- **84,553 (0:44:30.28):** the PS1 fired a Hind bullet (bullet.c + `AN_HeavyFlash`, 5 draws) 3 loops before the port.
+  The fire routine (`s11h_800DA02C`) fires every 3rd loop, but skips when its aim vector, a column of the body's world
+  matrix, has length 0. The port's matrix was noise (scale 29136, -350, 0, 2649 loop to loop). A PS1 RAM dump at
+  84,551/84,552 (`ram_dump.lua`; the Hind's Work found by its Act pointer) gave a scale of ~620 and Y ≈ 2,900; the
+  port's Hind Y position started at 15,578,195. Cause: `mips2c.py` paired `addiu v0, v0, 5000` with a `lui v0, 0x800B`
+  from elsewhere in the function, making `+ 5000` the address `gap_800B0614 + 3444`. That was a fallback from s08b for a
+  `lui` in a branch's delay slot: any `addiu rX, rX, imm` with |imm| >= 0x1000 took any `lui rX` in the function. It's
+  deleted; the delay-slot case is handled by `pending` (added later). One case still needed it: s11d's
+  `printf("invalid attack mode")`, where the `lui` is in an earlier branch's delay slot and a `j` reaches the printf. A `j`
+  now carries the live `lui` values to its target. Regenerating all seven translated overlays changed only constants that
+  had been read as addresses: s10a 1, s11b 28, s11g 21 (its Hind); s11d none; s11h is new.
+- **The PS1's holds, all of them.** `DG_HikituriFlag` also picks the DG channels (chanl.c: only the screen channel when
+  held) and frame.c's draw and normal-heap clear, but the replay copied the PS1's holds only into `GV_Clock` (Step 42).
+  dgd.c's Act1 now takes the flag from `Port_TasHold()` in replays (the PS1's clock for this loop and the next, from the
+  time table), and the after-the-fact clock flip in `Port_TasTrace` is gone. This was my first guess for 84,553; it
+  didn't change that desync, and the full run stays in sync with it.
+
+Tried and not useful: a `TICK_AT` entry for the s11h load-end loop (the Hind's sound timer reads the tick; reverted).
+
+Open: two TLB misses at loop ~84,515 (s11h, `s11h_800C6490`, DEMO_SHADOW's Act, `demokage.c`): its parent's `objs` is
+0x20, so the parent was freed. Not fixed yet.
+
+Matching builds 80 and 2 OK. In sync from the start to 84,844 (0:44:40.23, s11h): `GM_GameStatus` 0x20 set on the PS1.

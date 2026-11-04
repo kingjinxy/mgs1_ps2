@@ -73,6 +73,13 @@ static void Act1( Work *work )
         }
 
         DG_TickCount += 2;
+#ifdef MGS_PORT
+        {
+            extern int Port_TasHold( void ); /* port/src/tas_replay.c: in TAS replays, the PS1's hold */
+            int hold = Port_TasHold();
+            if ( hold >= 0 ) DG_HikituriFlag = hold;
+        }
+#endif
     }
     else
     {

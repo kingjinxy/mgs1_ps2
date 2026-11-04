@@ -5,10 +5,8 @@ extern char R_GM_PadVibration[] __asm__("GM_PadVibration");
 extern char R_GM_PadVibration2[] __asm__("GM_PadVibration2");
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
 extern char R_GV_Time[] __asm__("GV_Time");
-extern char R_MemorySystems[] __asm__("MemorySystems");
 extern char R_amissile_alive_8009F490[] __asm__("amissile_alive_8009F490");
 extern char R_gUnkCameraStruct2_800B7868[] __asm__("gUnkCameraStruct2_800B7868");
-extern char R_gap_800B0614[] __asm__("gap_800B0614");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_AN_Blast_Rand[] __asm__("AN_Blast_Rand");
 extern char R_DG_PutVector[] __asm__("DG_PutVector");
@@ -47,7 +45,7 @@ int G_s11b_800D89E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[29] + 72) = r[16];
     r[2] = *(int *)((u)r[19] + 1524);
     *(int *)((u)r[19] + 1492) = 0;
-    r[2] = (u)r[2] + ((int)R_gap_800B0614 + 2540);
+    r[2] = (u)r[2] + 4096;
     r[2] = r[2] & 4095;
     *(int *)((u)r[19] + 1524) = r[2];
     r[2] = 0;
@@ -221,7 +219,7 @@ int G_s11b_800D89E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     c = ((r[2] != 0));  if (c) goto L800d8d90;
     r[2] = *(int *)((u)r[19] + 1536);
     *(int *)((u)r[19] + 2364) = r[3];
-    r[2] = (u)r[2] + ((int)R_gap_800B0614 + 3444);
+    r[2] = (u)r[2] + 5000;
     *(int *)((u)r[19] + 1536) = r[2];
     *(int *)((u)r[19] + 1216) = r[2];
     L800d8d90:;
@@ -234,7 +232,7 @@ int G_s11b_800D89E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     c = ((r[2] != r[3]));  if (c) goto L800d8dd0;
     r[2] = *(int *)((u)r[19] + 1536);
     *(int *)((u)r[19] + 2364) = 0;
-    r[2] = (u)r[2] + ((int)R_MemorySystems + 6536);
+    r[2] = (u)r[2] + -5000;
     *(int *)((u)r[19] + 1536) = r[2];
     *(int *)((u)r[19] + 1216) = r[2];
     L800d8dd0:;

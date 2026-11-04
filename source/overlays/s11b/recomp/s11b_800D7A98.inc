@@ -1,7 +1,4 @@
 extern char R_GV_Time[] __asm__("GV_Time");
-extern char R_TexSets[] __asm__("TexSets");
-extern char R___bss_obj[] __asm__("__bss_obj");
-extern char R_gap_800B0614[] __asm__("gap_800B0614");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s11b_dat_800DB220[] __asm__("s11b_dat_800DB220");
 extern char R_GV_RandS[] __asm__("GV_RandS");
@@ -229,7 +226,7 @@ int G_s11b_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = *(int *)((u)r[16] + 1552);
     r[3] = (int)r[3] >> 12;
     *(int *)((u)r[16] + 1556) = r[3];
-    r[2] = (u)r[2] + ((int)R___bss_obj + 2424); goto L800d8418;
+    r[2] = (u)r[2] + -15000; goto L800d8418;
     L800d7e98:;
     r[2] = *(int *)((u)r[16] + 1524);
     r[4] = (u)0 + 2;
@@ -372,7 +369,7 @@ int G_s11b_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[16] + 1556) = r[2];
     r[2] = *(int *)((u)r[16] + 1552);
     r[5] = (u)r[4] + (u)0;
-    r[2] = (u)r[2] + ((int)R_TexSets + 1984);
+    r[2] = (u)r[2] + 10000;
     r[3] = (u)r[2] >> 31;
     r[2] = (u)r[2] + (u)r[3];
     r[2] = (int)r[2] >> 1;
@@ -455,7 +452,7 @@ int G_s11b_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     L800d82a4:;
     r[2] = (int)r[2] >> 12;
     r[4] = *(int *)((u)r[16] + 1524);
-    r[2] = (u)r[2] + ((int)R_gap_800B0614 + 3444);
+    r[2] = (u)r[2] + 5000;
     *(int *)((u)r[16] + 1548) = r[2]; CALL(R_rsin);
     r[3] = (u)r[2] << 1;
     r[3] = (u)r[3] + (u)r[2];
@@ -470,15 +467,15 @@ int G_s11b_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] + 4095;
     L800d82e8:;
     r[2] = (int)r[2] >> 12;
-    r[2] = (u)r[2] + ((int)R_gap_800B0614 + 3444);
+    r[2] = (u)r[2] + 5000;
     *(int *)((u)r[16] + 1556) = r[2];
     r[2] = (int)r[2] < 4000;
     c = ((r[2] == 0));  if (c) goto L800d830c;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R_TexSets + 4984); goto L800d8418;
+    r[2] = (u)r[2] + 13000; goto L800d8418;
     L800d830c:;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R_TexSets + 1984); goto L800d8418;
+    r[2] = (u)r[2] + 10000; goto L800d8418;
     L800d8318:;
     r[2] = 0x66660000;
     r[4] = *(int *)((u)r[16] + 1072);
@@ -536,7 +533,7 @@ int G_s11b_800D7A98(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = *(int *)((u)r[16] + 1552);
     r[3] = (int)r[3] >> 12;
     *(int *)((u)r[16] + 1556) = r[3];
-    r[2] = (u)r[2] + ((int)R_TexSets + 1984);
+    r[2] = (u)r[2] + 10000;
     L800d8418:;
     r[3] = (u)r[2] >> 31;
     r[2] = (u)r[2] + (u)r[3];

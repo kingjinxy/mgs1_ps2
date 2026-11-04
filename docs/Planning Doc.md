@@ -186,7 +186,7 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
       some `r` variants
 - [ ] A splitter for the overlays the decomp hasn't split (s10a, s11b, s11h, s15a, s17a, s18a, s19a are on the
       TAS route): `tools/port/stage_split.py` (2026-11-03) takes the stage binary from the disc into functions and
-      data in the PS1's layout, then mips2c.py. Done: s10a. Next: the others as the TAS reaches them
+      data in the PS1's layout, then mips2c.py. Done: s10a, s11b, s11h. Next: the others as the TAS reaches them
 - [ ] First playable path: dock (s00a) → heliport (s01a) are both linked in. Dock gameplay reached (2026-10-27);
       heliport not yet
 - [ ] Reduce the overlays' memory use by deduplicating: each overlay now has its own copy of every shared
@@ -275,7 +275,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 79,264 (0:41:44.05; was 12,101, 0:06:42.1,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 84,844 (0:44:40.23; was 12,101, 0:06:42.1,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair,
       `lit_mdl.c`'s dropped model initializer,
       chafgrnd.c's NULL `RECT` (`prim.c`).

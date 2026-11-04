@@ -1,5 +1,4 @@
 extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
-extern char R_gap_800B788C[] __asm__("gap_800B788C");
 extern char R_s11b_dat_800DAAD4[] __asm__("s11b_dat_800DAAD4");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_GV_RandS[] __asm__("GV_RandS");
@@ -98,7 +97,7 @@ int G_s11b_800C9EE4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = *(unsigned short *)((u)r[16] + 40);
     r[4] = lo_;
     c = (((int)r[4] >= 0)); r[3] = (u)r[2] + (u)r[3]; if (c) goto L800ca0a8;
-    r[4] = (u)r[4] + ((int)R_gap_800B788C + 1907);
+    r[4] = (u)r[4] + 32767;
     L800ca0a8:;
     r[2] = (int)r[4] >> 15;
     r[2] = (u)r[3] + (u)r[2];

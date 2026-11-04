@@ -64,7 +64,7 @@ static unsigned char* mgs_tas_ticks; /* host:tas_ticks.bin: the PS1's mts tick p
 static unsigned int   size_mgs_tas_ticks;
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
-extern int          DG_UnDrawFrameCount, DG_HikituriFlag, GM_LoadComplete;
+extern int          DG_UnDrawFrameCount, GM_LoadComplete;
 extern short        linkvarbuf[96];
 extern unsigned char GV_PadData[64], pad_800C14E0[16], GM_PlayerPosition[8];
 extern int          GM_PlayerStatus;
@@ -265,6 +265,26 @@ void Port_TasStrCounter(int* counter)
 }
 
 /** -1: no TAS timing (the caller decides); 0/1: whether the PS1 had started its stream by this loop. */
+/** dgd.c's Act1, for DG_HikituriFlag: 1 if the PS1 holds the next loop (doesn't flip GV_Clock, as its time table
+ * shows), else 0; -1 outside replays. The flag also picks dgd.c's DG channels and frame.c's draw and heap clear, so
+ * the PS1's holds are copied there, not only in GV_Clock (loop 59,444), and the port's own (the host's pace) don't
+ * happen (77,697, 84,552: s11h's Hind read a world matrix the screen channel hadn't made). BizHawk's mid-loop samples
+ * are fixed in the table (trace_to_pads.py, compare_trace.py's fix_clock). */
+int Port_TasHold(void)
+{
+#ifdef MGS_TAS
+    const unsigned char* r = time_record();
+    const unsigned char* n = time_record_at(GV_Time + 1);
+    if (!mgs_tas_time)
+    {
+        return -1;
+    }
+    return r && n && read_u32(r + 20) == read_u32(n + 20);
+#else
+    return -1;
+#endif
+}
+
 int Port_TasStreamMayStart(void)
 {
 #ifdef MGS_TAS
@@ -821,17 +841,6 @@ void Port_TasTrace(void)
     {
         Display_RequestDump(); /* the frame this loop draws, at its display */
         printf("tas: frame of loop %d dumped\n", GV_Time);
-    }
-    {
-        /* DG_HikituriFlag: a machine behind STATE_NOSLOW's 2-vblank pace (dgd.c) doesn't flip GV_Clock in this loop.
-           The PS1's holds are copied (loop 59,444), the port's own undone (its pace is the host's: 77,697).
-           BizHawk's mid-loop samples are fixed in the table (trace_to_pads.py, compare_trace.py's fix_clock) */
-        const unsigned char* p = time_record_at(GV_Time - 1);
-        const unsigned char* r = time_record();
-        if (p && r && (read_u32(p + 20) == read_u32(r + 20)) != (DG_HikituriFlag != 0))
-        {
-            GV_Clock ^= 1;
-        }
     }
     if (prev_request && !GM_LoadRequest && s_Loads < s_Ps1Loads)
     {

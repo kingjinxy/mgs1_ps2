@@ -1,4 +1,3 @@
-extern char R_DG_PaletteBuffer[] __asm__("DG_PaletteBuffer");
 extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
@@ -102,7 +101,7 @@ int G_s11b_800CBBAC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (int)r[3] >> 12;
     r[2] = (u)r[2] << 12;
     r[2] = (u)r[20] - (u)r[2];
-    r[2] = (u)r[2] + ((int)R_DG_PaletteBuffer + 2640);
+    r[2] = (u)r[2] + 17000;
     *(short *)((u)r[17] + 27310) = r[2];
     r[11] = LWL(((u)r[17] + 27311), r[11]);
     r[11] = LWR(((u)r[17] + 27308), r[11]);

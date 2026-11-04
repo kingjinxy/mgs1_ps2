@@ -1,5 +1,4 @@
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
-extern char R__overlay_bss_objend[] __asm__("_overlay_bss_objend");
 extern char R_s11g_dword_800DD240[] __asm__("s11g_dword_800DD240");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_rcos[] __asm__("rcos");
@@ -37,7 +36,7 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     r[2] = (u)0 + 10000; goto L800d9748;
     L800d9730:;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 24396);
+    r[2] = (u)r[2] + 13000;
     r[3] = (u)r[2] >> 31;
     r[2] = (u)r[2] + (u)r[3];
     r[2] = (int)r[2] >> 1;
@@ -74,7 +73,7 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     L800d97d0:;
     r[2] = (int)r[2] >> 12;
     r[4] = *(int *)((u)r[16] + 1524);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 20396);
+    r[2] = (u)r[2] + 9000;
     *(int *)((u)r[16] + 1548) = r[2]; CALL(R_rsin);
     r[3] = (u)r[2] << 1;
     r[3] = (u)r[3] + (u)r[2];
@@ -89,7 +88,7 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     r[2] = (u)r[2] + 4095;
     L800d9814:;
     r[2] = (int)r[2] >> 12;
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 20396);
+    r[2] = (u)r[2] + 9000;
     *(int *)((u)r[16] + 1556) = r[2];
     r[2] = (int)r[2] < 4000;
     c = ((r[2] != 0));  if (c) goto L800d9840;
@@ -98,10 +97,10 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     c = ((r[2] == 0));  if (c) goto L800d984c;
     L800d9840:;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 16396); goto L800d9a3c;
+    r[2] = (u)r[2] + 5000; goto L800d9a3c;
     L800d984c:;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 24396); goto L800d9a3c;
+    r[2] = (u)r[2] + 13000; goto L800d9a3c;
     L800d9858:;
     r[2] = *(int *)((u)r[16] + 1508);
     r[2] = (int)r[2] < 10;
@@ -201,10 +200,10 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     c = ((r[2] == 0));  if (c) goto L800d9a30;
     L800d9a24:;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 19396); goto L800d9a3c;
+    r[2] = (u)r[2] + 8000; goto L800d9a3c;
     L800d9a30:;
     r[2] = *(int *)((u)r[16] + 1552);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 26396);
+    r[2] = (u)r[2] + 15000;
     L800d9a3c:;
     r[3] = (u)r[2] >> 31;
     r[2] = (u)r[2] + (u)r[3];
@@ -244,7 +243,7 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     L800d9ae4:;
     r[2] = (int)r[2] >> 12;
     r[4] = *(int *)((u)r[16] + 1524);
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 20396);
+    r[2] = (u)r[2] + 9000;
     *(int *)((u)r[16] + 1548) = r[2];
     r[2] = (u)0 + 13000;
     *(int *)((u)r[16] + 1552) = r[2]; CALL(R_rsin);
@@ -261,7 +260,7 @@ int G_s11g_hind_800D96B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     r[2] = (u)r[2] + 4095;
     L800d9b30:;
     r[2] = (int)r[2] >> 12;
-    r[2] = (u)r[2] + ((int)R__overlay_bss_objend + 20396);
+    r[2] = (u)r[2] + 9000;
     *(int *)((u)r[16] + 1556) = r[2]; goto L800d9b70;
     L800d9b40:;
     r[2] = *(int *)((u)r[16] + 1508);

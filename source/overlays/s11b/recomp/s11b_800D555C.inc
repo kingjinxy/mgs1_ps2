@@ -10,7 +10,6 @@ extern char R_GM_PadVibration[] __asm__("GM_PadVibration");
 extern char R_GM_PadVibration2[] __asm__("GM_PadVibration2");
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
 extern char R_GV_Time[] __asm__("GV_Time");
-extern char R_TexSets[] __asm__("TexSets");
 extern char R_gUnkCameraStruct2_800B7868[] __asm__("gUnkCameraStruct2_800B7868");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s11b_dat_800DB1A8[] __asm__("s11b_dat_800DB1A8");
@@ -362,7 +361,7 @@ int G_s11b_800D555C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] + 3000;
     *(int *)((u)r[18] + 1548) = r[2];
     r[2] = *(int *)((u)r[18] + 1552);
-    r[3] = (u)r[3] + ((int)R_TexSets + 1984);
+    r[3] = (u)r[3] + 10000;
     *(int *)((u)r[18] + 1556) = r[3];
     r[2] = (u)r[2] + 3000;
     *(int *)((u)r[18] + 1552) = r[2]; CALL(R_GM_SeSet2);

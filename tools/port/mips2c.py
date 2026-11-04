@@ -84,11 +84,6 @@ def translate(path, seg=None):
         def wr(n, e): return '' if n == 0 else 'r[%d] = %s;' % (n, e)
         lo = si
         ea = None
-        # the lui can be in a branch's delay slot, before the branch's target in another path
-        if o == 9 and rs == rt and rs not in hi and abs(si) >= 0x1000:
-            for k, x in enumerate(ws):
-                if x >> 16 == 0x3C00 | rt and isaddr(x & 0xffff):
-                    hi[rs] = x & 0xffff
         if o in (8, 9) or o >= 32 or o == 13:
             if rs not in hi and (rs, si) in seen and o >= 32:
                 hi[rs] = seen[rs, si]  # the same address on another path
@@ -229,6 +224,10 @@ def translate(path, seg=None):
                 lines.append('t = r[%d]; %s %s' % (rs, ins(i + 1), ctrl.replace('(u)r[%d]' % rs, '(u)t').replace('())r[%d]' % rs, '())t')))
             else:
                 lines.append('%s %s' % (ins(i + 1), ctrl))
+            if o == 2:
+                # a j carries the lui values live here to its target (s11d 800CAB90: a lui in an earlier branch's
+                # delay slot, then j to the printf that uses it)
+                pending.setdefault(int(ctrl[6:-1], 16), {}).update(hi)
             if o == 3 or (o == 0 and fn == 9):
                 # a call clobbers the caller-saved registers: a lui before it doesn't pair with an addiu after
                 # (s07b 800C8CCC: v0 = GV_VecDir2() + 0x800 was taken for an address 0x800B0800)

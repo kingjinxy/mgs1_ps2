@@ -1,6 +1,5 @@
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
 extern char R_s11b_dat_800DB124[] __asm__("s11b_dat_800DB124");
-extern char R_s11b_dat_800E0040[] __asm__("s11b_dat_800E0040");
 extern char R_GV_RandS[] __asm__("GV_RandS");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_s11b_800D2998[] __asm__("s11b_800D2998");
@@ -78,7 +77,7 @@ int G_s11b_800D2CE8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] + (u)r[3];
     *(int *)((u)r[16] + 1548) = r[2]; CALL(R_GV_RandU);
     r[4] = (u)0 + 4096;
-    r[2] = (u)r[2] + ((int)R_s11b_dat_800E0040 + 19936);
+    r[2] = (u)r[2] + 20000;
     *(int *)((u)r[16] + 1552) = r[2]; CALL(R_GV_RandU);
     r[3] = (u)0 + 8000; goto L800d2e7c;
     L800d2e50:;

@@ -65,6 +65,8 @@ Add `--variant=vr_exe` for `SLPM_862.49`. The PSY-Q toolchain is `../psyq_sdk`. 
   frame rates in emulated time. Exception (user, 2026-11-04): TAS sync runs (`run_port.py`) use the null
   renderer, as they only compare game state; `--sw` falls back to software, and `--shot` always uses it.
   Never the hardware renderer: the VM has no real GPU.
+- **Parallel PCSX2 runs only when they save time** (`run_port.py --dir`, up to 3 at once): e.g. testing several
+  hypotheses or log windows for one desync. A single question gets a single run.
 - **A PCSX2 stall is a crash.** 15 emulated seconds without a new frame (at most 15 real seconds
   when emulation is slower): close PCSX2 and end the run, rather than waiting out a long timeout.
 - **Never dismiss "TLB Miss" lines in PCSX2.** PCSX2 lets user-mode reads of unmapped addresses

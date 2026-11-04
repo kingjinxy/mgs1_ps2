@@ -417,6 +417,10 @@ static void Act(Work *work)
         printf("exec scenario\n");
         load_request = GM_LoadRequest;
         GM_LoadRequest = 0;
+#ifdef MGS_PORT
+        extern void Port_TasScenario(void); /* port/src/tas_replay.c: the PS1's loop number from here in replays */
+        Port_TasScenario();
+#endif
 
         if ((load_request & 0x20) != 0)
         {

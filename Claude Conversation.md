@@ -18851,3 +18851,969 @@ Updating `mips2c.py`'s docstring (its struct-by-value note is out of date) and t
 
 - tool `Bash`: Commit the new doc and doc updates
 
+## Claude
+
+A quote in my shell command broke it. Retrying with a heredoc.
+
+- tool `Bash`: Commit the new doc and doc updates
+
+- tool `Bash`: Confirm the new doc is in the commit
+
+## Claude
+
+Written for: engineers (or later Claude sessions) adding the next stage overlay to the port.
+
+I've written the new doc, [docs/Stage Overlay Translation.md](docs/Stage%20Overlay%20Translation.md), and brought the other docs up to date. It's all committed as `791a68f08` (the TLB fixes were already in `01d426d06`), and the working tree is clean.
+
+**What the new doc covers**
+- **The tools:** what `stage_split.py`, `mips2c.py` and `recomp.h` each produce, and the two commands to run.
+- **Splitting from the disc:** how code, functions, data pointers and jump tables are recognised, and why the data keeps its PS1 layout.
+- **Translating:** what the generated C looks like, with a sample, plus symbol naming, branches, address tracking, GTE instructions and the call-rename table.
+- **Linking:** the data reset on each stage load, and the matching build and TAS replay as the checks.
+- **ABI rules where translated code meets C:** 12 arguments, no tail calls, and wrappers for structs passed by value in either direction. Each rule notes the desync or crash that taught it.
+- **PS1 behaviours to look for:** reads through NULL, pointer tags in bit 31, and the game tick. Includes the rule to collect and fix every TLB-miss PC.
+- **Debugging and the next stage:** the PS1/port comparison tools, then a 5-step checklist for adding the next unsplit stage, ending with a check that regenerating reproduces the committed files.
+
+**Other doc updates**
+- **Planning Doc:** a "Fixed" entry for the TLB-miss work, pointing to the new doc.
+- **Running Walkthrough:** Step 39, a short note about the new doc.
+- **`mips2c.py`:** the docstring said struct-by-value arguments weren't handled. It now describes the wrappers and points to the doc.
+- **TAS Progress:** unchanged, since the sync point is still loop 56,569 (0:29:45.27).
+- **`Claude Conversation.md`:** regenerated, with no lines removed.
+
+## User
+
+<command-name>/clear</command-name>
+            <command-message>clear</command-message>
+            <command-args></command-args>
+
+## User
+
+What are our next steps as far as TAS syncing? Are there any other systemic issues that might pop up?
+
+## Claude
+
+I'll check the current state in the docs.
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/docs; ls; grep -n "^## Step" "Running Walkthrough.md" | tail -5; awk '/^## Step/{s=NR} END{}{a[NR]=$0} END{for(i=s;i<=NR;i++)pr
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/docs; sed -n 960,1000p "Running Walkthrough.md"; tail -60 "TAS Progress.md"; sed -n 185,192p "Planning Doc.md"; sed -n 277,288p
+
+- tool `Bash`: cd /home/alex/Documents/mgs1_ps2/docs; grep -n -i "56,569\|s11b\|s11h\|s15a\|next" "TAS Testing Plan.md" | head -20; grep -n -i "shortcut" ../port -r --include=
+
+## Claude
+
+The next step is the desync at **loop 56,569 (0:29:45.27, `s09a`)**: the rand seed differs (port `5851331b`, PS1 `66ed992a`). Nobody has looked at it yet. That run had no TLB misses, so this is probably a logic or timing difference rather than a bad pointer read. We'd diagnose it the same way as Steps 35–38: find the first loop where the seed draws differ, log which actor made the extra or missing `rand()`, and compare its Work with a `work_dump.lua` dump from the PS1.
+
+**After that, the route ahead:**
+- **Stages split but not linked yet** need the mips2c.py pass `s07b` got: `s11a`, `s11g`, `s11d`, `s11i`, `s11e`, `s14e`, `s15c`, `d18a`, `s19b`. Each one is usually a quick sync jump once it's in.
+- **Stages the decomp hasn't split** need the `stage_split.py` path `s10a` took: `s11b`, `s11h`, `s15a`, `s17a`, `s18a`, `s19a`. `docs/Stage Overlay Translation.md` has the checklist for these.
+
+**Systemic issues likely to come back**, from what we've found so far:
+
+1. **Struct-by-value calls through function pointers.** I checked every C function that translated code calls directly (Step 38). Calls the other way, from C through an unprototyped pointer into translated code like `NewDemoKage`, only show up when something crashes. Each new translated stage can bring more. A scan of each stage's stage table and actor tables for struct parameters would catch them before the replay does.
+2. **PS1 address tricks besides bit 31.** The HZD tag was one case: code relies on KUSEG mirroring KSEG0, compares against literal `0x80xxxxxx` addresses, or tests a pointer's sign. Grepping for `< 0` tests on pointers, `& 0x7FFFFFFF` and `| 0x80000000` across the decomp and the translated stages would catch these in one pass.
+3. **The uncached-mirror floor tag.** If something writes a floor while its tagged pointer is still in use, the read can be stale. The `SyncDCache` covers the tag itself but not later moves. Elevator stages are where this would show.
+4. **NULL reads that depend on the PS1 BIOS bytes at address 0.** These are silent on PCSX2 unless the TLB Miss lines are checked, so check the run log for new TLB misses at every new stage.
+5. **mips2c.py translation bugs.** We've had a dropped `lui` at a call, the 8- and then 12-argument limits, and sibling calls. Any function with more than 12 arguments, or a new instruction pattern in a fresh stage, could break it again.
+6. **Shortcuts that could expire:**
+   - the seed resync after the `s05a` reload, where the source of the 5 PS1 draws was never found;
+   - `tas_replay.c:511`, where the port enters that state on its own loop;
+   - the drive and stream timing models fitted to the PS1.
+
+   Any of these can drift on a later stage load.
+7. **Memory.** Every overlay has its own copy of the shared code. As more stages get linked, this could run out of EE RAM before the deduplication task (Planning Doc) is done.
+
+I'd start with the 56,569 seed diagnosis, then run the scans in items 1 and 2 before linking the next batch of stages, since they're cheap and cover whole classes of bugs. Want me to start on 56,569?
+
+## User
+
+Explain the rand seed differing. My initial assumption is that the game simply sets one random seed at startup.
+
+## Claude
+
+Your assumption is right. The seed is set once at startup and not reset after that. What we compare isn't that starting value, though. It's the generator's current state.
+
+PSY-Q's `rand()` is a linear congruential generator, so each call does roughly `seed = seed * 1103515245 + 12345` and returns some bits of the result. The "seed" is the generator's whole state, and every call to `rand()` moves it one step. Both sides start from the same value, so at any loop they should hold the same number only if they've called `rand()` the same number of times since boot.
+
+That makes it a useful sync check. The trace records the seed each loop on the PS1 and in the port, and a mismatch means the port called `rand()` more or fewer times than the PS1 by that loop. It's usually one of these:
+
+- **An actor exists on one side only.** Step 35 was this: an extra bullet-hit smoke puff whose anime script draws a random number.
+- **An actor took a different branch.** In Step 36, a hit read as a floor in the port, so it made smoke instead of the PS1's two sparks, and the two effects draw a different number of times.
+- **A draw happened on a different loop.** That's a timing difference, for example something ending a loop early. A few of the earlier stream and lip sync fixes were this kind.
+
+So a different seed at loop 56,569 means the two games already behaved differently by then, at least as far as random numbers go. The seed is often the first value to show it, because Snake's position and the other state we trace may not differ until later. The cause is somewhere in loop 56,568: some actor drew a different number of times there. To find it, log each `rand()` caller in that loop on both sides and see which one is extra or missing.
+
+The earlier rows that mention "follows the PS1's seed" (the codec signal bars and static) were draws whose count depends on rendering or timing that the port can't match exactly. For those, the TAS replay copies the PS1's draws instead of trying to reproduce them.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>Bash</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Q1: "What are our next steps as far as TAS syncing? Are there any other systemic issues that might pop up?" (answered).
+   - Q2 (current): "Explain the rand seed differing. My initial assumption is that the game simply sets one random seed at startup." (still to answer, as text).
+
+2. Key Technical Concepts:
+   - The MGS1 PS2 port of the mgs_reversing decomp.
+   - TAS replay of TASVideos #5139, compared each loop (GV_Time) with the PS1 trace (compare_trace.py, run_port.py).
+   - The PS1 rand() is an LCG: one seed at startup, after which every call advances the state. The trace logs the seed each loop, so it's the most sensitive check: an extra or missing rand() call by any actor (e.g. AN_RecoilSmoke's anime script 0xFE) shows up there first.
+   - Past seed desyncs came from:
+     - extra actors from a wrong bullet speed (Step 35);
+     - the HZD wall/floor tag (Step 36);
+     - codec signal bar and static draws;
+     - 5 unexplained PS1 draws after the s05a reload (shortcut resync).
+   - mips2c.py and stage_split.py for stage overlays; recomp.h's CALL passes 12 arguments; the HZD_IS_WALL uncached-mirror tag.
+
+3. Files and Code Sections (read only, no edits):
+   - docs/Running Walkthrough.md: Steps 35–39 (latest is Step 39, the stage overlay write-up).
+   - docs/TAS Progress.md: current loop 56,569 (0:29:45.27), 34.17%.
+   - docs/TAS Testing Plan.md line 367: "Next desync: rand seed at loop 56,569 (0:29:45.27, `s09a`): port 5851331b, PS1 66ed992a. The run to it has no TLB misses."
+   - docs/Planning Doc.md:
+     - Stages still to translate: unsplit s11b, s11h, s15a, s17a, s18a, s19a; split but not linked s11a, s11g, s11d, s11i, s11e, s14e, s15c, d18a, s19b.
+   - port/src/tas_replay.c:511 has a shortcut comment.
+
+4. Errors and fixes: none in this session.
+
+5. Problem Solving: in the answer to Q1 I gave these systemic risks:
+   - struct-by-value calls through function pointers;
+   - other PS1 address and bit-31 tricks;
+   - staleness through the uncached mirror;
+   - NULL/BIOS-byte reads;
+   - mips2c.py bugs;
+   - shortcuts that could expire (the s05a seed resync, tas_replay.c:511, the drive/stream models);
+   - memory from duplicated overlays.
+
+   I recommended diagnosing 56,569 first, then grep scans for struct-by-value calls and pointer tags.
+
+6. All user messages:
+   - "What are our next steps as far as TAS syncing? Are there any other systemic issues that might pop up?"
+   - "Explain the rand seed differing. My initial assumption is that the game simply sets one random seed at startup."
+   - Standing project rules from CLAUDE.md:
+     - Never access tcrf.net.
+     - Web access is GitHub only without asking.
+     - Never PR or push to mgs_reversing.
+     - No pkill -f with a self-matching pattern.
+     - Give TAS loops with their movie timestamp.
+     - Keep docs/Running Walkthrough.md and Claude Conversation.md updated at milestones.
+
+7. Pending Tasks:
+   - Answer Q2.
+   - Then, if the user agrees, diagnose the seed desync at loop 56,569 (0:29:45.27, s09a).
+
+8. Current Work: explaining that the seed is set once but advances with every rand() call. A differing seed means the two sides made a different number or order of draws. It's a symptom, and the cause is whichever actor's draw count differs (an extra or missing actor, a branch taken differently, timing).
+
+9. Optional Next Step: give that explanation in text. Then offer to find the first loop and caller where the draws diverge near 56,569 by logging rand() callers in the port and comparing with PS1 Work dumps.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/8bc93391-f15b-4470-b764-26a7c6ce7091.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Let’s tackle 56,569. Keep in mind all the systemic issues that may arise, and utilize the Ponytail philosophy to help solve issues.
+
+## Claude
+
+I'll start with what the trace tools can show near loop 56,569.
+
+- tool `Bash`: List TAS tools and read testing plan notes
+
+## Claude
+
+The "rand log" counted draws per loop before. I'll check how it's turned on.
+
+- tool `Bash`: Find the rand-logging mechanism
+
+- tool `Bash`: Look up how draws were counted previously
+
+## Claude
+
+First, the two traces around the desync.
+
+- tool `Bash`: Find saved traces and the compare fields
+
+## Claude
+
+No saved port trace, so I'll need a run. First, what the PS1 is doing around 56,569:
+
+- tool `Bash`: Show PS1 trace near loop 56,569
+
+## Claude
+
+Every other field matches here. The seed alone tells me how many draws each side made in loop 56,569 if I step the LCG from the shared seed at 56,568:
+
+- tool `Bash`: Count LCG steps from the shared seed to each side's seed
+
+## Claude
+
+In loop 56,569 the PS1 drew 8 times and the port drew 9. So the port made one extra `rand()` call. Next I need to know who called it. I'll look for the earlier rand log hook.
+
+- tool `Bash`: Find the port's rand definition and logging
+
+- tool `Bash`: Locate where rand is implemented in the port
+
+- tool `Bash`: See how the earlier rand log was done
+
+## Claude
+
+The port's `rand()` comes from the shared HAL. I'll find it and add a temporary caller log that only runs for loop 56,569.
+
+- tool `Bash`: Locate HAL rand implementation
+
+- tool `Bash`: Search the filesystem for the HAL rand source
+
+- tool `Bash`: Find the HAL path from the build files
+
+- tool `Bash`: List port and tool directories
+
+- tool `Bash`: Inspect the HAL directory
+
+- tool `Bash`: Find HAL rand in the SH1 port
+
+- tool `TaskStop`: 
+
+## Claude
+
+I'm still finding where the port's `rand()` is defined. Once I have it, I'll log its callers for loop 56,569 only.
+
+- tool `Bash`: Search Documents for the HAL rand source
+
+- tool `Bash`: Read the HAL rand implementation
+
+## Claude
+
+Found it: the HAL's `rand()` in `psx-to-ps2-HAL/src/libapi_misc.c`. I'll add a temporary flag that logs each caller's return address, and turn it on in `tas_replay.c` for loops 56,568–56,569.
+
+- tool `Bash`: Read the trace hook and how run_port builds
+
+- tool `Bash`: Check how the HAL gets built into the port
+
+## Claude
+
+I'll make the temporary edits: a flag in the HAL `rand()`, switched on in `Port_TasTrace` around the loop.
+
+- tool `Bash`: Read the HAL rand file head
+
+- tool `Bash`: Add temporary rand caller logging
+
+## Claude
+
+Now the run, to loop 56,570, in the background (about 7–10 minutes at the earlier speed).
+
+- tool `Bash`: Replay the TAS in the port to loop 56,570 with rand logging
+
+## Claude
+
+While that runs: on the PS1 side, `actor_list.lua` can list the actors at 56,568 from a checkpoint if the port's extra caller needs a counterpart to compare. I'll wait for the port log first.
+
+- tool `Bash`: Read the PS1 actor-list tool usage
+
+## Claude
+
+I'll get the PS1's actor list at 56,567–56,568 in parallel. It starts from the 56,000 checkpoint, so it's quick.
+
+- tool `Bash`: List the PS1's actors at loops 56,567-56,568
+
+## Claude
+
+The PS1 at 56,568 has snow (`snowarea.c`), Wolf's dogs (`dog.c`), a gas effect, and a new footprint (`asiato.c`) that wasn't there a loop earlier. Waiting for the port run.
+
+- tool `Bash`: Check port run progress
+
+- tool `Bash`: Show the port's current loop
+
+- tool `Bash`: Measure the port's replay rate over a minute
+
+- tool `Bash`: Show the port's current loop
+
+## Claude
+
+The rate is about 30 loops a second, so 56,569 needs about 30 minutes, and my 1,500 s limit is too short. I'll restart the run with a longer limit.
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Check for leftover PCSX2 processes
+
+- tool `Bash`: Rerun the port replay to loop 56,570 with a one-hour limit
+
+## Claude
+
+It's running with the already-linked image (about 30 minutes). Meanwhile I'll look at which of these s09a actors call `rand()`, and whether they're C or translated.
+
+- tool `Bash`: Locate s09a actor sources
+
+- tool `Bash`: List rand draws in s09a actors
+
+## Claude
+
+The dog and snow code draw a lot. The caller log will narrow it down; waiting for the run to finish.
+
+- tool `Bash`: Show the port's current loop
+
+- tool `Monitor`: Wait for the port to reach loop 56,570
+
+## Claude
+
+The run will notify me when it finishes.
+
+- tool `ReadNotifications`: 
+
+## Claude
+
+The run is at about loop 2,000 of 56,570 and needs roughly 30 more minutes. I'll continue when it finishes.
+
+- tool `Bash`: Read run result and rand caller log
+
+- tool `Bash`: Resolve rand caller addresses to functions
+
+- tool `Bash`: Find GV_RandU definition
+
+- tool `Bash`: Read GV_RandU
+
+- tool `Bash`: Log GV_RandU callers and rerun to 56,570
+
+## Claude
+
+That's rerunning with the `GV_RandU` caller and its argument logged (another ~30 minutes). I'll resolve the caller when it finishes.
+
+- tool `Bash`: Resolve GV_RandU callers
+
+## Claude
+
+The extra caller is `s12c_dog_800CB42C` with `GV_RandU(16)`, in Wolf's dog code. I'll read that function.
+
+- tool `Bash`: Find the dog function source
+
+- tool `Bash`: Read the dog action function and its chance-16 caller
+
+- tool `Bash`: Read RAM/work dump tool usage
+
+## Claude
+
+I'll diff the dog's whole Work: the PS1 via `work_dump.lua` (act 800DB458), and the port through a temporary hex dump at the start of the dog's Act. First, the Work size:
+
+- tool `Bash`: Find dog Work struct and Act
+
+- tool `Bash`: Read Work tail and actor creation
+
+- tool `Bash`: Read work_dump output format and dog Act head
+
+## Claude
+
+Both sides dump at the start of each loop. I'll add the port dump inside the dog's Act and run both.
+
+- tool `Bash`: Add a temporary dog Work dump and rerun the port
+
+- tool `Bash`: Dump the PS1 dog Work at loops 56,555-56,569
+
+## Claude
+
+The PS1 dump is in. I'll write the diff script while the port runs.
+
+- tool `Bash`: Write the dog Work diff script
+
+## Claude
+
+The port run (about 30 minutes) will notify me when it finishes.
+
+- tool `Bash`: Diff the dog Work between PS1 and port
+
+## Claude
+
+The dumps look shifted by one loop. The port's values at loop t match the PS1's at t+1, because the two dumps are taken at different points in the loop. I'll compare port[t] with PS1[t+1] instead.
+
+- tool `Bash`: Diff dog Work with a one-loop sampling shift
+
+- tool `Bash`: Count PS1 draws per loop around the desync
+
+- tool `Bash`: Read dog Work layout start
+
+## Claude
+
+Those are in the MOTION_CONTROL array (0x45C, 0x50 each): offset 0x18 of dog 0 and of dog 1. I'll look up that field:
+
+- tool `Bash`: Read MOTION_CONTROL definition
+
+## Claude
+
+Offset 0x18 holds `info1.field_14` (low half) and `info1.time` (high half). In both dogs `field_14` matches but `time` is 1 in the port and 0 on the PS1. I'll see what `time` does in the motion code.
+
+- tool `Bash`: Find uses of MOTION_INFO.time
+
+- tool `Bash`: Read motion code that sets time (is_end)
+
+- tool `Bash`: Print per-loop series of dog fields on both sides
+
+- tool `Bash`: Read the dog Act's per-dog scheduling
+
+- tool `Bash`: Find stage loads before 56,569 on both sides
+
+- tool `Bash`: Read the GV_Time renumbering at a load end
+
+## Claude
+
+Whether this matters depends on whether the dogs act before GM_LoadRequest returns to 0. I'll look at the PS1's s09a load in the trace (GM_LoadRequest is field 12):
+
+- tool `Bash`: Show PS1 load request through the s09a load
+
+- tool `Bash`: Read trace field indices
+
+- tool `Bash`: Find when the PS1's load request clears
+
+- tool `Bash`: Dump the dogs' first 12 Acts in the port
+
+- tool `Bash`: Dump the PS1 dog Work at loops 56,480-56,500
+
+## Claude
+
+On the PS1 the dogs first appear at loop 56,486, the load's end. The port dump will show whether the port's dogs start at the same loop number or earlier. Waiting for that run (about 30 minutes).
+
+- tool `Bash`: Compare the dogs' first loops on both sides
+
+- tool `Bash`: Find where the load request clears and the trace hook runs
+
+- tool `Bash`: Read the two places gamed.c clears the load request
+
+- tool `Bash`: Read gvd.c's hook guard and the PS1 load count
+
+## Claude
+
+Outside a replay `s_Ps1Loads` is 0, so the new hook does nothing there. First I'll remove the temporary logging from all four files, then make the change.
+
+- tool `Bash`: Revert the temporary logging edits
+
+- tool `Bash`: Read the surrounding load helper for placement
+
+## Claude
+
+There's already a related fix for pads: in the load's last loop the port reads the PS1's pads (`s_Ps1LoadEnd - 1`). The new hook gives that loop the PS1's number for everything after the clear:
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/source/game/gamed.c
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+## Claude
+
+Now the matching build (gamed.c is shared with it), then a full replay past 56,569.
+
+- tool `Bash`: Run the matching build regression check
+
+- tool `Bash`: Confirm every matching output is OK
+
+## Claude
+
+All 80 matching outputs are OK. Now the full replay: it stops at the next desync, or at the one-hour limit.
+
+- tool `Bash`: Replay the TAS in the port to the next desync
+
+## Claude
+
+I've found the cause of the 56,569 desync and changed the replay code; a full replay is running now to confirm it. It's the systemic kind you asked me to watch for, not a dog bug.
+
+**Cause:** the replay gives GV_Time the PS1's number at the end of a load. It did that one loop late, at the next loop's trace. The new stage's actors are made in the load's last loop and act straight away, so their first Act saw the port's own loop number (56,322) instead of the PS1's (56,485). s09a's three dogs take turns by `GV_Time % 3`, and 163 % 3 = 1. So the port's dog 0 ended up one update ahead of the PS1's and dog 1 one behind. The PS1 dumps confirm it: the same values, shifted by one update. About 80 loops later a dog animation ended a loop early in the port and rolled `GV_RandU(16)` for its next action. That made 9 draws against the PS1's 8.
+
+**How I traced it:**
+1. I counted LCG steps from the shared seed: the port drew one extra number in that loop.
+2. A temporary log of `rand()` callers showed `GV_RandU(16)` called from `s12c_dog_800CB42C`.
+3. I compared the dogs' Work on both sides and found the same values shifted by one update.
+4. A dump of the dogs' first Acts showed the port's first one ran at loop 56,322, before the renumbering.
+
+**Fix:**
+- [gamed.c:419](source/game/gamed.c#L419) now calls a new hook, `Port_TasLoadEnd`, right where the load request clears. It's inside `#ifdef MGS_PORT`, so the matching build is untouched.
+- The hook sets GV_Time to the PS1's number for the load-end loop, so everything the stage script makes acts under that number.
+- The late renumbering in [tas_replay.c](port/src/tas_replay.c) is gone. `pads_as_ps1` still runs at every load end, so the loop 9,633 fix is kept.
+- The temporary logging is reverted, including in the HAL.
+
+The matching build is clean: all 80 outputs OK.
+
+This change affects every load, not just s09a. Any actor whose first Act depends on GV_Time could have been off in the same way at earlier loads, so the replay is running from the start. It's about 30 minutes to get past 56,569, and longer if it stays in sync. When it finishes I'll report the new first desync and update the Running Walkthrough, TAS Testing Plan and Planning Doc.
+
+- tool `Bash`: Read the replay result
+
+- tool `Bash`: Find the duplicate definition error
+
+## Claude
+
+The name `Port_TasLoadEnd` was already taken by an existing hook in loader.c, so the link failed. I'll look at that one:
+
+- tool `Bash`: Read the existing Port_TasLoadEnd
+
+## Claude
+
+I'll rename mine to `Port_TasScenario` (it runs where the stage script starts).
+
+- tool `Bash`: Rename the new hook and check guards
+
+- tool `Bash`: Check the preprocessor block around the new hook
+
+- tool `Bash`: Move the hook out of the TAS-only block
+
+- tool `Bash`: Replay the TAS in the port to the next desync
+
+## Claude
+
+The first full replay didn't run: my new hook's name was already taken by an existing loader.c hook, so the link failed. I renamed it to `Port_TasScenario` and moved it out of a TAS-only block, so non-TAS port builds still link. The replay has restarted and needs about 30 minutes to get past 56,569. I'll report the result when it finishes.
+
+- tool `Bash`: Read the replay result
+
+## Claude
+
+The 56,569 desync is gone. The replay now runs to loop 57,290 (0:30:06.47, s10a). But a new TLB miss appeared, which the run didn't have before, so I'll check it first:
+
+- tool `Bash`: Locate the TLB miss and its function
+
+- tool `Bash`: Find sub_8004EB74's source
+
+- tool `Bash`: Read sub_8004EB74 and the faulting instruction
+
+- tool `Bash`: Read PS1 low RAM and find prior NULL-read handling
+
+## Claude
+
+On the PS1, the halfword at 0x8 is `0x0008` (the same in every dump), so `dir` is 8, not -1, and the PS1 takes `field_A20 = -3`. I'll follow the style of the earlier NULL guards:
+
+- tool `Bash`: Find existing NULL-read guards in game sources
+
+- tool `Bash`: Show the earlier NULL guard change
+
+## Claude
+
+Same style: an `#ifdef MGS_PORT` guard that gives the PS1's value.
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/source/chara/snake/sna_init.c
+
+## Claude
+
+Now the seed desync at 57,290, 15 loops after the s10a load end. First, the draw counts:
+
+- tool `Bash`: Count draws per loop on both sides around 57,290
+
+## Claude
+
+The port makes 4 extra draws in the loop traced as 57,290, and 5 a loop after that instead of the PS1's 1. I'll log the callers again (with `GV_RandS` too this time), together with the NULL guard:
+
+- tool `Bash`: Log rand callers at 57,288-57,290 and rerun
+
+## Claude
+
+While that runs, the PS1's actor list at 57,288–57,289:
+
+- tool `Bash`: List the PS1's actors at 57,288-57,289
+
+## Claude
+
+The PS1 has Wolf, five rats (`mouse.c`), blood, ripple and the rifle. The port's extra 4 draws a loop could be rats in a different state. The caller log will say.
+
+## User
+
+Are there any other tools I could install to speed up this process?
+
+## Claude
+
+Installing tools won't help much, because emulation time is the bottleneck. Each port replay has to run PCSX2 from boot, about 30 minutes to reach loop 57,000, while linking takes about 30 seconds. The BizHawk side is already fast thanks to the 1,000-loop checkpoints. What would speed things up is changes to how we run the port:
+
+1. **Rand caller log built in permanently, switched on by a host file.** The port already does this for RAM dumps (`host:tas_ramdump.txt`). Each desync would then need one run instead of a rebuild per question. I spent three runs today narrowing the dog bug down step by step; with the log built in, one run would have shown all of it. This is the cheapest gain, about 20 lines, and I'd add it now.
+2. **Faster PCSX2 for sync-only runs.** CLAUDE.md requires the software renderer, but that rule exists to keep performance measurements honest. For runs that only compare traces, a null GS renderer or GS frame skipping could make the replay several times faster. It's a settings change and needs no install. Since it relaxes a standing rule, I'd want your OK first.
+3. **More than one run at a time.** Several PCSX2 instances under Xvfb could test two hypotheses at once, if you have spare cores.
+4. **PCSX2 savestates near the desync: not much help.** A savestate holds the old program, so it's only valid while the code is unchanged, and nearly every iteration changes it.
+5. **A native Linux build of the port: the big one, but not something to install.** The same game code and HAL compiled for x86 would replay thousands of loops a second, so a run would take under a minute. It's a large project, though: the HAL's PS2 graphics, sound and threads would need host versions.
+
+My recommendation: I add option 1 now, and you decide on option 2. The 57,290 caller-log run is still going, and I'll report what it finds.
+
+- tool `Bash`: Resolve the rand callers at 57,288-57,290
+
+- tool `Bash`: Find the source of s10a_800CF88C
+
+- tool `Bash`: Read the translated function's context and calls
+
+- tool `Bash`: Match the draws to mouse.c functions
+
+- tool `Bash`: Read the rat segment and think code
+
+- tool `Bash`: Read the translated rat segment start
+
+## Claude
+
+The translation itself looks faithful. The difference is earlier: in the port the rat is in state 1 (the segment start) at all, and the PS1's isn't. I'll look at what sets state 1:
+
+- tool `Bash`: Read the rat's wait and next-segment states
+
+- tool `Bash`: Dump the PS1 rats' state per loop
+
+- tool `Bash`: Find the GV actor list structures
+
+- tool `Bash`: Read GV_ACT and the actor list layout
+
+## Claude
+
+Rather than walk the lists, I'll print the fields at the top of the translated MouseAct (`a0` is the Work):
+
+- tool `Bash`: Print the port rat state per Act and rerun
+
+## Claude
+
+The run is going, now printing the port's rat state per Act (with GV_PauseLevel) from 57,268 to 57,292, about 30 minutes.
+
+Where things stand:
+- **56,569 is fixed.** The load-end loop now carries the PS1's number (`Port_TasScenario` in gamed.c), and the replay is in sync to 57,290 (0:30:06.47).
+- **A new TLB miss at 57,275 is fixed.** `sub_8004EB74` read Snake's pad pointer while it was NULL; a guard now gives the PS1's RAM value at 8 (`0x0008`).
+- **57,290 is in progress.** A rat in s10a starts its walk segment two loops before the PS1's rat does: its wait counter is 2 ahead. I'm finding out where the port's rat gets its two extra Acts.
+
+- tool `Bash`: Read the port rat state log
+
+- tool `Bash`: Print all five PS1 rats' state
+
+- tool `Bash`: Log the load-end loop's rand callers and rerun
+
+## Claude
+
+While it runs, a note: wolf2.c burns `tick % 256` draws when it's created, using the PS1's tick, so it makes up a large share of the 147. Its position in the loop relative to the rats' first rolls is a likely suspect. The caller log will show the port's order.
+
+- tool `Bash`: Resolve the load-end loop's rand callers in order
+
+- tool `Bash`: Check whether the rand log printed
+
+## Claude
+
+Off by one in my temporary condition: the load-end loop is 57,275, not 57,274. Rerunning with that corrected.
+
+- tool `Bash`: Fix the log loop to 57,275 and rerun
+
+## Claude
+
+I'm rerunning to log the callers in the load-end loop, 57,275 (my first try was off by one loop). About 30 minutes.
+
+- tool `Bash`: Resolve the load-end loop's rand callers in order
+
+- tool `Bash`: Summarize the load-end loop's draws by caller
+
+- tool `Bash`: Check the burn function and the tick override table
+
+- tool `Bash`: Read the PS1 tick samples after both Wolf creations
+
+- tool `Bash`: Check how trace_to_pads.py is run
+
+- tool `Bash`: Add the 57,275 tick override and regenerate tables
+
+## Claude
+
+Now I'll remove all the temporary logging and start a full replay:
+
+- tool `Bash`: Revert all temporary logging
+
+- tool `Bash`: Review the replay diff and start a full replay
+
+- tool `Bash`: Check that the replay is running
+
+## Claude
+
+It's running, but since I started it detached I won't get a notification when it finishes, so I'll set a watch on its PID:
+
+- tool `Monitor`: Wait for the full replay to end
+
+## Claude
+
+While the replay runs, I'll check the matching build, since sna_init.c changed:
+
+- tool `Bash`: Run the matching builds for both variants
+
+- tool `Bash`: Show any non-OK lines of the VR build
+
+## Claude
+
+Both matching builds are OK: 80 outputs for the main build, 2 for the VR one. Waiting for the replay.
+
+- tool `Bash`: Wait for the full replay to end
+
+## Claude
+
+I've set a background watch that will tell me when the full replay ends.
+
+- tool `Bash`: Read the full replay result
+
+- tool `Bash`: Read the progress doc and walkthrough tail
+
+- tool `Bash`: Compute percentages and read planning doc lines
+
+## Claude
+
+Now the doc updates:
+
+- tool `Bash`: Update progress, testing plan, planning doc and walkthrough
+
+## Claude
+
+Now the conversation archive, using the documented procedure:
+
+- tool `Bash`: Rebuild the conversation archive and check for removed lines
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+The replay is now in sync to loop 59,444 (0:31:17.28, 35.93%), up from 56,569 (0:29:45.27). It got there with two fixes and one NULL read; the run has no TLB misses. Both matching builds are OK (80 and 2), and nothing is committed yet.
+
+**1. Loop 56,569: the loop a load ends in had the wrong number.**
+- **Cause:** the port gave GV_Time the PS1's number one loop late, at the next loop's trace. But the stage script makes its actors in the load's last loop, and they act straight away. s09a's three dogs take turns by `GV_Time % 3`. The 163-loop jump left them one turn apart: the port's dog 0 was one update ahead and dog 1 one behind. About 80 loops later a dog's animation ended a loop early and it made an extra `GV_RandU(16)` draw.
+- **Fix:** a new hook, `Port_TasScenario`, called in [gamed.c](source/game/gamed.c) under `MGS_PORT` right where the load request clears, gives GV_Time the PS1's number before the stage script runs. This applies to every load, not just this one.
+
+**2. Loop 57,290: the same tick shortcut as 47,488.**
+- **Cause:** Wolf's s10a creation burns `tick % 256` random draws. The port used the next trace line's tick, which is 2 vertical blanks later than the tick the PS1 actually read, so the port drew 2 more. That moved the rats' wait rolls 2 draws along. The seed resync after the load-end loop hid the extra draws in the trace.
+- **Fix:** a second hand-found entry in `TICK_AT` in [trace_to_pads.py](tools/port/tas/trace_to_pads.py); the tables are regenerated.
+- **Pattern to watch:** both cases were exactly 2 blanks early. If a third shows up, recording the tick at the moment it's read in `trace.lua` would replace these hand-found entries.
+
+**3. NULL read at loop 57,275.** `sub_8004EB74` (Snake's first-person entry) reads through a NULL pad pointer. The PS1 gets `0x0008` from its RAM at address 8, so [sna_init.c](source/chara/snake/sna_init.c) now uses that value under `MGS_PORT`.
+
+**Next desync, at 59,444 (s03b):** GV_Clock, the pads and `DG_UnDrawFrameCount` all differ in the same loop. That looks like a hold, a loop where the port waits differently from the PS1, rather than a random draw.
+
+I've updated the Running Walkthrough (Step 40), the TAS Testing Plan, TAS Progress, the Planning Doc and Claude Conversation.md. All temporary logging is reverted, including in the HAL repo.
+
+Do you want me to commit? I'd also still like to make the rand caller log permanent, switched on by a host file. Today it took about eight replays of 30 minutes each, mostly rebuilding just to move a log window.
+
+## User
+
+Let’s try #1 for now and see how much of a speed up it is. After that, I’m willing to try #2 as well, with the stipulations that you laid out. If we run into issues with the null renderer or frame skipping, we can fall back to the software renderer. I don’t want to use the hardware renderer because the VM has no real GPU access. 
+#3 also seems like it could be helpful, but easy to get wrong. Let’s complete 1 and 2 first, then come back to this.
+
+## Claude
+
+Starting with #1. First, how the existing host-file switches (`tas_ramdump.txt`, `tas_shot.txt`) are read and written:
+
+- tool `Bash`: Read the host-file switches in port and run_port
+
+- tool `Bash`: Read run_port's main flow
+
+- tool `Bash`: Add a rand caller hook to the HAL
+
+- tool `Bash`: Read GV_RandU and GV_RandS
+
+- tool `Bash`: Record GV_RandU/GV_RandS callers under MGS_PORT
+
+## Claude
+
+Now the port side. `Port_RandFrom` has to be defined in every port build, since util.c always sets it; the hook itself is TAS-only:
+
+- tool `Bash`: Add the rand log hook and its host-file switch
+
+## Claude
+
+Now `run_port.py`: the `--rand-log A-B` option, plus a summary at the end. It lists each loop's draws in order by game function, with repeats collapsed and the totals per loop:
+
+- tool `Bash`: Add --rand-log and its report to run_port.py
+
+- tool `Bash`: Test the rand log on a short run
+
+## Claude
+
+Over 10 minutes for 5,812 loops is slower than expected (about 30 loops/s should take about 4 minutes including the link). I'll check where it is:
+
+- tool `Bash`: Check the test run's progress
+
+- tool `Bash`: Read the test run output and port startup lines
+
+- tool `Bash`: Check running processes and file times
+
+- tool `Bash`: Stop the stuck run and check PS1 seeds in the window
+
+## Claude
+
+No draws in that window on the PS1 either, so the window was a bad choice; the empty log is correct. I'll fix the hang (report "no draws" and skip addr2line) and pick a window with draws:
+
+- tool `Bash`: Fix the empty-log hang and find loops with draws
+
+- tool `Bash`: Test the rand log on loops 1,000-1,004 against PS1 counts
+
+## Claude
+
+The counts match the PS1's for all five loops (15, 12, 13, 13, 12). The run took 6 seconds, without a relink. One entry, `?? via Act`, needs a look:
+
+- tool `Bash`: Inspect the unresolved rand draw
+
+## Claude
+
+The draw is a direct `rand()` from `Act` in ripples.c. This libc prints a NULL pointer as `0x0`, not `(nil)`, so my report took it for an address. Fixed:
+
+- tool `Bash`: Treat a 0x0 caller as none and recheck
+
+## Claude
+
+A static `Act` alone is ambiguous across files, so I'll add the source file to each function name:
+
+- tool `Bash`: Add source files to the report's names
+
+- tool `Bash`: Read pcsx2_run.py renderer settings and options
+
+- tool `Bash`: Read how the ini settings are patched and the stall check
+
+- tool `Bash`: Find every PCSX2 launch in run_port.py
+
+- tool `Bash`: Read take_shots
+
+## Claude
+
+The screenshot run calls `run_port.py --shot`, so one rule covers it: software when `--shot` or `--sw` is given, null otherwise.
+
+- tool `Bash`: Add a --renderer option to pcsx2_run.py
+
+- tool `Bash`: Pass the null renderer through the private config
+
+## Claude
+
+The SH1 repo also has uncommitted changes to its CLAUDE.md and a profiles doc. Those aren't mine, so I'm leaving them alone. Now `run_port.py`:
+
+- tool `Bash`: Use the null renderer for sync runs in run_port.py
+
+## Claude
+
+Now the measurement: the same replay to loop 10,000 with each renderer, timed, one after the other. The links are already done, so these are replay times only.
+
+- tool `Bash`: Time a replay to loop 10,000 with null and software renderers
+
+## Claude
+
+The timing comparison is running, to loop 10,000 with the null renderer and then with the software renderer. Each run should take a few minutes. I'll report the speedup when both finish.
+
+- tool `Bash`: Read the timing results
+
+- tool `Bash`: Run the full replay with the null renderer and time it
+
+- tool `Bash`: Record the tools and renderer exception in the docs
+
+## Claude
+
+The pcsx2_run.py diff is larger than my edits, so I'll check whether it includes someone else's changes:
+
+- tool `Bash`: Show diff lines in pcsx2_run.py that aren't mine
+
+## Claude
+
+I've done #1 and #2, and both are in use.
+
+**#1, the built-in rand caller log.** `run_port.py --rand-log A-B` logs every `rand()` draw in loops A to B. At the end of the run it lists them per loop, in order, by game function and source file, with each loop's total. For example:
+
+`rand loop 1003: 13 draws: PrimsRectSet (bubble_s.c) via GV_RandS x2, …, Act (ripples.c)`
+
+- Moving the window needs no relink.
+- A load-end loop is logged under the PS1's loop number, which is the case my hand-set window missed twice at 57,290.
+- Checked against the PS1: loops 1,000–1,004 give 15, 12, 13, 13 and 12 draws, the same counts the PS1's seeds imply.
+- Outside a replay nothing changes: the HAL hook is NULL by default.
+
+**#2, the null renderer for sync runs.** `run_port.py` now runs PCSX2 with its null GS renderer by default. `--sw` falls back to the software renderer, and `--shot` always uses software because frame dumps need real drawing. The hardware renderer is never used. I recorded this exception in CLAUDE.md.
+
+| Run | Null | Software |
+|---|---|---|
+| To loop 10,000 | 37 s | 45 s |
+| Full replay to 59,444 | 211 s, same desync, no TLB misses | — |
+
+**I had the run time wrong.** A full replay takes about 3.5–5 minutes, not 30. My early measurement was taken while a link and a BizHawk run were competing for the machine. So the null renderer saves about 18%, and the larger gain is the shorter debugging loop from #1.
+
+`pcsx2_run.py` is in the SH1 port's repo. That file already had someone else's uncommitted change (per-run private PCSX2 config folders). My edit sits on top of it, and I haven't committed anything there.
+
+I've updated the docs: Running Walkthrough Step 41, which also corrects the timing claim, and the TAS Testing Plan. Nothing is committed in either repo yet.
+
+Should I commit the MGS repo now? It holds today's sync fixes plus these tools. After that, the next step is the loop 59,444 desync, or #3 (several runs in parallel) if you want it first.
+
+## User
+
+Let’s try testing #3. Try running 2 instances at once for a minute to test performance, then try 3 at once. If running more instances in parallel ends up slowing down everything compared to just running them serially, then we’ll abandon this idea.
+
+## Claude
+
+A parallel test needs one change: each instance writes `host:tas_trace.log` next to its ISO, so they would overwrite each other. For a speed test I'll give each instance a copy of the linked ISO in its own scratch folder. Then I'll run each PCSX2 for 60 s and count the loops it reached. First, the cores:
+
+- tool `Bash`: Check cores, memory and ISO size
+
+- tool `Bash`: Run 1, 2 and 3 PCSX2 instances for 60 s each and count loops
+
+## Claude
+
+The scratchpad is on a different filesystem, so the hard links failed. I'll put the instance folders under `obj_ps2/par/` instead, which is the build output folder:
+
+- tool `Bash`: Rerun the 1/2/3-instance test from obj_ps2/par
+
+- tool `Bash`: Remove the test folders and check no PCSX2 is left
+
+## Claude
+
+Running instances in parallel pays off: each instance slows a little, but total throughput rises well above running them one after another.
+
+| Instances | Loops each in 60 s | Total | vs. one instance |
+|---|---|---|---|
+| 1 | 14,144 | 14,144 | 1.00× |
+| 2 | 13,466 / 13,210 | 26,676 | 1.89× |
+| 3 | 11,123 / 11,098 / 11,264 | 33,485 | 2.37× |
+
+Each instance slows by about 5% with two running and about 21% with three. That's far less than the 2× or 3× that would make serial runs as good, so I wouldn't abandon the idea. Three is still clearly better than two. Going past three would hit memory before cores (8 cores, about 7 GB free, 15 GB total), so I'd stop at three.
+
+These runs used the null renderer, each from its own copy of the ISO under `obj_ps2/par/` (since deleted). The 60 seconds include the boot.
+
+**What it would take to use this for real.** `run_port.py` writes to fixed paths: `obj_ps2/tas_trace.log`, `run_port.log` and the `host:` switch files. Two runs at once would overwrite each other. The fix is small: a `--dir` option that runs from its own folder holding a hard link to the linked ISO, which is what this test did by hand. Running with different code changes at the same time would also need separate links, since `link_ps2.py` writes a single image.
+
+Want me to add `--dir` to `run_port.py`? Nothing is committed yet. The MGS repo still holds today's sync fixes plus the #1 and #2 tools, waiting for your go-ahead.
+
+## User
+
+Yes, let’s do this and then commit
+
+## Claude
+
+I'll find every place `run_port.py` uses the fixed `obj_ps2` paths:
+
+- tool `Bash`: List fixed obj_ps2 paths in run_port.py
+
+- tool `Bash`: Add --dir to run_port.py with per-run paths
+
+## Claude
+
+The blanket replacement may have caught the shared cache path too. I'll check it and compile the file properly, since a `global` placed after a use is a compile error that `ast.parse` doesn't report:
+
+- tool `Bash`: Check the cache path and compile run_port.py
+
+- tool `Bash`: Point the shot cache back at the shared folder
+
+## Claude
+
+Now a real test: two `run_port.py` runs at once in their own folders, one with a rand log, to loop 5,000:
+
+- tool `Bash`: Run two replays in parallel in separate folders
+
+- tool `Bash`: Check whether the parallel runs are still going
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Compare startup lines of a --dir run and a normal run
+
+- tool `Bash`: List host files the port reads
+
+## Claude
+
+The inputs are the six `tas_*.bin` tables; `tas_ram.bin` is an output. I'll link those too and rerun the two-folder test, waiting on the PIDs this time:
+
+- tool `Bash`: Link the replay tables and rerun two parallel runs
+
+- tool `Bash`: Time 1, 2 and 3 parallel replays to loop 20,000
+
+- tool `Bash`: Clean up, update docs and the conversation archive
+

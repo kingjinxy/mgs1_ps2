@@ -185,6 +185,10 @@ int GV_DiffDirAbs( int from, int to )
  */
 int GV_RandU( int input )
 {
+#ifdef MGS_PORT
+    extern void *Port_RandFrom; /* port/src/tas_replay.c: the TAS replay's rand caller log */
+    Port_RandFrom = __builtin_return_address( 0 );
+#endif
     return ( input - 1 ) & rand();
 }
 
@@ -196,5 +200,9 @@ int GV_RandU( int input )
  */
 int GV_RandS( int input )
 {
+#ifdef MGS_PORT
+    extern void *Port_RandFrom; /* port/src/tas_replay.c: the TAS replay's rand caller log */
+    Port_RandFrom = __builtin_return_address( 0 );
+#endif
     return ( ( input * 2 - 1 ) & rand() ) - input;
 }

@@ -313,7 +313,12 @@ void sub_8004EB74(SnaInitWork *work)
 {
     if (GM_Camera.first_person == 0)
     {
+#ifdef MGS_PORT
+        /* NULL pad pointer in a stage's first loop (s10a, loop 57,275): the PS1 reads its RAM at 8, 0x0008 */
+        if ((work->field_9B0_pad_ptr ? work->field_9B0_pad_ptr->dir : 8) == (short)-1)
+#else
         if (work->field_9B0_pad_ptr->dir == (short)-1)
+#endif
         {
             work->field_A20 = -6;
         }

@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 56,569 (0:29:45.27), 34.17%.
+Current: loop 59,444 (0:31:17.28), 35.93%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -45,6 +45,8 @@ Current: loop 56,569 (0:29:45.27), 34.17%.
 | 47,546 | 0:25:23.46 | 29.16% | loop 47,499 (Wolf's tick burn read mid-loop: trace_to_pads.py's TICK_AT, 90,359 at loop 47,488) | Nov 3 |
 | 47,556 | 0:25:23.79 | 29.16% | loop 47,546 (translated calls passed 8 arguments: NewBulletEx's 9th, speed, was garbage; CALL passes 12) | Nov 3 |
 | 56,569 | 0:29:45.27 | 34.17% | loop 47,556 (HZD floors tagged with the EE's uncached mirror instead of bit 31: HZD_IS_WALL/HZD_TAG_FLOOR/HZD_UNTAG_FLOOR in libhzd.h) | Nov 3 |
+| 57,290 | 0:30:06.47 | 34.57% | the load-end loop has the PS1's number when the stage script runs (s09a's dogs take turns by `GV_Time % 3`) | Nov 4 |
+| 59,444 | 0:31:17.28 | 35.93% | Wolf's s10a creation burn reads the tick 2 blanks before the line's (`TICK_AT` 57,275); NULL pad pointer in `sub_8004EB74` | Nov 4 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

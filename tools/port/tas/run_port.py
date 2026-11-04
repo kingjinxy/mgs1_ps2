@@ -15,8 +15,20 @@ TAS_SHOT) at the same time; tas/shots/loop_<T>.png is PS1 | port | difference (w
 PS1's 320 wide). The two are a frame apart if the dump and Redux's screen aren't from the same loop's drawing:
 redux_<T+1> is kept in obj_ps2/shots/ to check.
 
+With --rand-log A-B, every rand() draw in loops A to B is logged (host:tas_randlog.txt, tas_replay.c) and listed at
+the end per loop, in order: the game function that drew (GV_RandU/GV_RandS's caller, or rand()'s) and the loop's
+total, to compare with the PS1's draws between two trace seeds.
+No new link is needed to move the window.
+
+With --dir D the run works in folder D: its trace, log, host: switches and shots, with hard links to obj_ps2's ISO, ELF and
+replay tables as they are when it starts. Several runs can go at once (three gave 2.4x one's loops a minute, 8 cores): link
+once (or with --no-link), then start each with its own --dir. A new link while they run doesn't change them.
+
+PCSX2 runs with its null GS renderer (nothing drawn: faster; sync runs only compare game state), but the software
+one with --shot (the frame dump) or --sw (the fallback, if the null renderer ever changes a run).
+
 usage: run_port.py [--tables DIR (default ~/emu/tas)] [--ref TRACE] [--from 315] [--last T] [--seconds 900]
-                   [--ignore SPEC]... [--no-link] [--no-shots] [--shot T (dump loop T's frame)]"""
+                   [--ignore SPEC]... [--no-link] [--no-shots] [--shot T (dump loop T's frame)] [--rand-log A-B]"""
 import argparse
 import glob
 import hashlib
@@ -33,9 +45,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from compare_trace import FIELDS, control_diff, fix_clock, linkvar_diff, same, when  # noqa: E402
 
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
-TRACE = os.path.join(REPO, "obj_ps2", "tas_trace.log")
+WORK = os.path.join(REPO, "obj_ps2")  # the run's folder (--dir): the ISO's, so host: files are there too
+TRACE = os.path.join(WORK, "tas_trace.log")
 PCSX2_RUN = os.path.join(REPO, "..", "silent-hill-1-ps2-port", "tools", "port", "pcsx2_run.py")
-SHOTS = os.path.join(REPO, "obj_ps2", "shots")
+SHOTS = os.path.join(WORK, "shots")
+SHOT_CACHE = os.path.join(REPO, "obj_ps2", "shots", "cache")  # the control run's screens, shared by all runs
 OFFSCREEN = os.path.join(REPO, "tools", "port", "offscreen")
 REDUX = os.path.expanduser("~/emu/pcsx-redux/PCSX-Redux-HEAD-x86_64.AppImage")
 BIOS = os.path.expanduser("~/emu/bizhawk-1.11.4/Firmware/ps-10j.bin")
@@ -74,7 +88,7 @@ def take_shots(a, t, desc):
     """screenshots of loop t: the port rerun and the control run, side by side in tas/shots/loop_<t>.png"""
     from PIL import Image, ImageChops
     os.makedirs(SHOTS, exist_ok=True)
-    for f in glob.glob(os.path.join(REPO, "obj_ps2", "frame_*.ppm")) + glob.glob(os.path.join(SHOTS, "redux_*")):
+    for f in glob.glob(os.path.join(WORK, "frame_*.ppm")) + glob.glob(os.path.join(SHOTS, "redux_*")):
         os.remove(f)
     print("screenshots of loop %d: the port again and the Redux control run" % t, flush=True)
     # the control run only depends on the loop, the tables and redux_replay.lua: its screens are kept by those
@@ -82,13 +96,14 @@ def take_shots(a, t, desc):
     for f in ("pads.bin", "raw.bin", "time.bin", "MovieSaveRam.bin"):
         key.update(open(os.path.join(os.path.expanduser(a.tables), f), "rb").read())
     key.update(open(os.path.join(REPO, "tools", "port", "tas", "redux_replay.lua"), "rb").read())
-    cache = os.path.join(SHOTS, "cache", key.hexdigest())
+    cache = os.path.join(SHOT_CACHE, key.hexdigest())
     rx = None if os.path.isdir(cache) else redux(os.path.expanduser(a.tables), t)
     if rx is None:
         print("screenshots: the control run's from %s" % os.path.relpath(cache, REPO), flush=True)
         for f in glob.glob(os.path.join(cache, "*")):
             shutil.copy(f, SHOTS)
     cmd = [sys.executable, os.path.abspath(__file__), "--no-shots", "--no-link", "--shot", str(t), "--last", str(t + 2),
+           "--dir", WORK,
            "--tables", a.tables, "--ref", a.ref, "--from", str(a.start), "--seconds", str(a.seconds)]
     for spec in a.ignore + ["%s@%d-%d" % (n, t, t + 2) for n in FIELDS.values()]:  # the run's own desync again
         cmd += ["--ignore", spec]
@@ -104,7 +119,7 @@ def take_shots(a, t, desc):
 
 def compose(t, desc):
     from PIL import Image, ImageChops
-    dumps = sorted(glob.glob(os.path.join(REPO, "obj_ps2", "frame_*.ppm")))
+    dumps = sorted(glob.glob(os.path.join(WORK, "frame_*.ppm")))
     if not dumps or not os.path.exists(os.path.join(SHOTS, "redux_%d.raw" % t)):
         print("screenshots: missing (port dump %s, Redux %s)" % (bool(dumps), os.path.exists(
             os.path.join(SHOTS, "redux_%d.raw" % t))))
@@ -123,6 +138,34 @@ def compose(t, desc):
     out.save(path)
     open(path[:-4] + ".txt", "w").write(desc)
     print("screenshots: %s (PS1 | port | difference over 24)" % os.path.relpath(path, REPO))
+
+
+def rand_report():
+    """the run log's "tas: rand LOOP CALLER FROM" lines, per loop: runs of the same drawing function"""
+    draws = [m.groups() for m in re.finditer(r"tas: rand (\d+) (0x[0-9a-f]+|\(nil\)) (0x[0-9a-f]+|\(nil\))",
+                                             open(os.path.join(WORK, "run_port.log"), errors="replace").read())]
+    if not draws:
+        print("rand: no draws logged")
+        return
+    addrs = sorted({x for d in draws for x in d[1:] if x not in ("0x0", "(nil)")})
+    out = subprocess.run([os.path.expanduser("~/ps2dev/ee/bin/mips64r5900el-ps2-elf-addr2line"), "-f", "-s", "-e",
+                          os.path.join(WORK, "mgs.elf")] + addrs, capture_output=True, text=True).stdout
+    out = out.split("\n")
+    name = {a: f if loc.startswith("??") else "%s (%s)" % (f, loc.split(":")[0])  # static Acts share names
+            for a, f, loc in zip(addrs, out[0::2], out[1::2])}
+    loops = {}
+    for t, caller, frm in draws:
+        who = name.get(frm) if frm in name else name.get(caller, caller)  # GV_RandU/GV_RandS's caller, else rand()'s
+        if frm not in ("0x0", "(nil)"):
+            who += " via " + name.get(caller, caller)
+        runs = loops.setdefault(int(t), [])
+        if runs and runs[-1][0] == who:
+            runs[-1][1] += 1
+        else:
+            runs.append([who, 1])
+    for t in sorted(loops):
+        print("rand loop %d: %d draws: %s" % (t, sum(n for _, n in loops[t]),
+                                             ", ".join("%s x%d" % (w, n) if n > 1 else w for w, n in loops[t])))
 
 
 def parse_ignore(specs):
@@ -170,6 +213,10 @@ def main():
     ap.add_argument("--no-shots", action="store_true")
     ap.add_argument("--show", action="store_true", help="the emulator windows on the desktop")
     ap.add_argument("--shot", type=int, default=0)
+    ap.add_argument("--dir", help="run in this folder (its own trace, log and host: files; links to obj_ps2's "
+                                   "ISO and ELF), so several runs can go at once")
+    ap.add_argument("--sw", action="store_true", help="the software GS renderer (default: null, except with --shot)")
+    ap.add_argument("--rand-log", default="", help="A-B: log every rand() draw in loops A to B")
     a = ap.parse_args()
     if a.show:
         os.environ["MGS_SHOW"] = "1"
@@ -184,11 +231,31 @@ def main():
                           stdout=subprocess.DEVNULL).returncode:
             sys.exit("link_ps2.py failed")
 
-    shot = os.path.join(REPO, "obj_ps2", "tas_shot.txt")  # read by the port at startup (tas_replay.c)
+    if a.dir:
+        global WORK, TRACE, SHOTS
+        WORK = os.path.abspath(a.dir)
+        TRACE, SHOTS = os.path.join(WORK, "tas_trace.log"), os.path.join(WORK, "shots")
+        os.makedirs(WORK, exist_ok=True)
+        # the build linked now and the replay tables it reads from host: (tas_replay.c); a later link or
+        # trace_to_pads.py replaces obj_ps2's files, not these
+        for name in ("mgs_ps2.iso", "mgs.elf", "tas_pads.bin", "tas_raw.bin", "tas_time.bin", "tas_loads.bin",
+                     "tas_ticks.bin", "tas_timeline.bin"):
+            dst = os.path.join(WORK, name)
+            if os.path.exists(dst):
+                os.remove(dst)
+            os.link(os.path.join(REPO, "obj_ps2", name), dst)
+
+    shot = os.path.join(WORK, "tas_shot.txt")  # read by the port at startup (tas_replay.c)
     if a.shot:
         open(shot, "w").write("%d\n" % a.shot)
     elif os.path.exists(shot):
         os.remove(shot)
+
+    randlog = os.path.join(WORK, "tas_randlog.txt")  # read by the port at startup (tas_replay.c)
+    if a.rand_log:
+        open(randlog, "w").write(a.rand_log.replace("-", " ") + "\n")
+    elif os.path.exists(randlog):
+        os.remove(randlog)
 
     ref_path = os.path.expanduser(a.ref)
     ref = {}
@@ -201,9 +268,10 @@ def main():
 
     if os.path.exists(TRACE):
         os.remove(TRACE)
-    log = open(os.path.join(REPO, "obj_ps2", "run_port.log"), "w")
-    run = subprocess.Popen([OFFSCREEN, sys.executable, "-u", PCSX2_RUN, os.path.join(REPO, "obj_ps2", "mgs_ps2.iso"),
-                            "--seconds", str(a.seconds), "--stall", "15"], stdout=log, stderr=subprocess.STDOUT)
+    log = open(os.path.join(WORK, "run_port.log"), "w")
+    run = subprocess.Popen([OFFSCREEN, sys.executable, "-u", PCSX2_RUN, os.path.join(WORK, "mgs_ps2.iso"),
+                            "--seconds", str(a.seconds), "--stall", "15",
+                            "--renderer", "sw" if a.sw or a.shot else "null"], stdout=log, stderr=subprocess.STDOUT)
     first, ignored_first, last_t, desync, buf, f = {}, {}, -1, None, "", None
     try:
         while desync is None:
@@ -244,10 +312,12 @@ def main():
             run.wait(30)
         log.close()
 
+    if a.rand_log:
+        rand_report()
     for name, (t, d) in sorted(ignored_first.items(), key=lambda x: x[1][0]):
         print("ignored: %-20s from loop %d: %s" % (name, t, d))
     if desync is None:
-        why = "reached loop %d" % a.last if a.last and last_t >= a.last else "PCSX2 ended (see obj_ps2/run_port.log)"
+        why = "reached loop %d" % a.last if a.last and last_t >= a.last else "PCSX2 ended (see %s)" % os.path.join(WORK, "run_port.log")
         print("in sync to loop %d: %s" % (last_t, why))
         return 0 if a.last and last_t >= a.last else 1
     lines = ["DESYNC %-20s at loop %d (%s, movie %s, frame %s): %s" % (name, t, r[6], when(r[0]), r[0], d)

@@ -496,6 +496,38 @@ void Port_TasLoadEnd(void)
 #endif
 }
 
+/** util.c's GV_RandU/GV_RandS: their caller, for the rand caller log (a draw straight from rand() has 0). */
+void* Port_RandFrom;
+
+#ifdef MGS_TAS
+static int s_RandFirst = -1, s_RandLast = -1; /* host:tas_randlog.txt (run_port.py --rand-log): the loops logged */
+
+/** HAL rand's hook: each draw in the logged loops, as "tas: rand LOOP CALLER FROM" (run_port.py resolves them).
+ * By the loop at each draw, so a load-end loop renumbered mid-loop (Port_TasScenario) logs under the PS1's. */
+static void rand_log(void* caller)
+{
+    if (GV_Time >= s_RandFirst && GV_Time <= s_RandLast)
+    {
+        printf("tas: rand %d %p %p\n", GV_Time, caller, Port_RandFrom);
+    }
+    Port_RandFrom = 0;
+}
+#endif
+
+/** gamed.c, where a load ends (GM_LoadRequest cleared, the stage's script about to run): the rest of the loop, whose
+ * new actors act in it, is the PS1's load-end loop. Port_TasTrace's renumbering came a loop late: s09a's dogs
+ * update in turn by GV_Time % 3, and their first Act at the port's own number had them a turn apart (loop 56,569). */
+void Port_TasScenario(void)
+{
+#ifdef MGS_TAS
+    if (s_Loads < s_Ps1Loads)
+    {
+        printf("tas: load end %d in loop %d, the PS1's in %d\n", s_Loads, GV_Time, s_Ps1LoadEnd[s_Loads] - 1);
+        GV_Time = s_Ps1LoadEnd[s_Loads] - 1;
+    }
+#endif
+}
+
 /** movie.c: STATE_DEMO goes in Die, the loop after the destroy; the record's status is its next line's. */
 int Port_TasMovieMayEnd(void)
 {
@@ -710,6 +742,15 @@ void Port_TasInit(void)
         }
         fclose(f);
     }
+    if ((f = fopen("host:tas_randlog.txt", "r")) != 0) /* run_port.py --rand-log: first and last loop */
+    {
+        extern void (*Hal_RandHook)(void* caller);
+        if (fscanf(f, "%d %d", &s_RandFirst, &s_RandLast) == 2)
+        {
+            Hal_RandHook = rand_log;
+        }
+        fclose(f);
+    }
     if ((f = fopen("host:tas_ramdump.txt", "r")) != 0)
     {
         if (fscanf(f, "%d", &s_RamLoop) != 1)
@@ -783,13 +824,8 @@ void Port_TasTrace(void)
     }
     if (prev_request && !GM_LoadRequest && s_Loads < s_Ps1Loads)
     {
-        if (GV_Time != s_Ps1LoadEnd[s_Loads])
-        {
-            printf("tas: load end %d at loop %d, the PS1's at %d\n", s_Loads, GV_Time, s_Ps1LoadEnd[s_Loads]);
-            GV_Time = s_Ps1LoadEnd[s_Loads];
-            pads_as_ps1(GV_Time); /* the PS1 updated its pads all through its load; the port's are its last loop's
-                                     (loop 9,633: down held) */
-        }
+        pads_as_ps1(GV_Time); /* the PS1 updated its pads all through its load; the port's are its last loop's
+                                 (loop 9,633: down held). GV_Time is the PS1's already (Port_TasScenario) */
         if ((r = time_record()) != 0)
         {
             GV_PassageTime  = (int)read_u32(r + 12);

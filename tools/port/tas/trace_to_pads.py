@@ -102,9 +102,10 @@ for i, f in enumerate(rows):
 # ticks.bin: for each loop, the PS1's mts tick when its actors ran, as game logic reads it (s10a's Wolf burns
 # tick % 256 rand() calls when made; port Port_GameTick): the next line's sample, but for the loops in TICK_AT.
 # shortcut: TICK_AT is the tick read mid-loop, found by hand (the trace only samples between loops; a stage's
-# scenario can take 30 blanks: 90,361 at the end of loop 47,488, Wolf's burn at 90,359). Add a loop when a
-# tick-dependent burn desyncs; record the tick in trace.lua if they become common.
-TICK_AT = {47488: 90359}
+# scenario can take 30 blanks: 90,361 at the end of loop 47,488, Wolf's burn at 90,359; s10a again at 57,275,
+# 107,407 and 107,405: 141 draws, so the rats' rolls after it are the PS1's). Add a loop when a tick-dependent
+# burn desyncs; record the tick in trace.lua if they become common.
+TICK_AT = {47488: 90359, 57275: 107405}
 ticks_bin = b"".join(struct.pack("<I", TICK_AT.get(int(f[1]), int(n[14]))) for f, n in zip(rows, rows[1:]))
 open(os.path.join(out_dir, "ticks.bin"), "wb").write(ticks_bin)
 # loads.bin: at each PS1 load end (the line whose GM_LoadRequest is back to 0), a u32 GV_Time and that line's

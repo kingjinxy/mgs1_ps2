@@ -62,7 +62,9 @@ Add `--variant=vr_exe` for `SLPM_862.49`. The PSY-Q toolchain is `../psyq_sdk`. 
   or `MGS_SHOW=1 tools/port/tas/run_bizhawk.sh`, puts them on the desktop for that run.
 - **PCSX2 uses the software GS renderer** (`PCSX2.ini` `[EmuCore/GS] Renderer = 13`), enforced by
   any run script. The hardware renderer's host-GPU load distorts performance measurements. Measure
-  frame rates in emulated time.
+  frame rates in emulated time. Exception (user, 2026-11-04): TAS sync runs (`run_port.py`) use the null
+  renderer, as they only compare game state; `--sw` falls back to software, and `--shot` always uses it.
+  Never the hardware renderer: the VM has no real GPU.
 - **A PCSX2 stall is a crash.** 15 emulated seconds without a new frame (at most 15 real seconds
   when emulation is slower): close PCSX2 and end the run, rather than waiting out a long timeout.
 - **Never dismiss "TLB Miss" lines in PCSX2.** PCSX2 lets user-mode reads of unmapped addresses

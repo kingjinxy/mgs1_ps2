@@ -1,6 +1,13 @@
 #include "ps1align.h"
 #include "mgstype.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): rank_dword_800E189C: RadioFileModeStruElem.
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.rank_overlay2")))
+#endif
+
 int rank_dword_800C3260 = 0x4C534942;
 int rank_dword_800C3264 = 0x392D4D50;
 int rank_dword_800C3268 = 0x39393939;

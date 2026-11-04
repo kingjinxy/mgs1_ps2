@@ -3,6 +3,13 @@
 #include <sys/types.h>
 #include <libgte.h>
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): Zako11FCommand_800D5AF8 (ZAKO11F_COMMAND) and TOPCOMMAND_800D5C40.
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s11i_overlay4")))
+#endif
+
 SVECTOR s11i_dword_800C34C4[3] =
 {
     {5750, 0, -1000, 0},

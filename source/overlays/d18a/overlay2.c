@@ -1,5 +1,12 @@
 #include "mgstype.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): d18a_dword_800DAF00: HZD_FLR[2].
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.d18a_overlay2")))
+#endif
+
 
 int d18a_dword_800C353C = 0x16100602;
 int d18a_dword_800C3540 = 0x7170201A;

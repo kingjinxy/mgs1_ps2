@@ -1,6 +1,13 @@
 #include "ps1align.h"
 #include "game/game.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): s05a_dword_800E3800: a CONTROL.
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s05a_overlay2")))
+#endif
+
 int s05a_dword_800C362C = 0x00000000;
 int s05a_dword_800C3630 = 0x00000000;
 int s05a_dword_800C3634 = 0x00000000;

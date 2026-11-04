@@ -1,6 +1,13 @@
 #include "ps1align.h"
 #include "mgstype.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): s08b_dword_800E4334: an int[].
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s08b_overlay2")))
+#endif
+
 /* Jump table labels are decimal: the port's code reads the PS1's from mips2c.py, these aren't used there. */
 extern const char s08b_aNinja_800E3714[];
 extern const char s08b_dword_800E3C48[], s08b_dword_800E3DAC[], s08b_dword_800E3EB0[], s08b_dword_800E3FB4[];

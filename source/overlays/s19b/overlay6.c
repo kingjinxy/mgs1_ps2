@@ -1,6 +1,13 @@
 #include "mgstype.h"
 #include "game/game.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): s19b_dword_800DE64C: a Work.
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s19b_overlay6")))
+#endif
+
 typedef struct _JEEP_SYSTEM
 {
     char     pad1[0x4];

@@ -3,6 +3,14 @@
 #include <sys/types.h>
 #include <libgte.h>
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): ZakoCommand_800DF280 (ZAKO_COMMAND) and TOPCOMMAND_800DF3A8 are a word and the words after it (loop 91,969: the
+   commander's mode was another variable).
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s11e_overlay4")))
+#endif
+
 SVECTOR SECTION(".bss") ZAKOCOM_PlayerPosition_800DF278;
 
 //zakocommand start

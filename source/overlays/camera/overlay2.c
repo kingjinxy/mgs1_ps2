@@ -1,6 +1,13 @@
 #include "ps1align.h"
 #include "mgstype.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): camera_dword_800D072C and the words after it: DATA_INFO, RadioFileModeStru_800ABB7C, SPRT.
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.camera_overlay2")))
+#endif
+
 int camera_dword_800C3218 = 0x0000530C;
 int camera_dword_800C321C = 0x00000A1E;
 int camera_dword_800C3220 = 0x00002AEB;

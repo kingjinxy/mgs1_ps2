@@ -1,6 +1,13 @@
 #include "ps1align.h"
 #include "mgstype.h"
 
+#ifdef MGS_PORT
+/* Kept in this order, out of common (SECTION is empty in the port): s19b_dword_800DE5C8: JlampState.
+   s03d's overlay3.c is the same. */
+#undef SECTION
+#define SECTION(x) __attribute__((section(".bss.s19b_overlay3")))
+#endif
+
 const char s19b_dword_800DDD4C[] STR_PIECE = {0xe4, 0xfd, 0xbe, 0x4};
 const char s19b_dword_800DDD50[] STR_PIECE = {'=', 0xfc, 0x0, 0x0};
 const char s19b_dword_800DDD54[] STR_PIECE = {0xac, 0x1, 'U', 0x2};

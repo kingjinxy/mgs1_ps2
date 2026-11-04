@@ -37,6 +37,10 @@ def survey(name):
     """(sources, reason it can't be linked in yet or None)."""
     srcs, _ = overlay_survey.overlay_objects(name)
     stubs = lits = 0
+    # jump table entries: the PS1 addresses mips2c's translated switches compare against (case 0x...:), not pointers
+    recomp = os.path.join(ROOT, "source", "overlays", name, "recomp")
+    cases = {c.upper() for f in (os.listdir(recomp) if os.path.isdir(recomp) else [])
+             for c in re.findall(r"case 0x([0-9a-f]{8}):", open(os.path.join(recomp, f)).read())}
     for s in srcs:
         path = os.path.join(ROOT, s)
         if not os.path.exists(path):
@@ -45,7 +49,7 @@ def survey(name):
             continue
         text = overlay_survey.strip_comments(open(path, errors="replace").read())
         stubs += len(re.findall(r"^\s*(?:#pragma\s+)?INCLUDE_ASM", text, re.M))
-        lits += len(overlay_survey.LIT.findall(text))
+        lits += len([a for a in overlay_survey.LIT.findall(text) if a.upper() not in cases])
     if stubs:
         return srcs, "%d INCLUDE_ASM" % stubs
     if lits:

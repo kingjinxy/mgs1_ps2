@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "game/game.h"
 #include "hind.h"
@@ -94,10 +97,22 @@ void s11g_hind_800D9344(HindWork *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_hind_800D96B0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_hind_800D96B0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_hind_800D9B80.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_hind_800D9B80.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_hind_800DA534.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_hind_800DA534.s")
+#endif
 void s11g_hind_800DA534(HindWork *work);
 
 /*
@@ -293,4 +308,8 @@ void s11g_hind_800DA7C4(HindWork *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_hind_800DAAC8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_hind_800DAAC8.s")
+#endif

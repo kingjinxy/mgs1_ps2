@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "bullet/blast.h"
 #include "libgcl/libgcl.h"
 #include "game/game.h"
@@ -163,7 +166,11 @@ void s11g_11g_demo_800CB858(SVECTOR *pos, int se_id)
     GM_SeSetMode(pos, se_id, GM_SEMODE_BOMB);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_11g_demo_800CB878.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_11g_demo_800CB878.s")
+#endif
 void s11g_11g_demo_800CB878(Work *, SVECTOR *, int);
 
 void s11g_11g_demo_800CB994(Work *work)

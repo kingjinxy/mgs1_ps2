@@ -1,0 +1,11 @@
+int G_s11b_800DA6F8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s11b_800DA6F8");
+int G_s11b_800DA6F8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[2] = (u)0 + 4;
+    *(char *)((u)r[4] + 3) = r[2];
+    r[2] = (u)0 + 100;
+    *(char *)((u)r[4] + 7) = r[2]; goto out;
+out:
+    RECOMP_RETURN;
+}

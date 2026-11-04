@@ -1,0 +1,98 @@
+extern char R_GV_Clock[] __asm__("GV_Clock");
+extern char R_GV_PauseLevel[] __asm__("GV_PauseLevel");
+int G_s11b_800C6E90(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s11b_800C6E90");
+int G_s11b_800C6E90(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(8)
+    r[29] = (u)r[29] + -8;
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_GV_PauseLevel);
+    c = ((r[2] != 0)); r[6] = (u)r[4] + (u)0; if (c) goto L800c7040;
+    r[2] = *(int *)((u)r[6] + 44);
+    r[5] = *(int *)((u)r[6] + 40);
+    r[4] = (u)r[2] + 1;
+    r[2] = (int)r[5] < (int)r[4];
+    c = ((r[2] != 0)); *(int *)((u)r[6] + 44) = r[4]; if (c) goto L800c6fd0;
+    r[2] = *(short *)((u)r[6] + 56);
+    r[3] = *(short *)((u)r[6] + 48);
+    r[2] = (u)r[2] - (u)r[3];
+    mul = (long long)(int)r[2] * (int)r[4]; hi_ = mul >> 32; lo_ = mul;
+    r[2] = lo_;
+    if (r[5]) { lo_ = (int)r[2] / (int)r[5]; hi_ = (int)r[2] % (int)r[5]; }
+    c = ((r[5] != 0));  if (c) goto L800c6ef0;
+    L800c6ef0:;
+    r[1] = (u)0 + -1;
+    c = ((r[5] != r[1])); r[1] = 0; if (c) goto L800c6f08;
+    c = ((r[2] != r[1]));  if (c) goto L800c6f08;
+    L800c6f08:;
+    r[3] = lo_;
+    r[2] = *(unsigned short *)((u)r[6] + 48);
+    r[2] = (u)r[2] + (u)r[3];
+    *(short *)((u)r[29] + 0) = r[2];
+    r[2] = *(short *)((u)r[6] + 58);
+    r[3] = *(short *)((u)r[6] + 50);
+    r[4] = *(int *)((u)r[6] + 44);
+    r[2] = (u)r[2] - (u)r[3];
+    mul = (long long)(int)r[2] * (int)r[4]; hi_ = mul >> 32; lo_ = mul;
+    r[2] = lo_;
+    r[3] = *(int *)((u)r[6] + 40);
+    if (r[3]) { lo_ = (int)r[2] / (int)r[3]; hi_ = (int)r[2] % (int)r[3]; }
+    c = ((r[3] != 0));  if (c) goto L800c6f4c;
+    L800c6f4c:;
+    r[1] = (u)0 + -1;
+    c = ((r[3] != r[1])); r[1] = 0; if (c) goto L800c6f64;
+    c = ((r[2] != r[1]));  if (c) goto L800c6f64;
+    L800c6f64:;
+    r[3] = lo_;
+    r[2] = *(unsigned short *)((u)r[6] + 50);
+    r[2] = (u)r[2] + (u)r[3];
+    *(short *)((u)r[29] + 2) = r[2];
+    r[2] = *(short *)((u)r[6] + 60);
+    r[3] = *(short *)((u)r[6] + 52);
+    r[4] = *(int *)((u)r[6] + 44);
+    r[2] = (u)r[2] - (u)r[3];
+    mul = (long long)(int)r[2] * (int)r[4]; hi_ = mul >> 32; lo_ = mul;
+    r[2] = lo_;
+    r[3] = *(int *)((u)r[6] + 40);
+    if (r[3]) { lo_ = (int)r[2] / (int)r[3]; hi_ = (int)r[2] % (int)r[3]; }
+    c = ((r[3] != 0));  if (c) goto L800c6fa8;
+    L800c6fa8:;
+    r[1] = (u)0 + -1;
+    c = ((r[3] != r[1])); r[1] = 0; if (c) goto L800c6fc0;
+    c = ((r[2] != r[1]));  if (c) goto L800c6fc0;
+    L800c6fc0:;
+    r[3] = lo_;
+    r[2] = *(unsigned short *)((u)r[6] + 52);
+    r[2] = (u)r[2] + (u)r[3]; goto L800c6fec;
+    L800c6fd0:;
+    r[2] = *(unsigned short *)((u)r[6] + 56);
+    *(short *)((u)r[29] + 0) = r[2];
+    r[2] = *(unsigned short *)((u)r[6] + 58);
+    *(short *)((u)r[29] + 2) = r[2];
+    r[2] = *(unsigned short *)((u)r[6] + 60);
+    L800c6fec:;
+    *(short *)((u)r[29] + 4) = r[2];
+    r[5] = 0;
+    r[2] = *(int *)((u)r[5] + (int)R_GV_Clock);
+    r[3] = *(int *)((u)r[6] + 32);
+    r[4] = *(unsigned char *)((u)r[29] + 0);
+    r[2] = (u)r[2] << 4;
+    r[2] = (u)r[2] + (u)r[3];
+    *(char *)((u)r[2] + 20) = r[4];
+    r[2] = *(int *)((u)r[5] + (int)R_GV_Clock);
+    r[3] = *(int *)((u)r[6] + 32);
+    r[4] = *(unsigned char *)((u)r[29] + 2);
+    r[2] = (u)r[2] << 4;
+    r[2] = (u)r[2] + (u)r[3];
+    *(char *)((u)r[2] + 21) = r[4];
+    r[2] = *(int *)((u)r[5] + (int)R_GV_Clock);
+    r[3] = *(int *)((u)r[6] + 32);
+    r[4] = *(unsigned char *)((u)r[29] + 4);
+    r[2] = (u)r[2] << 4;
+    r[2] = (u)r[2] + (u)r[3];
+    *(char *)((u)r[2] + 22) = r[4];
+    L800c7040:;
+    r[29] = (u)r[29] + 8; goto out;
+out:
+    RECOMP_RETURN;
+}

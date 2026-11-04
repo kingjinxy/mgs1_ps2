@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "game/game.h"
 #include "kojo/demo.h"
@@ -977,7 +980,11 @@ const int s11g_dword_800DD1DC = 0x800D7628;
 const int s11g_dword_800DD1E0 = 0x800D7628;
 const int s11g_dword_800DD1E4 = 0x800D6D40;
 
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_hind_800D6848.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_hind_800D6848.s")
+#endif
 
 const int s11g_dword_800DD1E8 = 0x800D7700;
 const int s11g_dword_800DD1EC = 0x800D776C;
@@ -1020,4 +1027,8 @@ const int s11g_dword_800DD27C = 0x800DA0E0;
 const int s11g_dword_800DD280 = 0x800DA2B4;
 const int s11g_dword_800DD284 = 0x00000000;
 
+#ifdef MGS_PORT
+#include "overlays/s11g/recomp/s11g_hind_800D7644.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11g/s11g_hind_800D7644.s")
+#endif

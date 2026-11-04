@@ -1151,3 +1151,16 @@ Now in sync to 91,969 (0:48:36.25, s11e): `GM_AlertMode` 3 on the PS1, 0 in the 
 
 Matching builds 80 and 2 OK. In sync from the start to 93,337 (0:49:16.90, s12a), the rand seed.
 
+## Step 50: the tick table by loop (Nov 4)
+
+**93,337 (0:49:16.90, s12a):** the PS1's load-end loop made 2,701 draws, the port's 2,479. The rand log: Wolf's
+`wolf2_GetResources` burns `Port_GameTick() % 256` draws and made 26, where the tick table's line for that loop says
+249. `trace_to_pads.py` wrote `ticks.bin` one entry per trace line, but `Port_GameTick` reads it by `GV_Time`. Since
+the first loop without a line (60,536, Step 42) every tick read came from a later loop, 7 lines late here. `ticks.bin`
+is now by loop, like `time.bin`: a loop without a line takes the next line's tick. The earlier `TICK_AT` entries
+(47,488, 57,275) were before 60,536 and are unchanged. That gave 2,702 draws, one more than the PS1: as in s10a, Wolf
+reads the tick a blank before the next line, so `TICK_AT` gets 93,335: 176,376. That's the third hand-found entry,
+all Wolf's burn in a load-end loop; the comment says to record the tick in trace.lua if more appear.
+
+Matching builds unaffected (tools only). In sync from the start to 94,060 (0:49:41.80, s12a), the rand seed.
+

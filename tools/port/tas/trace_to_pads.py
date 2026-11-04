@@ -106,10 +106,18 @@ for i, f in enumerate(rows):
 # tick % 256 rand() calls when made; port Port_GameTick): the next line's sample, but for the loops in TICK_AT.
 # shortcut: TICK_AT is the tick read mid-loop, found by hand (the trace only samples between loops; a stage's
 # scenario can take 30 blanks: 90,361 at the end of loop 47,488, Wolf's burn at 90,359; s10a again at 57,275,
-# 107,407 and 107,405: 141 draws, so the rats' rolls after it are the PS1's). Add a loop when a tick-dependent
-# burn desyncs; record the tick in trace.lua if they become common.
-TICK_AT = {47488: 90359, 57275: 107405}
-ticks_bin = b"".join(struct.pack("<I", TICK_AT.get(int(f[1]), int(n[14]))) for f, n in zip(rows, rows[1:]))
+# 107,407 and 107,405: 141 draws, so the rats' rolls after it are the PS1's; s12a's Wolf at 93,335, 176,377 and
+# 176,376: the load-end loop's total, 2,701). All so far are Wolf's burn in a load-end loop, 1-2 blanks before the
+# next line. Add a loop when a tick-dependent burn desyncs; record the tick in trace.lua if they become common.
+TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376}
+# By loop (Port_GameTick reads it by GV_Time), as time.bin: a loop without a line has the next line's. Written by line
+# until loop 93,335 (s12a: Wolf's burn read the tick 7 lines late), harmless before the first loop without a line.
+tick_at = {int(f[1]): TICK_AT.get(int(f[1]), int(n[14])) for f, n in zip(rows, rows[1:])}
+tick_list, nxt_tick = [], 0
+for t in range(max(tick_at), -1, -1):
+    nxt_tick = tick_at.get(t, nxt_tick)
+    tick_list.append(nxt_tick)
+ticks_bin = b"".join(struct.pack("<I", x) for x in reversed(tick_list))
 open(os.path.join(out_dir, "ticks.bin"), "wb").write(ticks_bin)
 # loads.bin: at each PS1 load end (the line whose GM_LoadRequest is back to 0), a u32 GV_Time and that line's
 # GV_PadData as recorded (pads.bin's records can have [2]/[3] rebuilt): tas_replay.c's realign at the load's end

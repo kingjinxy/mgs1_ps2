@@ -1104,3 +1104,23 @@ goes to state 2 when its task is ready.
 
 Matching builds 80 and 2 OK. In sync from the start to 86,037 (0:45:20.40, s11h), the rand seed.
 
+## Step 47: square roots of overflowed sums (Nov 4)
+
+**86,037 (0:45:20.40, s11h):** the PS1 drew 1 more in loop 86,035 and ~240 more in the next (an explosion). PCSX-Redux's
+PS1 screenshot timed out this deep in the movie (interpreter, 900 s), so I compared the Hind's whole Work instead: a
+port hex dump at the Act's entry against BizHawk RAM dumps (`ram_dump.lua`, the Work found by its Act pointer). The
+Hind's missile (+1888: position, +1928: heading) flew toward Snake on the PS1 and was stuck far off in the port. A
+per-loop BizHawk log of those fields (a scratch script on `seek.lua`) against a port printf: the missile launches at
+85,909 on both sides, and the port's first step is already wrong.
+
+The heading is `ratan2(SquareRoot0(dx² + dz²), dy)` (`s11h_800D347C`), with dx and dz around 62,000: the sum
+overflows to a negative int. libgte's `SquareRoot0` then normalises it to a table index of -320 to -129, and the PS1
+reads the halfwords before `SQRT` (0x800A4C00), the end of `rsin_tbl`. The HAL's port read whatever its link put
+there. The HAL now keeps those 192 halfwords (`SQRT_NEG`, from a PS1 RAM dump) for `SquareRoot0`/`SquareRoot12`
+(psx-to-ps2-HAL 2944fbc). Check: at 85,905, a = -411,533,807 gives 15,968, so heading 406, the PS1's. My first table
+had only 64 entries (I took the range of the shift alone); a sum with 2 leading ones (85,911) reaches further, and the
+desync moved to 86,035 until the table covered it.
+
+Matching builds 80 and 2 OK. In sync from the start to 91,876 (0:48:33.11, s11e): `GM_GameStatus` 0x10000000 on the
+PS1. s11e is still left out of the port (7 literal addresses).
+

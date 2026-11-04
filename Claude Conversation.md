@@ -21296,3 +21296,223 @@ Writing the walkthrough step and committing.
 
 - tool `Bash`: Fix counts and commit
 
+## Claude
+
+Updating the conversation archive as CLAUDE.md requires.
+
+- tool `Bash`: Archive all sessions into conversation file
+
+- tool `Bash`: Commit conversation archive
+
+## Claude
+
+Committed. Next desync: 84,844, where the PS1 sets `GM_GameStatus` bit 0x20.
+
+- tool `Bash`: Status bit meaning and context lines
+
+- tool `Bash`: Who clears status 0x20
+
+- tool `Bash`: Resident code changing STATE_DAMAGED
+
+## Claude
+
+0x20 is `STATE_VOX_STREAM`: the port's voice stream ends earlier than the PS1's. Checking when each one starts and ends.
+
+- tool `Bash`: Status timelines both sides
+
+- tool `Bash`: Port log stream messages near 84,838
+
+## Claude
+
+Something calls `GM_StreamPlayStop` about 6 loops after the voice starts. The Hind's Act has two such calls; looking at them.
+
+- tool `Bash`: Hind Act head with stream stop calls
+
+## Claude
+
+The Hind stops any stream whose `GM_StreamStatus()` is 1. Reading strctrl.c's states to see why the port's stream sits in state 1.
+
+- tool `Bash`: Read stream control states
+
+- tool `Bash`: Locate stream functions for logging
+
+- tool `Bash`: Log stream starts/stops with callers
+
+- tool `Bash`: Resolve callers; read stream start gate
+
+- tool `Bash`: Time record indexing and stream starts
+
+- tool `Bash`: PS1 stream-start counts near 84,838
+
+- tool `Bash`: Hold stream in state 1 until PS1 start; full replay
+
+## Claude
+
+In sync to 86,037 (0:45:20.40). Matching build, then commit.
+
+- tool `Bash`: Matching builds
+
+- tool `Bash`: Document and commit stream fix
+
+## Claude
+
+Committed. Now looking at 86,037 with the rand log.
+
+- tool `Bash`: Per-loop draw counts near 86,037
+
+- tool `Bash`: Port rand callers at 86,034–86,036
+
+- tool `Bash`: Port rand callers after the desync
+
+- tool `Bash`: Next differing field past the seed
+
+## Claude
+
+Looking at screenshots of both sides at 86,040 to see what happens there.
+
+- tool `Bash`: Screenshot pair at the desync
+
+- tool `Bash`: Desync run with screenshots
+
+## Claude
+
+It's 1:30 — sending the hourly summary while the screenshot run finishes.
+
+- tool `PushNotification`: 
+
+## Claude
+
+While the run finishes, I'll read the s11g decomp of the Hind's damage handling (same actor as s11h's).
+
+- tool `Bash`: Hind damage detection in s11g decomp
+
+- tool `Bash`: Check background run output
+
+- tool `Bash`: Wait for screenshot run to finish
+
+- tool `Bash`: Screenshot run result
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Dump Hind Work on both sides at 86,033–86,036
+
+- tool `Bash`: Diff Hind Work PS1 vs port
+
+- tool `Bash`: Check dump formats
+
+- tool `Bash`: How the dump lines look in the log
+
+- tool `Bash`: Diff Hind Work PS1 vs port (parsed)
+
+## Claude
+
+The Hind's Work differs in a group of fields (+1888…+2020) that change every loop on the PS1 but are frozen in the port (or flip between two values), plus its tick fields. Finding what writes them.
+
+- tool `Bash`: Writers of the differing fields
+
+- tool `Bash`: Port missile position timeline
+
+## Claude
+
+Now the PS1's view of the same fields: a small BizHawk script logging them each loop from 85,700.
+
+- tool `Bash`: Log PS1 Hind missile fields per loop
+
+- tool `Bash`: First loop where missile fields diverge
+
+## Claude
+
+Column layout mismatch in my awk; fixing the comparison.
+
+- tool `Bash`: Fixed diff of missile fields
+
+- tool `Bash`: Python diff of missile timelines
+
+- tool `Bash`: Python diff of missile timelines
+
+- tool `Bash`: Both sides around the first difference
+
+- tool `Bash`: Missile flight update code
+
+## Claude
+
+The missile's heading is the SVECTOR at +1928: PS1 vx = 2894, port vx = 4096 or 6144 (multiples of 2048), vy almost equal. Finding what updates it.
+
+- tool `Bash`: Writers of missile heading
+
+- tool `Bash`: Read heading-update function
+
+- tool `Bash`: Read the heading reader/adjuster
+
+- tool `Bash`: Uses of heading in hind Act
+
+- tool `Bash`: Find HAL SquareRoot0
+
+- tool `Bash`: Read HAL SquareRoot0
+
+- tool `Bash`: Read sqrt_mantissa and find PSY-Q original
+
+## Claude
+
+The HAL's `SquareRoot0` follows the original's leading-bit handling, so that's probably not it. Printing the actual inputs and outputs of the heading function in the port.
+
+- tool `Bash`: Trace heading inputs in port
+
+- tool `Bash`: Table type and PS1 location
+
+## Claude
+
+On the PS1, `SQRT` (0x800A4C00) comes right after `rsin_tbl` (0x800A43E0, 0x820 bytes), so those negative indices read the end of `rsin_tbl`. Checking how the HAL lays out these two tables.
+
+- tool `Bash`: HAL table declarations
+
+- tool `Bash`: Where rsin_tbl lives in the port
+
+- tool `Bash`: HAL rsin table and PS1 bytes before SQRT
+
+## Claude
+
+Those PS1 values are the tail of `rsin_tbl` (3948…4035), a fixed table. The HAL will return the same 64 halfwords for a negative input, in place of whatever memory sits before its `SQRT`.
+
+- tool `Bash`: Give HAL SquareRoot the PS1's out-of-table values
+
+## Claude
+
+Index check: t ∈ −128…−65 gives `SQRT_NEG[0…63]`, which is SQRT−384…SQRT−258 bytes. That matches. Regenerating s11h without the debug prints and running the full replay.
+
+- tool `Bash`: Full replay with the HAL fix
+
+## Claude
+
+The desync moved 2 loops *earlier* (86,035). So the missile flight changed but still isn't right. Comparing its path with the PS1 log again.
+
+- tool `Bash`: Re-compare missile path
+
+## Claude
+
+Closer: the path now matches through 85,911, then diverges at 85,912 (the port flies nearly level). Logging the PS1's heading and target too, to compare the square-root results directly.
+
+- tool `Bash`: Log PS1 heading and target
+
+- tool `Bash`: Add heading to PS1 log and rerun
+
+- tool `Bash`: Widen out-of-table range to 192 entries
+
+## Claude
+
+Mapping check: `SQRT_NEG[k]` = SQRT[k − 320], so k = t − 64 + 320 = t + 256. Rerunning the comparison.
+
+- tool `Bash`: Replay with widened sqrt table
+
+## Claude
+
+In sync to **91,876 (0:48:33.11, s11e)**. Since the HAL change affects every game, running the full replay from the start plus the matching builds before committing.
+
+- tool `Bash`: Full replay and matching builds
+
+## Claude
+
+All good. Committing the HAL change (in its own repo), then the docs here.
+
+- tool `Bash`: Commit HAL sqrt fix
+

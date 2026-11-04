@@ -320,7 +320,12 @@ void s11e_zk11ecom_800DA16C( ZAKO_COMMAND* command )
     for ( i = 0 ; i < command->field_0x08 ; i ++ )
     {
         work = ( ZakoWork * )command->field_0x8C[ ZakoCommand_800DF280.field_0x40[ i ] ].watcher;
+#ifdef MGS_PORT
+        /* A removed soldier's entry is NULL: the PS1 reads its RAM at 0xC2C, 0 (BizHawk dumps; s03d's zakocom.c) */
+        dists[i] = work ? work->sn_dis : 0;
+#else
         dists[i] = work->sn_dis;
+#endif
     }
 
     for ( t3 = command->field_0x08 - 1 ; t3 > -1 ; t3 = t4  )
@@ -355,6 +360,9 @@ void s11e_zk11ecom_800DA16C( ZAKO_COMMAND* command )
     for ( i = 0 ; i < command->field_0x08 ; i++ )
     {
         work = ( ZakoWork * )command->field_0x8C[ ZakoCommand_800DF280.field_0x40[ i ] ].watcher;
+#ifdef MGS_PORT
+        if ( work ) /* the PS1 writes its RAM at 0xBFC */
+#endif
         work->field_BFC = s11e_dword_800C3908[ ZakoCommand_800DF280.field_0x40[ i ] ];
     }
 }

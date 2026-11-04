@@ -1133,3 +1133,21 @@ functions' symbols, as for s11i in Step 45. Matching builds 80 and 2 OK; the por
 
 Now in sync to 91,969 (0:48:36.25, s11e): `GM_AlertMode` 3 on the PS1, 0 in the port.
 
+## Step 49: overlay structs kept in order; s11e's removed soldiers (Nov 4)
+
+- **91,969 (0:48:36.25, s11e):** alert 3 on the PS1 right after the cutscene, 0 in the port. A BizHawk log of the
+  commander (`ZakoCommand_800DF280`) showed its alert going 0 to 255 in loop 91,967 on both sides, but the port's `mode`
+  was 70,254,592 (and counting), so the switch that calls `GM_AlertModeSet(3)` never ran. s11e's `overlay4.c` defines
+  the commander as a run of `int`s, and in the port `SECTION` is empty, so they're common symbols that the linker laid
+  out in another order (`nm`: the struct's "mode" was another variable). s03d's `overlay3.c` had the same fix: its
+  `.bss` goes in a named section, which keeps the file's order. A scan for `int` bss words that other files declare
+  as a struct or array found 9 files: s11e and s11i (commanders), s08b, s05a, s19b (2), d18a, camera, rank. All get the
+  same 6 lines (only s11e, s11i and s08b are linked in today).
+- **TLB misses at 0x638478/548 (48):** s11e's commander reads `sn_dis` and writes `field_BFC` for a removed
+  soldier's NULL entry, as s03d's `zakocom.c` did. The PS1 reads 0 at 0xC2C (every RAM dump) and writes 0xBFC; the port
+  uses 0 and skips the write.
+- **Still open:** s11h's DEMO_SHADOW Act (`s11h_800C6490`) reads a freed parent (2 misses, loop ~84,515). The PS1
+  reads its own heap there; it only draws (visible or not), no game state.
+
+Matching builds 80 and 2 OK. In sync from the start to 93,337 (0:49:16.90, s12a), the rand seed.
+

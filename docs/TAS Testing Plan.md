@@ -367,7 +367,11 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [x] Fixed: rand seed at loop 56,569 (0:29:45.27, `s09a`): GV_Time took the PS1's number a loop after a load's end, so the new stage's actors made their first Act under the port's own number; s09a's dogs take turns by `GV_Time % 3` and were a turn apart. `Port_TasScenario` (gamed.c, where the load request clears) renumbers before the script runs (Running Walkthrough Step 40).
 - [x] Fixed: rand seed at loop 57,290 (0:30:06.47, `s10a`): Wolf's creation burn read the tick 2 blanks before the next line's sample, as at 47,488 (`TICK_AT` 57,275: 107,405), so the rats' wait rolls after it were 2 draws off. The seed resync after the load-end loop hid the count (149 against 147). Also a TLB miss there: `sub_8004EB74` reads Snake's NULL pad pointer, the PS1's RAM at 8 (0x0008).
 - [x] Faster iterations (2026-11-04): `run_port.py --rand-log A-B` logs every rand() draw in loops A to B (HAL `Hal_RandHook`, `Port_RandFrom` in util.c's GV_RandU/GV_RandS; host:tas_randlog.txt, no new link) and lists them per loop by game function. Sync runs use PCSX2's null GS renderer (`pcsx2_run.py --renderer null`; `--sw` falls back): 37 s instead of 45 s to loop 10,000; the whole run to 59,444 takes 211 s, same desync. `--dir D` runs in its own folder (links to the ISO, ELF and replay tables), so runs can go at once: to loop 20,000, 1 run 72 s, 2 at once 77 s, 3 at once 90 s (2.4x serial), all in sync.
-- [ ] Next desync: loop 59,444 (0:31:17.28, `s03b`): GV_Clock (port 0, PS1 1), GV_PadData and DG_UnDrawFrameCount (port 1, PS1 0) together. No TLB misses in the run to it.
+- [x] Loops 59,444 to 72,998 (2026-11-04, Running Walkthrough Step 42): the PS1's frame holds (`DG_HikituriFlag`) copied from
+      its `GV_Clock`; lines BizHawk sampled partway into a loop compared with the port's next line (`compare_trace.same`);
+      loops without a line keep the PS1's clock and play time; a stream starts in the PS1's loop even when the port's
+      stream task is a loop late (strctrl.c state 1).
+- [ ] Next desync: loop 72,998 (0:38:21.72, `s11a`): GV_PadData, a stick value (`0829` against `1029`).
   Found so far (2026-11-03): in loop 47,498 the PS1's Wolf switches to state 0 (Work+1748) and draws 3 (her
   `RandU(4)`, `9A4C`, `RandU(16)`); the port's doesn't. Equal on both sides at the loop's start: Wolf's whole Work,
   her two TARGETs, the actor lists, the overlay's data, the resident globals but sound/OT/stack noise

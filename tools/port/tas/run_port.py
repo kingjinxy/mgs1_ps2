@@ -272,7 +272,7 @@ def main():
     run = subprocess.Popen([OFFSCREEN, sys.executable, "-u", PCSX2_RUN, os.path.join(WORK, "mgs_ps2.iso"),
                             "--seconds", str(a.seconds), "--stall", "15",
                             "--renderer", "sw" if a.sw or a.shot else "null"], stdout=log, stderr=subprocess.STDOUT)
-    first, ignored_first, last_t, desync, buf, f = {}, {}, -1, None, "", None
+    first, ignored_first, last_t, desync, buf, f, held = {}, {}, -1, None, "", None, None
     try:
         while desync is None:
             ended = run.poll() is not None
@@ -282,15 +282,18 @@ def main():
             buf += chunk
             *lines, buf = buf.split("\n")
             for line in lines:
-                p = line.split()
-                if len(p) < 14:
+                nxt = line.split()
+                if len(nxt) < 14:
+                    continue
+                last_t = int(nxt[1])
+                p, held = held, nxt  # line t is compared when t+1 is in (compare_trace.same: a late PS1 sample)
+                if p is None:
                     continue
                 t = int(p[1])
-                last_t = t
                 if t < a.start or t not in ref:
                     continue
                 r = ref[t]
-                for name in (n for i, n in FIELDS.items() if not same(i, p, r)):
+                for name in (n for i, n in FIELDS.items() if not same(i, p, r, nxt if last_t == t + 1 else None)):
                     if ignored(name, t, p, r, rules):
                         ignored_first.setdefault(name, (t, detail(name, p, r)))
                     else:

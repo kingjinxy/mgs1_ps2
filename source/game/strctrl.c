@@ -60,10 +60,22 @@ static void Act( Work *work )
     switch ( work->field_20_state )
     {
     case 1:
+#ifdef MGS_PORT
+        {
+            /* port/src/tas_replay.c: in replays, the PS1 started this stream's clock in this loop: case 3 waits
+               for the port's data, not case 1 (the port's task a loop late at 61,305: Johnny's talk count) */
+            extern int Port_TasStreamMayStart( void );
+            if ( FS_StreamTaskState() < 0 && Port_TasStreamMayStart() != 1 )
+            {
+                return;
+            }
+        }
+#else
         if ( FS_StreamTaskState() < 0 )
         {
             return;
         }
+#endif
         work->field_20_state = 2;
 
     case 2:

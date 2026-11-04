@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 59,444 (0:31:17.28), 35.93%.
+Current: loop 72,998 (0:38:21.72), 44.05%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -47,6 +47,9 @@ Current: loop 59,444 (0:31:17.28), 35.93%.
 | 56,569 | 0:29:45.27 | 34.17% | loop 47,556 (HZD floors tagged with the EE's uncached mirror instead of bit 31: HZD_IS_WALL/HZD_TAG_FLOOR/HZD_UNTAG_FLOOR in libhzd.h) | Nov 3 |
 | 57,290 | 0:30:06.47 | 34.57% | the load-end loop has the PS1's number when the stage script runs (s09a's dogs take turns by `GV_Time % 3`) | Nov 4 |
 | 59,444 | 0:31:17.28 | 35.93% | Wolf's s10a creation burn reads the tick 2 blanks before the line's (`TICK_AT` 57,275); NULL pad pointer in `sub_8004EB74` | Nov 4 |
+| 60,532 | 0:31:53.56 | 36.62% | the PS1's frame holds (`DG_HikituriFlag`, behind its `STATE_NOSLOW` pace) copied from its `GV_Clock` | Nov 4 |
+| 61,444 | 0:32:21.02 | 37.15% | lines BizHawk sampled partway into a loop compared with the port's next line; loops without a line keep the PS1's play time | Nov 4 |
+| 72,998 | 0:38:21.72 | 44.05% | a stream starts in the PS1's loop even when the port's stream task is a loop late (Johnny's talk count, 61,305) | Nov 4 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

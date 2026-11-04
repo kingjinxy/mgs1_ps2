@@ -60,12 +60,28 @@ def control_diff(a, b):
                      if pa[o:o + n] != pb[o:o + n])
 
 
-def same(i, p, r):
+def seed_between(a, b, c):
+    """Whether seed b comes on rand()'s way from a to c (at most 4,096 draws)."""
+    s, b, c = int(a, 16), int(b, 16), int(c, 16)
+    for _ in range(4096):
+        if s in (b, c):
+            return s == b
+        s = (s * 0x41C64E6D + 0x3039) & 0xFFFFFFFF
+    return False
+
+
+def same(i, p, r, nxt=None):
+    """Field i of the port's line p and the PS1's r. BizHawk can sample in a wait inside loop t (trace_to_pads.py's
+    note), after some of its actors: the PS1's line then has values between the port's line t and nxt, t+1's
+    (loops 59,444 and 60,532 after a hold, 61,444: Johnny's draw, 61,449: STATE_NOSLOW). Not GV_Clock and
+    GV_PassageTime, set in gvd.c before any sample: a held clock's parity stays one off."""
     if i >= len(p) or i >= len(r):
         return True  # a field only the debug traces have
-    if i == 23:
-        return control_key(p[i]) == control_key(r[i])
-    return p[i] == r[i]
+    if (control_key(p[i]) == control_key(r[i])) if i == 23 else p[i] == r[i]:
+        return True
+    if nxt is None or i in (2, 3) or i >= len(nxt):
+        return False
+    return seed_between(p[i], r[i], nxt[i]) if i == 5 else same(i, nxt, r)
 
 
 def linkvar_diff(a, b):
@@ -93,7 +109,7 @@ def main():
     first, listed = {}, 0
     for t in common:
         p, r = port[t], ref[t]
-        diff = [n for i, n in FIELDS.items() if not same(i, p, r)]
+        diff = [n for i, n in FIELDS.items() if not same(i, p, r, port.get(t + 1))]
         for n in diff:
             first.setdefault(n, t)
         if diff and listed < a.all:

@@ -64,7 +64,7 @@ static unsigned char* mgs_tas_ticks; /* host:tas_ticks.bin: the PS1's mts tick p
 static unsigned int   size_mgs_tas_ticks;
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
-extern int          DG_UnDrawFrameCount, GM_LoadComplete;
+extern int          DG_UnDrawFrameCount, DG_HikituriFlag, GM_LoadComplete;
 extern short        linkvarbuf[96];
 extern unsigned char GV_PadData[64], pad_800C14E0[16], GM_PlayerPosition[8];
 extern int          GM_PlayerStatus;
@@ -821,6 +821,17 @@ void Port_TasTrace(void)
     {
         Display_RequestDump(); /* the frame this loop draws, at its display */
         printf("tas: frame of loop %d dumped\n", GV_Time);
+    }
+    {
+        /* DG_HikituriFlag: the PS1 fell behind STATE_NOSLOW's 2-vblank pace (dgd.c) and didn't flip GV_Clock in
+           this loop; the port keeps pace (loop 59,444). BizHawk's mid-loop samples are fixed in the table
+           (trace_to_pads.py, compare_trace.py's fix_clock) */
+        const unsigned char* p = time_record_at(GV_Time - 1);
+        const unsigned char* r = time_record();
+        if (p && r && !DG_HikituriFlag && read_u32(p + 20) == read_u32(r + 20))
+        {
+            GV_Clock ^= 1;
+        }
     }
     if (prev_request && !GM_LoadRequest && s_Loads < s_Ps1Loads)
     {

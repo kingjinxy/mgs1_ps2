@@ -19,6 +19,8 @@ import os
 import struct
 import sys
 
+from compare_trace import fix_clock
+
 REPO = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 src = os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "tas", "reference", "trace.log.xz"))
 out_dir = os.path.expanduser(sys.argv[2] if len(sys.argv) > 2 else "~/emu/tas")
@@ -53,6 +55,7 @@ for line in (lzma.open(src, "rt") if src.endswith(".xz") else open(src)):
         sys.exit("%s: no stream timing, pad state, stream data, file read or play time fields (an older trace.lua)"
                  % src)
     rows.append(f)
+fix_clock({int(f[1]): f for f in rows})  # BizHawk's mid-loop samples: tas_replay.c copies the clock's holds
 out, prev, raw, prev_raw, time, ticks, starts = bytearray(), None, bytearray(), None, {}, 0, 0
 for i, f in enumerate(rows):
     t = int(f[1])
@@ -119,7 +122,13 @@ lines = len(rows)
 pads_path, time_path = os.path.join(out_dir, "pads.bin"), os.path.join(out_dir, "time.bin")
 open(pads_path, "wb").write(out)
 open(os.path.join(out_dir, "raw.bin"), "wb").write(raw)
-empty = struct.pack("<iIIiIiiIii", NO_TICK, 0, 0, 0, 0, 0, -1, starts, 0, 0)
-open(time_path, "wb").write(b"".join(time.get(t, empty) for t in range(max(time) + 1)))
+# a loop without a line (two loops in one video frame, as after a hold): no passage, the next line's GV_Clock and
+# play time (tas_replay.c's hold check, its display; zeros made the play time 0 at loop 60,536)
+records, nxt = [], None
+for t in range(max(time), -1, -1):
+    if t in time:
+        nxt = struct.unpack("<iIIiIiiIii", time[t])
+    records.append(time.get(t) or struct.pack("<iIIiIiiIii", NO_TICK, 0, 0, 0, 0, nxt[5], -1, starts, 0, nxt[9]))
+open(time_path, "wb").write(b"".join(reversed(records)))
 print("%s: %d game loops, %d records; raw.bin: %d records; %s: %d loops with a stream tick"
       % (pads_path, lines, len(out) // 68, len(raw) // 28, time_path, ticks))

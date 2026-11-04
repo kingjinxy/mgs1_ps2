@@ -20857,3 +20857,442 @@ I'll check what's running.
 
 - tool `Bash`: Matching build, docs, archive, commit
 
+## Claude
+
+The TAS replay is now in sync to **loop 79,264 (0:41:44.05, 47.92%)**, up from 59,444 (0:31:17.28, 35.93%) this morning. All the work is committed and nothing is pushed. After each change the matching build passed (80 and 2 OK), and the latest run had no TLB misses.
+
+On your question: none of the four background tasks needs to keep running. Everything I ran this session finished in the foreground, and no PCSX2, BizHawk or run_port processes are left. The four are probably earlier wait loops or monitors whose IDs I no longer have, so please stop them from the task list. Of the processes still running, keep the HAL's UDPFS server and PS2 log receiver for hardware deploys; the 18-hour-old Xvfb is a leftover you can kill.
+
+**Fixes, in order** (commits `6de4b3127`, `51e73b077`, `c45084cad`, `a189e9ec9`):
+1. **Frame holds (59,444):** when either machine falls behind STATE_NOSLOW's pace it skips a GV_Clock flip (`DG_HikituriFlag`). The replay now copies the PS1's holds and undoes the port's own, which depend on host speed.
+2. **Late PS1 samples:** in busy loops BizHawk sometimes samples partway through a loop. The comparison now accepts a PS1 value that matches the port's next line. GV_Clock and passage time are still compared exactly.
+   - **Weak spot:** for the rand seed, this only proves the draw counts are similar, not that each caller got the same value. It hid one real desync for 6 loops before the status field caught it.
+3. **Loops with no PS1 trace line** were getting all-zero records, which set the play time to 0. They now take the next line's clock and play time.
+4. **Stream start a loop late (61,305):** the replay held strctrl until the port's own stream task was ready, a loop after the PS1. That made Johnny's talk timing, and later his random roll, a loop late. It now starts in the PS1's loop.
+5. **s11a wasn't in the port at all:** its character table used raw addresses, so the overlay was left out of the link and the stairs guards never existed. I filled in the two missing names in `charalst.h`. I also fixed 50 TLB misses in the torture room (`boxall.c` reading through a NULL player pointer).
+6. **s11b, s11g and s11d translated** with the s10a pipeline (`stage_split.py`, `mips2c.py`):
+   - `stage_split.py` now declares resident constructors that the stage tables use.
+   - The link check no longer counts jump-table addresses that the translated code switches on (those were keeping s11g out).
+7. **One-line pad blip at 72,998:** let through with `--ignore "GV_PadData@72998-72998"`. Nothing differed after it, but it isn't built in, so every run past that loop needs the flag.
+
+**Next desync, 79,264 (s11i):** the rand seed differs. s11i is one of the 12 overlays still left out of the link (3 literal addresses), so it probably needs the same treatment as s11a.
+
+The docs are updated (Running Walkthrough Steps 42–44, TAS Progress, TAS Testing Plan, Planning Doc), and the conversation archive has no removed lines.
+
+## User
+
+I can’t seem to stop any of the background tasks you have listed
+
+- tool `ToolSearch`: 
+
+## Claude
+
+I'll look up the task IDs in the session transcript.
+
+- tool `Bash`: Find background task IDs in the transcript
+
+## Claude
+
+I'll try stopping each ID from the transcript; the ones that already ended will just fail.
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+- tool `TaskStop`: 
+
+## Claude
+
+I couldn't stop them from here either. I tried every background task ID in this session's transcript, and none of them exists any more.
+
+As far as I can tell, the four entries are left over from before the context was summarized and nothing is behind them. My process check found no PCSX2, BizHawk, run_port or wait loops running. The only long-running processes are the HAL's UDPFS server and PS2 log receiver, which you started for hardware deploys, and an idle Xvfb.
+
+The entries will probably clear when this session ends or restarts. If they don't, or the UI shows a command or PID for one, tell me and I'll check that process directly.
+
+## User
+
+<command-name>/clear</command-name>
+            <command-message>clear</command-message>
+            <command-args></command-args>
+
+## User
+
+Continue fixing desync issues until 4:30 pm, when I will do a check in. Report on your progress then and update docs and commit as necessary. If you’re in the middle of a task, complete it first. 
+Always keep in mind the Ponytail philosophy, and keep in mind that slowly circling an issue is sometimes inevitable, but if you’re making very little progress, it may make sense to step back and think about whether a systemic issue is at play that requires rethinking the solution. If you come across something that requires a serious change, notify me and I can provide guidance. Otherwise, continue to commit and update docs after each meaningful change, but keep working autonomously. Notify me with a short progress summary each hour, starting at 1:30 pm. If you’re in the middle of a task, finish it first.
+
+- tool `Bash`: Check time and latest walkthrough state
+
+- tool `ToolSearch`: 
+
+- tool `Bash`: Find overlay literal-address check
+
+- tool `Bash`: List s11i literal addresses
+
+- tool `Bash`: Read overlay inclusion logic
+
+- tool `Bash`: Locate s11i literal addresses
+
+## Claude
+
+Working on the next desync (loop 79,264, s11i): s11i is left out of the port because of 3 literal addresses in zako11f/action.c; fixing those now.
+
+- tool `Bash`: Inspect the literals and find their symbols
+
+- tool `Bash`: Use symbols in table, run matching build
+
+- tool `Bash`: Count OK outputs, find port build command
+
+- tool `Bash`: VR check, see port build and run options
+
+- tool `Bash`: Read run_port.py header
+
+- tool `Bash`: Link port and replay TAS to next desync
+
+## Claude
+
+s11i now links in; the run reaches 84,331 (0:44:22.39, s11h), a rand seed desync. Committing, then logging rand draws there.
+
+- tool `Bash`: Check linked overlays, rerun with rand log
+
+- tool `Bash`: Inspect rand-log plumbing
+
+- tool `Bash`: Read rand log implementation
+
+- tool `Bash`: Inspect run log for rand lines
+
+- tool `Bash`: Find reference trace path
+
+- tool `Bash`: Compare PS1 reference lines around desync
+
+## Claude
+
+Diagnosing the 84,331 desync: the port makes no rand draws in that window while the PS1 does. Checking the trace fields to see what differs.
+
+- tool `Bash`: Read compare_trace usage
+
+- tool `Bash`: Interleave PS1 and port lines near desync
+
+- tool `Bash`: Count PS1 draws and see stage context
+
+- tool `Bash`: Port's seed timeline after desync
+
+- tool `Bash`: Port log around s11h
+
+## Claude
+
+s11h loads a stage binary (4AC2) that isn't linked in — finding which overlay it is.
+
+- tool `Bash`: Find stage binary hash mapping
+
+- tool `Bash`: Read stage table lookup
+
+## Claude
+
+s11h has no source at all (unsplit, like s11b was). Following the Stage Overlay Translation recipe.
+
+- tool `Bash`: Read unsplit stage checklist
+
+- tool `Bash`: Read translation doc outline and end
+
+- tool `Bash`: Split and translate s11h
+
+- tool `Bash`: Matching builds after s11h split
+
+- tool `Bash`: Relink and replay with s11h
+
+## Claude
+
+Progress to 84,553. Checking the 2 TLB-miss lines, then committing.
+
+- tool `Bash`: Show TLB miss lines
+
+- tool `Bash`: Resolve TLB miss PC and stage context
+
+- tool `Bash`: Read the faulting translated function
+
+- tool `Bash`: Locate the s11h function source
+
+- tool `Bash`: Read the translated function
+
+- tool `Bash`: Find callers and context in s11h
+
+## Claude
+
+Investigating s11h's new desync at 84,553 (0:44:30.28) and a NULL read in translated s11h code (s11h_800C63DC).
+
+- tool `Bash`: Stage table and call chain
+
+- tool `Bash`: Rest of stage table
+
+- tool `Bash`: Find decompiled DEMO_SHADOW actor
+
+- tool `Bash`: Read decompiled demo kage
+
+- tool `Bash`: Check port handling in demokage
+
+- tool `Bash`: Read translated Act
+
+## Claude
+
+Reading a stale parent pointer in the s11h demo shadow (parent freed) — noted; first checking whether the 84,553 desync is related, via the rand log.
+
+- tool `Bash`: Rand log at 84,553 and PS1 draw counts
+
+- tool `Bash`: Draw counts per loop both sides
+
+- tool `Bash`: Rand callers 84,552–84,558
+
+## Claude
+
+The port fires a bullet (bullet.c + AN_HeavyFlash) 3 loops late at s11h's start; finding which s11h actor fires it.
+
+- tool `Bash`: Find s11h code that fires
+
+- tool `Bash`: What the hind-related functions call
+
+- tool `Bash`: Look at stream/tick uses in s11h
+
+## Claude
+
+The s11h Hind gates its fire on the mts tick (`Port_GameTick() - last < 12`), the same mechanism as Wolf's TICK_AT cases. Checking how the replay supplies ticks.
+
+- tool `Bash`: Read tick replay mechanism
+
+- tool `Bash`: Ticks per loop and where hind stores tick
+
+- tool `Bash`: How tables are regenerated
+
+- tool `Bash`: Try mid-loop tick for s11h load end
+
+## Claude
+
+No change; adding a temporary printf at the Hind's tick check to see the actual values.
+
+- tool `Bash`: Read the hind fire tick code
+
+- tool `Bash`: Find bullet call sites
+
+- tool `Bash`: Who calls NewBulletEx in s11h
+
+- tool `Bash`: Structure of the bullet-firing function
+
+- tool `Bash`: Gate before NewBulletEx
+
+## Claude
+
+The Hind fires when `GV_Time % N == 0`, so the port's Hind wasn't ready at 84,552. Its state uses `GM_StreamStatus` (like Step 42's late stream). Instrumenting temporarily.
+
+- tool `Bash`: Entry points for instrumentation
+
+- tool `Bash`: Instrument hind state and fire gate
+
+- tool `Bash`: Port log between load end and fire
+
+- tool `Bash`: Control flow in hind act up to fire call
+
+- tool `Bash`: Gate right before fire call
+
+- tool `Bash`: Where the fire-skip flag is set
+
+## Claude
+
+Tracing why the Hind skips its fire routine at loop 84,552 in the port (temporary printfs).
+
+- tool `Bash`: Trace hind Act and gate per loop
+
+- tool `Bash`: Early exits in fire routine
+
+- tool `Bash`: Print aim vector in fire routine
+
+- tool `Bash`: Read first part of fire routine
+
+- tool `Bash`: Look for decompiled Hind source
+
+- tool `Bash`: List decompiled Hind files
+
+## Claude
+
+Still on the Hind's fire timing at 84,552 — looking for a decompiled version of this Hind code to read instead of the translated MIPS.
+
+- tool `Bash`: Find decompiled Hind fire code
+
+- tool `Bash`: All NewBulletEx callers
+
+- tool `Bash`: Middle of fire routine
+
+- tool `Bash`: Time and RAM dump tool usage
+
+- tool `Bash`: DG_OBJS / DG_OBJ layout
+
+- tool `Bash`: Where DG_OBJ world matrices are computed
+
+- tool `Bash`: Read world matrix computation in screen.c
+
+- tool `Bash`: Who runs the screen pass; PS1 passage times
+
+- tool `Bash`: Frame skip logic
+
+- tool `Bash`: EndFrame and hold flag usage
+
+- tool `Bash`: Hold flag effects and the replay's handling
+
+- tool `Bash`: Where the replay hooks run
+
+- tool `Bash`: Regenerate s11h clean; look at replay helpers
+
+## Claude
+
+Now the change: a `Port_TasHold()` hook used by dgd.c, and the old flip removed.
+
+- tool `Bash`: Set hold flag from PS1 table; drop clock flip
+
+- tool `Bash`: Rebuild and replay with copied holds
+
+## Claude
+
+No change, so the holds weren't the cause here (the change still makes the replay more faithful; I'll keep it if a full run stays in sync). Back to what the Hind's zero vector is.
+
+- tool `Bash`: Writes to the stack area used by the sqrt
+
+- tool `Bash`: Dump Hind objs[0] world matrix per loop
+
+## Claude
+
+The Hind's model matrix varies wildly in scale each loop (29136, -350, 0, 2649…), and it's exactly zero at 84,552 in the port. Dumping the PS1's RAM at that loop to compare the same matrix.
+
+- tool `Bash`: Dump PS1 RAM at loops 84,551 and 84,552
+
+- tool `Bash`: Find Hind work in PS1 RAM, read matrix
+
+## Claude
+
+PS1 at the same loops: scale ~620 and t.y ≈ 2,800–2,900, changing smoothly. The port's matrix is noise, so the translated Hind code computes it wrong. Narrowing down where.
+
+- tool `Bash`: ABI rules and hind object update code
+
+- tool `Bash`: Compare Hind objs->world port vs PS1
+
+## Claude
+
+objs->world itself (written by the Hind actor) is wrong: X/Z match the PS1, but the scale and Y are noise. Finding the code that sets them.
+
+- tool `Bash`: Locate scale/position writes in hind
+
+- tool `Bash`: Read the hind ScaleMatrix code
+
+- tool `Bash`: Second ScaleMatrix branch
+
+- tool `Bash`: Decompiled hind act and sub_8007F1DC
+
+- tool `Bash`: Code before the scale computation
+
+## Claude
+
+The Hind's position/scale come from `sub_8007F1DC` (decompiled C) fed by the camera position and the Hind's own position. Comparing those inputs between the port and the PS1 RAM dump.
+
+- tool `Bash`: PS1 Hind inputs from RAM dump
+
+- tool `Bash`: Print hind inputs in port
+
+## Claude
+
+Found it: the port's Hind Y position starts at 15,578,195 (PS1: ~15,000) and eases down from there. Something in its setup is wrong. Checking the constructor.
+
+- tool `Bash`: Map hind work offsets via s11g decomp
+
+- tool `Bash`: Where hind position y is written
+
+- tool `Bash`: All position y uses and init
+
+- tool `Bash`: Find the hind constructor's option parsing
+
+- tool `Bash`: Position parsing in hind constructor
+
+- tool `Bash`: Writes to hind position
+
+- tool `Bash`: Any non-load references to pos fields
+
+- tool `Bash`: Constructor and act writes of y
+
+- tool `Bash`: Original asm for the misread adds
+
+- tool `Bash`: How mips2c pairs lui/addiu
+
+- tool `Bash`: Read hi/lo pairing logic
+
+- tool `Bash`: Raw instructions around misread add
+
+- tool `Bash`: Read mips2c instruction translation
+
+## Claude
+
+The culprit is a fallback heuristic in mips2c: any `addiu rX,rX,imm` with |imm| ≥ 0x1000 is paired with *any* `lui rX,0x80xx` anywhere in the function. Checking why it was added.
+
+- tool `Bash`: History of the lui heuristic
+
+## Claude
+
+The later `pending` mechanism already carries a delay-slot `lui` to its branch target, so this scan may be redundant. Removing it and regenerating every translated overlay to see what changes.
+
+- tool `Bash`: Remove the broad lui scan; list translated overlays
+
+- tool `Bash`: Regenerate all translated overlays
+
+- tool `Bash`: Inspect the regenerated differences
+
+## Claude
+
+All changes are constants that had been read as addresses (s10a, s11b, s11g, s11d Hinds too), except one: s11d's printf string lost its address. Checking that case.
+
+- tool `Bash`: Context for the printf string case
+
+- tool `Bash`: Where a0's lui is
+
+- tool `Bash`: Carry lui across j; regenerate; show unusual diffs
+
+## Claude
+
+Only constant fixes remain and the s11d printf keeps its string. Now a full replay from the start, since this touches s10a/s11b/s11g/s11d and the hold handling.
+
+- tool `Bash`: Full TAS replay from the start
+
+## Claude
+
+In sync to 84,844 (0:44:40.23) from the start. Reverting my speculative TICK_AT entry (it had no effect), then running the matching build and committing.
+
+- tool `Bash`: Revert tick entry, matching builds
+
+## Claude
+
+Writing the walkthrough step and committing.
+
+- tool `Bash`: Find planning doc progress lines
+
+- tool `Bash`: Read planning doc lines to update
+
+- tool `Bash`: Update docs and stage changes
+
+- tool `Bash`: Count changed constants per overlay
+
+- tool `Bash`: Fix counts and commit
+

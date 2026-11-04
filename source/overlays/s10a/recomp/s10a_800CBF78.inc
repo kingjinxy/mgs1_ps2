@@ -7,8 +7,8 @@ extern char R_s10a_dat_800C356E[] __asm__("s10a_dat_800C356E");
 extern char R_s10a_dat_800C3570[] __asm__("s10a_dat_800C3570");
 extern char R_s10a_dat_800E3CB8[] __asm__("s10a_dat_800E3CB8");
 extern char R_NewAnime[] __asm__("NewAnime");
-int G_s10a_800CBF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CBF78");
-int G_s10a_800CBF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800CBF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800CBF78");
+int G_s10a_800CBF78(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

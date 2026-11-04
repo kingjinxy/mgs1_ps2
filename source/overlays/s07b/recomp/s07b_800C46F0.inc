@@ -1,5 +1,5 @@
-int G_s07b_800C46F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C46F0");
-int G_s07b_800C46F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C46F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C46F0");
+int G_s07b_800C46F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     c = ((r[6] != 0)); r[2] = (u)0 + (u)0; if (c) goto L800c4708;

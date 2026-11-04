@@ -4,8 +4,8 @@ extern char R_DrawSync[] __asm__("DrawSync");
 extern char R_LoadImage2[] __asm__("LoadImage2");
 extern char R_StoreImage2[] __asm__("StoreImage2");
 extern char R_s10a_800E2848[] __asm__("s10a_800E2848");
-int G_s10a_800E28B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E28B8");
-int G_s10a_800E28B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E28B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E28B8");
+int G_s10a_800E28B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(56)
     r[29] = (u)r[29] + -56;
@@ -68,8 +68,8 @@ out:
 }
 extern char R_DG_Chanls[] __asm__("DG_Chanls");
 extern char R_GV_Clock[] __asm__("GV_Clock");
-int G_s10a_rc_800E29AC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E29AC");
-int G_s10a_rc_800E29AC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800E29AC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800E29AC");
+int G_s10a_rc_800E29AC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[10] = 0xff0000;

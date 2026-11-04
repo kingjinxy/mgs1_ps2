@@ -2,8 +2,8 @@ extern char R_GV_Time[] __asm__("GV_Time");
 extern char R_s08b_dword_800E3900[] __asm__("s08b_dword_800E3900");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_NewPlasma_800CD1A4[] __asm__("NewPlasma_800CD1A4");
-int G_s08b_bunsin2_800C9978(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C9978");
-int G_s08b_bunsin2_800C9978(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800C9978(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800C9978");
+int G_s08b_bunsin2_800C9978(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

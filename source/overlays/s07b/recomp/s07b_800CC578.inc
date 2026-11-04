@@ -4,8 +4,8 @@ extern char R_GV_LenVec3[] __asm__("GV_LenVec3");
 extern char R_GV_SubVec3[] __asm__("GV_SubVec3");
 extern char R_GV_VecDir2[] __asm__("GV_VecDir2");
 extern char R_GV_VecLen3[] __asm__("GV_VecLen3");
-int G_s07b_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CC578");
-int G_s07b_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CC578");
+int G_s07b_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;

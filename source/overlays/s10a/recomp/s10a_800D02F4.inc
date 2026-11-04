@@ -8,8 +8,8 @@ extern char R_GM_MoveTarget[] __asm__("GM_MoveTarget");
 extern char R_NewBlood[] __asm__("NewBlood");
 extern char R_s10a_800CF558[] __asm__("s10a_800CF558");
 extern char R_s10a_800D0230[] __asm__("s10a_800D0230");
-int G_s10a_800D02F4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D02F4");
-int G_s10a_800D02F4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D02F4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D02F4");
+int G_s10a_800D02F4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(88)
     r[29] = (u)r[29] + -88;

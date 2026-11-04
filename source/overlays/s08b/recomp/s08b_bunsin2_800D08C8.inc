@@ -2,8 +2,8 @@ extern char R_GM_PlayerAddress[] __asm__("GM_PlayerAddress");
 extern char R_s08b_bunsin2_800CEA34[] __asm__("s08b_bunsin2_800CEA34");
 extern char R_s08b_bunsin2_800CEE68[] __asm__("s08b_bunsin2_800CEE68");
 extern char R_s08b_bunsin2_800CEF34[] __asm__("s08b_bunsin2_800CEF34");
-int G_s08b_bunsin2_800D08C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D08C8");
-int G_s08b_bunsin2_800D08C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800D08C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800D08C8");
+int G_s08b_bunsin2_800D08C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

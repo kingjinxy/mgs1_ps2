@@ -2,8 +2,8 @@ extern char R_GM_CheckMessage[] __asm__("GM_CheckMessage");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_s10a_800D4B24[] __asm__("s10a_800D4B24");
 extern char R_s10a_800D4D64[] __asm__("s10a_800D4D64");
-int G_s10a_800D4FA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D4FA0");
-int G_s10a_800D4FA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D4FA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D4FA0");
+int G_s10a_800D4FA0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

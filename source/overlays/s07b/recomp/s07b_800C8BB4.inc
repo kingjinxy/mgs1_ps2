@@ -20,8 +20,8 @@ extern char R_NewSepia_800C5214[] __asm__("NewSepia_800C5214");
 extern char R_OpenCinemaScreen[] __asm__("OpenCinemaScreen");
 extern char R_s07b_800C4854[] __asm__("s07b_800C4854");
 extern char R_s07b_800C4E90[] __asm__("s07b_800C4E90");
-int G_s07b_800C8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C8BB4");
-int G_s07b_800C8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C8BB4");
+int G_s07b_800C8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

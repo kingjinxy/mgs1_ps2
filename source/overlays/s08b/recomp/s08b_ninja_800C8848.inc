@@ -5,8 +5,8 @@ extern char R_s08b_dword_800E431C[] __asm__("s08b_dword_800E431C");
 extern char R_s08b_dword_800E4320[] __asm__("s08b_dword_800E4320");
 extern char R_s08b_rc_800C800C[] __asm__("s08b_rc_800C800C");
 extern char R_GM_SetCameraCallbackFunc[] __asm__("GM_SetCameraCallbackFunc");
-int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_ninja_800C8848");
-int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_ninja_800C8848");
+int G_s08b_ninja_800C8848(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

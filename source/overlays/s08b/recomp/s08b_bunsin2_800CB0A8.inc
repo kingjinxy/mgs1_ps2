@@ -2,8 +2,8 @@ extern char R_s08b_bunsin2_800C9B38[] __asm__("s08b_bunsin2_800C9B38");
 extern char R_s08b_dword_800C33D8[] __asm__("s08b_dword_800C33D8");
 extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
 extern char R_s08b_bunsin2_800C9120[] __asm__("s08b_bunsin2_800C9120");
-int G_s08b_bunsin2_800CB0A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CB0A8");
-int G_s08b_bunsin2_800CB0A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CB0A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CB0A8");
+int G_s08b_bunsin2_800CB0A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

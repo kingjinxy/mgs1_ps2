@@ -6,8 +6,8 @@ extern char R_s07b_800CB9E8[] __asm__("s07b_800CB9E8");
 extern char R_s07b_800CBD4C[] __asm__("s07b_800CBD4C");
 extern char R_s07b_800CC89C[] __asm__("s07b_800CC89C");
 extern char R_s07b_800CC9E8[] __asm__("s07b_800CC9E8");
-int G_s07b_800CEFF0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CEFF0");
-int G_s07b_800CEFF0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CEFF0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CEFF0");
+int G_s07b_800CEFF0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

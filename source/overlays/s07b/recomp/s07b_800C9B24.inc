@@ -2,8 +2,8 @@ extern char R_GM_GameOverTimer[] __asm__("GM_GameOverTimer");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s07b_800C8F9C[] __asm__("s07b_800C8F9C");
 extern char R_s07b_800C54C0[] __asm__("s07b_800C54C0");
-int G_s07b_800C9B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C9B24");
-int G_s07b_800C9B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C9B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C9B24");
+int G_s07b_800C9B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[2] = 0;

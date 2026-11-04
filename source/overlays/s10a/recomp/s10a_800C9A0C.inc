@@ -13,12 +13,12 @@ extern char R_GM_InitObject[] __asm__("GM_InitObject");
 extern char R_GM_SetHomingTarget[] __asm__("GM_SetHomingTarget");
 extern char R_GV_CacheID[] __asm__("GV_CacheID");
 extern char R_GV_GetCache[] __asm__("GV_GetCache");
-extern char R_NewShadow2[] __asm__("NewShadow2");
+extern char R_Port_NewShadow2[] __asm__("Port_NewShadow2");
 extern char R_s10a_800C781C[] __asm__("s10a_800C781C");
 extern char R_s10a_800C99B0[] __asm__("s10a_800C99B0");
 extern char R_s10a_800CB370[] __asm__("s10a_800CB370");
-int G_s10a_800C9A0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C9A0C");
-int G_s10a_800C9A0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C9A0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C9A0C");
+int G_s10a_800C9A0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(72)
     r[29] = (u)r[29] + -72;
@@ -114,7 +114,7 @@ int G_s10a_800C9A0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[6] = r[2] | r[6];
     r[2] = *(unsigned short *)((u)r[29] + 36);
     r[7] = (u)r[7] << 16;
-    r[7] = r[2] | r[7]; CALL(R_NewShadow2);
+    r[7] = r[2] | r[7]; CALL(R_Port_NewShadow2);
     *(int *)((u)r[17] + 2800) = r[2];
     r[4] = *(int *)((u)r[16] + 0);
     r[5] = (u)r[17] + 2812;

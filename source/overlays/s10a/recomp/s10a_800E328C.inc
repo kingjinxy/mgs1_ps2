@@ -2,8 +2,8 @@ extern char R_s10a_dat_800C3844[] __asm__("s10a_dat_800C3844");
 extern char R_GCL_ExecProc[] __asm__("GCL_ExecProc");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_s10a_800E027C[] __asm__("s10a_800E027C");
-int G_s10a_800E328C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E328C");
-int G_s10a_800E328C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E328C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E328C");
+int G_s10a_800E328C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

@@ -2,8 +2,8 @@ extern char R_SetDrawTPage[] __asm__("SetDrawTPage");
 extern char R_SetSemiTrans[] __asm__("SetSemiTrans");
 extern char R_s10a_800E350C[] __asm__("s10a_800E350C");
 extern char R_s10a_800E354C[] __asm__("s10a_800E354C");
-int G_s10a_800E0FE0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E0FE0");
-int G_s10a_800E0FE0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E0FE0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E0FE0");
+int G_s10a_800E0FE0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

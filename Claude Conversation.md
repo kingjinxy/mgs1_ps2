@@ -18353,3 +18353,453 @@ The misses start around loop 27,150, long before this change's area, so they pre
 
 - tool `Bash`: Read DG_GetLightMatrix
 
+## Claude
+
+That's a NULL read in `DG_GetLightMatrix`, probably a caller passing `pos = NULL` around loop 27,150 (0:14:16). It's separate from this change. I'll record it and commit option 1.
+
+- tool `Bash`: Docs and commit option 1
+
+## Claude
+
+Option 1 is in. The TAS is now in sync to **loop 56,569 (0:29:45.27, in `s09a`)**, up from 47,556 and past the Wolf fight, about 34% of the run. Both matching builds pass (80 OK, and 2 OK for `vr_exe`), and it's committed as `536490449`.
+
+**What changed**
+- **Macros:** `libhzd.h` has three new macros: `HZD_IS_WALL`, `HZD_TAG_FLOOR` and `HZD_UNTAG_FLOOR`.
+  - On the PS2, a floor is marked by pointing it at the uncached copy of the same memory (`| 0x20000000`). The HAL already reads through that mirror on real hardware, so it's safe there.
+  - The PS1 builds keep the original bit-31 checks.
+- **Stale-cache risk:** `online.c` calls `SyncDCache` on the floor when it marks it. That writes any pending changes back to RAM, so a later uncached read doesn't get old data.
+- **Call sites:** the checks in `okajima/bullet.c`, `revbullt.c`, `claymore.c`, `elevator.c` and `s19b`'s `jbullet.c` now use the macros.
+  - This also fixes `elevator.c`'s floor matching, which had been silently failing in the port.
+- **Option 2:** the comment is next to the macros in `libhzd.h`. It says to record wall versus floor in a separate flag, store that flag next to every saved pointer, and change `HZD_IS_WALL` to read it. It lists every struct and copy that would need the flag; grepping `HZD_GetOnlineHazard` finds all the callers.
+
+**New problem in the run log:** 50 TLB misses, all reads from address 0, in `DG_GetLightMatrix`, starting around loop 27,150 (0:14:16). They come from a code path this change doesn't touch, so they aren't caused by it, but they would crash a real PS2. It's probably a caller passing a NULL position, and it's logged in the TAS plan as open.
+
+The next desync is the random seed at loop 56,569. The 4:30 PM window has passed, so I've stopped. Next up are the TLB misses and then that desync.
+
+## User
+
+What command can I run to play through the TAS in PCSX2, showing the window?
+
+## Claude
+
+From the repo root:
+
+```
+python3 tools/port/tas/run_port.py --show --no-shots --last 56569 --seconds 1200
+```
+
+- **`--show`** puts the PCSX2 window on your desktop. Without it, the run stays hidden on the virtual display (Xvfb).
+- **`--no-shots`** turns off the screenshot comparisons, so the run isn't slowed down.
+- **`--last 56569`** is the last loop to play. 56,569 (0:29:45.27) is where it currently desyncs. Past that, the port's game drifts from the movie.
+- **`--seconds 1200`** is the run's time limit. The port reaches loop 56,569 in about 10–15 minutes, so 20 minutes leaves room.
+
+To watch an earlier section, lower `--last`, for example `--last 47500` to stop just after the Wolf fight starts. The run always plays from the beginning; save states are only on the BizHawk side.
+
+## User
+
+I wonder if the light matrix bug is causing lighting errors on many polygons. Let's fix the TLB misses
+
+## Claude
+
+Disassembling the faulting instructions to see which pointer is NULL.
+
+- tool `Bash`: Disassemble around the TLB miss PCs
+
+## Claude
+
+The loads use `0(s2)`, `2(s2)` and `4(s2)`, and `s2` is `pos`, so a caller is passing `pos = NULL`. Logging who calls with NULL.
+
+- tool `Bash`: Find callers passing NULL pos
+
+- tool `Bash`: Read DG_GetLightMatrix2 wrapper
+
+- tool `Bash`: Find caller of DG_GetLightMatrix2 with NULL
+
+## Claude
+
+The call comes straight from `GV_ExecActorSystem`, so some actor's `Act` tail-calls `DG_GetLightMatrix2` with a NULL position. Looking for `Act` functions that end with that call.
+
+- tool `Bash`: Acts ending with a light-matrix call
+
+## Claude
+
+`bunsin2.c` (the Ninja's afterimage) passes a pointer field, `field_108`, which fits the timing (the Ninja fight). Reading it.
+
+- tool `Bash`: Read bunsin2 use of field_108
+
+## Claude
+
+`field_108` is never assigned in `bunsin2.c`. Checking the PS1's asm for what sets it.
+
+- tool `Bash`: Locate bunsin2 init and asm
+
+- tool `Bash`: Read bunsin2 Work and init
+
+- tool `Bash`: Read PS1 RAM at address 0
+
+- tool `Bash`: Fix NULL pos and replay
+
+## Claude
+
+Still 50 misses. `s08b` is linked from translated code, so the C `bunsin2.c` probably isn't what runs. Checking.
+
+- tool `Bash`: Check which bunsin2 is linked
+
+## Claude
+
+The `DG_GetLightMatrix` misses are gone. The 50 left are at three other PCs. Identifying them.
+
+- tool `Bash`: Resolve remaining TLB PCs
+
+## Claude
+
+Those are in translated stage code (`s07b` twice, `s10a` once). Checking which addresses they read.
+
+- tool `Bash`: Unique TLB lines and function sources
+
+- tool `Bash`: Read the two s07b functions
+
+## Claude
+
+Two stores through a NULL pointer kept at Work+2012 in `s07b`. On the PS1 that field might not be NULL, so I'm checking where it's set.
+
+- tool `Bash`: Find users and setters of +2012
+
+- tool `Bash`: Read +2012 setter
+
+## Claude
+
+Work+2012 is a TARGET from `GM_AllocTarget`, so NULL means it was never set or the allocation failed. Logging when and on which actor the NULL store happens.
+
+- tool `Bash`: Log NULL target store in s07b
+
+## Claude
+
+The build failed, probably because my extern `printf` declaration conflicts with the existing prototype, the same issue as earlier. Retrying without it.
+
+- tool `Bash`: Retry NULL target logging
+
+- tool `Bash`: Identify the actors with NULL target
+
+## Claude
+
+The actor is `s07b`'s act `800D1254`. Dumping the PS1's copy at loop 39,551 (0:21:00) to see whether its +2012 is NULL there too.
+
+- tool `Bash`: PS1 +2012 for that actor
+
+## Claude
+
+The PS1 has a valid TARGET there, so this is a port bug. Checking whether the port's `GM_AllocTarget` returns NULL in the setter.
+
+- tool `Bash`: Log target allocation in s07b
+
+## Claude
+
+The port's `800D1254` actor never goes through that setter. Looking at its constructor.
+
+- tool `Bash`: Read constructor of 800D1254 actor
+
+- tool `Bash`: Search for 800D1254 references
+
+- tool `Bash`: Read psyco constructor
+
+- tool `Bash`: Read Mantis init body
+
+- tool `Bash`: Find PS1 writers of offset 0x7DC
+
+- tool `Bash`: Case-insensitive search for 0x7dc
+
+## Claude
+
+I'm tracing how Psycho Mantis's TARGET pointer (Work+2012) gets set on the PS1, since the port's stays NULL. The asm search found nothing, so I'm checking the file format and the split asm location.
+
+- tool `Bash`: Check asm format for offsets
+
+- tool `Bash`: Find PS1 stores to offset 0x7DC
+
+## Claude
+
+On the PS1, `800CA1FC` is the only writer as well, so the port just never calls it for Mantis. Finding its callers.
+
+- tool `Bash`: Find callers of 800CA1FC
+
+- tool `Bash`: Which file owns CBCE8 and its callers
+
+- tool `Bash`: Find Mantis Work layout near 2012
+
+- tool `Bash`: Read Mantis Work struct
+
+## Claude
+
+Offset 0x7DC falls in `pad7D8`, just past the light matrices, so some C function probably writes it through a cast or a base pointer. Searching the C side.
+
+- tool `Bash`: Search psyco C for 0x7DC writes
+
+## Claude
+
+Three init functions are hand-decompiled C (`800D18E0`, `800D1CF8`, `800D1C80`). Checking them for a TARGET write.
+
+- tool `Bash`: Read Mantis C init functions
+
+## Claude
+
+No writer in the C. Checking what the PS1's value 0x8016DFE0 points at: if it's in the target pool, it was allocated; if not, something else wrote it.
+
+- tool `Bash`: Find PS1 target pool address
+
+## Claude
+
+0x8016DFE0 is a heap address, not the target pool, so +2012 holds some other object's pointer. Dumping Mantis's +2012 on the PS1 every 50 loops to find when it gets set.
+
+- tool `Bash`: Find when PS1 Mantis +2012 is set
+
+- tool `Bash`: Check GV_NewActor zeroing
+
+- tool `Bash`: Read GM_AllocTarget
+
+## Claude
+
+Targets live in a resident static array, so 0x8016DFE0 is something else. Dumping PS1 RAM at loop 39,260 to see what that address holds.
+
+- tool `Bash`: Inspect what 0x8016DFE0 is on PS1
+
+- tool `Bash`: Identify the owning actor
+
+## Claude
+
+That address is inside a `shadow.c` actor (act 800600E4), so +2012 is a pointer to a flag in Mantis's shadow, which her camouflage turns on and off. Finding where her shadow is created.
+
+- tool `Bash`: Find NewShadow call in Mantis code
+
+- tool `Bash`: Read Mantis shadow creation
+
+- tool `Bash`: Find NewShadow2 signature
+
+- tool `Bash`: Find recomp-called functions with struct params
+
+- tool `Bash`: Find rename table and shadow callers
+
+- tool `Bash`: Read mips2c rename and regen usage
+
+## Claude
+
+Applying it: wrappers in `shadow.c`, the rename in `mips2c.py` for future translations, and the same rename in the 4 generated files that call these functions.
+
+- tool `Bash`: Add PS1-ABI shadow wrappers and rename calls
+
+## Claude
+
+Replaying to check that the TLB misses are gone and sync still holds.
+
+- tool `Bash`: Replay after shadow fix
+
+## Claude
+
+The `s07b` NULL stores are gone and sync holds at 56,569. One site is left: 50 loads from address 8, probably the `s10a` one at a new address after relinking.
+
+- tool `Bash`: Identify remaining TLB site
+
+- tool `Bash`: Read s10a_800C4F68
+
+## Claude
+
+The read is `GM_WhereList[11]->[+8]`, and entry 11 is NULL in the port. Checking whether it's NULL on the PS1 too.
+
+- tool `Bash`: PS1 GM_WhereList contents in s10a
+
+- tool `Bash`: Check GM_WhereList declaration
+
+## Claude
+
+On both sides `GM_WhereList[0]` is a CONTROL and the code reads `->map->hzd`; in the port that `map` is NULL. Logging when it happens and which actor owns the CONTROL.
+
+- tool `Bash`: Log NULL map read in s10a
+
+## Claude
+
+It happens around the `s10a` load (loops 44,879–45,071, 0:23:5x), and `GM_WhereList[0]` points to a static at 0x7A0128, not an actor. Identifying it.
+
+- tool `Bash`: Symbolize 0x7A0128
+
+- tool `Bash`: Find DummyPlayer usage
+
+- tool `Bash`: Check NULL-map tests and DummyPlayer setup
+
+- tool `Bash`: Give DummyPlayer a zeroed map
+
+- tool `Bash`: Replay, count TLB misses, matching builds
+
+- tool `Bash`: Inspect the last 2 TLB misses
+
+## Claude
+
+2 misses are left, a new one in `s10a_800C5B48` (a load from address 0x48). Reading it.
+
+- tool `Bash`: Read s10a_800C5B48
+
+- tool `Bash`: Find the +72 read and callers
+
+## Claude
+
+The fault PC is the function's entry block, so the bad load is one of its first reads. Logging the argument and its pointer fields.
+
+- tool `Bash`: Log bad arguments to s10a_800C5B48
+
+## Claude
+
+`a0`'s +84 holds 0x48, which the function dereferences. Looking at the caller to see what `a0` is.
+
+- tool `Bash`: Read caller C5BFC
+
+- tool `Bash`: Find +84 setter in that actor
+
+- tool `Bash`: Read +84 setter in C5CBC
+
+## Claude
+
+The +84 value is `C5CBC`'s 6th argument, read from its caller's stack (`sp+76` = caller's `sp+20`). Checking how the caller passes it.
+
+- tool `Bash`: Read call site of C5CBC
+
+- tool `Bash`: Read caller head and callee stack-arg reads
+
+- tool `Bash`: Locate 8-arg signature template and users
+
+- tool `Bash`: Widen translated functions to 12 args
+
+## Claude
+
+811 translated files and the `mips2c.py` template now use 12 arguments. Replaying and running the matching builds.
+
+- tool `Bash`: Replay and matching builds after 12-arg change
+
+## Claude
+
+The replay crashed at loop 31,411 (about 0:16:32) with a jump to 0x1000, which is a regression from this change. Checking the log around the crash.
+
+- tool `Bash`: Read log before the crash
+
+- tool `Bash`: Read log just before reset
+
+- tool `Bash`: Lines before first TLB miss
+
+- tool `Bash`: Which stage at loop 31411
+
+- tool `Bash`: Check thread stack sizes
+
+- tool `Bash`: Check overflow messages and history
+
+- tool `Bash`: Bisect: drop a8-a11 stores
+
+## Claude
+
+Still crashes, so the copies aren't the cause. Next variant: put `stk` back to `frame+32`.
+
+- tool `Bash`: Bisect: stk back to +32
+
+## Claude
+
+Still crashes, so the 12-parameter signature itself is the problem. Looking for 8-parameter declarations or calls left behind.
+
+- tool `Bash`: Find leftover 8-arg declarations
+
+## Claude
+
+No 8-parameter leftovers. Comparing the compiled code: I'll disassemble a small translated `s08b` function to see what the 12-parameter signature changed.
+
+- tool `Bash`: Disassemble a translated function prologue
+
+## Claude
+
+The prologue looks normal, so I'll trace directly: print each translated function as it's entered from loop 31,410 on, to see what runs right before the jump to 0x1000.
+
+- tool `Bash`: Trace translated functions before crash
+
+- tool `Bash`: Read last translated function before crash
+
+- tool `Bash`: Block sibling calls and replay
+
+## Claude
+
+The crash is gone and sync still holds at 56,569. The 0x48 load is still there, so I'm checking what `C5EF4`'s caller passes it.
+
+- tool `Bash`: Find callers of C5EF4
+
+- tool `Bash`: See the data table referencing C5EF4
+
+- tool `Bash`: Find the table's label
+
+- tool `Bash`: Find similar tables in decompiled code
+
+- tool `Bash`: Find label of the dispatch table
+
+- tool `Bash`: Find chara-by-id dispatchers
+
+## Claude
+
+Two TLB misses are left, a NULL+0x48 read in a `s10a` effect created by the cutscene (demo) system. I'm checking `demoexec.c`'s call for id 15 to see what arguments it passes.
+
+- tool `Bash`: Find demo id 15
+
+- tool `Bash`: List demo ids
+
+- tool `Bash`: Read demoexec shadow call
+
+- tool `Bash`: Check funcptr type and field_18 type
+
+- tool `Bash`: Read variant_0xE and funcptr type
+
+- tool `Bash`: Find DEMOID_SHADOW registrations
+
+- tool `Bash`: Find where NewDemoKage lives
+
+- tool `Bash`: Find stage_split's word emission
+
+- tool `Bash`: Read word emission and lname
+
+- tool `Bash`: See how port/src files are built
+
+## Claude
+
+I'll put the wrapper in `port/src/hal_game.c`, with a local 8-byte struct so it doesn't need the game headers, and add a rename table to `stage_split.py`'s data output.
+
+- tool `Bash`: Add DemoKage ABI wrapper and rename
+
+- tool `Bash`: Replay, TLB count, matching builds
+
+- tool `Bash`: Check remaining TLB miss
+
+## Claude
+
+Still there. Checking that the rename made it into the build and that the wrapper is what gets called.
+
+- tool `Bash`: Verify table rename and lookup
+
+- tool `Bash`: Read GM_GetCharaID
+
+## Claude
+
+The port's chara lookup uses `stage_table.inc`, not the data block in `s10a.c`. Renaming there too, and making `stage_split.py` apply `ABI_WRAP` to that table.
+
+- tool `Bash`: Find table generation in stage_split
+
+- tool `Bash`: Read stage_table.inc generation
+
+- tool `Bash`: Apply wrap in stage table and replay
+
+## Claude
+
+No TLB misses at all now, and sync still holds at 56,569. Checking that regenerating `s10a` with the updated tools reproduces the files I edited by hand.
+
+- tool `Bash`: Find stage_split usage
+
+- tool `Bash`: Read stage_split header
+
+- tool `Bash`: Regenerate s10a and compare
+
+## Claude
+
+Those changes are against the last commit. Checking that they're only the intended edits (signatures, shadow rename, wrapper names):
+
+- tool `Bash`: Summarize s10a diff kinds
+

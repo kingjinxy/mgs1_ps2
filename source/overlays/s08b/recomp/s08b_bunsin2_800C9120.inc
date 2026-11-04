@@ -28,8 +28,8 @@ extern char R_s08b_rc_800CA298[] __asm__("s08b_rc_800CA298");
 extern char R_s08b_rc_800CA414[] __asm__("s08b_rc_800CA414");
 extern char R_s08b_rc_800CA5D8[] __asm__("s08b_rc_800CA5D8");
 extern char R_s08b_rc_800CA858[] __asm__("s08b_rc_800CA858");
-int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C9120");
-int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800C9120");
+int G_s08b_bunsin2_800C9120(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[2] = *(int *)((u)r[4] + 6576);

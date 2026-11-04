@@ -1,6 +1,6 @@
-extern char R_NewShadow2[] __asm__("NewShadow2");
-int G_s07b_800CAF54(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CAF54");
-int G_s07b_800CAF54(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+extern char R_Port_NewShadow2[] __asm__("Port_NewShadow2");
+int G_s07b_800CAF54(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CAF54");
+int G_s07b_800CAF54(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
@@ -25,7 +25,7 @@ int G_s07b_800CAF54(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[6] = (u)r[6] << 16;
     r[7] = (u)r[7] << 16;
     r[6] = r[2] | r[6];
-    r[7] = r[3] | r[7]; CALL(R_NewShadow2);
+    r[7] = r[3] | r[7]; CALL(R_Port_NewShadow2);
     *(int *)((u)r[16] + 2008) = r[2];
     r[31] = *(int *)((u)r[29] + 36);
     r[16] = *(int *)((u)r[29] + 32);

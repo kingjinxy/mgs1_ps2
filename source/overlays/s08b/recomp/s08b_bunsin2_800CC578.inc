@@ -7,8 +7,8 @@ extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_NewPlasma_800CD1A4[] __asm__("NewPlasma_800CD1A4");
 extern char R_fprintf[] __asm__("fprintf");
 extern char R_s08b_bunsin2_800C9548[] __asm__("s08b_bunsin2_800C9548");
-int G_s08b_bunsin2_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CC578");
-int G_s08b_bunsin2_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CC578");
+int G_s08b_bunsin2_800CC578(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(56)
     r[29] = (u)r[29] + -56;

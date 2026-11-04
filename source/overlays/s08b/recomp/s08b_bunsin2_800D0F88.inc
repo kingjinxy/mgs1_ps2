@@ -1,6 +1,6 @@
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
-int G_s08b_bunsin2_800D0F88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D0F88");
-int G_s08b_bunsin2_800D0F88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800D0F88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800D0F88");
+int G_s08b_bunsin2_800D0F88(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[2] = *(int *)((u)r[4] + 6608);

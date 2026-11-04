@@ -70,3 +70,15 @@ void HalGame_Status(void)
            (short)GV_PadData[5]);
 }
 #endif
+
+/* stage_split.py's ABI_WRAP: s10a's DEMOID_SHADOW (its copy of NewDemoKage, translated code), which demoexec.c calls with
+   an SVECTOR by value: the EE passes it in one register, the translated code takes the PS1's two (a1: vx, vy; a2: vz,
+   pad), so every argument after it was one register off (its color as a pointer: a TLB miss at NULL+0x48) */
+typedef struct { short vx, vy, vz, pad; } Ps1Svector;
+extern int s10a_800C5EF4(int, int, int, int, int, int, int, int, int, int, int, int);
+
+void *Port_s10a_DemoKage(void *parent, Ps1Svector v, int *arg2, int *arg3, int r, int g, int b)
+{
+    return (void *)s10a_800C5EF4((int)parent, (unsigned short)v.vx | v.vy << 16, (unsigned short)v.vz | v.pad << 16,
+                                 (int)arg2, (int)arg3, r, g, b, 0, 0, 0, 0);
+}

@@ -6,8 +6,8 @@ extern char R_GM_ConfigObjectLight[] __asm__("GM_ConfigObjectLight");
 extern char R_GM_InitObject[] __asm__("GM_InitObject");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
-int G_s08b_p_sphere_800D95CC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_p_sphere_800D95CC");
-int G_s08b_p_sphere_800D95CC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_p_sphere_800D95CC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_p_sphere_800D95CC");
+int G_s08b_p_sphere_800D95CC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(72)
     r[29] = (u)r[29] + -72;

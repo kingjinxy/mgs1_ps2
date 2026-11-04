@@ -2,8 +2,8 @@ extern char R_DG_ZeroMatrix[] __asm__("DG_ZeroMatrix");
 extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
 extern char R_s10a_800DEFCC[] __asm__("s10a_800DEFCC");
 extern char R_s10a_800DF6FC[] __asm__("s10a_800DF6FC");
-int G_s10a_800DECB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DECB0");
-int G_s10a_800DECB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800DECB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800DECB0");
+int G_s10a_800DECB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(72)
     r[29] = (u)r[29] + -72;
@@ -91,8 +91,8 @@ int G_s10a_800DECB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 out:
     RECOMP_RETURN;
 }
-int G_s10a_rc_800DEE2C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800DEE2C");
-int G_s10a_rc_800DEE2C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800DEE2C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800DEE2C");
+int G_s10a_rc_800DEE2C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
      goto out;

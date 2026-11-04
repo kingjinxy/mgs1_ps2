@@ -6,8 +6,8 @@ extern char R_GM_SetTarget[] __asm__("GM_SetTarget");
 extern char R_GV_SubVec3[] __asm__("GV_SubVec3");
 extern char R_ratan2[] __asm__("ratan2");
 extern char R_s10a_800CF620[] __asm__("s10a_800CF620");
-int G_s10a_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D0550");
-int G_s10a_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D0550");
+int G_s10a_800D0550(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(56)
     r[29] = (u)r[29] + -56;

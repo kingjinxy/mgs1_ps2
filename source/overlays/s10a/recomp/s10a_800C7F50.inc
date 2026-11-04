@@ -4,8 +4,8 @@ extern char R_s10a_dat_800E4962[] __asm__("s10a_dat_800E4962");
 extern char R_s10a_800C7CDC[] __asm__("s10a_800C7CDC");
 extern char R_s10a_800C7E78[] __asm__("s10a_800C7E78");
 extern char R_s10a_800C7ED0[] __asm__("s10a_800C7ED0");
-int G_s10a_800C7F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C7F50");
-int G_s10a_800C7F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C7F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C7F50");
+int G_s10a_800C7F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
@@ -57,8 +57,8 @@ int G_s10a_800C7F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 out:
     RECOMP_RETURN;
 }
-int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800C8030");
-int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800C8030");
+int G_s10a_rc_800C8030(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
      goto out;

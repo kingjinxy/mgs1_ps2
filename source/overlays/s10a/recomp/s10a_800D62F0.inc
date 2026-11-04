@@ -7,8 +7,8 @@ extern char R_GM_SeSet2[] __asm__("GM_SeSet2");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_s10a_800D5F78[] __asm__("s10a_800D5F78");
 extern char R_s10a_800D6060[] __asm__("s10a_800D6060");
-int G_s10a_800D62F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D62F0");
-int G_s10a_800D62F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D62F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D62F0");
+int G_s10a_800D62F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

@@ -9,8 +9,8 @@ extern char R_dword_8009F480[] __asm__("dword_8009F480");
 extern char R_dword_8009F49C[] __asm__("dword_8009F49C");
 extern char R_dword_800BDD28[] __asm__("dword_800BDD28");
 extern char R_s07b_800CBF00[] __asm__("s07b_800CBF00");
-int G_s07b_800CBFB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CBFB0");
-int G_s07b_800CBFB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CBFB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CBFB0");
+int G_s07b_800CBFB0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[2] = 0;

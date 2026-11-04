@@ -17,8 +17,8 @@ extern char R_HZD_OnlineHazardCheck[] __asm__("HZD_OnlineHazardCheck");
 extern char R_RotTransPers[] __asm__("RotTransPers");
 extern char R_s10a_800D81DC[] __asm__("s10a_800D81DC");
 extern char R_s10a_800DC104[] __asm__("s10a_800DC104");
-int G_s10a_800D820C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D820C");
-int G_s10a_800D820C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D820C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D820C");
+int G_s10a_800D820C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(224)
     r[29] = (u)r[29] + -224;

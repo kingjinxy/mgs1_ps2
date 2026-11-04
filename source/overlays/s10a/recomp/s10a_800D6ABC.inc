@@ -3,8 +3,8 @@ extern char R_GM_Camera[] __asm__("GM_Camera");
 extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
 extern char R_gUnkCameraStruct2_800B7868[] __asm__("gUnkCameraStruct2_800B7868");
 extern char R_DG_MakeCameraMatrix[] __asm__("DG_MakeCameraMatrix");
-int G_s10a_800D6ABC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D6ABC");
-int G_s10a_800D6ABC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D6ABC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D6ABC");
+int G_s10a_800D6ABC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
@@ -106,7 +106,7 @@ int G_s10a_800D6ABC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[31] = *(int *)((u)r[29] + 40);
     r[29] = (u)r[29] + 48; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }
 extern char R_GM_GameOverTimer[] __asm__("GM_GameOverTimer");
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
@@ -135,8 +135,8 @@ extern char R_s10a_800D6ABC[] __asm__("s10a_800D6ABC");
 extern char R_s10a_800D7C80[] __asm__("s10a_800D7C80");
 extern char R_s10a_800E1EC4[] __asm__("s10a_800E1EC4");
 extern char R_s10a_800E1F5C[] __asm__("s10a_800E1F5C");
-int G_s10a_rc_800D6C50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800D6C50");
-int G_s10a_rc_800D6C50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800D6C50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800D6C50");
+int G_s10a_rc_800D6C50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[2] = 0;
@@ -387,5 +387,5 @@ int G_s10a_rc_800D6C50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = *(int *)((u)r[29] + 24);
     r[29] = (u)r[29] + 40; goto out;
 out:
-    return r[2];
+    RECOMP_RETURN;
 }

@@ -3,8 +3,8 @@ extern char R_s10a_dat_800C37FC[] __asm__("s10a_dat_800C37FC");
 extern char R_DG_PutVector[] __asm__("DG_PutVector");
 extern char R_DG_SetPos2[] __asm__("DG_SetPos2");
 extern char R_GV_SubVec3[] __asm__("GV_SubVec3");
-int G_s10a_800DC520(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DC520");
-int G_s10a_800DC520(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800DC520(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800DC520");
+int G_s10a_800DC520(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(72)
     r[29] = (u)r[29] + -72;

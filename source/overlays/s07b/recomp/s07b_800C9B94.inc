@@ -4,8 +4,8 @@ extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s07b_800C9044[] __asm__("s07b_800C9044");
 extern char R_GM_ConfigMotionAdjust[] __asm__("GM_ConfigMotionAdjust");
 extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
-int G_s07b_800C9B94(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C9B94");
-int G_s07b_800C9B94(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C9B94(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C9B94");
+int G_s07b_800C9B94(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

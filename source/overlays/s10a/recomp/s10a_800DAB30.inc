@@ -7,8 +7,8 @@ extern char R_gUnkCameraStruct2_800B7868[] __asm__("gUnkCameraStruct2_800B7868")
 extern char R_DG_MakeCameraMatrix[] __asm__("DG_MakeCameraMatrix");
 extern char R_GM_SeSet2[] __asm__("GM_SeSet2");
 extern char R_rsin[] __asm__("rsin");
-int G_s10a_800DAB30(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DAB30");
-int G_s10a_800DAB30(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800DAB30(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800DAB30");
+int G_s10a_800DAB30(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;

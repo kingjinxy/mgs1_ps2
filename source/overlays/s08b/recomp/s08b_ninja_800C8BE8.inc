@@ -12,8 +12,8 @@ extern char R_s08b_ninja_800C8624[] __asm__("s08b_ninja_800C8624");
 extern char R_s08b_ninja_800C8848[] __asm__("s08b_ninja_800C8848");
 extern char R_s08b_ninja_800C8988[] __asm__("s08b_ninja_800C8988");
 extern char R_s08b_ninja_800C8A40[] __asm__("s08b_ninja_800C8A40");
-int G_s08b_ninja_800C8BE8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_ninja_800C8BE8");
-int G_s08b_ninja_800C8BE8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_ninja_800C8BE8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_ninja_800C8BE8");
+int G_s08b_ninja_800C8BE8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

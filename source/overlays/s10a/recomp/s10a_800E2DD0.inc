@@ -1,8 +1,8 @@
 extern char R_s10a_800E2C5C[] __asm__("s10a_800E2C5C");
 extern char R_s10a_800E2CD4[] __asm__("s10a_800E2CD4");
 extern char R_DG_SetExtPaletteMakeFunc[] __asm__("DG_SetExtPaletteMakeFunc");
-int G_s10a_800E2DD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E2DD0");
-int G_s10a_800E2DD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E2DD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E2DD0");
+int G_s10a_800E2DD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

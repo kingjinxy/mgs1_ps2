@@ -1,8 +1,8 @@
 extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
 extern char R_GV_Time[] __asm__("GV_Time");
 extern char R_s08b_bunsin2_800CF54C[] __asm__("s08b_bunsin2_800CF54C");
-int G_s08b_bunsin2_800D0D80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D0D80");
-int G_s08b_bunsin2_800D0D80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800D0D80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800D0D80");
+int G_s08b_bunsin2_800D0D80(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

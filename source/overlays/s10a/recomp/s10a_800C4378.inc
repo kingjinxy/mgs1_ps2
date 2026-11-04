@@ -4,8 +4,8 @@ extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
 extern char R_GV_Time[] __asm__("GV_Time");
 extern char R_GV_ReceiveMessage[] __asm__("GV_ReceiveMessage");
 extern char R_s10a_800C4218[] __asm__("s10a_800C4218");
-int G_s10a_800C4378(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C4378");
-int G_s10a_800C4378(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C4378(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C4378");
+int G_s10a_800C4378(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;
@@ -61,8 +61,8 @@ int G_s10a_800C4378(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 out:
     RECOMP_RETURN;
 }
-int G_s10a_rc_800C4484(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800C4484");
-int G_s10a_rc_800C4484(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800C4484(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800C4484");
+int G_s10a_rc_800C4484(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
      goto out;

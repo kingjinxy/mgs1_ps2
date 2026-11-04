@@ -6,8 +6,8 @@ extern char R_GM_SetC4Target[] __asm__("GM_SetC4Target");
 extern char R_GM_SetCaptureTarget[] __asm__("GM_SetCaptureTarget");
 extern char R_GM_SetPowerTarget[] __asm__("GM_SetPowerTarget");
 extern char R_GM_SetTarget[] __asm__("GM_SetTarget");
-int G_s10a_800C9884(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C9884");
-int G_s10a_800C9884(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C9884(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C9884");
+int G_s10a_800C9884(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

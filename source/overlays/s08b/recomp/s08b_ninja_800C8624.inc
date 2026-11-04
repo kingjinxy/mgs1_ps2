@@ -5,8 +5,8 @@ extern char R_DG_MakePrim[] __asm__("DG_MakePrim");
 extern char R_DG_QueuePrim[] __asm__("DG_QueuePrim");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
 extern char R_s08b_bunsin2_800CD914[] __asm__("s08b_bunsin2_800CD914");
-int G_s08b_ninja_800C8624(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_ninja_800C8624");
-int G_s08b_ninja_800C8624(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_ninja_800C8624(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_ninja_800C8624");
+int G_s08b_ninja_800C8624(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

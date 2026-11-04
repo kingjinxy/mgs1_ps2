@@ -1,7 +1,7 @@
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_MENU_DrawBar2[] __asm__("MENU_DrawBar2");
-int G_s07b_800C7604(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C7604");
-int G_s07b_800C7604(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C7604(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C7604");
+int G_s07b_800C7604(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

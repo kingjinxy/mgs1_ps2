@@ -1,6 +1,6 @@
 extern char R_s10a_800E16F0[] __asm__("s10a_800E16F0");
-int G_s10a_800E180C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E180C");
-int G_s10a_800E180C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E180C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E180C");
+int G_s10a_800E180C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;
@@ -19,8 +19,8 @@ extern char R_GV_PauseLevel[] __asm__("GV_PauseLevel");
 extern char R_s10a_dat_800C381C[] __asm__("s10a_dat_800C381C");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_s10a_800E027C[] __asm__("s10a_800E027C");
-int G_s10a_rc_800E1834(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E1834");
-int G_s10a_rc_800E1834(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800E1834(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800E1834");
+int G_s10a_rc_800E1834(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

@@ -1,8 +1,8 @@
 extern char R_DG_ZeroMatrix[] __asm__("DG_ZeroMatrix");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_NewWindcrcl_800CF784[] __asm__("NewWindcrcl_800CF784");
-int G_s08b_bunsin2_800C8F0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C8F0C");
-int G_s08b_bunsin2_800C8F0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800C8F0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800C8F0C");
+int G_s08b_bunsin2_800C8F0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;

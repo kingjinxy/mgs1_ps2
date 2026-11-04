@@ -17,8 +17,8 @@ extern char R_GM_PowerTarget[] __asm__("GM_PowerTarget");
 extern char R_GM_SetPowerTarget[] __asm__("GM_SetPowerTarget");
 extern char R_GM_SetTarget[] __asm__("GM_SetTarget");
 extern char R_memset[] __asm__("memset");
-int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800C9588");
-int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800C9588");
+int G_s08b_bunsin2_800C9588(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(144)
     r[29] = (u)r[29] + -144;

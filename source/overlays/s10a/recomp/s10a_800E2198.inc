@@ -5,8 +5,8 @@ extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_GV_NewActor[] __asm__("GV_NewActor");
 extern char R_GV_SetNamedActor[] __asm__("GV_SetNamedActor");
 extern char R_s10a_800E208C[] __asm__("s10a_800E208C");
-int G_s10a_800E2198(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E2198");
-int G_s10a_800E2198(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E2198(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E2198");
+int G_s10a_800E2198(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;
@@ -50,8 +50,8 @@ extern char R_s10a_dat_800E4354[] __asm__("s10a_dat_800E4354");
 extern char R_GV_NearExp4[] __asm__("GV_NearExp4");
 extern char R_GV_ReceiveMessage[] __asm__("GV_ReceiveMessage");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
-int G_s10a_rc_800E222C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E222C");
-int G_s10a_rc_800E222C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800E222C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800E222C");
+int G_s10a_rc_800E222C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

@@ -128,7 +128,16 @@ static void Act(Work *work)
     s08b_bunsin2_800D5600(work);
     s08b_bunsin2_800D5734(work);
 
+#ifdef MGS_PORT
+    {
+        /* field_108 is never set (GV_NewActor zeroes it), so the PS1 lights the afterimage from what's at address 0, its
+           BIOS's (3, 0, 3152) in every TAS dump; the PS2 faults there (TLB miss) */
+        static SVECTOR ps1_null_pos = { 3, 0, 3152, 0x2750 };
+        DG_GetLightMatrix2(work->field_108 ? work->field_108 : &ps1_null_pos, work->light);
+    }
+#else
     DG_GetLightMatrix2(work->field_108, work->light);
+#endif
 }
 
 static void Die(Work *work)

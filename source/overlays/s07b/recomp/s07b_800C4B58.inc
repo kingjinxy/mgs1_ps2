@@ -12,8 +12,8 @@ extern char R_ClearPadMask[] __asm__("ClearPadMask");
 extern char R_GV_VecDir2[] __asm__("GV_VecDir2");
 extern char R_SetPadMask[] __asm__("SetPadMask");
 extern char R_s07b_800C4A94[] __asm__("s07b_800C4A94");
-int G_s07b_800C4B58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C4B58");
-int G_s07b_800C4B58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C4B58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C4B58");
+int G_s07b_800C4B58(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

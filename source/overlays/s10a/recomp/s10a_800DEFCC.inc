@@ -1,7 +1,7 @@
 extern char R_GM_N_WhereList[] __asm__("GM_N_WhereList");
 extern char R_GM_WhereList[] __asm__("GM_WhereList");
-int G_s10a_800DEFCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DEFCC");
-int G_s10a_800DEFCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800DEFCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800DEFCC");
+int G_s10a_800DEFCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[11] = (u)r[4] + 40;

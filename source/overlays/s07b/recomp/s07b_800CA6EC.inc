@@ -14,7 +14,7 @@ extern char R_GM_InitControl[] __asm__("GM_InitControl");
 extern char R_GM_InitObject[] __asm__("GM_InitObject");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
 extern char R_NewPadManager[] __asm__("NewPadManager");
-extern char R_NewShadow[] __asm__("NewShadow");
+extern char R_Port_NewShadow[] __asm__("Port_NewShadow");
 extern char R_s07b_800C76C8[] __asm__("s07b_800C76C8");
 extern char R_s07b_800CA1FC[] __asm__("s07b_800CA1FC");
 extern char R_s07b_800CA2EC[] __asm__("s07b_800CA2EC");
@@ -22,8 +22,8 @@ extern char R_s07b_800CA4FC[] __asm__("s07b_800CA4FC");
 extern char R_s07b_800CA584[] __asm__("s07b_800CA584");
 extern char R_s07b_800CA5FC[] __asm__("s07b_800CA5FC");
 extern char R_s07b_800CA674[] __asm__("s07b_800CA674");
-int G_s07b_800CA6EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CA6EC");
-int G_s07b_800CA6EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CA6EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CA6EC");
+int G_s07b_800CA6EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;
@@ -109,7 +109,7 @@ int G_s07b_800CA6EC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(short *)((u)r[29] + 36) = r[2];
     r[2] = (u)0 + 15;
     *(short *)((u)r[29] + 32) = 0;
-    *(short *)((u)r[29] + 38) = r[2]; CALL(R_NewShadow);
+    *(short *)((u)r[29] + 38) = r[2]; CALL(R_Port_NewShadow);
     c = ((r[2] == 0)); *(int *)((u)r[17] + 2008) = r[2]; if (c) goto L800ca8d8;
     r[2] = 0;
     *(int *)((u)r[2] + (int)R_s07b_dword_800E5BC0) = 0; CALL(R_NewPadManager);

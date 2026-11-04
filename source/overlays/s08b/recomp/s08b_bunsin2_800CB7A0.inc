@@ -5,8 +5,8 @@ extern char R_GM_SeSet2[] __asm__("GM_SeSet2");
 extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
 extern char R_s08b_bunsin2_800C9548[] __asm__("s08b_bunsin2_800C9548");
 extern char R_s08b_bunsin2_800C9588[] __asm__("s08b_bunsin2_800C9588");
-int G_s08b_bunsin2_800CB7A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CB7A0");
-int G_s08b_bunsin2_800CB7A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CB7A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CB7A0");
+int G_s08b_bunsin2_800CB7A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

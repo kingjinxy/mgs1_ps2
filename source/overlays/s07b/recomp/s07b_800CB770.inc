@@ -5,8 +5,8 @@ extern char R_GV_SubVec3[] __asm__("GV_SubVec3");
 extern char R_GV_VecLen3[] __asm__("GV_VecLen3");
 extern char R_HZD_GetAddress[] __asm__("HZD_GetAddress");
 extern char R_NavigateGetTargetDist[] __asm__("NavigateGetTargetDist");
-int G_s07b_800CB770(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CB770");
-int G_s07b_800CB770(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CB770(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CB770");
+int G_s07b_800CB770(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;

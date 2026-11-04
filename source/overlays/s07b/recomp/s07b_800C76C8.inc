@@ -3,8 +3,8 @@ extern char R_s07b_dword_800E4BA0[] __asm__("s07b_dword_800E4BA0");
 extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
 extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
 extern char R_GCL_StrToInt[] __asm__("GCL_StrToInt");
-int G_s07b_800C76C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C76C8");
-int G_s07b_800C76C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C76C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C76C8");
+int G_s07b_800C76C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

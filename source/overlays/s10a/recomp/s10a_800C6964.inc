@@ -13,11 +13,11 @@ extern char R_GM_ConfigObjectLight[] __asm__("GM_ConfigObjectLight");
 extern char R_GM_ConfigObjectRoot[] __asm__("GM_ConfigObjectRoot");
 extern char R_GM_InitControl[] __asm__("GM_InitControl");
 extern char R_GM_InitObject[] __asm__("GM_InitObject");
-extern char R_NewShadow[] __asm__("NewShadow");
+extern char R_Port_NewShadow[] __asm__("Port_NewShadow");
 extern char R_printf[] __asm__("printf");
 extern char R_s10a_800C781C[] __asm__("s10a_800C781C");
-int G_s10a_800C6964(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C6964");
-int G_s10a_800C6964(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C6964(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C6964");
+int G_s10a_800C6964(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(72)
     r[29] = (u)r[29] + -72;
@@ -165,7 +165,7 @@ int G_s10a_800C6964(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(short *)((u)r[29] + 36) = r[2];
     r[2] = (u)0 + 15;
     *(short *)((u)r[29] + 32) = 0;
-    *(short *)((u)r[29] + 38) = r[2]; CALL(R_NewShadow);
+    *(short *)((u)r[29] + 38) = r[2]; CALL(R_Port_NewShadow);
     c = ((r[2] != 0)); *(int *)((u)r[18] + 3604) = r[2]; if (c) goto L800c6c40;
     r[2] = (u)0 + -1; goto L800c6d00;
     L800c6c40:;

@@ -1,8 +1,8 @@
 extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
 extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
 extern char R_GCL_StrToSV[] __asm__("GCL_StrToSV");
-int G_s10a_800E01D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E01D0");
-int G_s10a_800E01D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E01D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E01D0");
+int G_s10a_800E01D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

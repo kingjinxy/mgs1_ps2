@@ -5,8 +5,8 @@ extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_GV_NewActor[] __asm__("GV_NewActor");
 extern char R_GV_SetNamedActor[] __asm__("GV_SetNamedActor");
 extern char R_s10a_800C725C[] __asm__("s10a_800C725C");
-int G_s10a_800C7530(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C7530");
-int G_s10a_800C7530(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C7530(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C7530");
+int G_s10a_800C7530(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;
@@ -43,8 +43,8 @@ int G_s10a_800C7530(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 out:
     RECOMP_RETURN;
 }
-int G_s10a_rc_800C75C4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800C75C4");
-int G_s10a_rc_800C75C4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800C75C4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800C75C4");
+int G_s10a_rc_800C75C4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[3] = *(int *)((u)r[4] + 32);

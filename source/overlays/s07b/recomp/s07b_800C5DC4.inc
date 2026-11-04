@@ -7,8 +7,8 @@ extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
 extern char R_GV_VecDir2[] __asm__("GV_VecDir2");
 extern char R_s07b_800C4854[] __asm__("s07b_800C4854");
 extern char R_s07b_800C5B14[] __asm__("s07b_800C5B14");
-int G_s07b_800C5DC4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C5DC4");
-int G_s07b_800C5DC4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C5DC4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C5DC4");
+int G_s07b_800C5DC4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

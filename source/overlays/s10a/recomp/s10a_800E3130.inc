@@ -4,8 +4,8 @@ extern char R_GM_PlayerBody[] __asm__("GM_PlayerBody");
 extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
 extern char R_GV_PadData[] __asm__("GV_PadData");
 extern char R_DG_MakeCameraMatrix[] __asm__("DG_MakeCameraMatrix");
-int G_s10a_800E3130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E3130");
-int G_s10a_800E3130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E3130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E3130");
+int G_s10a_800E3130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;
@@ -57,8 +57,8 @@ int G_s10a_800E3130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 out:
     RECOMP_RETURN;
 }
-int G_s10a_rc_800E31FC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E31FC");
-int G_s10a_rc_800E31FC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800E31FC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800E31FC");
+int G_s10a_rc_800E31FC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[3] = *(int *)((u)r[4] + 60);

@@ -13,8 +13,8 @@ extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_NewBulletEnemy[] __asm__("NewBulletEnemy");
 extern char R_ReadRotMatrix[] __asm__("ReadRotMatrix");
 extern char R_s10a_800CB3B8[] __asm__("s10a_800CB3B8");
-int G_s10a_800CB260(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CB260");
-int G_s10a_800CB260(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800CB260(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800CB260");
+int G_s10a_800CB260(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(80)
     r[29] = (u)r[29] + -80;

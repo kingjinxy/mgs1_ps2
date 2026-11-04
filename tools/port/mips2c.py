@@ -182,7 +182,10 @@ def translate(path, seg=None):
             ctrl = 'goto L%x;' % (((pc + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2))
         elif o == 3:
             t = ((pc + 4) & 0xF0000000) | ((w & 0x3ffffff) << 2)
-            n_ = {'mts_get_tick_count': 'Port_GameTick'}.get(names[t], names[t])  # game logic's tick (tas_replay.c)
+            # game logic's tick (tas_replay.c); and C functions taking a struct by value, which the PS1 passes in two
+            # registers and the EE in one (shadow.c's Port_NewShadow*: the PS1's argument registers)
+            n_ = {'mts_get_tick_count': 'Port_GameTick', 'NewShadow': 'Port_NewShadow',
+                  'NewShadow2': 'Port_NewShadow2'}.get(names[t], names[t])
             funcs.add(n_)
             ctrl = 'CALL(R_%s);' % n_
         elif o == 0 and fn == 8:
@@ -243,8 +246,8 @@ def translate(path, seg=None):
     # no duplicates between data and call use
     both = funcs & used
     body = '\n'.join('    ' + l for l in lines if l)
-    return '''%sint G_%s(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("%s");
-int G_%s(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+    return '''%sint G_%s(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("%s");
+int G_%s(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(%d)
 %s

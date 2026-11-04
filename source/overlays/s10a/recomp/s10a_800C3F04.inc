@@ -11,8 +11,8 @@ extern char R_GCL_StrToSV[] __asm__("GCL_StrToSV");
 extern char R_RotMatrix[] __asm__("RotMatrix");
 extern char R_s10a_800C385C[] __asm__("s10a_800C385C");
 extern char R_s10a_800C3E1C[] __asm__("s10a_800C3E1C");
-int G_s10a_800C3F04(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C3F04");
-int G_s10a_800C3F04(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C3F04(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C3F04");
+int G_s10a_800C3F04(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(120)
     r[29] = (u)r[29] + -120;

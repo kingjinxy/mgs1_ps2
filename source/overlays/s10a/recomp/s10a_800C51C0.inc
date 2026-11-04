@@ -4,8 +4,8 @@ extern char R_s10a_rc_800C5140[] __asm__("s10a_rc_800C5140");
 extern char R_GV_NewActor[] __asm__("GV_NewActor");
 extern char R_GV_SetNamedActor[] __asm__("GV_SetNamedActor");
 extern char R_s10a_800C5148[] __asm__("s10a_800C5148");
-int G_s10a_800C51C0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C51C0");
-int G_s10a_800C51C0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C51C0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C51C0");
+int G_s10a_800C51C0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

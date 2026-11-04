@@ -68,7 +68,7 @@ __asm__(
     ".byte 14,0,0,0\n"
     ".word s10a_800C4218\n"
     ".byte 15,0,0,0\n"
-    ".word s10a_800C5EF4\n"
+    ".word Port_s10a_DemoKage\n"
     ".byte 33,0,0,0\n"
     ".word s10a_800E27B4\n"
     ".byte 37,0,0,0\n"

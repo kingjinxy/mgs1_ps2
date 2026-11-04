@@ -80,6 +80,12 @@ found:
 
 void GM_InitWhereSystem(void)
 {
+#ifdef MGS_PORT
+    /* code reads GM_WhereList[0]->map->hzd with no player (s10a 800C4F68 during its load): the PS1 reads address 8
+       there, a fault on the PS2. A zeroed map gives hzd NULL, as PCSX2 did */
+    static MAP dummy_map;
+    DummyPlayer.map = &dummy_map;
+#endif
     GM_WhereList[0] = &DummyPlayer;
     GM_N_WhereList = 1;
 }

@@ -8,8 +8,8 @@ extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
 extern char R_NewBullet2[] __asm__("NewBullet2");
 extern char R_ReadRotMatrix[] __asm__("ReadRotMatrix");
 extern char R_s08b_bunsin2_800C9548[] __asm__("s08b_bunsin2_800C9548");
-int G_s08b_bunsin2_800CC434(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CC434");
-int G_s08b_bunsin2_800CC434(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CC434(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CC434");
+int G_s08b_bunsin2_800CC434(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(88)
     r[29] = (u)r[29] + -88;

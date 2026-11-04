@@ -3,8 +3,8 @@ extern char R_DG_RotVector[] __asm__("DG_RotVector");
 extern char R_DG_SetPos2[] __asm__("DG_SetPos2");
 extern char R_s08b_bunsin2_800CD298[] __asm__("s08b_bunsin2_800CD298");
 extern char R_s08b_bunsin2_800CD2C0[] __asm__("s08b_bunsin2_800CD2C0");
-int G_s08b_bunsin2_800CD2E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CD2E8");
-int G_s08b_bunsin2_800CD2E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CD2E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CD2E8");
+int G_s08b_bunsin2_800CD2E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(72)
     r[29] = (u)r[29] + -72;

@@ -1,8 +1,8 @@
 extern char R_s07b_800CF130[] __asm__("s07b_800CF130");
 extern char R_s07b_800CF9A0[] __asm__("s07b_800CF9A0");
 extern char R_s07b_dword_800C33AC[] __asm__("s07b_dword_800C33AC");
-int G_s07b_800CBB38(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CBB38");
-int G_s07b_800CBB38(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CBB38(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CBB38");
+int G_s07b_800CBB38(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[3] = *(short *)((u)r[4] + 2116);

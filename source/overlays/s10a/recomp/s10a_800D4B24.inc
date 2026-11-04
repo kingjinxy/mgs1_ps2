@@ -1,8 +1,8 @@
 extern char R_DG_Chanls[] __asm__("DG_Chanls");
 extern char R_GV_Clock[] __asm__("GV_Clock");
 extern char R_SetDrawStp[] __asm__("SetDrawStp");
-int G_s10a_800D4B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D4B24");
-int G_s10a_800D4B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D4B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D4B24");
+int G_s10a_800D4B24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

@@ -5,8 +5,8 @@ extern char R_GV_NearExp2[] __asm__("GV_NearExp2");
 extern char R_GV_NearExp4[] __asm__("GV_NearExp4");
 extern char R_GV_NearExp8V[] __asm__("GV_NearExp8V");
 extern char R_s08b_ninja_800C79D4[] __asm__("s08b_ninja_800C79D4");
-int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_ninja_800C7F74");
-int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_ninja_800C7F74");
+int G_s08b_ninja_800C7F74(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;
@@ -59,8 +59,8 @@ extern char R_s08b_ninja_800C7CF4[] __asm__("s08b_ninja_800C7CF4");
 extern char R_s08b_ninja_800C7E14[] __asm__("s08b_ninja_800C7E14");
 extern char R_s08b_ninja_800C7ED8[] __asm__("s08b_ninja_800C7ED8");
 extern char R_s08b_ninja_800C7F74[] __asm__("s08b_ninja_800C7F74");
-int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800C800C");
-int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_rc_800C800C");
+int G_s08b_rc_800C800C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

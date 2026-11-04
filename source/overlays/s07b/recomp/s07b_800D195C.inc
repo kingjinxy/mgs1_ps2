@@ -3,8 +3,8 @@ extern char R_s07b_dword_800E5080[] __asm__("s07b_dword_800E5080");
 extern char R_s07b_dword_800E5088[] __asm__("s07b_dword_800E5088");
 extern char R_DG_GetTexture[] __asm__("DG_GetTexture");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
-int G_s07b_800D195C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800D195C");
-int G_s07b_800D195C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800D195C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800D195C");
+int G_s07b_800D195C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(56)
     r[29] = (u)r[29] + -56;

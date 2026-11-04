@@ -1,7 +1,7 @@
 extern char R_GV_Clock[] __asm__("GV_Clock");
 extern char R_GV_PauseLevel[] __asm__("GV_PauseLevel");
-int G_s10a_800D3FD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D3FD0");
-int G_s10a_800D3FD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D3FD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D3FD0");
+int G_s10a_800D3FD0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(8)
     r[29] = (u)r[29] + -8;

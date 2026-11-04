@@ -6,8 +6,8 @@ extern char R_DG_SetPos[] __asm__("DG_SetPos");
 extern char R_GM_SeSet[] __asm__("GM_SeSet");
 extern char R_ReadRotMatrix[] __asm__("ReadRotMatrix");
 extern char R_s08b_bunsin2_800CD95C[] __asm__("s08b_bunsin2_800CD95C");
-int G_s08b_bunsin2_800CD614(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CD614");
-int G_s08b_bunsin2_800CD614(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CD614(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CD614");
+int G_s08b_bunsin2_800CD614(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;

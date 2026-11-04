@@ -22,8 +22,8 @@ extern char R_s10a_800DC520[] __asm__("s10a_800DC520");
 extern char R_s10a_800DC6AC[] __asm__("s10a_800DC6AC");
 extern char R_s10a_800DD18C[] __asm__("s10a_800DD18C");
 extern char R_s10a_800E0B8C[] __asm__("s10a_800E0B8C");
-int G_s10a_800DCA7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DCA7C");
-int G_s10a_800DCA7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800DCA7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800DCA7C");
+int G_s10a_800DCA7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(56)
     r[29] = (u)r[29] + -56;

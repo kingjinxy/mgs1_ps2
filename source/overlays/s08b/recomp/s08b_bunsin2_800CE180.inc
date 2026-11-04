@@ -1,8 +1,8 @@
 extern char R_GV_Time[] __asm__("GV_Time");
 extern char R_s08b_dword_800C3490[] __asm__("s08b_dword_800C3490");
 extern char R_HZD_GetAddress[] __asm__("HZD_GetAddress");
-int G_s08b_bunsin2_800CE180(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800CE180");
-int G_s08b_bunsin2_800CE180(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800CE180(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800CE180");
+int G_s08b_bunsin2_800CE180(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[2] = 0;

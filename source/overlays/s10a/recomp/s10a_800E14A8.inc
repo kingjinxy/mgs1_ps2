@@ -5,8 +5,8 @@ extern char R_GCL_StrToInt[] __asm__("GCL_StrToInt");
 extern char R_GV_Malloc[] __asm__("GV_Malloc");
 extern char R_s10a_800E0104[] __asm__("s10a_800E0104");
 extern char R_s10a_800E0FE0[] __asm__("s10a_800E0FE0");
-int G_s10a_800E14A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E14A8");
-int G_s10a_800E14A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E14A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E14A8");
+int G_s10a_800E14A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

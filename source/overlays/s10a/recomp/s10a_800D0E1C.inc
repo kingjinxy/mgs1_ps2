@@ -2,8 +2,8 @@ extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
 extern char R_dword_8009F46C[] __asm__("dword_8009F46C");
 extern char R_dword_8009F480[] __asm__("dword_8009F480");
 extern char R_svector_8009F478[] __asm__("svector_8009F478");
-int G_s10a_800D0E1C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800D0E1C");
-int G_s10a_800D0E1C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800D0E1C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800D0E1C");
+int G_s10a_800D0E1C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[3] = (u)0 + 1;

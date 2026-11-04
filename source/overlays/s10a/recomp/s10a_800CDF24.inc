@@ -1,7 +1,7 @@
 extern char R_DG_DequeuePrim[] __asm__("DG_DequeuePrim");
 extern char R_DG_FreePrim[] __asm__("DG_FreePrim");
-int G_s10a_800CDF24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CDF24");
-int G_s10a_800CDF24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800CDF24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800CDF24");
+int G_s10a_800CDF24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

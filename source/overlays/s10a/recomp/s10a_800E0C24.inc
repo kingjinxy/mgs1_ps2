@@ -6,8 +6,8 @@ extern char R_GV_NewActor[] __asm__("GV_NewActor");
 extern char R_GV_SetNamedActor[] __asm__("GV_SetNamedActor");
 extern char R_s10a_800E0144[] __asm__("s10a_800E0144");
 extern char R_s10a_800E0A68[] __asm__("s10a_800E0A68");
-int G_s10a_800E0C24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800E0C24");
-int G_s10a_800E0C24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800E0C24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800E0C24");
+int G_s10a_800E0C24(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;
@@ -54,8 +54,8 @@ extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_GCL_ExecProc[] __asm__("GCL_ExecProc");
 extern char R_GM_SeSet[] __asm__("GM_SeSet");
 extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
-int G_s10a_rc_800E0CCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E0CCC");
-int G_s10a_rc_800E0CCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800E0CCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800E0CCC");
+int G_s10a_rc_800E0CCC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;
@@ -138,8 +138,8 @@ out:
     RECOMP_RETURN;
 }
 extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
-int G_s10a_rc_800E0E3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_rc_800E0E3C");
-int G_s10a_rc_800E0E3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_rc_800E0E3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_rc_800E0E3C");
+int G_s10a_rc_800E0E3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
     r[4] = 0xefff0000;

@@ -7,8 +7,8 @@ extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
 extern char R_GV_RandS[] __asm__("GV_RandS");
 extern char R_s08b_plasma_l_800D9C98[] __asm__("s08b_plasma_l_800D9C98");
 extern char R_s08b_plasma_l_800D9F1C[] __asm__("s08b_plasma_l_800D9F1C");
-int G_s08b_plasma_l_800D9FB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_plasma_l_800D9FB4");
-int G_s08b_plasma_l_800D9FB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_plasma_l_800D9FB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_plasma_l_800D9FB4");
+int G_s08b_plasma_l_800D9FB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(80)
     r[29] = (u)r[29] + -80;

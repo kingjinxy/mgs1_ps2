@@ -1,6 +1,6 @@
 extern char R_GV_ZeroMemory[] __asm__("GV_ZeroMemory");
-int G_s10a_800C99B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C99B0");
-int G_s10a_800C99B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C99B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C99B0");
+int G_s10a_800C99B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

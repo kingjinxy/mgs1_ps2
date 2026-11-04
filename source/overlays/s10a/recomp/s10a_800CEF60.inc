@@ -5,8 +5,8 @@ extern char R_GV_RandS[] __asm__("GV_RandS");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_rcos[] __asm__("rcos");
 extern char R_rsin[] __asm__("rsin");
-int G_s10a_800CEF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CEF60");
-int G_s10a_800CEF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800CEF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800CEF60");
+int G_s10a_800CEF60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(120)
     r[29] = (u)r[29] + -120;

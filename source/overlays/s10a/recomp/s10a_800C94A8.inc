@@ -1,8 +1,8 @@
 extern char R_GM_StreamStatus[] __asm__("GM_StreamStatus");
 extern char R_GM_VoxStream[] __asm__("GM_VoxStream");
 extern char R_s10a_800C9458[] __asm__("s10a_800C9458");
-int G_s10a_800C94A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C94A8");
-int G_s10a_800C94A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C94A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C94A8");
+int G_s10a_800C94A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

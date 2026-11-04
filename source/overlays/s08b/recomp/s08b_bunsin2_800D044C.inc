@@ -1,7 +1,7 @@
 extern char R_blast_data_8009F4B8[] __asm__("blast_data_8009F4B8");
 extern char R_NewBlast[] __asm__("NewBlast");
-int G_s08b_bunsin2_800D044C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D044C");
-int G_s08b_bunsin2_800D044C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800D044C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800D044C");
+int G_s08b_bunsin2_800D044C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;

@@ -6,8 +6,8 @@ extern char R_s08b_dword_800C3608[] __asm__("s08b_dword_800C3608");
 extern char R_s08b_dword_800C360C[] __asm__("s08b_dword_800C360C");
 extern char R_s08b_dword_800E3FC0[] __asm__("s08b_dword_800E3FC0");
 extern char R_NewAnime[] __asm__("NewAnime");
-int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_bunsin2_800D4FBC");
-int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_bunsin2_800D4FBC");
+int G_s08b_bunsin2_800D4FBC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
@@ -97,8 +97,8 @@ extern char R_s08b_dword_800C3608[] __asm__("s08b_dword_800C3608");
 extern char R_s08b_dword_800C360C[] __asm__("s08b_dword_800C360C");
 extern char R_s08b_dword_800E3FE0[] __asm__("s08b_dword_800E3FE0");
 extern char R_NewAnime[] __asm__("NewAnime");
-int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800D50F0");
-int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_rc_800D50F0");
+int G_s08b_rc_800D50F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
@@ -189,8 +189,8 @@ extern char R_s08b_dword_800C3608[] __asm__("s08b_dword_800C3608");
 extern char R_s08b_dword_800C360C[] __asm__("s08b_dword_800C360C");
 extern char R_s08b_dword_800E4000[] __asm__("s08b_dword_800E4000");
 extern char R_NewAnime[] __asm__("NewAnime");
-int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800D5228");
-int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_rc_800D5228");
+int G_s08b_rc_800D5228(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
@@ -277,8 +277,8 @@ out:
 extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
 extern char R_s08b_dword_800C35EC[] __asm__("s08b_dword_800C35EC");
 extern char R_NewAnime[] __asm__("NewAnime");
-int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s08b_rc_800D5364");
-int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s08b_rc_800D5364");
+int G_s08b_rc_800D5364(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

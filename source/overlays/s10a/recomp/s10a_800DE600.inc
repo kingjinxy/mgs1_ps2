@@ -4,8 +4,8 @@ extern char R_DG_SetPos[] __asm__("DG_SetPos");
 extern char R_GV_RandS[] __asm__("GV_RandS");
 extern char R_GV_RandU[] __asm__("GV_RandU");
 extern char R_RotMatrixYXZ_gte[] __asm__("RotMatrixYXZ_gte");
-int G_s10a_800DE600(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800DE600");
-int G_s10a_800DE600(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800DE600(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800DE600");
+int G_s10a_800DE600(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

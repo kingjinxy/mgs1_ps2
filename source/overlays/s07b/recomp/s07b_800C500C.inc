@@ -2,8 +2,8 @@ extern char R_GM_GameOverTimer[] __asm__("GM_GameOverTimer");
 extern char R_linkvarbuf[] __asm__("linkvarbuf");
 extern char R_s07b_dword_800C33F0[] __asm__("s07b_dword_800C33F0");
 extern char R_GCL_ExecProc[] __asm__("GCL_ExecProc");
-int G_s07b_800C500C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C500C");
-int G_s07b_800C500C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C500C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C500C");
+int G_s07b_800C500C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

@@ -26,8 +26,8 @@ extern char R_s07b_800C4E90[] __asm__("s07b_800C4E90");
 extern char R_s07b_800C5160[] __asm__("s07b_800C5160");
 extern char R_sna_act_helper2_helper2_80033054[] __asm__("sna_act_helper2_helper2_80033054");
 extern char R_sna_ration_available_8004FB4C[] __asm__("sna_ration_available_8004FB4C");
-int G_s07b_800C8510(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C8510");
-int G_s07b_800C8510(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C8510(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C8510");
+int G_s07b_800C8510(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(128)
     r[29] = (u)r[29] + -128;

@@ -3,8 +3,8 @@ extern char R_s07b_dword_800E4B4C[] __asm__("s07b_dword_800E4B4C");
 extern char R_s07b_dword_800E4B58[] __asm__("s07b_dword_800E4B58");
 extern char R_GV_SendMessage[] __asm__("GV_SendMessage");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
-int G_s07b_800C50D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C50D8");
-int G_s07b_800C50D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C50D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C50D8");
+int G_s07b_800C50D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[2] = 0;

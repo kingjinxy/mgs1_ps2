@@ -2,8 +2,8 @@ extern char R_GM_NoisePosition[] __asm__("GM_NoisePosition");
 extern char R_GM_WhereList[] __asm__("GM_WhereList");
 extern char R_s10a_dat_800E4AA4[] __asm__("s10a_dat_800E4AA4");
 extern char R_HZD_GetAddress[] __asm__("HZD_GetAddress");
-int G_s10a_800CC4C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800CC4C8");
-int G_s10a_800CC4C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800CC4C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800CC4C8");
+int G_s10a_800CC4C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

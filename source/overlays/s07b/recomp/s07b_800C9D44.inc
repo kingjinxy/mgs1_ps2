@@ -13,8 +13,8 @@ extern char R_s07b_800C9A58[] __asm__("s07b_800C9A58");
 extern char R_s07b_800C9B24[] __asm__("s07b_800C9B24");
 extern char R_s07b_800C9B94[] __asm__("s07b_800C9B94");
 extern char R_s07b_800C9C74[] __asm__("s07b_800C9C74");
-int G_s07b_800C9D44(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C9D44");
-int G_s07b_800C9D44(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C9D44(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C9D44");
+int G_s07b_800C9D44(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;
@@ -138,8 +138,8 @@ extern char R_GM_MoveTarget[] __asm__("GM_MoveTarget");
 extern char R_GM_PushTarget[] __asm__("GM_PushTarget");
 extern char R_s07b_800C7604[] __asm__("s07b_800C7604");
 extern char R_s07b_800C9D44[] __asm__("s07b_800C9D44");
-int G_s07b_rc_800C9F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_rc_800C9F50");
-int G_s07b_rc_800C9F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_rc_800C9F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_rc_800C9F50");
+int G_s07b_rc_800C9F50(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[29] = (u)r[29] + -32;
@@ -246,8 +246,8 @@ extern char R_GM_FreeObject[] __asm__("GM_FreeObject");
 extern char R_GM_FreeTarget[] __asm__("GM_FreeTarget");
 extern char R_GM_VoxInit[] __asm__("GM_VoxInit");
 extern char R_GV_DestroyOtherActor[] __asm__("GV_DestroyOtherActor");
-int G_s07b_rc_800CA0F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_rc_800CA0F0");
-int G_s07b_rc_800CA0F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_rc_800CA0F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_rc_800CA0F0");
+int G_s07b_rc_800CA0F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;

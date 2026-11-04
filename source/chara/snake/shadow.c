@@ -243,3 +243,25 @@ void *NewShadow2(CONTROL *control, OBJECT *parent, SVECTOR indices, int **enable
     }
     return (void *)work;
 }
+
+#ifdef MGS_PORT
+/* mips2c.py's calls of NewShadow/NewShadow2: the PS1 passes the SVECTOR in two argument registers (a2: vx, vy; a3:
+   vz, pad) and enabled after them; the EE passes a struct in one, so a direct call loses enabled (s07b's Psycho Mantis:
+   her shadow's flag pointer went to 0x000F000C, and her camouflage then stored through NULL) */
+static SVECTOR ps1_svector(unsigned int lo, unsigned int hi)
+{
+    SVECTOR v;
+    v.vx = (short)lo; v.vy = (short)(lo >> 16); v.vz = (short)hi; v.pad = (short)(hi >> 16);
+    return v;
+}
+
+void *Port_NewShadow(CONTROL *control, OBJECT *parent, unsigned int lo, unsigned int hi)
+{
+    return NewShadow(control, parent, ps1_svector(lo, hi));
+}
+
+void *Port_NewShadow2(CONTROL *control, OBJECT *parent, unsigned int lo, unsigned int hi, int **enabled)
+{
+    return NewShadow2(control, parent, ps1_svector(lo, hi), enabled);
+}
+#endif

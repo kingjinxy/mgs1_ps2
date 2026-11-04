@@ -1,6 +1,6 @@
 extern char R_GV_DiffDirS[] __asm__("GV_DiffDirS");
-int G_s07b_800C4974(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C4974");
-int G_s07b_800C4974(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C4974(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C4974");
+int G_s07b_800C4974(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(24)
     r[29] = (u)r[29] + -24;

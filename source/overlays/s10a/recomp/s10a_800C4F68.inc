@@ -3,8 +3,8 @@ extern char R_GM_WhereList[] __asm__("GM_WhereList");
 extern char R_dword_800AB9D4[] __asm__("dword_800AB9D4");
 extern char R_s10a_800C4EA4[] __asm__("s10a_800C4EA4");
 extern char R_s10a_800C4F48[] __asm__("s10a_800C4F48");
-int G_s10a_800C4F68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C4F68");
-int G_s10a_800C4F68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C4F68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C4F68");
+int G_s10a_800C4F68(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(32)
     r[2] = 0;

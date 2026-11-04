@@ -3,8 +3,8 @@ extern char R_DG_RotVector[] __asm__("DG_RotVector");
 extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
 extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
 extern char R_s07b_800C54C0[] __asm__("s07b_800C54C0");
-int G_s07b_800C6C5C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800C6C5C");
-int G_s07b_800C6C5C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800C6C5C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800C6C5C");
+int G_s07b_800C6C5C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;

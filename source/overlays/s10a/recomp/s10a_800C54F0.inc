@@ -8,8 +8,8 @@ extern char R_GM_InitObject[] __asm__("GM_InitObject");
 extern char R_GM_ReshadeObjs[] __asm__("GM_ReshadeObjs");
 extern char R_GV_StrCode[] __asm__("GV_StrCode");
 extern char R_ScaleMatrix[] __asm__("ScaleMatrix");
-int G_s10a_800C54F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s10a_800C54F0");
-int G_s10a_800C54F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s10a_800C54F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s10a_800C54F0");
+int G_s10a_800C54F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(64)
     r[29] = (u)r[29] + -64;

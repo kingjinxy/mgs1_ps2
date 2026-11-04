@@ -10,8 +10,8 @@ extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
 extern char R_s07b_800CC138[] __asm__("s07b_800CC138");
 extern char R_s07b_800CC578[] __asm__("s07b_800CC578");
 extern char R_s07b_800CCA10[] __asm__("s07b_800CCA10");
-int G_s07b_800CF9A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_800CF9A0");
-int G_s07b_800CF9A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_800CF9A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_800CF9A0");
+int G_s07b_800CF9A0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(48)
     r[29] = (u)r[29] + -48;
@@ -198,8 +198,8 @@ extern char R_s07b_800CC970[] __asm__("s07b_800CC970");
 extern char R_s07b_800CC9E8[] __asm__("s07b_800CC9E8");
 extern char R_s07b_800CCA10[] __asm__("s07b_800CCA10");
 extern char R_sna_act_helper2_helper2_80033054[] __asm__("sna_act_helper2_helper2_80033054");
-int G_s07b_rc_800CFBF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7) __asm__("s07b_rc_800CFBF8");
-int G_s07b_rc_800CFBF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+int G_s07b_rc_800CFBF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s07b_rc_800CFBF8");
+int G_s07b_rc_800CFBF8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(128)
     r[29] = (u)r[29] + -128;

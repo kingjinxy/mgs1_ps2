@@ -1164,3 +1164,12 @@ all Wolf's burn in a load-end loop; the comment says to record the tick in trace
 
 Matching builds unaffected (tools only). In sync from the start to 94,060 (0:49:41.80, s12a), the rand seed.
 
+**94,060 (0:49:41.80, s12a):** snow flake respawns (105 draws each, `Snow_800C59C8`) at different loops. A BizHawk
+log of `gUnkCameraStruct2_800B7868` against a port printf: the cameras match (the PS1's line T+1 is the port's
+state at Act time in loop T). The flakes are placed at creation, in the load-end loop 94,052, where Wolf is made again:
+the port made 2,645 draws there and the PS1 2,644, so Wolf burned 191, not the table's 192. Fourth `TICK_AT` entry:
+94,052: 177,855. The seed becomes the PS1's at a load end, which hides the load-end loop's count, but the flakes made
+in that loop got other positions.
+
+In sync from the start to 95,874 (0:50:51.43, s13a): `linkvarbuf` [4], [6] to [10] and [74].
+

@@ -107,9 +107,9 @@ for i, f in enumerate(rows):
 # shortcut: TICK_AT is the tick read mid-loop, found by hand (the trace only samples between loops; a stage's
 # scenario can take 30 blanks: 90,361 at the end of loop 47,488, Wolf's burn at 90,359; s10a again at 57,275,
 # 107,407 and 107,405: 141 draws, so the rats' rolls after it are the PS1's; s12a's Wolf at 93,335, 176,377 and
-# 176,376: the load-end loop's total, 2,701). All so far are Wolf's burn in a load-end loop, 1-2 blanks before the
-# next line. Add a loop when a tick-dependent burn desyncs; record the tick in trace.lua if they become common.
-TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376}
+# 176,376: the load-end loop's total, 2,701; s12a again at 94,052, 177,856 and 177,855). All so far are Wolf's
+# burn in a load-end loop, 1-2 blanks before the next line. Add a loop when a tick-dependent burn desyncs; record the tick in trace.lua if they become common.
+TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376, 94052: 177855}
 # By loop (Port_GameTick reads it by GV_Time), as time.bin: a loop without a line has the next line's. Written by line
 # until loop 93,335 (s12a: Wolf's burn read the tick 7 lines late), harmless before the first loop without a line.
 tick_at = {int(f[1]): TICK_AT.get(int(f[1]), int(n[14])) for f, n in zip(rows, rows[1:])}

@@ -1,0 +1,61 @@
+extern char R_s14e_dword_800C3330[] __asm__("s14e_dword_800C3330");
+extern char R_s14e_dword_800DC908[] __asm__("s14e_dword_800DC908");
+extern char R_s14e_dword_800DC924[] __asm__("s14e_dword_800DC924");
+extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
+extern char R_printf[] __asm__("printf");
+extern char R_s14e_800C6158[] __asm__("s14e_800C6158");
+extern char R_s14e_800C61B0[] __asm__("s14e_800C61B0");
+int G_s14e_800C6208(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800C6208");
+int G_s14e_800C6208(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[3] = (u)0 + (u)0;
+    r[2] = 0;
+    r[5] = (u)r[2] + (int)R_s14e_dword_800C3330;
+    *(int *)((u)r[29] + 20) = r[31];
+    L800c6224:;
+    r[2] = *(unsigned short *)((u)r[5] + 0);
+    r[5] = (u)r[5] + 2;
+    r[3] = (u)r[3] + 1;
+    *(int *)((u)r[4] + 2992) = r[2];
+    r[2] = (int)r[3] < 8;
+    c = ((r[2] != 0)); r[4] = (u)r[4] + 4; if (c) goto L800c6224;
+    r[4] = (u)0 + 116; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0)); r[4] = (u)r[2] + (u)0; if (c) goto L800c6270;
+    r[5] = (u)r[16] + 2996; CALL(R_s14e_800C61B0);
+    r[2] = (int)r[2] < 5;
+    c = ((r[2] != 0)); r[3] = (u)0 + 3; if (c) goto L800c6274;
+    r[4] = 0;
+    r[4] = (u)r[4] + (int)R_s14e_dword_800DC908; goto L800c62bc;
+    L800c6270:;
+    r[3] = (u)0 + 3;
+    L800c6274:;
+    r[4] = (u)0 + 3072;
+    r[2] = (u)r[16] + 6;
+    L800c627c:;
+    *(short *)((u)r[2] + 3024) = r[4];
+    r[4] = (u)r[4] + -1024;
+    r[3] = (u)r[3] + -1;
+    c = (((int)r[3] >= 0)); r[2] = (u)r[2] + -2; if (c) goto L800c627c;
+    r[4] = (u)0 + 105; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0)); r[4] = (u)r[2] + (u)0; if (c) goto L800c62cc;
+    r[5] = (u)r[16] + 3024; CALL(R_s14e_800C6158);
+    r[2] = (int)r[2] < 5;
+    c = ((r[2] != 0)); r[2] = (u)0 + (u)0; if (c) goto L800c62d0;
+    r[4] = 0;
+    r[4] = (u)r[4] + (int)R_s14e_dword_800DC924;
+    L800c62bc:;
+     CALL(R_printf);
+    r[2] = (u)0 + -1; goto L800c62d0;
+    L800c62cc:;
+    r[2] = (u)0 + (u)0;
+    L800c62d0:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

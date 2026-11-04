@@ -1,0 +1,61 @@
+extern char R_ZAKO14Command[] __asm__("ZAKO14Command");
+extern char R_s14e_800CCC04[] __asm__("s14e_800CCC04");
+extern char R_s14e_800CCF84[] __asm__("s14e_800CCF84");
+extern char R_s14e_800CD024[] __asm__("s14e_800CD024");
+int G_s14e_800CD764(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800CD764");
+int G_s14e_800CD764(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[3] = *(short *)((u)r[16] + 2852);
+    r[2] = (u)0 + 2;
+    c = ((r[3] == r[2])); r[2] = (int)r[3] < 3; if (c) goto L800cd7e4;
+    c = ((r[2] == 0)); r[2] = (u)0 + 1; if (c) goto L800cd79c;
+    c = ((r[3] == r[2]));  if (c) goto L800cd7b0;
+     goto L800cd848;
+    L800cd79c:;
+    r[2] = (u)0 + 3;
+    c = ((r[3] == r[2]));  if (c) goto L800cd820;
+     goto L800cd848;
+    L800cd7b0:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CCF84);
+    c = ((r[2] == 0));  if (c) goto L800cd848;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CCC04);
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + ((int)R_ZAKO14Command + 28));
+    c = ((r[2] == 0)); r[2] = (u)0 + 246; if (c) goto L800cd838;
+    *(short *)((u)r[16] + 2890) = r[2]; goto L800cd840;
+    L800cd7e4:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CD024);
+    c = ((r[2] == 0)); r[2] = (u)0 + 3; if (c) goto L800cd848;
+    *(short *)((u)r[16] + 2850) = r[2];
+    r[2] = (u)0 + 16;
+    *(short *)((u)r[16] + 2852) = r[2];
+    r[2] = (u)0 + 1;
+    *(int *)((u)r[16] + 2876) = r[2];
+    r[2] = (u)0 + 240;
+    *(short *)((u)r[16] + 2890) = r[2];
+    r[2] = (u)0 + 255;
+    *(short *)((u)r[16] + 2848) = 0;
+    *(int *)((u)r[16] + 2856) = 0; goto L800cd844;
+    L800cd820:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CD024);
+    c = ((r[2] == 0));  if (c) goto L800cd848;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CCC04);
+    L800cd838:;
+    r[2] = (u)0 + 240;
+    *(short *)((u)r[16] + 2890) = r[2];
+    L800cd840:;
+    r[2] = (u)0 + 255;
+    L800cd844:;
+    *(int *)((u)r[16] + 2968) = r[2];
+    L800cd848:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

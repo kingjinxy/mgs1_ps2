@@ -1,0 +1,61 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_s14e_800DA720[] __asm__("s14e_800DA720");
+extern char R_s14e_rc_800D8BB4[] __asm__("s14e_rc_800D8BB4");
+extern char R_s14e_rc_800D921C[] __asm__("s14e_rc_800D921C");
+extern char R_s14e_rc_800DA0CC[] __asm__("s14e_rc_800DA0CC");
+extern char R_DG_SetChanlSystemUnits[] __asm__("DG_SetChanlSystemUnits");
+extern char R_THING_Gcl_GetInt[] __asm__("THING_Gcl_GetInt");
+extern char R_THING_Gcl_GetIntDefault[] __asm__("THING_Gcl_GetIntDefault");
+extern char R_s14e_800D8698[] __asm__("s14e_800D8698");
+int G_s14e_800D852C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800D852C");
+int G_s14e_800D852C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[4] = (u)0 + 115;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 24) = r[18];
+    *(int *)((u)r[29] + 20) = r[17];
+    *(int *)((u)r[16] + 36) = r[5];
+    r[5] = (u)0 + 50;
+    r[2] = 0;
+    *(int *)((u)r[2] + (int)R_GM_CurrentMap) = r[6];
+    *(int *)((u)r[16] + 32) = r[6]; CALL(R_THING_Gcl_GetIntDefault);
+    r[4] = (u)0 + 101;
+    r[5] = (u)0 + 50;
+    r[18] = (u)r[2] + (u)0; CALL(R_THING_Gcl_GetIntDefault);
+    r[4] = (u)0 + 109;
+    r[17] = (u)r[2] + (u)0; CALL(R_THING_Gcl_GetInt);
+    r[4] = (u)r[18] + (u)0;
+    r[5] = (u)r[17] + (u)0;
+    *(int *)((u)r[16] + 44) = r[2]; CALL(R_s14e_800D8698);
+    r[4] = (u)0 + 1;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s14e_rc_800D921C;
+    *(int *)((u)r[16] + 40) = r[18]; CALL(R_DG_SetChanlSystemUnits);
+    r[4] = (u)0 + 2;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s14e_rc_800DA0CC;
+    *(int *)((u)r[16] + 48) = r[2]; CALL(R_DG_SetChanlSystemUnits);
+    r[4] = (u)0 + 3;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s14e_800DA720;
+    *(int *)((u)r[16] + 52) = r[2]; CALL(R_DG_SetChanlSystemUnits);
+    r[4] = (u)0 + 6;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s14e_rc_800D8BB4;
+    *(int *)((u)r[16] + 56) = r[2]; CALL(R_DG_SetChanlSystemUnits);
+    r[3] = (u)0 + 1;
+    *(int *)((u)r[16] + 60) = r[2];
+    *(int *)((u)r[16] + 64) = r[3];
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[2] = (u)0 + (u)0;
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

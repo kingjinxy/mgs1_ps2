@@ -1,0 +1,74 @@
+extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
+extern char R_ZAKO14_GameFlag[] __asm__("ZAKO14_GameFlag");
+extern char R_s14e_dword_800C34F0[] __asm__("s14e_dword_800C34F0");
+extern char R_s14e_dword_800DCFC8[] __asm__("s14e_dword_800DCFC8");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+int G_s14e_800CD5A4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800CD5A4");
+int G_s14e_800CD5A4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[3] = 0x10000;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 2872);
+    r[4] = *(unsigned short *)((u)r[16] + 3120);
+    r[2] = r[2] | r[3];
+    r[3] = *(int *)((u)r[16] + 2856);
+    *(int *)((u)r[16] + 2872) = r[2];
+    r[2] = (u)0 + 16;
+    c = ((r[3] != r[2])); *(short *)((u)r[16] + 2888) = r[4]; if (c) goto L800cd5f0;
+    r[4] = (u)0 + 14; CALL(R_GV_RandU);
+    r[3] = *(int *)((u)r[16] + 2856);
+    r[3] = (u)r[3] + (u)r[2];
+    *(int *)((u)r[16] + 2856) = r[3];
+    L800cd5f0:;
+    r[2] = *(int *)((u)r[16] + 2856);
+    r[2] = (u)r[2] < (u)33;
+    c = ((r[2] != 0)); r[4] = 0; if (c) goto L800cd6a4;
+    r[4] = (u)r[4] + (int)R_s14e_dword_800C34F0;
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_ZAKO14_GameFlag);
+    r[3] = *(signed char *)((u)r[16] + 2932);
+    r[2] = (u)r[2] << 2;
+    r[3] = (u)r[3] << 6;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (u)r[2] + (u)r[4];
+    r[3] = *(int *)((u)r[2] + 0);
+    r[2] = (u)r[3] < (u)5;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800cd6a4;
+    r[2] = (u)r[2] + (int)R_s14e_dword_800DCFC8;
+    r[3] = (u)r[3] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(int *)((u)r[3] + 0);
+    t = r[2];  switch ((u)t) { case 0x800cd654: goto L800cd654; case 0x800cd684: goto L800cd684; case 0x800cd68c: goto L800cd68c; case 0x800cd694: goto L800cd694; case 0x800cd69c: goto L800cd69c; default: goto out; }
+    L800cd654:;
+    r[2] = *(int *)((u)r[16] + 3116);
+    r[2] = (int)r[2] < 800;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800cd67c;
+    r[3] = *(int *)((u)r[2] + (int)R_GM_PlayerStatus);
+    r[3] = r[3] & 4192;
+    c = ((r[3] == 0)); r[2] = (u)0 + 10; if (c) goto L800cd6b4;
+    L800cd67c:;
+    r[2] = (u)0 + 6; goto L800cd6b4;
+    L800cd684:;
+    r[2] = (u)0 + 7; goto L800cd6b4;
+    L800cd68c:;
+    r[2] = (u)0 + 12; goto L800cd6b4;
+    L800cd694:;
+    r[2] = (u)0 + 13; goto L800cd6b4;
+    L800cd69c:;
+    r[2] = (u)0 + 14; goto L800cd6b4;
+    L800cd6a4:;
+    r[3] = *(int *)((u)r[16] + 2856);
+    r[2] = (u)0 + (u)0;
+    r[3] = (u)r[3] + 1;
+    *(int *)((u)r[16] + 2856) = r[3];
+    L800cd6b4:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

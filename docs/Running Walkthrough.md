@@ -1190,3 +1190,23 @@ send that. ab_ch.c (abst) has its own tray states and isn't changed.
 Matching builds 80 and 2 OK. In sync from the start to 97,879 (0:51:47.37, s14e): `GM_PlayerPosition`. s13a loads
 with "stage binary 4B1F is not linked in".
 
+## Step 52: s14e linked in (Nov 4)
+
+**97,879 (0:51:47.37, s14e):** "stage binary 4B1F is not linked in" is s14e. It was left out because 30 of its objects
+are assembly in the decomp (`asm/overlays/s14e/*.s`, no C file). A same-named .c would give the matching build two
+rules for one .obj, so the port gets `source/overlays/s14e/asm_objects.c` (all under `MGS_PORT`), which includes mips2c's
+translations of those objects. `build/overlays_ps2.py` takes it in place of a missing source when it includes that
+object's `.inc`. mips2c already translates every `.s` of an overlay.
+
+Then 57 literal addresses: data words holding function or string addresses (`zako14_data.c`, `overlay3.c`) and the
+stage table. `tools/port/symlits.py OVL FILE...` (new) rewrites such initializers as `(int)SYMBOL` from the link map
+and keeps words that translated switches compare against (`case 0x...:`). I had to fix declarations by hand: they must
+go after the file's first includes, not after a recomp include, and the strings are `const char`. The stage table uses the
+`CHARA_*`/`DEMO_*` macros like s11a's, except `CHARA_FOG`: `NewFog` (fog.c) is assembly in s14e, so that entry is
+`s14e_800D8604`. Matching builds 80 and 2 OK.
+
+TLB misses: s14e's commander (`zako14com.c` `ChangePrio`) has the same NULL soldier read and write as s11e's (Step 49),
+fixed the same way.
+
+In sync from the start to 101,236 (0:53:40.90, s15a), the rand seed. s15a ("4B3B") isn't split yet, and it's on disc 2.
+

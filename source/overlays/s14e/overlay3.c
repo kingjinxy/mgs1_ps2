@@ -1,31 +1,40 @@
 #include "ps1align.h"
 #include "mgstype.h"
 
-int s14e_dword_800C3838 = 0x800D8848;
-int s14e_dword_800C383C = 0x800D8850;
-int s14e_dword_800C3840 = 0x800D8850;
-int s14e_dword_800C3844 = 0x800D8850;
-int s14e_dword_800C3848 = 0x800D8878;
-int s14e_dword_800C384C = 0x800D88C0;
-int s14e_dword_800C3850 = 0x800D8910;
-int s14e_dword_800C3854 = 0x800D8850;
-int s14e_dword_800C3858 = 0x800D8850;
-int s14e_dword_800C385C = 0x800D8850;
-int s14e_dword_800C3860 = 0x800D8850;
-int s14e_dword_800C3864 = 0x800D8850;
-int s14e_dword_800C3868 = 0x800D8850;
-int s14e_dword_800C386C = 0x800D8850;
-int s14e_dword_800C3870 = 0x800D8850;
-int s14e_dword_800C3874 = 0x800D8850;
-int s14e_dword_800C3878 = 0x800D88C0;
-int s14e_dword_800C387C = 0x800D8910;
-int s14e_dword_800C3880 = 0x800D8850;
-int s14e_dword_800C3884 = 0x800D8850;
-int s14e_dword_800C3888 = 0x800D8968;
-int s14e_dword_800C388C = 0x800D89B8;
-int s14e_dword_800C3890 = 0x800D8848;
-int s14e_dword_800C3894 = 0x800D8848;
-int s14e_dword_800C3898 = 0x800D8848;
+extern char s14e_800D8848[];
+extern char s14e_800D8850[];
+extern char s14e_800D8878[];
+extern char s14e_800D88C0[];
+extern char s14e_800D8910[];
+extern char s14e_800D8968[];
+extern char s14e_800D89B8[];
+
+
+int s14e_dword_800C3838 = (int)s14e_800D8848;
+int s14e_dword_800C383C = (int)s14e_800D8850;
+int s14e_dword_800C3840 = (int)s14e_800D8850;
+int s14e_dword_800C3844 = (int)s14e_800D8850;
+int s14e_dword_800C3848 = (int)s14e_800D8878;
+int s14e_dword_800C384C = (int)s14e_800D88C0;
+int s14e_dword_800C3850 = (int)s14e_800D8910;
+int s14e_dword_800C3854 = (int)s14e_800D8850;
+int s14e_dword_800C3858 = (int)s14e_800D8850;
+int s14e_dword_800C385C = (int)s14e_800D8850;
+int s14e_dword_800C3860 = (int)s14e_800D8850;
+int s14e_dword_800C3864 = (int)s14e_800D8850;
+int s14e_dword_800C3868 = (int)s14e_800D8850;
+int s14e_dword_800C386C = (int)s14e_800D8850;
+int s14e_dword_800C3870 = (int)s14e_800D8850;
+int s14e_dword_800C3874 = (int)s14e_800D8850;
+int s14e_dword_800C3878 = (int)s14e_800D88C0;
+int s14e_dword_800C387C = (int)s14e_800D8910;
+int s14e_dword_800C3880 = (int)s14e_800D8850;
+int s14e_dword_800C3884 = (int)s14e_800D8850;
+int s14e_dword_800C3888 = (int)s14e_800D8968;
+int s14e_dword_800C388C = (int)s14e_800D89B8;
+int s14e_dword_800C3890 = (int)s14e_800D8848;
+int s14e_dword_800C3894 = (int)s14e_800D8848;
+int s14e_dword_800C3898 = (int)s14e_800D8848;
 int s14e_dword_800C389C = 0x00000000;
 int s14e_dword_800C38A0 = 0x00000000;
 int s14e_dword_800C38A4 = 0x00000000;

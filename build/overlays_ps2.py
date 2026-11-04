@@ -44,6 +44,12 @@ def survey(name):
     for s in srcs:
         path = os.path.join(ROOT, s)
         if not os.path.exists(path):
+            # an object that is assembly in the decomp: its translation in the overlay's asm_objects.c (port only)
+            port = os.path.join(os.path.dirname(path), "asm_objects.c")
+            name = os.path.basename(s)[:-2] + ".inc"
+            if os.path.exists(port) and name in open(port).read():
+                srcs[srcs.index(s)] = os.path.relpath(port, ROOT)
+                continue
             if s not in NO_SOURCE:
                 return srcs, "no source for " + s
             continue
@@ -54,7 +60,7 @@ def survey(name):
         return srcs, "%d INCLUDE_ASM" % stubs
     if lits:
         return srcs, "%d literal symbol addresses" % lits
-    return [s for s in srcs if s not in NO_SOURCE], None
+    return list(dict.fromkeys(s for s in srcs if s not in NO_SOURCE)), None  # asm_objects.c once
 
 
 def build(run, objcopy, ld, cc, renames):

@@ -1,0 +1,62 @@
+extern char R_GV_Time[] __asm__("GV_Time");
+extern char R_GV_AddVec3[] __asm__("GV_AddVec3");
+extern char R_GV_NearExp2[] __asm__("GV_NearExp2");
+int G_s14e_800CB128(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800CB128");
+int G_s14e_800CB128(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = *(int *)((u)r[18] + 2304);
+    r[2] = *(unsigned short *)((u)r[16] + 6);
+    r[2] = r[2] & 8;
+    c = ((r[2] == 0)); r[17] = (u)0 + (u)0; if (c) goto L800cb214;
+    r[4] = (u)r[16] + 52;
+    r[5] = (u)r[18] + 100;
+    r[6] = (u)r[5] + (u)0; CALL(R_GV_AddVec3);
+    r[2] = *(unsigned short *)((u)r[16] + 6);
+    r[2] = r[2] & 65527;
+    *(short *)((u)r[16] + 6) = r[2];
+    r[2] = *(short *)((u)r[18] + 2272);
+    r[2] = (u)r[2] + -1;
+    r[2] = (u)r[2] < (u)2;
+    c = ((r[2] == 0));  if (c) goto L800cb214;
+    r[4] = *(short *)((u)r[16] + 58);
+    c = ((r[4] == 0)); r[2] = 0; if (c) goto L800cb1f8;
+    r[2] = *(int *)((u)r[2] + (int)R_GV_Time);
+    r[2] = r[2] & 256;
+    c = ((r[2] == 0));  if (c) goto L800cb1d4;
+    r[2] = *(unsigned char *)((u)r[18] + 2932);
+    r[2] = r[2] & 1;
+    c = ((r[2] != 0)); r[17] = (u)r[4] << 10; if (c) goto L800cb1f4;
+    r[2] = (u)r[4] + 2; goto L800cb1e8;
+    L800cb1d4:;
+    r[2] = *(unsigned char *)((u)r[18] + 2932);
+    r[2] = r[2] & 1;
+    c = ((r[2] == 0)); r[2] = (u)r[4] + 2; if (c) goto L800cb1f0;
+    L800cb1e8:;
+    r[17] = (u)r[2] << 10; goto L800cb1f4;
+    L800cb1f0:;
+    r[17] = (u)r[4] << 10;
+    L800cb1f4:;
+    r[17] = r[17] & 4095;
+    L800cb1f8:;
+    r[16] = (u)r[18] + 32;
+    r[4] = *(short *)((u)r[16] + 54);
+    *(short *)((u)r[16] + 78) = r[17];
+    r[5] = *(short *)((u)r[18] + 2276);
+     CALL(R_GV_NearExp2);
+    *(short *)((u)r[16] + 54) = r[2];
+    L800cb214:;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

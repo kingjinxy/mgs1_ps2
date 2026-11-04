@@ -1,0 +1,65 @@
+extern char R_linkvarbuf[] __asm__("linkvarbuf");
+extern char R_ZAKO14SetGopointLast[] __asm__("ZAKO14SetGopointLast");
+extern char R_s14e_800CCB60[] __asm__("s14e_800CCB60");
+extern char R_s14e_800CD08C[] __asm__("s14e_800CD08C");
+extern char R_s14e_800CD184[] __asm__("s14e_800CD184");
+int G_s14e_800CD9DC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800CD9DC");
+int G_s14e_800CD9DC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 24) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    r[3] = *(short *)((u)r[16] + 2852);
+    r[17] = (u)0 + 4;
+    c = ((r[3] == r[17])); r[2] = (u)0 + 5; if (c) goto L800cda10;
+    c = ((r[3] == r[2]));  if (c) goto L800cda30;
+     goto L800cda60;
+    L800cda10:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CCB60);
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CD08C);
+    c = ((r[2] == 0)); r[2] = (u)0 + 5; if (c) goto L800cda60;
+    *(short *)((u)r[16] + 2852) = r[2]; goto L800cda5c;
+    L800cda30:;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800CD184);
+    c = (((int)r[2] >= 0));  if (c) goto L800cda48;
+    *(short *)((u)r[16] + 2852) = r[17]; goto L800cda5c;
+    L800cda48:;
+    c = (((int)r[2] <= 0)); r[2] = (u)0 + 2; if (c) goto L800cda60;
+    *(short *)((u)r[16] + 2850) = r[2];
+    r[2] = (u)0 + 14;
+    *(short *)((u)r[16] + 2852) = r[2];
+    L800cda5c:;
+    *(int *)((u)r[16] + 2856) = 0;
+    L800cda60:;
+    r[2] = *(int *)((u)r[16] + 3116);
+    r[2] = (int)r[2] < 800;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800cdaac;
+    r[2] = *(short *)((u)r[2] + ((int)R_linkvarbuf + 32));
+    c = ((r[2] != 0)); r[2] = (u)0 + 2; if (c) goto L800cdaac;
+    *(short *)((u)r[16] + 2850) = r[2];
+    r[2] = (u)0 + 10;
+    *(short *)((u)r[16] + 2852) = r[2];
+    r[2] = *(int *)((u)r[16] + 2872);
+    r[4] = *(unsigned short *)((u)r[16] + 3120);
+    r[3] = 0x10000;
+    *(int *)((u)r[16] + 2856) = 0;
+    r[2] = r[2] | r[3];
+    *(int *)((u)r[16] + 2872) = r[2];
+    *(short *)((u)r[16] + 2888) = r[4];
+    L800cdaac:;
+    r[3] = *(short *)((u)r[16] + 2962);
+    r[2] = (u)0 + 2;
+    c = ((r[3] != r[2])); r[2] = (u)0 + 255; if (c) goto L800cdac0;
+    *(int *)((u)r[16] + 2968) = r[2];
+    L800cdac0:;
+     CALL(R_ZAKO14SetGopointLast);
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

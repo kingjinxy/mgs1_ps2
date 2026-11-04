@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #define __ZAKO_BUGFIX__
 
 #include "animal/zako14/zako.h"
@@ -34,31 +37,79 @@ void s14e_800C5958( void )
     return;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C5960.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C5960.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C59DC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C59DC.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C5B14.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C5B14.s")
+#endif
 void s14e_800C5B14( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C5C78.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C5C78.s")
+#endif
 void s14e_800C5C78( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C5DAC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C5DAC.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C5E08.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C5E08.s")
+#endif
 void s14e_800C5E08( Work *work, int name, int where );
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C6028.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C6028.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C609C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C609C.s")
+#endif
 void s14e_800C609C( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C60BC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C60BC.s")
+#endif
 int s14e_800C60BC( Work *work );
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C6158.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C6158.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C61B0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C61B0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800C6208.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800C6208.s")
+#endif
 void s14e_800C6208( Work *work );
 
 void s14e_800C62E0( Work *work, int name, int where )

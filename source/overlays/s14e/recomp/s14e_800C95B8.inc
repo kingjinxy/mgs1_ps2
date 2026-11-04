@@ -1,0 +1,68 @@
+extern char R_ZAKO14Command[] __asm__("ZAKO14Command");
+extern char R_ZAKO14_NO_POINT[] __asm__("ZAKO14_NO_POINT");
+extern char R_linkvarbuf[] __asm__("linkvarbuf");
+extern char R_s14e_800C7398[] __asm__("s14e_800C7398");
+extern char R_GM_ConfigMotionAdjust[] __asm__("GM_ConfigMotionAdjust");
+extern char R_s14e_800C6E6C[] __asm__("s14e_800C6E6C");
+int G_s14e_800C95B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800C95B8");
+int G_s14e_800C95B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 2924);
+    r[2] = r[2] | 64;
+    c = ((r[5] != 0)); *(int *)((u)r[16] + 2924) = r[2]; if (c) goto L800c964c;
+    r[2] = 0;
+    r[3] = 0;
+    *(int *)((u)r[16] + 2532) = 0;
+    r[9] = (u)r[2] + (int)R_ZAKO14_NO_POINT;
+    r[6] = LWL(((u)r[9] + 3), r[6]);
+    r[6] = LWR(((u)r[9] + 0), r[6]);
+    r[7] = LWL(((u)r[9] + 7), r[7]);
+    r[7] = LWR(((u)r[9] + 4), r[7]);
+    SWL(((u)r[16] + 35), r[6]);
+    SWR(((u)r[16] + 32), r[6]);
+    SWL(((u)r[16] + 39), r[7]);
+    SWR(((u)r[16] + 36), r[7]);
+    r[2] = *(signed char *)((u)r[16] + 2932);
+    r[3] = (u)r[3] + (int)R_ZAKO14Command;
+    r[2] = (u)r[2] << 4;
+    r[2] = (u)r[2] + (u)r[3];
+    r[3] = (u)0 + 1;
+    *(int *)((u)r[2] + 144) = r[3];
+    r[2] = *(short *)((u)r[16] + 3136);
+    c = ((r[2] != 0)); r[3] = 0; if (c) goto L800c9650;
+    r[3] = 0;
+    r[3] = (u)r[3] + (int)R_linkvarbuf;
+    r[2] = *(unsigned short *)((u)r[3] + 158);
+    r[2] = (u)r[2] + 1;
+    *(short *)((u)r[3] + 158) = r[2];
+    L800c964c:;
+    r[3] = 0;
+    L800c9650:;
+    r[2] = *(signed char *)((u)r[16] + 2932);
+    r[3] = (u)r[3] + (int)R_ZAKO14Command;
+    r[2] = (u)r[2] << 4;
+    r[2] = (u)r[2] + (u)r[3];
+    r[3] = *(int *)((u)r[2] + 144);
+    r[2] = (u)0 + 2;
+    c = ((r[3] != r[2]));  if (c) goto L800c969c;
+    r[4] = (u)r[16] + (u)0; CALL(R_s14e_800C6E6C);
+    r[4] = (u)r[16] + 156;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s14e_800C7398;
+    r[5] = (u)0 + (u)0;
+    *(int *)((u)r[16] + 2284) = r[2];
+    *(int *)((u)r[16] + 2292) = 0;
+    *(short *)((u)r[16] + 112) = 0;
+    *(short *)((u)r[16] + 108) = 0; CALL(R_GM_ConfigMotionAdjust);
+    L800c969c:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

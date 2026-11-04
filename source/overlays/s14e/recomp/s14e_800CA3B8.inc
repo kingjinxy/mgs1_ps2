@@ -1,0 +1,63 @@
+extern char R_linkvarbuf[] __asm__("linkvarbuf");
+extern char R_s14e_dword_800C33F8[] __asm__("s14e_dword_800C33F8");
+extern char R_s14e_dword_800C33FC[] __asm__("s14e_dword_800C33FC");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+extern char R_NewItemPut[] __asm__("NewItemPut");
+int G_s14e_800CA3B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800CA3B8");
+int G_s14e_800CA3B8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(48)
+    r[29] = (u)r[29] + -48;
+    r[2] = (u)r[4] + (u)0;
+    r[4] = (u)0 + 10;
+    *(int *)((u)r[29] + 40) = r[16];
+    *(int *)((u)r[29] + 44) = r[31];
+    r[7] = LWL(((u)r[2] + 2263), r[7]);
+    r[7] = LWR(((u)r[2] + 2260), r[7]);
+    r[8] = LWL(((u)r[2] + 2267), r[8]);
+    r[8] = LWR(((u)r[2] + 2264), r[8]);
+    SWL(((u)r[29] + 19), r[7]);
+    SWR(((u)r[29] + 16), r[7]);
+    SWL(((u)r[29] + 23), r[8]);
+    SWR(((u)r[29] + 20), r[8]);
+    r[16] = (u)r[2] + 32; CALL(R_GV_RandU);
+    r[4] = (u)0 + 10;
+    r[3] = *(unsigned short *)((u)r[29] + 16);
+    r[5] = *(unsigned short *)((u)r[29] + 18);
+    r[3] = (u)r[3] + (u)r[2];
+    r[5] = (u)r[5] + 100;
+    *(short *)((u)r[29] + 16) = r[3];
+    *(short *)((u)r[29] + 18) = r[5]; CALL(R_GV_RandU);
+    r[3] = *(unsigned short *)((u)r[29] + 20);
+    r[4] = (u)0 + 4;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[29] + 20) = r[3]; CALL(R_GV_RandU);
+    r[2] = 0;
+    r[2] = *(short *)((u)r[2] + ((int)R_linkvarbuf + 36));
+    c = (((int)r[2] >= 0)); r[2] = (u)0 + 2; if (c) goto L800ca454;
+    *(short *)((u)r[29] + 28) = r[2];
+    r[2] = 0;
+    r[3] = *(int *)((u)r[2] + (int)R_s14e_dword_800C33F8);
+    r[2] = (u)0 + 12;
+    *(short *)((u)r[29] + 30) = 0; goto L800ca46c;
+    L800ca454:;
+    *(short *)((u)r[29] + 28) = r[2];
+    r[2] = (u)0 + 1;
+    *(short *)((u)r[29] + 30) = r[2];
+    r[2] = 0;
+    r[3] = *(int *)((u)r[2] + (int)R_s14e_dword_800C33FC);
+    r[2] = (u)0 + 25;
+    L800ca46c:;
+    *(short *)((u)r[29] + 32) = r[2];
+    *(int *)((u)r[29] + 24) = r[3];
+    r[2] = (u)0 + 900;
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)r[29] + 16;
+    r[6] = (u)r[29] + 24;
+    *(short *)((u)r[29] + 34) = r[2]; CALL(R_NewItemPut);
+    r[31] = *(int *)((u)r[29] + 44);
+    r[16] = *(int *)((u)r[29] + 40);
+    r[29] = (u)r[29] + 48; goto out;
+out:
+    RECOMP_RETURN;
+}

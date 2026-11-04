@@ -331,7 +331,12 @@ static void ChangePrio( COMMANDER *com )
     for ( i = 0; i < com->n_watchers; i++ )
     {
         work = com->watchers[ ZAKO14Command.prio[ i ] ].work;
+#ifdef MGS_PORT
+        /* A removed soldier's entry is NULL: the PS1 reads its RAM at 0xC2C, 0 (as s11e's zk11ecom.c) */
+        dis[ i ] = work ? work->sn_dis : 0;
+#else
         dis[ i ] = work->sn_dis;
+#endif
     }
 
     for ( iter = com->n_watchers - 1; iter >= 0; iter = next )
@@ -357,6 +362,9 @@ static void ChangePrio( COMMANDER *com )
     for ( i = 0; i < com->n_watchers; i++ )
     {
         work = com->watchers[ ZAKO14Command.prio[ i ] ].work;
+#ifdef MGS_PORT
+        if ( work ) /* the PS1 writes its RAM at 0xBFC */
+#endif
         work->chase_dis = ChaseDis[ ZAKO14Command.prio[ i ] ];
     }
 }

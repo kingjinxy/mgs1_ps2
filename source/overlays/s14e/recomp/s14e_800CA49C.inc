@@ -1,0 +1,44 @@
+extern char R_GM_PlayerMap[] __asm__("GM_PlayerMap");
+extern char R_AN_HeadMark[] __asm__("AN_HeadMark");
+extern char R_GM_SeSet[] __asm__("GM_SeSet");
+extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
+int G_s14e_800CA49C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800CA49C");
+int G_s14e_800CA49C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[3] = 0;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 24) = r[18];
+    *(int *)((u)r[29] + 20) = r[17];
+    r[2] = *(int *)((u)r[16] + 76);
+    r[3] = *(int *)((u)r[3] + (int)R_GM_PlayerMap);
+    r[2] = *(int *)((u)r[2] + 0);
+    r[2] = r[2] & r[3];
+    c = ((r[2] == 0)); r[18] = (u)r[5] + (u)0; if (c) goto L800ca520;
+    r[2] = *(int *)((u)r[16] + 156);
+    c = ((r[18] != 0)); r[17] = (u)r[2] + 624; if (c) goto L800ca4ec;
+    r[4] = (u)r[16] + 32;
+    r[5] = (u)0 + 83; CALL(R_GM_SeSet);
+    L800ca4ec:;
+    r[2] = *(int *)((u)r[16] + 2920);
+    c = ((r[2] == 0)); r[4] = (u)r[17] + (u)0; if (c) goto L800ca50c;
+    r[4] = *(int *)((u)r[16] + 2912);
+     CALL(R_GV_DestroyActor);
+    r[4] = (u)r[17] + (u)0;
+    L800ca50c:;
+    r[5] = (u)r[18] + (u)0; CALL(R_AN_HeadMark);
+    *(int *)((u)r[16] + 2912) = r[2];
+    r[2] = (u)0 + 30;
+    *(int *)((u)r[16] + 2920) = r[2];
+    L800ca520:;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

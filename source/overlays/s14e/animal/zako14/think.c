@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "ps1align.h"
 #include "game/game.h"
 
@@ -194,31 +197,143 @@ const int s14e_dword_800DD010 = 0x800CDBD0;
 const int s14e_dword_800DD014 = 0x800CDBE0;
 const int s14e_dword_800DD018 = 0x800CDBF0;
 
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCB60.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCB60.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCBA8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCBA8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCC04.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCC04.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCC70.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCC70.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCC8C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCC8C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCCC4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCCC4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CCF84.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CCF84.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD024.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD024.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD08C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD08C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD0FC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD0FC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD184.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD184.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD218.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD218.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD2B4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD2B4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD37C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD37C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD440.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD440.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD4A8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD4A8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD514.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD514.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD55C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD55C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD5A4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD5A4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD6C4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD6C4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD714.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD714.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD734.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD734.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD764.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD764.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD858.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD858.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CD9DC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CD9DC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CDADC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CDADC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CDB78.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CDB78.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s14e/recomp/s14e_800CDC08.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s14e/s14e_800CDC08.s")
+#endif

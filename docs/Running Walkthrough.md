@@ -1173,3 +1173,8 @@ in that loop got other positions.
 
 In sync from the start to 95,874 (0:50:51.43, s13a): `linkvarbuf` [4], [6] to [10] and [74].
 
+**95,874 is the disc swap.** The PS1 goes from the `change` stage (disc 1 → 2, TAS frames 181,883 to 181,906) to
+s13a. The port stays in `change`, printing `CD CASE CLOSE!!`: the disc swap isn't built yet (Planning Doc, `libfs`:
+`DISC2.BIN` is on the image, but `change`'s drive checks and the switch aren't). Everything after this in the TAS
+needs it. Waiting for the user's decision on how the port should present the swap.
+

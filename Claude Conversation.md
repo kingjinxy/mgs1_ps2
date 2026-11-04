@@ -21516,3 +21516,269 @@ All good. Committing the HAL change (in its own repo), then the docs here.
 
 - tool `Bash`: Commit HAL sqrt fix
 
+- tool `Bash`: Document, archive conversation, commit
+
+- tool `PushNotification`: 
+
+## Claude
+
+Now s11e's 7 literal addresses.
+
+- tool `Bash`: List s11e literal addresses
+
+- tool `Bash`: What the s11e literals point at and who uses them
+
+## Claude
+
+Same pattern as s11i: an item-name string table and a function table stored as integers. Finding the symbol names.
+
+- tool `Bash`: Names of the targets
+
+- tool `Bash`: Symbolize s11e tables; matching builds
+
+## Claude
+
+Matching builds still OK. Replaying with s11e linked in.
+
+- tool `Bash`: Replay with s11e
+
+## Claude
+
+Moves to 91,969 (0:48:36.25): the PS1's alert mode is 3 there. Confirming s11e actually linked, then committing.
+
+- tool `Bash`: Check s11e was linked
+
+- tool `Bash`: Document and commit s11e
+
+## Claude
+
+Committed. Now the alert at 91,969: the PS1's soldiers spot Snake and the port's don't. Looking at the context.
+
+- tool `Bash`: Status, seed, alert timelines
+
+- tool `Bash`: PS1 vs port near the alert
+
+## Claude
+
+Right after the cutscene the PS1 enters alert 3; the port stays at 0 and its rand draws run one loop late. Looking at what sets the alert in s11e.
+
+- tool `Bash`: Who sets GM_AlertMode
+
+- tool `Bash`: Alert update and commander alert handling
+
+- tool `Bash`: Rand callers vs PS1 draw counts at the alert
+
+- tool `Bash`: How alert gets requested
+
+- tool `Bash`: Commander alert logic and AlertModeSet
+
+## Claude
+
+The alert comes from the s11e commander when `command->alert` reaches 255 (raised by the soldiers). Comparing that value per loop on both sides.
+
+- tool `Bash`: Commander symbol addresses and caller
+
+- tool `Bash`: Commander Act and struct offsets
+
+- tool `Bash`: Find ZAKO_COMMAND definition
+
+- tool `Bash`: Commander struct layout
+
+- tool `Bash`: ZAKO_COMMAND struct
+
+- tool `Bash`: Log PS1 commander alert state
+
+## Claude
+
+PS1: the commander's alert jumps from 0 to 255 in one loop (91,967), so one soldier's `alert_level` goes straight to max. Printing the port's soldier alert levels for those loops.
+
+- tool `Bash`: Port soldier alert levels per loop
+
+- tool `Bash`: Neighbours of the commander struct
+
+- tool `Bash`: Where the commander is defined
+
+- tool `Bash`: s11e bss and how other stages define it
+
+- tool `Bash`: Read s11e overlay4.c bss definitions
+
+## Claude
+
+This is a systemic risk: decomp overlay files define structs as runs of separate ints, and the port's GCC can reorder them. Checking whether the port build already guards against that.
+
+- tool `Bash`: Port compile flags and SECTION macro
+
+- tool `Bash`: SECTION macro under the port
+
+- tool `Bash`: How SECTION and the s03d precedent work
+
+- tool `Bash`: Find split-struct bss words in overlays
+
+- tool `Bash`: Ordered bss sections for split-struct overlay files
+
+- tool `Bash`: Check sections used and initialized vars
+
+## Claude
+
+All pure `.bss`. Inserting after the last `#include` for the remaining files.
+
+- tool `Bash`: Apply to remaining files; drop debug print
+
+- tool `Bash`: Full replay with ordered bss
+
+## Claude
+
+In sync to **93,337 (0:49:16.90, s12a)**, and the struct is now in order. There are new TLB misses (48 lines, 2 PCs) that must be fixed. First the matching builds and a commit.
+
+- tool `Bash`: Matching builds; resolve TLB PCs
+
+- tool `Bash`: Commit; read the faulting commander function
+
+## Claude
+
+The new NULL reads are in s11e's commander (`s11e_zk11ecom_800DA16C`): it reads `watcher->sn_dis` for every slot, including ones whose watcher is NULL. Reading the rest to find the store.
+
+- tool `Bash`: Rest of function; prior NULL-watcher handling
+
+- tool `Bash`: How other commanders/NULL reads were handled
+
+- tool `Bash`: s00a commander equivalent and the boxall precedent
+
+- tool `Bash`: Find earlier NULL-read fixes
+
+- tool `Bash`: s03d zakocom NULL watcher precedent
+
+## Claude
+
+Same as s03d's commander. Reading what the PS1 holds at 0xC2C in the RAM dumps I have.
+
+- tool `Bash`: PS1 low RAM words at 0xC2C and 0xBFC
+
+## Claude
+
+Zero in every dump (none from after s11e, but this code only writes 0xBFC, never 0xC2C). Applying the s03d fix.
+
+- tool `Bash`: Guard NULL soldier in s11e commander
+
+- tool `Bash`: Replay after NULL-soldier fix
+
+## Claude
+
+The commander's TLB misses are gone. Matching build, docs, commit.
+
+- tool `Bash`: Matching build, docs, commit
+
+## Claude
+
+Now 93,337, two loops after the s12a load. Running the rand log (and the VR matching build alongside).
+
+- tool `Bash`: Rand callers at s12a start
+
+- tool `Bash`: Snow update scheduling
+
+- tool `Bash`: Read snow Act
+
+- tool `Bash`: Summarise load-end loop draws by caller
+
+## Claude
+
+Wolf (s12a's `NewWolf2`) is created in this loop. In s10a, Wolf's constructor burned `tick % 256` rand calls (Steps 34/40). Checking for the same here.
+
+- tool `Bash`: Tick use in Wolf2
+
+- tool `Bash`: Wolf2 burn and the replay tick there
+
+## Claude
+
+The port burned 26 draws, while the tick table gives 249 for that loop (218 for the loop before). Reading `Port_GameTick`.
+
+- tool `Bash`: Read Port_GameTick
+
+- tool `Bash`: Tick table indexed by GV_Time
+
+- tool `Bash`: Row collection and per-loop records
+
+- tool `Bash`: Write ticks.bin by loop; check entries
+
+- tool `Bash`: Replay with per-loop ticks
+
+## Claude
+
+2,702 against the PS1's 2,701, as predicted. Adding the mid-loop tick entry.
+
+- tool `Bash`: Add s12a tick entry; full replay
+
+## Claude
+
+In sync from the start to **94,060 (0:49:41.80)**. Updating the `TICK_AT` comment and docs, then committing.
+
+- tool `Bash`: Read TICK_AT comment
+
+- tool `Bash`: Document and commit the tick fix
+
+## Claude
+
+~55 minutes left. Looking at 94,060.
+
+- tool `Bash`: Draw counts and callers near 94,060
+
+## Claude
+
+Snow flake respawns (105 draws each) run at different loops: PS1 at 94,058/94,059, port at 94,059/94,061. Reading the respawn condition.
+
+- tool `Bash`: Snow area and respawn checks
+
+## Claude
+
+Respawns depend on the camera (`gUnkCameraStruct2_800B7868` position and target), which the trace doesn't record. Logging it on both sides.
+
+- tool `Bash`: Camera struct address and layout
+
+- tool `Bash`: Log PS1 camera struct per loop
+
+## Claude
+
+Now the port's camera at the same loops (temporary printf in snow.c's Act).
+
+- tool `Bash`: Port camera per loop
+
+- tool `Bash`: Where snow init reads the camera
+
+## Claude
+
+The constructor places the flakes around `GM_WhereList[0]->mov` (Snake's position). Printing what the port has there at creation.
+
+- tool `Bash`: Port snow init player position
+
+- tool `Bash`: Snow init with no loop filter
+
+- tool `Bash`: Tick table at 94,052
+
+## Claude
+
+(The "1" was a line count, not a draw count.) The table says 192, and the totals say the PS1 burned 191, so the tick is 177,855.
+
+- tool `Bash`: Add 94,052 tick; full replay
+
+## Claude
+
+In sync to **95,874 (0:50:51.43, s13a)**. Tidying the comment wrap and committing.
+
+- tool `Bash`: Commit; look at the s13a desync
+
+## Claude
+
+The PS1 leaves stage `change` for s13a here. `change` is the disc-swap screen, so this is the switch from disc 1 to disc 2, and the port stays in `change`. Checking what the port does there.
+
+- tool `Bash`: Port behaviour at the disc change
+
+## Claude
+
+The port waits at "CD CASE CLOSE!!" forever: the TAS swaps to disc 2 here, and the port has no disc swap yet. Checking the plan for what was decided.
+
+- tool `Bash`: Planned handling of the disc swap
+
+- tool `Bash`: Disc-swap plan status and lid code
+
+- tool `PushNotification`: 
+

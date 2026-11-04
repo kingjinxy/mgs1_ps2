@@ -59,14 +59,27 @@ int s11e_dword_800C3684 = 0x00000064;
 int s11e_dword_800C3688 = 0x0000FC00;
 int s11e_dword_800C368C = 0x00000000;
 
-int s11e_dword_800C3690 = 0x800DEC0C;
-int s11e_dword_800C3694 = 0x800DEBF8;
-int s11e_dword_800C3698 = 0x800DEBE4;
+extern const char s11e_dword_800DEC0C[];
+extern const char s11e_aSocombullet_800DEBF8[];
+extern const char s11e_aFamasbullet_800DEBE4[];
 
-int s11e_dword_800C369C = 0x800D7CAC;
-int s11e_dword_800C36A0 = 0x800D7D44;
-int s11e_dword_800C36A4 = 0x800D7E8C;
-int s11e_dword_800C36A8 = 0x800D7EC8;
+const char *s11e_dword_800C3690[3] = {
+    s11e_dword_800DEC0C,
+    s11e_aSocombullet_800DEBF8,
+    s11e_aFamasbullet_800DEBE4
+};
+
+void ZAKO11E_PutSound_800D7CAC();
+void ZAKO11E_PutBreath_800D7D44();
+void s11e_zk11ecom_800D7E8C();
+void ZAKO11E_PutBulletEx_800D7EC8();
+
+void *s11e_dword_800C369C[4] = {
+    ZAKO11E_PutSound_800D7CAC,
+    ZAKO11E_PutBreath_800D7D44,
+    s11e_zk11ecom_800D7E8C,
+    ZAKO11E_PutBulletEx_800D7EC8
+};
 int s11e_dword_800C36AC = 0xFE0C0005;
 int s11e_dword_800C36B0 = 0x00000050;
 int s11e_dword_800C36B4 = 0x00001676;

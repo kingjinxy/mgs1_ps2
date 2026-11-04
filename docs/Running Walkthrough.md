@@ -1124,3 +1124,12 @@ desync moved to 86,035 until the table covered it.
 Matching builds 80 and 2 OK. In sync from the start to 91,876 (0:48:33.11, s11e): `GM_GameStatus` 0x10000000 on the
 PS1. s11e is still left out of the port (7 literal addresses).
 
+## Step 48: s11e linked in (Nov 4)
+
+**91,876 (0:48:33.11, s11e):** s11e was left out for 7 literal addresses in `overlay2.c`: the item-name table
+(`s11e_dword_800C3690`, read by zk11eaction.c as `const char *[3]`) and the soldiers' put-function table
+(`s11e_dword_800C369C`, `void *[]`) were ints holding the PS1 addresses. They're now arrays of the strings' and
+functions' symbols, as for s11i in Step 45. Matching builds 80 and 2 OK; the port loads s11e's actors.
+
+Now in sync to 91,969 (0:48:36.25, s11e): `GM_AlertMode` 3 on the PS1, 0 in the port.
+

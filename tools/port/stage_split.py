@@ -20,14 +20,14 @@ in 0x80010000..the overlay's end) is relocated all the same; the TAS replay is t
 import bisect, os, re, struct, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DISC = os.path.expanduser('~/emu/mgs-integral/disc1.bin')
+DISCS = [os.path.expanduser('~/emu/mgs-integral/disc%d.bin' % n) for n in (1, 2)]  # a disc 2 stage: s15a, ...
 BASE, RES = 0x800C3208, 0x80010000
 ovl = sys.argv[1]
 os.chdir(ROOT)
 
 
-def disc_stage(name):
-    f = open(DISC, 'rb')
+def disc_stage(name, disc):
+    f = open(disc, 'rb')
     def sec(n, c=1):
         b = b''
         for i in range(c):
@@ -58,13 +58,15 @@ def disc_stage(name):
             if ext == b'b':
                 return sec(s, (size + 2047) // 2048)[:size]
             s += (size + 2047) // 2048
-    raise SystemExit('stage %s: no .bin' % name)
+    return None  # not on this disc
 
 
 def s16(x): return x - 65536 if x & 0x8000 else x
 
 
-b = disc_stage(ovl)
+b = next((x for x in (disc_stage(ovl, d) for d in DISCS) if x), None)
+if b is None:
+    raise SystemExit('stage %s: no .bin on either disc' % ovl)
 open('build/%s.matching.bin' % ovl, 'wb').write(b)
 W = list(struct.unpack('<%dI' % (len(b) // 4), b[:len(b) // 4 * 4]))
 END = BASE + len(b)

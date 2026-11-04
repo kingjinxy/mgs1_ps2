@@ -1,0 +1,42 @@
+extern char R_GV_ReceiveMessage[] __asm__("GV_ReceiveMessage");
+int G_s15a_800C733C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800C733C");
+int G_s15a_800C733C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[5] + (u)0;
+    *(int *)((u)r[29] + 28) = r[17];
+    r[17] = (u)r[6] + (u)0;
+    r[4] = r[4] & 65535;
+    *(int *)((u)r[29] + 32) = r[31];
+    r[5] = (u)r[29] + 16; CALL(R_GV_ReceiveMessage);
+    r[5] = (u)r[2] + (u)0;
+    c = (((int)r[5] <= 0)); r[7] = (u)0 + -1; if (c) goto L800c73bc;
+    L800c736c:;
+    r[2] = *(int *)((u)r[29] + 16);
+    r[6] = *(unsigned short *)((u)r[2] + 4);
+    c = (((int)r[16] <= 0)); r[3] = (u)0 + (u)0; if (c) goto L800c73ac;
+    r[4] = (u)r[17] + (u)0;
+    L800c7384:;
+    r[2] = *(unsigned short *)((u)r[4] + 0);
+    c = ((r[6] != r[2]));  if (c) goto L800c7398;
+    r[7] = (u)r[3] + (u)0;
+    L800c7398:;
+    r[3] = (u)r[3] + 1;
+    r[2] = (int)r[3] < (int)r[16];
+    c = ((r[2] != 0)); r[4] = (u)r[4] + 2; if (c) goto L800c7384;
+    r[2] = *(int *)((u)r[29] + 16);
+    L800c73ac:;
+    r[5] = (u)r[5] + -1;
+    r[2] = (u)r[2] + 20;
+    c = (((int)r[5] > 0)); *(int *)((u)r[29] + 16) = r[2]; if (c) goto L800c736c;
+    L800c73bc:;
+    r[31] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[2] = (u)r[7] + (u)0;
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

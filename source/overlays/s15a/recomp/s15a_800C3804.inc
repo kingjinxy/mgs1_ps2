@@ -1,0 +1,22 @@
+int G_s15a_800C3804(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800C3804");
+int G_s15a_800C3804(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[4] = *(int *)((u)r[4] + 52);
+    r[3] = *(unsigned char *)((u)r[4] + 0);
+    r[2] = (u)0 + 80;
+    c = ((r[3] != r[2])); r[6] = (u)r[2] + (u)0; if (c) goto L800c3848;
+    L800c381c:;
+    r[2] = *(unsigned char *)((u)r[4] + 1);
+    c = ((r[2] == r[5])); r[2] = (u)r[4] + 3; if (c) goto L800c3850;
+    r[2] = *(unsigned char *)((u)r[4] + 2);
+    r[2] = (u)r[4] + (u)r[2];
+    r[3] = *(unsigned char *)((u)r[2] + 2);
+    c = ((r[3] == r[6])); r[4] = (u)r[2] + 2; if (c) goto L800c381c;
+    L800c3848:;
+    r[2] = (u)0 + (u)0; goto out;
+    L800c3850:;
+     goto out;
+out:
+    RECOMP_RETURN;
+}

@@ -1,0 +1,66 @@
+extern char R_s15a_dat_800D9084[] __asm__("s15a_dat_800D9084");
+extern char R_s15a_dat_800D9098[] __asm__("s15a_dat_800D9098");
+extern char R_s15a_dat_800D90A0[] __asm__("s15a_dat_800D90A0");
+extern char R_NewItemPut[] __asm__("NewItemPut");
+int G_s15a_800D0AE4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800D0AE4");
+int G_s15a_800D0AE4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 32) = r[31];
+    r[4] = (u)r[5] + (u)0;
+    r[3] = (u)0 + 1;
+    c = ((r[7] == r[3])); r[5] = (u)r[6] + (u)0; if (c) goto L800d0b54;
+    r[2] = (int)r[7] < 2;
+    c = ((r[2] == 0)); r[2] = (u)0 + 2; if (c) goto L800d0b18;
+    c = ((r[7] == 0)); r[2] = (u)0 + -1; if (c) goto L800d0b30;
+    r[6] = (u)r[29] + 16; goto L800d0bc0;
+    L800d0b18:;
+    c = ((r[7] == r[2])); r[2] = (u)0 + 3; if (c) goto L800d0b78;
+    c = ((r[7] == r[2])); r[2] = (u)0 + -1; if (c) goto L800d0b98;
+    r[6] = (u)r[29] + 16; goto L800d0bc0;
+    L800d0b30:;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s15a_dat_800D9084;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[2] = (u)0 + 3;
+    *(short *)((u)r[29] + 20) = r[2];
+    *(short *)((u)r[29] + 22) = r[2];
+    r[2] = (u)0 + 4;
+    *(short *)((u)r[29] + 24) = r[2]; goto L800d0bb8;
+    L800d0b54:;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s15a_dat_800D9098;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[2] = (u)0 + 6;
+    *(short *)((u)r[29] + 22) = r[2];
+    r[2] = (u)0 + 2;
+    *(short *)((u)r[29] + 20) = 0;
+    *(short *)((u)r[29] + 24) = r[2]; goto L800d0bb8;
+    L800d0b78:;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s15a_dat_800D9098;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[2] = (u)0 + 6;
+    *(short *)((u)r[29] + 20) = 0;
+    *(short *)((u)r[29] + 22) = r[2];
+    *(short *)((u)r[29] + 24) = r[7]; goto L800d0bb8;
+    L800d0b98:;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s15a_dat_800D90A0;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[2] = (u)0 + 4;
+    *(short *)((u)r[29] + 20) = r[2];
+    r[2] = (u)0 + 13;
+    *(short *)((u)r[29] + 22) = r[2];
+    *(short *)((u)r[29] + 24) = r[3];
+    L800d0bb8:;
+    r[2] = (u)0 + -1;
+    r[6] = (u)r[29] + 16;
+    L800d0bc0:;
+    *(short *)((u)r[29] + 26) = r[2]; CALL(R_NewItemPut);
+    r[31] = *(int *)((u)r[29] + 32);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

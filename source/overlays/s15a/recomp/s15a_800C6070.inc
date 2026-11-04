@@ -1,0 +1,42 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_GV_Clock[] __asm__("GV_Clock");
+extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
+extern char R_s15a_800C5EBC[] __asm__("s15a_800C5EBC");
+extern char R_s15a_800C6038[] __asm__("s15a_800C6038");
+int G_s15a_800C6070(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800C6070");
+int G_s15a_800C6070(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[3] = 0;
+    *(int *)((u)r[29] + 24) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    r[4] = *(int *)((u)r[16] + 680);
+    r[2] = *(int *)((u)r[16] + 32);
+    r[17] = (u)r[4] + -1;
+    *(int *)((u)r[3] + (int)R_GM_CurrentMap) = r[2];
+    c = (((int)r[17] > 0)); *(int *)((u)r[16] + 680) = r[17]; if (c) goto L800c60b0;
+    r[4] = (u)r[16] + (u)0; CALL(R_GV_DestroyActor);
+     goto L800c60e4;
+    L800c60b0:;
+    r[4] = (u)r[16] + 40;
+    r[5] = (u)r[16] + 168;
+    r[6] = (u)0 + 16; CALL(R_s15a_800C5EBC);
+    r[5] = (u)0 + 16;
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_GV_Clock);
+    r[3] = *(int *)((u)r[16] + 36);
+    r[2] = (u)r[2] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[4] = *(int *)((u)r[3] + 64);
+    r[6] = (u)r[17] << 4; CALL(R_s15a_800C6038);
+    L800c60e4:;
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

@@ -1,0 +1,64 @@
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_SquareRoot0[] __asm__("SquareRoot0");
+int G_s15a_800CA728(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800CA728");
+int G_s15a_800CA728(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 32) = r[31];
+    r[2] = *(int *)((u)r[4] + 160);
+    r[2] = *(unsigned short *)((u)r[2] + 460);
+    *(short *)((u)r[29] + 16) = r[2];
+    r[2] = *(int *)((u)r[4] + 160);
+    r[2] = *(unsigned short *)((u)r[2] + 464);
+    *(short *)((u)r[29] + 18) = r[2];
+    r[2] = *(int *)((u)r[4] + 160);
+    r[2] = *(unsigned short *)((u)r[2] + 468);
+    c = ((r[5] == 0)); *(short *)((u)r[29] + 20) = r[2]; if (c) goto L800ca79c;
+    r[2] = 0;
+    r[9] = (u)r[2] + (int)R_GM_PlayerPosition;
+    r[6] = LWL(((u)r[9] + 3), r[6]);
+    r[6] = LWR(((u)r[9] + 0), r[6]);
+    r[7] = LWL(((u)r[9] + 7), r[7]);
+    r[7] = LWR(((u)r[9] + 4), r[7]);
+    SWL(((u)r[29] + 27), r[6]);
+    SWR(((u)r[29] + 24), r[6]);
+    SWL(((u)r[29] + 31), r[7]);
+    SWR(((u)r[29] + 28), r[7]);
+     goto L800ca7bc;
+    L800ca79c:;
+    r[6] = LWL(((u)r[4] + 1311), r[6]);
+    r[6] = LWR(((u)r[4] + 1308), r[6]);
+    r[7] = LWL(((u)r[4] + 1315), r[7]);
+    r[7] = LWR(((u)r[4] + 1312), r[7]);
+    SWL(((u)r[29] + 27), r[6]);
+    SWR(((u)r[29] + 24), r[6]);
+    SWL(((u)r[29] + 31), r[7]);
+    SWR(((u)r[29] + 28), r[7]);
+    L800ca7bc:;
+    r[2] = *(short *)((u)r[29] + 16);
+    r[3] = *(short *)((u)r[29] + 24);
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (int)r[2] >> 4;
+    mul = (long long)(int)r[2] * (int)r[2]; hi_ = mul >> 32; lo_ = mul;
+    r[2] = *(short *)((u)r[29] + 18);
+    r[3] = *(short *)((u)r[29] + 26);
+    r[5] = lo_;
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (int)r[2] >> 4;
+    mul = (long long)(int)r[2] * (int)r[2]; hi_ = mul >> 32; lo_ = mul;
+    r[3] = *(short *)((u)r[29] + 28);
+    r[2] = *(short *)((u)r[29] + 20);
+    r[4] = lo_;
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (int)r[2] >> 4;
+    mul = (long long)(int)r[2] * (int)r[2]; hi_ = mul >> 32; lo_ = mul;
+    r[4] = (u)r[5] + (u)r[4];
+    r[3] = lo_;
+    r[4] = (u)r[4] + (u)r[3]; CALL(R_SquareRoot0);
+    r[31] = *(int *)((u)r[29] + 32);
+    r[2] = (u)r[2] << 4;
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

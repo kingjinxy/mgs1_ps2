@@ -1,0 +1,110 @@
+extern char R_GM_NoiseLength[] __asm__("GM_NoiseLength");
+extern char R_GM_NoisePosition[] __asm__("GM_NoisePosition");
+extern char R_GM_NoisePower[] __asm__("GM_NoisePower");
+extern char R_GM_PlayerControl[] __asm__("GM_PlayerControl");
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
+extern char R_GM_SeSet[] __asm__("GM_SeSet");
+extern char R_s15a_800C5780[] __asm__("s15a_800C5780");
+extern char R_s15a_800C57C0[] __asm__("s15a_800C57C0");
+extern char R_s15a_800C580C[] __asm__("s15a_800C580C");
+int G_s15a_800C583C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800C583C");
+int G_s15a_800C583C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 28) = r[19];
+    r[19] = 0;
+    r[2] = *(int *)((u)r[19] + (int)R_GM_PlayerControl);
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 32) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    c = ((r[2] == 0)); *(int *)((u)r[29] + 16) = r[16]; if (c) goto L800c59c4;
+    r[2] = 0;
+    r[3] = *(int *)((u)r[2] + (int)R_GM_PlayerStatus);
+    r[2] = r[3] & 2;
+    c = ((r[2] == 0)); r[2] = r[3] & 16; if (c) goto L800c58c8;
+    c = ((r[2] == 0));  if (c) goto L800c59c4;
+     CALL(R_s15a_800C580C);
+    r[16] = (u)r[2] + (u)0;
+    c = (((int)r[16] < 0));  if (c) goto L800c59c4;
+    r[2] = *(int *)((u)r[19] + (int)R_GM_PlayerControl);
+    r[2] = *(unsigned short *)((u)r[2] + 102);
+    r[3] = r[2] & 3;
+    r[2] = (u)r[16] << 2;
+    r[3] = (u)r[3] << 3;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (u)r[18] + (u)r[2];
+    r[5] = *(int *)((u)r[2] + 116);
+    r[4] = 0; goto L800c59bc;
+    L800c58c8:;
+    r[4] = (u)r[18] + (u)0; CALL(R_s15a_800C57C0);
+    r[16] = (u)r[2] + (u)0;
+    c = (((int)r[16] < 0));  if (c) goto L800c59c4;
+    r[4] = (u)r[18] + (u)0; CALL(R_s15a_800C5780);
+    r[17] = (u)r[2] + (u)0;
+    c = (((int)r[17] < 0)); r[2] = (u)r[16] << 2; if (c) goto L800c5994;
+    r[3] = (u)r[17] << 3;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (u)r[18] + (u)r[2];
+    r[16] = 0;
+    r[5] = *(int *)((u)r[2] + 52);
+    r[4] = (u)r[16] + (int)R_GM_PlayerPosition; CALL(R_GM_SeSet);
+    r[2] = (u)r[17] << 2;
+    r[2] = (u)r[18] + (u)r[2];
+    r[2] = *(int *)((u)r[2] + 148);
+    c = ((r[2] == 0)); r[6] = 0; if (c) goto L800c59c4;
+    r[4] = (u)0 + 100;
+    r[3] = *(int *)((u)r[6] + (int)R_GM_NoisePower);
+    r[2] = (int)r[4] < (int)r[3];
+    c = ((r[2] != 0)); r[5] = (u)0 + 4; if (c) goto L800c59c4;
+    c = ((r[3] != r[4])); r[2] = 0; if (c) goto L800c5958;
+    r[2] = *(int *)((u)r[2] + (int)R_GM_NoiseLength);
+    r[2] = (int)r[5] < (int)r[2];
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800c59c4;
+    L800c5958:;
+    *(int *)((u)r[2] + (int)R_GM_NoiseLength) = r[5];
+    r[2] = 0;
+    *(int *)((u)r[6] + (int)R_GM_NoisePower) = r[4];
+    r[10] = (u)r[16] + (int)R_GM_PlayerPosition;
+    r[9] = (u)r[2] + (int)R_GM_NoisePosition;
+    r[7] = LWL(((u)r[10] + 3), r[7]);
+    r[7] = LWR(((u)r[10] + 0), r[7]);
+    r[8] = LWL(((u)r[10] + 7), r[8]);
+    r[8] = LWR(((u)r[10] + 4), r[8]);
+    SWL(((u)r[9] + 3), r[7]);
+    SWR(((u)r[9] + 0), r[7]);
+    SWL(((u)r[9] + 7), r[8]);
+    SWR(((u)r[9] + 4), r[8]);
+     goto L800c59c4;
+    L800c5994:;
+    r[2] = *(int *)((u)r[19] + (int)R_GM_PlayerControl);
+    r[2] = *(unsigned short *)((u)r[2] + 102);
+    r[4] = 0;
+    r[3] = r[2] & 3;
+    r[2] = (u)r[16] << 2;
+    r[3] = (u)r[3] << 3;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (u)r[18] + (u)r[2];
+    r[5] = *(int *)((u)r[2] + 84);
+    L800c59bc:;
+    r[4] = (u)r[4] + (int)R_GM_PlayerPosition; CALL(R_GM_SeSet);
+    L800c59c4:;
+    r[31] = *(int *)((u)r[29] + 32);
+    r[19] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}
+int G_s15a_rc_800C59E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_rc_800C59E0");
+int G_s15a_rc_800C59E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+     goto out;
+out:
+    RECOMP_RETURN;
+}

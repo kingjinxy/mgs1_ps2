@@ -1210,3 +1210,11 @@ fixed the same way.
 
 In sync from the start to 101,236 (0:53:40.90, s15a), the rand seed. s15a ("4B3B") isn't split yet, and it's on disc 2.
 
+## Step 53: s15a, from disc 2 (Nov 4)
+
+**101,236 (0:53:40.90):** s15a ("4B3B") isn't split and is on disc 2. `stage_split.py` read only disc 1's STAGE.DIR.
+It now tries disc 1, then disc 2 (s10a regenerates unchanged). Then `stage_split.py s15a` and
+`mips2c.py s15a 0x800C3208` (274 functions, no warnings). Matching builds 80 and 2 OK.
+
+In sync from 100,000 to 101,734 (0:54:00.52, s15a), the rand seed.
+

@@ -1,0 +1,14 @@
+extern char R_s15a_dat_800C34AC[] __asm__("s15a_dat_800C34AC");
+int G_s15a_800C7F08(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800C7F08");
+int G_s15a_800C7F08(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_s15a_dat_800C34AC);
+    c = ((r[2] == 0));  if (c) goto L800c7f20;
+    *(int *)((u)r[2] + 92) = 0;
+    L800c7f20:;
+     goto out;
+out:
+    RECOMP_RETURN;
+}

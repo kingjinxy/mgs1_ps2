@@ -1,0 +1,62 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
+extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
+extern char R_GCL_StrToSV[] __asm__("GCL_StrToSV");
+extern char R_GM_GetMap[] __asm__("GM_GetMap");
+extern char R_HZD_QueueDynamicFloor[] __asm__("HZD_QueueDynamicFloor");
+extern char R_s15a_800D53B8[] __asm__("s15a_800D53B8");
+extern char R_s15a_800D7E70[] __asm__("s15a_800D7E70");
+int G_s15a_800D8130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s15a_800D8130");
+int G_s15a_800D8130(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(72)
+    r[29] = (u)r[29] + -72;
+    *(int *)((u)r[29] + 56) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    r[4] = (u)0 + 112;
+    *(int *)((u)r[29] + 60) = r[19];
+    r[19] = (u)r[6] + (u)0;
+    r[2] = 0;
+    *(int *)((u)r[29] + 64) = r[31];
+    *(int *)((u)r[29] + 52) = r[17];
+    *(int *)((u)r[29] + 48) = r[16];
+    *(int *)((u)r[2] + (int)R_GM_CurrentMap) = r[19];
+    *(int *)((u)r[18] + 32) = r[19];
+    *(int *)((u)r[18] + 36) = r[5]; CALL(R_GCL_GetOption);
+    c = ((r[2] == 0));  if (c) goto L800d81c0;
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = (u)r[29] + 16; CALL(R_GCL_StrToSV);
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = (u)r[29] + 24; CALL(R_GCL_StrToSV);
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = (u)r[29] + 32; CALL(R_GCL_StrToSV);
+     CALL(R_GCL_NextStr);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = (u)r[29] + 40; CALL(R_GCL_StrToSV);
+    L800d81c0:;
+    r[4] = (u)0 + 115; CALL(R_s15a_800D53B8);
+    r[17] = (u)r[18] + 44;
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)r[29] + 16;
+    r[16] = (u)r[2] + (u)0; CALL(R_s15a_800D7E70);
+    r[4] = (u)r[19] + (u)0; CALL(R_GM_GetMap);
+    r[4] = *(int *)((u)r[2] + 8);
+    r[5] = (u)r[17] + (u)0;
+    *(int *)((u)r[18] + 40) = r[4]; CALL(R_HZD_QueueDynamicFloor);
+    r[3] = *(unsigned short *)((u)r[18] + 50);
+    r[16] = (u)r[16] << 8;
+    r[3] = r[3] | r[16];
+    *(short *)((u)r[18] + 50) = r[3];
+    r[31] = *(int *)((u)r[29] + 64);
+    r[19] = *(int *)((u)r[29] + 60);
+    r[18] = *(int *)((u)r[29] + 56);
+    r[17] = *(int *)((u)r[29] + 52);
+    r[16] = *(int *)((u)r[29] + 48);
+    r[2] = (u)0 + (u)0;
+    r[29] = (u)r[29] + 72; goto out;
+out:
+    RECOMP_RETURN;
+}

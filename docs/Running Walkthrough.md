@@ -1042,3 +1042,11 @@ Ruled out on the way: the actor order (levels run 0 to 9; uji 4, Johnny 5), a CD
 
 Next desync: 72,998 (0:38:21.72, s11a), `GV_PadData` (a stick value, `0829` against `1029`). Matching builds: 80 and 2 OK.
 
+## Step 43: s11a linked in (Nov 4)
+
+- **72,998 (0:38:21.72):** one PS1 line has `GV_PadData`'s word at offset 8 as `0x1029` instead of `0x0829`, after a 56-blank loop; the lines before and after match. Let through with `--ignore "GV_PadData@72998-72998"`: nothing differed after it until 73,234.
+- **73,234 (0:38:29.61):** `GM_EnemyWatchCount` (score screen) 1 against 2. The PS1's s11a commander (`zk11acom.c`, `UpdateGameFlag`: Snake in zone 24 on the stairs) counted it; a printf there never ran in the port. s11a was one of the 19 overlays left out of the port link: its character table (`source/stage/s11a.c`) gave its 12 constructors as literal addresses, because `charalst.h` had `?` for `CHARA_ZAKO11A` and `CHARA_ZAKO11ACOM`. They're now `NewZako11A` and `NewZako11ACommander`, and the table uses the `CHARA_*` names like the other stages. The matching build still matches (80 and 2 OK), and the port links s11a in. In the port, s11a had been running with no actors of its own.
+- **TLB misses:** 50, all in boxall.c's `DrawItemText` (torture room, loops 60,535 on): `GM_PlayerControl` is NULL there and the PS1 reads its RAM at 0 (`0003 0000 0c50 275a`). The port uses those values when it's NULL. None left in the run.
+
+Now in sync to 76,316 (0:40:10.44, s11b): `STATE_CUT_IN` (0x40) set on the PS1 five loops after a load end.
+

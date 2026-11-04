@@ -371,7 +371,9 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       its `GV_Clock`; lines BizHawk sampled partway into a loop compared with the port's next line (`compare_trace.same`);
       loops without a line keep the PS1's clock and play time; a stream starts in the PS1's loop even when the port's
       stream task is a loop late (strctrl.c state 1).
-- [ ] Next desync: loop 72,998 (0:38:21.72, `s11a`): GV_PadData, a stick value (`0829` against `1029`).
+- [x] Loop 72,998: a one-line PS1 pad blip, let through; 73,234: s11a wasn't linked (its chara table had literal
+      addresses): linked in (Running Walkthrough Step 43).
+- [ ] Next desync: loop 76,316 (0:40:10.44, `s11b`): `STATE_CUT_IN` on the PS1, five loops after a load end.
   Found so far (2026-11-03): in loop 47,498 the PS1's Wolf switches to state 0 (Work+1748) and draws 3 (her
   `RandU(4)`, `9A4C`, `RandU(16)`); the port's doesn't. Equal on both sides at the loop's start: Wolf's whole Work,
   her two TARGETs, the actor lists, the overlay's data, the resident globals but sound/OT/stack noise

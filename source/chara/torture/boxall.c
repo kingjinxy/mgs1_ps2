@@ -56,6 +56,19 @@ static void DrawItemText(Work *work)
 
     mov = &work->control.mov;
 
+#ifdef MGS_PORT
+    {
+        /* NULL GM_PlayerControl in the torture (loop 60,535): the PS1 reads its RAM at 0, mov 3, 0, 0x0c50 */
+        static SVECTOR ps1_ram0 = { 3, 0, 0x0c50, 0x275a };
+        SVECTOR *player = GM_PlayerControl ? &GM_PlayerControl->mov : &ps1_ram0;
+        dx = player->vx - mov->vx;
+        if (dx < 0)
+        {
+            dx = -dx;
+        }
+        dz = player->vz - mov->vz;
+    }
+#else
     dx = GM_PlayerControl->mov.vx - mov->vx;
     if (dx < 0)
     {
@@ -63,6 +76,7 @@ static void DrawItemText(Work *work)
     }
 
     dz = GM_PlayerControl->mov.vz - mov->vz;
+#endif
     if (dz < 0)
     {
         dz = -dz;

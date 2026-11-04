@@ -284,8 +284,8 @@
 #define CHARA_ZAKO              { 0xed87, ? }                       // GV_StrCode("ざこ") animal/zako/zako.c
 #define CHARA_ZAKO10            { 0x31e3, ? }                       // GV_StrCode("ざこ１０") animal/zako10/zako10.c
 #define CHARA_ZAKO10COM         { 0x8e64, ? }                       // GV_StrCode("ざこ１０コマンダー") animal/zako10/zk10com.c
-#define CHARA_ZAKO11A           { 0xa608, ? }                       // GV_StrCode("ざこ１１ａ") animal/zako11a/zako11a.c
-#define CHARA_ZAKO11ACOM        { 0x5efa, ? }                       // GV_StrCode("ざこ１１ａコマンダー") animal/zako11a/zk11acom.c
+#define CHARA_ZAKO11A           { 0xa608, NewZako11A }              // GV_StrCode("ざこ１１ａ") animal/zako11a/zako11a.c
+#define CHARA_ZAKO11ACOM        { 0x5efa, NewZako11ACommander }     // GV_StrCode("ざこ１１ａコマンダー") animal/zako11a/zk11acom.c
 #define CHARA_ZAKO11E           { 0xa60c, NewZako11E }              // GV_StrCode("ざこ１１ｅ") animal/zako11e/zako11e.c
 #define CHARA_ZAKO11ECOM        { 0x5f0a, NewZako11ECommander }     // GV_StrCode("ざこ１１ｅコマンダー") animal/zako11e/zk11ecom.c
 #define CHARA_ZAKO11F           { 0xa60d, NewZako11F }              // GV_StrCode("ざこ１１ｆ") animal/zako11f/zako11f.c
@@ -408,6 +408,8 @@ extern NEWCHARA NewBombLed;                     /* animal/liquid/bombled.c      
 extern NEWCHARA NewMeryl72_800C7BC4;            /* animal/meryl72/meryl72.c     */
 extern NEWCHARA NewNinjaBoss;                   /* animal/ninja/ninja.c         */
 extern NEWCHARA d18a_snake18_800D4E94;          /* animal/snake18/snake18.c     */
+extern NEWCHARA NewZako11A;                     /* animal/zako11a/zako11a.c     */
+extern NEWCHARA NewZako11ACommander;            /* animal/zako11a/zk11acom.c    */
 extern NEWCHARA NewZako11E;                     /* animal/zako11e/zako11e.c     */
 extern NEWCHARA NewZako11ECommander;            /* animal/zako11e/zk11ecom.c    */
 extern NEWCHARA NewZako11F;                     /* animal/zako11f/zako11f.c     */

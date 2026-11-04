@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 72,998 (0:38:21.72), 44.05%.
+Current: loop 76,316 (0:40:10.44), 46.13%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -50,6 +50,7 @@ Current: loop 72,998 (0:38:21.72), 44.05%.
 | 60,532 | 0:31:53.56 | 36.62% | the PS1's frame holds (`DG_HikituriFlag`, behind its `STATE_NOSLOW` pace) copied from its `GV_Clock` | Nov 4 |
 | 61,444 | 0:32:21.02 | 37.15% | lines BizHawk sampled partway into a loop compared with the port's next line; loops without a line keep the PS1's play time | Nov 4 |
 | 72,998 | 0:38:21.72 | 44.05% | a stream starts in the PS1's loop even when the port's stream task is a loop late (Johnny's talk count, 61,305) | Nov 4 |
+| 76,316 | 0:40:10.44 | 46.13% | s11a linked in: its character table named its constructors (`CHARA_ZAKO11A`/`ZAKO11ACOM` filled in); the stairs commander counts Snake being spotted. Pad blip at 72,998 let through (one PS1 line) | Nov 4 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

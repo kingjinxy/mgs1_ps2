@@ -257,7 +257,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       chunks of 16 sectors from `DISC1.BIN` (raw 2352-byte sectors, extracted from `ps1-original/*.chd`
       by `build/link_ps2.py`) through `port/src/cdbios_ps2.c` and hands each to the request's callback in
       a critical section. In PCSX2 the ISO9660 lookup finds every file at its right sector and STAGE.DIR's
-      table is read. Still to do: disc swap (`DISC2.BIN` is on the image already), `CdControl`/`CdRead2`
+      table is read. Disc swap: automatic at the change screen (2026-11-04, `MgsCd_Swap`; until all files are on one DVD). Still to do: `CdControl`/`CdRead2`
       for movies and XA (`Port_CdHill` stub), `change`/`open`'s drive checks
       Found on the way: the game needs `-funsigned-char` (as PSY-Q's `ccpsx`; `build_ps2.py`), or byte
       reads through `char` sign-extend (the directory's file sizes came out negative)
@@ -275,7 +275,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 95,874 (0:50:51.43; was 12,101, 0:06:42.1,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 97,879 (0:51:47.37; was 12,101, 0:06:42.1,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair,
       `lit_mdl.c`'s dropped model initializer,
       chafgrnd.c's NULL `RECT` (`prim.c`).

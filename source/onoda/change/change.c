@@ -378,6 +378,14 @@ static void change_800C3CD0( Work *work )
         param[ 0 ] = 0;
         CdControlB( CdlNop, param, result );
 
+#ifdef MGS_PORT
+        {
+            /* port/src/cdbios_ps2.c: the tray opens and the other disc goes in, no player action */
+            extern void MgsCd_Swap( void );
+            MgsCd_Swap();
+            result[ 0 ] |= CdlStatShellOpen;
+        }
+#endif
         if ( !( result[ 0 ] & CdlStatShellOpen ) )
         {
             printf( "CD CASE CLOSE!!\n" );

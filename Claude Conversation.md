@@ -21782,3 +21782,81 @@ The port waits at "CD CASE CLOSE!!" forever: the TAS swaps to disc 2 here, and t
 
 - tool `PushNotification`: 
 
+## Claude
+
+While that waits for you, I'll finish the docs and archive. First a short note in the walkthrough on where the run stops.
+
+- tool `Bash`: Document the disc-swap stop, archive, commit
+
+## Claude
+
+The TAS replay now stays in sync up to loop **95,874 (0:50:51.43)**, up from 79,264 (0:41:44.05) this morning. It stops there because the movie swaps from disc 1 to disc 2, and the port can't swap discs yet. I need your decision on how it should, so I've stopped there. Everything is committed (8 commits here, 1 in the HAL), and `docs/Running Walkthrough.md` (Steps 45–50), the Planning Doc and `Claude Conversation.md` are updated.
+
+Each fix moved the first desync later. Every fix that touched shared code got a full replay from the start, and the matching builds (80 and 2 OK) after every source change.
+
+| Fix | Desync, loop (movie time) | What was wrong |
+|---|---|---|
+| s11i, s11e linked in | 79,264 (0:41:44.05), 91,876 (0:48:33.11) | Item-name and function tables stored as raw PS1 addresses; now symbols. |
+| s11h split and translated | 84,331 (0:44:22.39) | The stage had no source at all. |
+| mips2c constants (**systemic**) | 84,553 (0:44:30.28) | A fallback paired `addiu reg,reg,5000` with any `lui` in the function, turning constants into addresses. It also corrupted already-committed s10a, s11b and s11g code (the Hinds' heights). Removed it, and all translated overlays were regenerated. |
+| Stream start | 84,844 (0:44:40.23) | The port's voice stream waited in a state the Hind reads as "stop it". |
+| HAL `SquareRoot0` | 86,037 (0:45:20.40) | The Hind missile's dx² + dz² overflows 32 bits, and the PS1 then reads past the start of its sqrt table into the end of `rsin_tbl`. The HAL now has those 192 PS1 values (HAL 2944fbc). |
+| Overlay `.bss` order (**systemic**) | 91,969 (0:48:36.25) | Structs defined as runs of separate `int`s were laid out in a different order in the port, so s11e's commander `mode` was another variable. Fixed in all 9 overlay files with this pattern. |
+| s11e commander | (NULL reads) | Removed soldiers' NULL entries read and written as on the PS1 (48 TLB misses gone). |
+| Tick table by loop (**systemic**) | 93,337 (0:49:16.90), 94,060 (0:49:41.80) | `ticks.bin` was indexed by trace line but read by loop; since loop 60,536 every tick read was up to 7 loops late. Also added two more hand-found Wolf tick entries. |
+
+I also changed the replay so `DG_HikituriFlag` (the frame-hold flag) itself comes from the PS1, not only the clock flip. It didn't fix a specific desync; the full run stays in sync with it.
+
+**Open issues:**
+- **Hand-found tick entries:** there are now 4 in `TICK_AT`, all Wolf's random-number burn in a load-end loop. If more appear, recording the mid-loop tick in `trace.lua` would replace finding them by hand.
+- **One leftover TLB miss:** s11h's cutscene shadow reads its freed parent actor twice. It only affects drawing, not game state.
+
+**Decision needed: the disc swap.** At 95,874 the PS1 goes from the disc-change screen to s13a. The port sits in `change` printing `CD CASE CLOSE!!`. `DISC2.BIN` is already on the image, but nothing switches to it yet. How should the port present the swap?
+1. **Switch automatically:** treat the tray as opened and closed and read `DISC2.BIN` from then on, with no player action.
+2. **Ask the player:** show a "swap disc" prompt and wait for a button, mimicking the PS1.
+3. **Something else**, for example also skipping the `change` screen.
+
+For the TAS replay, either 1 or 2 can follow the movie's tray timing (open at frame 181,883, closed at 181,906).
+
+## User
+
+For now, let’s do automatic switching. Later the need for disc swapping will be negated by the fact that all files will be on one DVD
+
+## Claude
+
+Automatic switching it is. Finding where `change` checks the drive.
+
+- tool `Bash`: Locate drive checks and disc file use
+
+- tool `Bash`: Read change.c drive logic and port cdbios
+
+## Claude
+
+The screen waits in state 2 for the lid to open, then in state 3 for it to close. Reading what it does after that.
+
+- tool `Bash`: Rest of change.c states
+
+- tool `Bash`: Disc verification after the swap
+
+- tool `Bash`: Other CdlStop users; disc state in cdbios_ps2
+
+- tool `Bash`: CdReady stub
+
+## Claude
+
+`CdReady` falls to the link's generated stub (returns 0), which passes that check. Implementing.
+
+- tool `Bash`: Automatic disc swap in change screen
+
+## Claude
+
+Replaying through the swap.
+
+- tool `Bash`: Replay through the disc swap
+
+## Claude
+
+The swap works: disc 2 is found, "THIS IS DISC 2!!", s13a loads, and the run stays in sync to **97,879 (0:51:47.37, s14e)**. Matching builds and a full replay from the start before committing.
+
+- tool `Bash`: Matching builds and full replay
+

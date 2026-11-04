@@ -1178,3 +1178,15 @@ s13a. The port stays in `change`, printing `CD CASE CLOSE!!`: the disc swap isn'
 `DISC2.BIN` is on the image, but `change`'s drive checks and the switch aren't). Everything after this in the TAS
 needs it. Waiting for the user's decision on how the port should present the swap.
 
+## Step 51: automatic disc swap (Nov 4)
+
+The user's decision: switch discs automatically for now; later every file will be on one DVD and no swap is needed.
+`change.c`'s state 2 waits for the tray to open. Under `MGS_PORT` it now calls `MgsCd_Swap()` (cdbios_ps2.c: the other
+`DISC*.BIN` becomes the drive's disc) and sees the tray open. The stub already reports the tray closed, so state 3
+goes on to state 4, which waits for START (the TAS's press). Then state 8's check reads disc 2 and prints
+`THIS IS DISC 2!!`. I keyed this to the change screen, not to `CdlStop`, because demosel.c, open.c and ab_ch.c also
+send that. ab_ch.c (abst) has its own tray states and isn't changed.
+
+Matching builds 80 and 2 OK. In sync from the start to 97,879 (0:51:47.37, s14e): `GM_PlayerPosition`. s13a loads
+with "stage binary 4B1F is not linked in".
+

@@ -16,6 +16,7 @@
 
 static sceCdlFILE    s_Disc;
 static int           s_Ready;
+static int           s_DiscNo = 1; /* the PS1 disc in the drive (MgsCd_Swap) */
 static unsigned int  s_DiscSectors; /* PS1 sectors in the file */
 static unsigned int  s_Skip;        /* where the chunk's first PS1 sector starts in the bounce buffer */
 int MgsCd_Paced; /* set by libfs/cdbios.c for each read: a file read's (no callback) sectors still to come, or 0 */
@@ -68,15 +69,24 @@ int MgsCd_Init(void)
     }
     sceCdInit(SCECdINIT);
     sceCdMmode(SCECdMmodeDvd);
-    if (!sceCdSearchFile(&s_Disc, "\\DISC1.BIN;1"))
+    if (!sceCdSearchFile(&s_Disc, s_DiscNo == 2 ? "\\DISC2.BIN;1" : "\\DISC1.BIN;1"))
     {
-        printf("cdbios: DISC1.BIN not found on the disc\n");
+        printf("cdbios: DISC%d.BIN not found on the disc\n", s_DiscNo);
         return 0;
     }
     s_DiscSectors = s_Disc.size / PS1_RAW_SECTOR;
     s_Ready       = 1;
-    printf("cdbios: DISC1.BIN at DVD sector %u (%u PS1 sectors)\n", s_Disc.lsn, s_DiscSectors);
+    printf("cdbios: DISC%d.BIN at DVD sector %u (%u PS1 sectors)\n", s_DiscNo, s_Disc.lsn, s_DiscSectors);
     return 1;
+}
+
+/** The disc change screen (onoda/change/change.c), waiting for the tray to open: the other PS1 disc goes in at
+ * once, with no player action. shortcut: until every file is on one DVD (then no swap at all). */
+void MgsCd_Swap(void)
+{
+    s_DiscNo = 3 - s_DiscNo;
+    s_Ready  = 0;
+    MgsCd_Init();
 }
 
 /** Starts reading PS1 sectors [sector, sector + count); returns how many will be read (count is cut to

@@ -1,0 +1,61 @@
+extern char R_GV_Time[] __asm__("GV_Time");
+extern char R_rsin[] __asm__("rsin");
+int G_s11d_hind_800C9C7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s11d_hind_800C9C7C");
+int G_s11d_hind_800C9C7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[2] = 0;
+    r[3] = *(int *)((u)r[2] + (int)R_GV_Time);
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    *(int *)((u)r[29] + 16) = r[16];
+    c = (((int)r[3] >= 0)); r[2] = (u)r[3] + (u)0; if (c) goto L800c9ca8;
+    r[2] = (u)r[3] + 63;
+    L800c9ca8:;
+    r[16] = (int)r[2] >> 6;
+    r[2] = (u)r[16] << 6;
+    r[16] = (u)r[3] - (u)r[2];
+    r[17] = (u)r[16] << 6;
+    r[4] = (u)r[17] + (u)0; CALL(R_rsin);
+    r[4] = (u)r[16] + -1;
+    r[4] = (u)r[4] << 6;
+    r[16] = (u)r[2] + (u)0; CALL(R_rsin);
+    r[16] = (u)r[16] - (u)r[2];
+    c = (((int)r[16] >= 0)); r[3] = (int)r[16] >> 3; if (c) goto L800c9ce4;
+    r[16] = (u)r[16] + 7;
+    r[3] = (int)r[16] >> 3;
+    L800c9ce4:;
+    r[2] = *(unsigned short *)((u)r[18] + 102);
+    r[4] = (u)r[17] + (u)0;
+    r[2] = (u)r[2] + (u)r[3];
+    *(short *)((u)r[18] + 102) = r[2]; CALL(R_rsin);
+    r[3] = (u)r[2] << 1;
+    r[3] = (u)r[3] + (u)r[2];
+    r[3] = (u)r[3] << 4;
+    c = (((int)r[3] >= 0));  if (c) goto L800c9d10;
+    r[3] = (u)r[3] + 4095;
+    L800c9d10:;
+    r[3] = (int)r[3] >> 12;
+    r[2] = *(unsigned short *)((u)r[18] + 2396);
+    r[4] = (u)r[17] + (u)0;
+    r[2] = (u)r[2] + (u)r[3];
+    *(short *)((u)r[18] + 108) = r[2]; CALL(R_rsin);
+    r[3] = (u)r[2] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[3] = (u)r[3] << 4;
+    c = (((int)r[3] >= 0));  if (c) goto L800c9d40;
+    r[3] = (u)r[3] + 4095;
+    L800c9d40:;
+    r[3] = (int)r[3] >> 12;
+    *(short *)((u)r[18] + 112) = r[3];
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

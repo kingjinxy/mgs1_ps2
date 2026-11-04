@@ -1050,3 +1050,12 @@ Next desync: 72,998 (0:38:21.72, s11a), `GV_PadData` (a stick value, `0829` agai
 
 Now in sync to 76,316 (0:40:10.44, s11b): `STATE_CUT_IN` (0x40) set on the PS1 five loops after a load end.
 
+## Step 44: s11b, s11g and s11d in the port; the port's own holds (Nov 4)
+
+- **s11b (76,316):** "stage binary 4ABC is not linked in": the decomp hasn't split s11b. `stage_split.py s11b` and `mips2c.py s11b 0x800C3208` (228 functions). The generated table didn't compile: it named `NewAnime_8005E258`, a resident constructor `charalst.h` doesn't declare. `stage_split.py` now declares resident names `charalst.h` doesn't list; s10a regenerates unchanged.
+- **s11g (77,164):** 8 INCLUDE_ASM stubs, translated by `mips2c.py s11g`. It was still left out for 66 "literal symbol addresses": its jump tables (`jpt_800DD2C4`, hindbody.c's `s11g_dword_*`). The translated code loads a table word and switches on the PS1 address, so they must stay literal. `overlays_ps2.py` no longer counts a literal that appears as a `case 0x...:` in the overlay's translated code; s11e and s11i (other literals) stay out.
+- **s11d (77,671):** 37 stubs, translated by `mips2c.py s11d`.
+- **77,697:** the port's clock held on two loops the PS1 didn't. Under `STATE_NOSLOW` the port sets `DG_HikituriFlag` when it falls behind its own pace, which depends on the host. `Port_TasTrace` now flips whenever the PS1's hold and the port's disagree, both ways.
+
+Matching builds 80 and 2 OK after each; no TLB misses. Next desync: 79,264 (0:41:44.05, s11i), the rand seed. s11i is still left out (3 literal addresses).
+

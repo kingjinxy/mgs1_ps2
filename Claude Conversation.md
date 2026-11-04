@@ -20551,3 +20551,309 @@ All 80 outputs and both VR outputs match. Updating the docs: TAS Progress, Runni
 
 - tool `Bash`: Update the testing plan and planning doc
 
+## Claude
+
+Now archiving the conversation and committing.
+
+- tool `Bash`: Archive the conversation and check for removed lines
+
+- tool `Bash`: Commit the fixes and docs
+
+## Claude
+
+Committed as `6de4b3127`. Sending a short notification, then on to loop 72,998.
+
+- tool `ToolSearch`: 
+
+- tool `PushNotification`: 
+
+## Claude
+
+Next desync, at loop 72,998: the PS1's pad data has a stick value of 0x1029 where the port has 0x0829. I'm comparing both sides' pads around that loop.
+
+- tool `Bash`: Compare pads around loop 72,998
+
+- tool `Bash`: Run past 72,998 ignoring the one-line pad blip
+
+## Claude
+
+Nothing diverges right after it, but at loop 73,234 (0:38:29.61) linkvarbuf[78] is 1 in the port and 2 on the PS1. Checking what that variable is:
+
+- tool `Bash`: Look up linkvarbuf index 78
+
+- tool `Bash`: Compare seeds, alert and position before 73,234
+
+## Claude
+
+Everything matches, including the seed and the status bit at 73,234. Only the PS1's watch count goes from 1 to 2. Finding where the count is incremented:
+
+- tool `Bash`: Find EnemyWatchCount updates
+
+- tool `Bash`: Read s11a's watch count updates and the port log
+
+- tool `Bash`: Check the port log for the flag and find HZD_Zone
+
+- tool `Bash`: Read HZD_Zone and GM_PlayerAddress writers
+
+## Claude
+
+I'm printing the port's zones and map section in that function around loop 73,234.
+
+- tool `Bash`: Log the port's zones near 73,234
+
+## Claude
+
+No output, so `UpdateGameFlag` isn't running in the port at those loops. The other place that counts is enemy/command.c, which s11a's regular guards use. Reading it:
+
+- tool `Bash`: Read command.c's watch count logic
+
+## Claude
+
+That path also needs alert mode 3, and the alert mode is 0 on both sides, so it's not this one. Checking where `UpdateGameFlag` is called from in zk11acom.c:
+
+- tool `Bash`: Find UpdateGameFlag's caller and whether it's linked
+
+## Claude
+
+It runs on every Act of the commander, so the print should have shown. Either that actor isn't running in the port, or the port's s11a uses a different build of this file. Checking the port's build:
+
+- tool `Bash`: Look for zako11a in the port build
+
+- tool `Bash`: Check the zako11a object's build time
+
+- tool `Bash`: Check s11a's actor table and missing-chara messages
+
+- tool `Bash`: Look at the port's build layout
+
+- tool `Bash`: Read how build.sh handles stage overlays
+
+- tool `Bash`: Find the port build script
+
+- tool `Bash`: Read how overlays are chosen for the port
+
+## Claude
+
+The port links an overlay only once it has no assembly stubs. I'm checking whether s11a is linked or left out.
+
+- tool `Bash`: Check s11a's link status
+
+- tool `Bash`: Survey s11a's literal addresses
+
+## Claude
+
+The 12 are in s11a's character table (the "table" column), not in code. Looking at the table:
+
+- tool `Bash`: Show s11a's character table
+
+- tool `Bash`: Read the survey's table check and s11a's object list
+
+- tool `Bash`: Read the survey's table counting and s11a's stage table
+
+- tool `Bash`: Look at a named stage table for comparison
+
+- tool `Bash`: Rewrite s11a's table with CHARA names
+
+## Claude
+
+All 12 names are defined. Running the matching build to confirm s11a still matches:
+
+- tool `Bash`: Run the matching build after the table change
+
+## Claude
+
+Two names don't compile: `CHARA_ZAKO11ACOM` and `CHARA_ZAKO11A` expand to something with "?" in charalst.h. Checking:
+
+- tool `Bash`: Look at the zako11a chara definitions
+
+- tool `Bash`: Find the zako11a constructors
+
+- tool `Bash`: Find constructor definitions and prototype handling
+
+## Claude
+
+The constructors exist (`NewZako11A`, `NewZako11ACommander`); the header just never filled them in. Adding them the same way zako11e is done:
+
+- tool `Bash`: Define the zako11a charas and run matching builds
+
+## Claude
+
+All 80 outputs and both VR outputs match, s11a included. s11a should now link into the port. Running the replay:
+
+- tool `Bash`: Rerun with s11a linked in
+
+- tool `Bash`: Check s11a's link and TLB miss PCs
+
+- tool `Bash`: Show sample TLB miss lines
+
+## Claude
+
+s11a is linked (its object was built at 11:02; build_link.log is just from an earlier link). The TLB misses come from two PCs, reading addresses 0 and 4 (a NULL pointer). Resolving them:
+
+- tool `Bash`: Resolve TLB miss PCs and find when they occur
+
+- tool `Bash`: Read DrawItemText and the log before the misses
+
+- tool `Bash`: Read the PS1's low RAM from a dump
+
+- tool `Bash`: Read low RAM words and the earlier guard
+
+## Claude
+
+The PS1's RAM at 0 holds `0003 0000 0c50 275a`, so through a NULL pointer it reads mov.vx = 3 and mov.vz = 0x0C50. I'm guarding the read with those values, like the earlier fix.
+
+- tool `Bash`: Guard the NULL player read in DrawItemText
+
+- tool `Bash`: Look up bit 0x40 and rerun to check TLB misses
+
+## Claude
+
+No TLB misses now. This is a good checkpoint, so I'm committing the s11a table and the boxall guard (the matching build already passed) and updating the docs.
+
+- tool `Bash`: Recheck matching build and compute progress
+
+- tool `Bash`: Update docs and commit the s11a work
+
+## Claude
+
+Committed as `51e73b077`. On to loop 76,316. The cut-in camera (cat_in.c) sets STATE_CUT_IN. I'm checking when the port sets it, if at all:
+
+- tool `Bash`: Compare status near 76,316 and find CUT_IN setters
+
+- tool `Bash`: Compare status near 76,316 and read camera.c's CUT_IN
+
+## Claude
+
+CUT_IN can come from a camera change (when the new camera's `trg.pad & 1`), from the cut-in actor, or from the script. The port logs every camera change, so I'm checking for one around 76,316:
+
+- tool `Bash`: Show camera changes after the s11b load
+
+- tool `Bash`: Read the port log around the s11b load
+
+## Claude
+
+The port log shows "stage binary 4ABC is not linked in" when s11b loads, so s11b runs on another overlay that's missing from the port. Finding which one has that code:
+
+- tool `Bash`: See how stage binaries are named and listed
+
+- tool `Bash`: Match 0x4ABC against overlay name hashes
+
+## Claude
+
+It's s11b's own overlay. It isn't in the "left out" list either, so it may be like s10a was: a stage the decomp hasn't split, which needs `stage_split.py`. Checking:
+
+- tool `Bash`: Check whether s11b exists in the decomp
+
+- tool `Bash`: Read the stage translation checklist outline
+
+- tool `Bash`: Read the add-a-stage steps and split s11b
+
+- tool `Bash`: Translate s11b with mips2c
+
+- tool `Bash`: Run matching builds with s11b's new files
+
+- tool `Bash`: Replay with s11b linked in
+
+- tool `Bash`: Show the port link errors
+
+- tool `Bash`: Run the port link directly to see errors
+
+- tool `Bash`: Show the overlay compile failure
+
+- tool `Bash`: Find the port's compile command
+
+- tool `Bash`: Compile s11b's stage table to see the error
+
+- tool `Bash`: Look for the anime function and s10a's table format
+
+- tool `Bash`: Find the table generator in stage_split
+
+- tool `Bash`: Read the extern-declaration logic
+
+## Claude
+
+Resident constructors listed in charalst.h are already declared there, so the generator skipped all resident names. I'll also declare any resident name that charalst.h doesn't list:
+
+- tool `Bash`: Regenerate s11b, and confirm s10a's output is unchanged
+
+## Claude
+
+s10a regenerates unchanged. Running the replay with s11b:
+
+- tool `Bash`: Replay with s11b translated and linked
+
+- tool `Bash`: Read the translate step and confirm the missing overlay
+
+## Claude
+
+mips2c handles a decomp-split overlay's INCLUDE_ASM stubs too, wrapping each one. Running it on s11g:
+
+- tool `Bash`: Translate s11g's stubs and run matching builds
+
+## Claude
+
+The matching build is fine (80 and 2). Running the replay with s11g:
+
+- tool `Bash`: Replay with s11g linked
+
+## Claude
+
+s11g still isn't linked, so something else is keeping it out. Asking the link step why:
+
+- tool `Bash`: Show why s11g is left out
+
+## Claude
+
+Translating the stubs removed one blocker, but s11g's C also has 66 literal symbol addresses. Listing where they are:
+
+- tool `Bash`: List s11g's literal addresses by file
+
+- tool `Bash`: See how hindbody.c uses literal addresses
+
+- tool `Bash`: Read the link step and survey's jump-table handling
+
+## Claude
+
+The doc doesn't cover this. A literal in data is only safe if nothing in the C code reads it (a function pointer used from C would break). Checking whether any C code references these table entries:
+
+- tool `Bash`: Check C and translated references to the jump-table data
+
+- tool `Bash`: Check how translated code uses the jump tables
+
+- tool `Bash`: Read the overlay link gate
+
+- tool `Bash`: Exempt jump-table targets from the literal check
+
+## Claude
+
+s11g now passes, and s11e/s11i still correctly fail (their literals aren't switch targets). Replaying:
+
+- tool `Bash`: Replay with s11g linked
+
+## Claude
+
+In sync to 77,671 (0:40:53.30) with no TLB misses. Next is s11d, another overlay that isn't linked (37 stubs). I'm committing s11b and s11g first, since the matching build already passed with both.
+
+- tool `Bash`: Commit s11b and s11g
+
+- tool `Bash`: Translate s11d, run matching builds, check link
+
+- tool `Bash`: Replay with s11d linked
+
+## Claude
+
+s11d is linked now. The run reaches 77,697 (0:40:54.19), where GV_Clock differs (port 1, PS1 0). Looking at the clocks around it:
+
+- tool `Bash`: Show clocks and passage near 77,697
+
+- tool `Bash`: Show the table's clocks near 77,697
+
+- tool `Bash`: Follow the PS1's holds both ways, rerun
+
+## Claude
+
+I'll check what's running.
+
+- tool `Bash`: List long-running emulator and script processes
+
+- tool `Bash`: Matching build, docs, archive, commit
+

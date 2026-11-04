@@ -823,12 +823,12 @@ void Port_TasTrace(void)
         printf("tas: frame of loop %d dumped\n", GV_Time);
     }
     {
-        /* DG_HikituriFlag: the PS1 fell behind STATE_NOSLOW's 2-vblank pace (dgd.c) and didn't flip GV_Clock in
-           this loop; the port keeps pace (loop 59,444). BizHawk's mid-loop samples are fixed in the table
-           (trace_to_pads.py, compare_trace.py's fix_clock) */
+        /* DG_HikituriFlag: a machine behind STATE_NOSLOW's 2-vblank pace (dgd.c) doesn't flip GV_Clock in this loop.
+           The PS1's holds are copied (loop 59,444), the port's own undone (its pace is the host's: 77,697).
+           BizHawk's mid-loop samples are fixed in the table (trace_to_pads.py, compare_trace.py's fix_clock) */
         const unsigned char* p = time_record_at(GV_Time - 1);
         const unsigned char* r = time_record();
-        if (p && r && !DG_HikituriFlag && read_u32(p + 20) == read_u32(r + 20))
+        if (p && r && (read_u32(p + 20) == read_u32(r + 20)) != (DG_HikituriFlag != 0))
         {
             GV_Clock ^= 1;
         }

@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 76,316 (0:40:10.44), 46.13%.
+Current: loop 79,264 (0:41:44.05), 47.92%.
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -51,6 +51,9 @@ Current: loop 76,316 (0:40:10.44), 46.13%.
 | 61,444 | 0:32:21.02 | 37.15% | lines BizHawk sampled partway into a loop compared with the port's next line; loops without a line keep the PS1's play time | Nov 4 |
 | 72,998 | 0:38:21.72 | 44.05% | a stream starts in the PS1's loop even when the port's stream task is a loop late (Johnny's talk count, 61,305) | Nov 4 |
 | 76,316 | 0:40:10.44 | 46.13% | s11a linked in: its character table named its constructors (`CHARA_ZAKO11A`/`ZAKO11ACOM` filled in); the stairs commander counts Snake being spotted. Pad blip at 72,998 let through (one PS1 line) | Nov 4 |
+| 77,164 | 0:40:37.08 | 46.64% | s11b translated (`stage_split.py` + `mips2c.py`; the table declares resident constructors) | Nov 4 |
+| 77,671 | 0:40:53.30 | 46.95% | s11g's 8 stubs translated; jump-table entries no longer count as literal addresses | Nov 4 |
+| 79,264 | 0:41:44.05 | 47.92% | s11d's 37 stubs translated; the port's own frame holds undone (its pace is the host's) | Nov 4 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

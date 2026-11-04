@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "libgv/libgv.h"
 #include "libgcl/libgcl.h"
@@ -176,12 +179,28 @@ void s11d_hind_800C99A8(Work *work)
     s11d_hind_800C9908(work, a1);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800C99F4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800C99F4.s")
+#endif
 void s11d_hind_800C99F4(Work *work);
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800C9B94.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800C9B94.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800C9C7C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800C9C7C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800C9D60.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800C9D60.s")
+#endif
 
 void s11d_hind_800CA424(Work *work)
 {
@@ -209,9 +228,21 @@ void s11d_hind_800CA49C(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CA504.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CA504.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CA6D8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CA6D8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CABA8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CABA8.s")
+#endif
 
 void s11d_hind_800CAD9C(Work *work)
 {
@@ -250,7 +281,11 @@ void s11d_hind_800CAD9C(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CAE6C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CAE6C.s")
+#endif
 void s11d_hind_800CAE6C(Work *work);
 
 void s11d_hind_800CAF20(Work *work)
@@ -281,9 +316,21 @@ void s11d_hind_800CAF9C(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CAFEC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CAFEC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CB054.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CB054.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CB178.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CB178.s")
+#endif
 
 void s11d_hind_800CB310(Work *work)
 {
@@ -312,7 +359,11 @@ void s11d_hind_800CB310(Work *work)
     *(int *)&work->field_1C8 |= 0x10;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_hind_800CB3A0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_hind_800CB3A0.s")
+#endif
 int s11d_hind_800CB3A0(Work *work, int name, int where);
 
 void *NewHind(int name, int where)

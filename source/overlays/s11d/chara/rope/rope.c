@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "game/camera.h"
 #include "game/game.h"
@@ -176,7 +179,11 @@ void s11d_rope_800C3DF0(CONTROL *control, HZD_HDL *hzd)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C3E50.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C3E50.s")
+#endif
 
 void s11d_rope_800C4274(Work *work)
 {
@@ -349,7 +356,11 @@ void s11d_rope_800C45F8(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C4648.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C4648.s")
+#endif
 
 void s11d_rope_800C481C(Work *work)
 {
@@ -381,8 +392,16 @@ void s11d_rope_800C48C0(Work *work)
     target->class |= (TARGET_POWER | TARGET_SEEK);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C48EC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C48EC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C4B78.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C4B78.s")
+#endif
 
 int s11d_rope_800C4DE0(Work *work)
 {
@@ -498,7 +517,11 @@ int s11d_rope_800C4FC8(Work *work)
     return 0;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C502C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C502C.s")
+#endif
 
 int s11d_rope_800C5298(Work *work)
 {
@@ -578,7 +601,11 @@ void s11d_rope_800C5348(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C5410.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C5410.s")
+#endif
 
 void s11d_rope_800C54CC(Work *work)
 {
@@ -637,9 +664,21 @@ void s11d_rope_800C5538(Work *work)
     cluster2[9]  = 0;  /* field_F28 */
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C5584.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C5584.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C5B10.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C5B10.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C5E74.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C5E74.s")
+#endif
 
 void s11d_rope_800C61D8(Work *work, int index)
 {
@@ -707,7 +746,11 @@ void s11d_rope_800C62E0(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C634C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C634C.s")
+#endif
 
 void s11d_rope_800C6478(Work *work)
 {
@@ -738,9 +781,21 @@ void s11d_rope_800C650C(void)
     NewPadVibration(s11d_dword_800C32B8, 2);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C6544.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C6544.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C6834.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C6834.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C697C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C697C.s")
+#endif
 
 extern void s11d_rope_800C6CD4(Work *work);
 extern void s11d_rope_800C7530(Work *work, int arg1);
@@ -820,10 +875,26 @@ void s11d_rope_800C6B18(Work *work, int arg1)
 
 work->control.step.vz -= 0x6C;
 }
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C6CD4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C6CD4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C6F28.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C6F28.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C7138.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C7138.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C7320.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C7320.s")
+#endif
 
 void s11d_rope_800C7530(Work *work, int arg1)
 {
@@ -882,7 +953,11 @@ void s11d_rope_800C7530(Work *work, int arg1)
     work->field_EBC = 0;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C766C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C766C.s")
+#endif
 
 void s11d_rope_800C7A4C(Work *work, int arg1)
 {
@@ -910,8 +985,16 @@ void s11d_rope_800C7A4C(Work *work, int arg1)
     work->control.step.vy -= 0x80;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C7B2C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C7B2C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C7D20.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C7D20.s")
+#endif
 
 void s11d_rope_800C7EC4(Work *work, int arg1)
 {
@@ -937,7 +1020,11 @@ void s11d_rope_800C7EC4(Work *work, int arg1)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C7F8C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C7F8C.s")
+#endif
 
 void s11d_rope_800C8200(Work *work, int arg1)
 {
@@ -981,7 +1068,11 @@ void s11d_rope_800C8250(Work *work)
     s11d_rope_800C5410();
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C8364.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C8364.s")
+#endif
 
 void s11d_rope_800C868C(Work *work)
 {
@@ -1030,7 +1121,11 @@ int s11d_rope_800C879C(Work *work)
     return 0;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C882C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C882C.s")
+#endif
 
 void s11d_rope_800C8C04(Work *work)
 {
@@ -1056,7 +1151,11 @@ void s11d_rope_800C8C04(Work *work)
     cluster2[14] = (int)&work->control.turn.vx; /* field_F3C */
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C8C88.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C8C88.s")
+#endif
 
 void s11d_rope_800C8EE4(Work *work)
 {
@@ -1199,7 +1298,11 @@ void s11d_rope_800C9134(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s11d/recomp/s11d_rope_800C91AC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s11d/s11d_rope_800C91AC.s")
+#endif
 
 void *NewRope(int name, int where)
 {

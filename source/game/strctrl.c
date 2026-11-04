@@ -63,9 +63,12 @@ static void Act( Work *work )
 #ifdef MGS_PORT
         {
             /* port/src/tas_replay.c: in replays, the PS1 started this stream's clock in this loop: case 3 waits
-               for the port's data, not case 1 (the port's task a loop late at 61,305: Johnny's talk count) */
+               for the port's data, not case 1 (the port's task a loop late at 61,305: Johnny's talk count).
+               Before that, a stream already free to play (sub state 0) waits here, not in case 2, as the PS1's
+               does for its task: GM_StreamStatus 0, not 1 (s11h's Hind stops a stream at 1: loop 84,842) */
             extern int Port_TasStreamMayStart( void );
-            if ( FS_StreamTaskState() < 0 && Port_TasStreamMayStart() != 1 )
+            int may = Port_TasStreamMayStart();
+            if ( may != 1 && ( FS_StreamTaskState() < 0 || ( may == 0 && !work->field_22_sub_state ) ) )
             {
                 return;
             }

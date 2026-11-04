@@ -1090,3 +1090,17 @@ Open: two TLB misses at loop ~84,515 (s11h, `s11h_800C6490`, DEMO_SHADOW's Act, 
 0x20, so the parent was freed. Not fixed yet.
 
 Matching builds 80 and 2 OK. In sync from the start to 84,844 (0:44:40.23, s11h): `GM_GameStatus` 0x20 set on the PS1.
+
+## Step 46: a stream's wait for the PS1's start (Nov 4)
+
+**84,844 (0:44:40.23, s11h):** `STATE_VOX_STREAM` cleared in the port after 6 loops, the PS1's after 81. A temporary
+caller log in `GM_VoxStream`/`GM_StreamPlayStop` showed the Hind's Act (`s11h_800D0790`) stopping vox 87158 at loop
+84,842: it stops a stream whose `GM_StreamStatus()` is 1 (strctrl state 2, waiting to start). The time table puts the
+PS1's clock start at 84,843. Until then the PS1's strctrl stayed in state 1 (status 0) waiting for its stream task,
+then went through 2 to 3 in one loop. The port's task was ready sooner, so it waited in state 2 for the PS1's start
+(`Port_TasStreamMayStart`, Step 42). Now in replays a stream with sub state 0 (free to play, so nothing but the clock
+start holds it in state 2) waits in state 1 until the PS1 starts it. A stream waiting for `GM_StreamPlayStart` still
+goes to state 2 when its task is ready.
+
+Matching builds 80 and 2 OK. In sync from the start to 86,037 (0:45:20.40, s11h), the rand seed.
+

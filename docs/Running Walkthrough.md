@@ -996,3 +996,14 @@ The run to loop 56,569 logged 50+ "TLB Miss" lines from five causes. Each was fo
 - **Translated functions now take 12 arguments,** like `CALL` passes (`RECOMP_ENTRY` puts a4–a11 at sp+16..44, `stk` has 48 bytes over the frame; `s10a 800C5EF4` reads a 9th). The first try crashed in `s08b` at loop 31,411. With 12 parameters GCC turned a final `CALL` into a sibling call, which wrote arguments 9–12 into the incoming argument area. A C caller passing one argument (`GV_ExecActorSystem` calling an `Act`) has no such area, so that write landed on its saved `ra`, and the jump went to 0x1000. `CALL` now ends with an empty `asm volatile`, so it is never a tail call.
 
 The run to loop 56,569 has 0 TLB misses. Sync is unchanged (still in sync to 56,569). Matching builds 80 and 2 OK. Regenerating `s10a` with `stage_split.py` and `mips2c.py` reproduces the committed files.
+
+## Step 39: the stage overlay process, written up (Nov 3)
+
+`docs/Stage Overlay Translation.md` describes the whole path for a stage that isn't hand-decompiled:
+- the tools: `stage_split.py` (from the disc), `mips2c.py`, `recomp.h`;
+- linking and the per-load data reset;
+- the ABI rules where translated code meets C: 12 arguments, no sibling calls, struct-by-value wrappers both ways;
+- the PS1 memory behaviours to look for: NULL reads, bit-31 tags, the tick;
+- the debugging tools, and a checklist for the next unsplit stage.
+
+`mips2c.py`'s docstring now points there.

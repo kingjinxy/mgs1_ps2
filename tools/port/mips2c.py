@@ -2,8 +2,9 @@
 """mips2c.py OVL: each INCLUDE_ASM stub of an overlay as exact-behaviour C for the port (MGS_PORT), one file each in
 source/overlays/OVL/recomp/, included where the stub's pragma is. Registers and the PS1 stack frame are kept, so even
 uninitialized reads see the frame's own bytes. Addresses become symbols from obj/asm_OVL_lhs.map, through asm names, so
-the C names don't clash with the file's declarations. shortcut: struct-by-value arguments aren't handled; a link or
-crash there needs that call by hand."""
+the C names don't clash with the file's declarations. Calls of C functions that take a struct by value
+(the PS1 passes it in two registers, the EE in one) go to a PS1-ABI wrapper (the rename table at the call: NewShadow*);
+C calling translated code that way needs one too (stage_split.py's ABI_WRAP). docs/Stage Overlay Translation.md."""
 import bisect, os, re, struct, sys
 ovl = sys.argv[1]
 ad, out = 'asm/overlays/' + ovl, 'source/overlays/%s/recomp' % ovl

@@ -18803,3 +18803,51 @@ Those changes are against the last commit. Checking that they're only the intend
 
 - tool `Bash`: Summarize s10a diff kinds
 
+## Claude
+
+Regeneration reproduces everything. The only other difference is two files using `RECOMP_RETURN` (which is `return r[2]`) where the old ones had a literal `return r[2]`. Updating docs and committing.
+
+- tool `Bash`: Docs and commit TLB fixes
+
+## Claude
+
+The TAS run to loop 56,569 (0:29:45.27) now has **no TLB misses**, down from 50+. Sync still holds there, both matching builds pass (80 and 2 OK), and it's committed as `01d426d06`.
+
+**On the lighting:** the light-matrix bug wasn't causing widespread lighting errors. It affected only the Ninja's afterimage. `bunsin2.c` passes a position field that nothing ever sets, so the PS1 lights the afterimage from whatever is at address 0: BIOS bytes that read as the position (3, 0, 3152) in every dump. The port now passes those same values.
+
+**What was behind the misses**
+- **Shadows (`s07b`, Psycho Mantis).** `NewShadow2` takes a 4-short vector as a by-value argument. The PS1 passes it in two registers and the PS2 in one, so the translated call put the wrong value where the shadow's flag pointer belongs. Her shadow wrote that pointer into low memory, and her camouflage later wrote through NULL.
+  - New wrappers in `shadow.c` take the PS1's register layout, and `mips2c.py` redirects calls to them.
+  - I checked every C function called from translated code; only `NewShadow` and `NewShadow2` take a struct by value.
+- **The same mismatch in the other direction (`s10a`).** `demoexec.c` calls `s10a`'s translated `DEMOID_SHADOW` handler with the vector by value. `stage_split.py`'s new `ABI_WRAP` points the stage table at a wrapper in `port/src/hal_game.c`.
+- **Missing player (`s10a` load).** While no player exists, the game uses `DummyPlayer`, which has no map, and `s10a` reads the map's collision data through it. The port now gives it an empty map.
+- **Translated functions now take 12 arguments,** matching what calls pass. `s10a`'s shadow constructor reads a 9th.
+  - My first version crashed in the Ninja fight (`s08b`, loop 31,411). With the extra parameters, GCC turned a function's last call into a tail jump, which overwrote the return address of the C function that called it.
+  - Every call in translated code now ends with an empty `asm` statement, which rules out tail jumps.
+
+Regenerating `s10a` with the updated tools reproduces the committed files.
+
+## User
+
+Commit and updated all docs. Create a new doc detailing the process of disassembling the stage overlays.
+
+## Claude
+
+Everything up to the TLB fixes is already committed (`01d426d06`). I'll check the Planning Doc and TAS Progress for anything stale, then write the new doc.
+
+- tool `Bash`: Check Planning Doc and TAS Progress state
+
+- tool `Bash`: Read Planning Doc items and mips2c outline
+
+- tool `Bash`: Read mips2c header and s07b usage
+
+## Claude
+
+Updating `mips2c.py`'s docstring (its struct-by-value note is out of date) and the Planning Doc, then writing the new doc.
+
+- tool `Bash`: Update mips2c docstring and Planning Doc
+
+- tool `Write`: /home/alex/Documents/mgs1_ps2/docs/Stage Overlay Translation.md
+
+- tool `Bash`: Commit the new doc and doc updates
+

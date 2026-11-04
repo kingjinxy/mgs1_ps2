@@ -202,6 +202,10 @@ Verified 2026-10-27: all 80 outputs match, and the VR executable (`--variant=vr_
 - Fixed (2026-11-03): mips2c.py: a `lui` is forgotten at a call (caller-saved registers); overlay `static`s
   that translated code reads are `STATIC` (global, so the map names them; `chair_alive` etc. in `s07b`), and
   the translator warns on "word symbol + 4 or more". Overlay `.data`/`.bss` reset on each stage load.
+- Fixed (2026-11-03): no TLB misses in the TAS run to loop 56,569. Translated functions take 12 arguments, and a
+  call is never a sibling call. Struct-by-value calls between C and translated code go through PS1-ABI wrappers
+  (`Port_NewShadow*`, `Port_s10a_DemoKage`). HZD floors are tagged with the EE's uncached mirror (`HZD_IS_WALL`).
+  `DummyPlayer` has a map. The whole process: `docs/Stage Overlay Translation.md`.
 - BizHawk checkpoints (2026-11-03): a state every 1,000 loops (`tools/port/tas/checkpoints.lua`, `seek.lua`),
   so PS1 memory queries (`work_dump.lua`, `cam_log.lua`) start near their loop: about 50 s instead of 20 min.
 - Fixed (2026-11-03): post-load deadlock (HAL `thread_ps2.c`): an interrupt switch suspended a PS1 thread holding newlib's `printf`/`malloc` lock or the SPU lock; switches now wait for the release. Likely also the 2026-10-28 console opening hang (to confirm on hardware).

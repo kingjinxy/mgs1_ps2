@@ -113,7 +113,11 @@ for i, f in enumerate(rows):
 TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376, 94052: 177855, 101313: 192415}
 # By loop (Port_GameTick reads it by GV_Time), as time.bin: a loop without a line has the next line's. Written by line
 # until loop 93,335 (s12a: Wolf's burn read the tick 7 lines late), harmless before the first loop without a line.
-tick_at = {int(f[1]): TICK_AT.get(int(f[1]), int(n[14])) for f, n in zip(rows, rows[1:])}
+# The default is a blank after the loop's start (the previous loop's end sample): s15a's Raven reads it early in the
+# loop, and his stored ticks (10 of them, loops 101,334 to 101,929) are all exactly that; the end sample was 1 or 2
+# off and made loop 101,982's timer early. TICK_AT stays for reads late in a long load-end loop.
+end_tick = {int(f[1]): int(n[14]) for f, n in zip(rows, rows[1:])}
+tick_at = {t: TICK_AT.get(t, end_tick[t - 1] + 1 if t - 1 in end_tick else end_tick[t]) for t in end_tick}
 tick_list, nxt_tick = [], 0
 for t in range(max(tick_at), -1, -1):
     nxt_tick = tick_at.get(t, nxt_tick)

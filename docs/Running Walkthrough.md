@@ -1249,3 +1249,14 @@ doing now.
 
 In sync from the start to 101,983 (0:54:10.85, s15a), the rand seed.
 
+## Step 55: the tick at a loop's start (Nov 4)
+
+**101,983 (0:54:10.85, s15a):** Raven's timer (`s15a_800CD9A4`) fired a loop early in the port. A BizHawk log of his
+timer over 101,480 to 101,990 against a port printf, and the stored ticks against the tick table: all 10 PS1 values are
+exactly the loop's start tick + 1 (the previous loop's end sample + 1). The table's "next line's sample" was 1 or 2 later,
+depending on how long the loop ran. `ticks.bin`'s default is now that start + 1; `TICK_AT` still covers the reads late in
+a long load-end loop (Wolf's burns, Raven's creation). First I tried "end sample - 1": no regressions, but it didn't
+fix 101,983 (some loops are 3 blanks long).
+
+In sync from the start to 105,450 (0:56:00.79, s16b): `GV_PadData`.
+

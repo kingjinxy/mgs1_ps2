@@ -1228,3 +1228,24 @@ starts about 20 units off and points slightly differently (step z -155 against -
 position and aim differ in the port, from before 101,690. Next: dump that actor's Work on both sides, going back to find
 when it starts to differ.
 
+## Step 54: Raven's timer tick (Nov 4)
+
+**101,734 (0:54:00.52, s15a), solved.** Step 53's notes chased the bullets' aim to Vulcan Raven (`CHARA_VALCAN`,
+Act `s15a_800C99F0`). BizHawk logs of Raven's Work (found by the Act pointer) against port printfs:
+- His position matched. His facing (`turn.vy`, Work +0x72, set by `s15a_800CC8DC` as `ratan2(target - own) +
+  GV_RandS(64)`) differed from loop 101,484: 350 against 377.
+- The `ratan2` inputs matched, and the PS1's turn is the second draw from the shared seed (-14) where the port's is
+  the first (+13), so one draw comes before Raven's on the PS1.
+- That's his own timer (`s15a_800CD9A4`): when `tick - Work[2284] > Work[2272]` he draws `GV_RandU(64)` and stores
+  the tick. Logged on both sides: when Raven is made in the load-end loop 101,313, the PS1 stores tick 192,415 and the
+  port the table's 192,418, so every trigger came a loop late.
+
+`TICK_AT` 101,313: 192,415. Wrong turns I took on the way: a stale-target theory (the PS1's frame-end samples look one
+loop behind; the inputs matched), and the camera's noise shake (`GM_NoisePower` is 255 at 101,486 on both sides).
+
+That's the fifth hand-found `TICK_AT` entry, all from an actor made in a load-end loop reading the tick 1-3 blanks
+before the next line. trace_to_pads.py's comment says to record the tick in trace.lua once they're common; it's worth
+doing now.
+
+In sync from the start to 101,983 (0:54:10.85, s15a), the rand seed.
+

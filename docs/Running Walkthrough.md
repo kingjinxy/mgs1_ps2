@@ -1265,6 +1265,7 @@ demo (`GM_GameStatus` 0x10CA0000, pads masked). The port stays in play: the PS1'
 as `GV_PadData` and Snake moving. A temporary printf in `GCL_Command` over 105,425 to 105,470: the port runs one
 command, 0x64C0 at 105,431 (the codec's exit callback, proc B9E5), and nothing at 105,449. `delay.c` is a plain
 counter, so whatever starts the demo on the PS1 (a trap on Snake's position, or an s16b actor's `GCL_ExecProc`) doesn't
-fire in the port. Snake's position matches through 105,449. Demos on disc 2 do play in the port (95,875). Next: find
-what runs the demo script on the PS1 (BizHawk: GCL state, or the s16b actors at 105,449).
+fire in the port. Snake's position matches through 105,449. Demos on disc 2 do play in the port (95,875). 0x64C0 is `eval`: the callback only sets script variables, and `linkvarbuf` matches through 105,450, so whatever polls
+them and starts the demo 18 loops later is what differs. Next: find what runs the demo script on the PS1 (BizHawk:
+the s16b actors at 105,449, `actor_list.lua`).
 

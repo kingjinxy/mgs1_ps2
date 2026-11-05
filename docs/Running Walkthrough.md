@@ -1260,3 +1260,11 @@ fix 101,983 (some loops are 3 blanks long).
 
 In sync from the start to 105,450 (0:56:00.79, s16b): `GV_PadData`.
 
+**105,450 (0:56:00.79, s16b), open.** The PS1 closes a codec call at 105,432 (both sides) and 18 loops later starts a
+demo (`GM_GameStatus` 0x10CA0000, pads masked). The port stays in play: the PS1's demo is missing, which then shows
+as `GV_PadData` and Snake moving. A temporary printf in `GCL_Command` over 105,425 to 105,470: the port runs one
+command, 0x64C0 at 105,431 (the codec's exit callback, proc B9E5), and nothing at 105,449. `delay.c` is a plain
+counter, so whatever starts the demo on the PS1 (a trap on Snake's position, or an s16b actor's `GCL_ExecProc`) doesn't
+fire in the port. Snake's position matches through 105,449. Demos on disc 2 do play in the port (95,875). Next: find
+what runs the demo script on the PS1 (BizHawk: GCL state, or the s16b actors at 105,449).
+

@@ -22106,3 +22106,182 @@ Found them (each Work matches twice; I'll use the rows where the Act is at +8). 
 
 - tool `Bash`: New bullets per loop on both sides
 
+- tool `Bash`: Document findings, archive, commit
+
+- tool `PushNotification`: 
+
+## Claude
+
+The replay is now in sync to **loop 101,734 (0:54:00.52, s15a)**, up from 95,874 at the disc swap. I stopped there because the next desync needs more digging than the time left. Everything is committed, and the walkthrough (Steps 51–53 plus notes on the open desync), Planning Doc and `Claude Conversation.md` are updated. Matching builds pass (80 and 2 OK), and a full replay from the start reaches the same loop.
+
+**This session's steps:**
+- **Automatic disc swap:** at the disc-change screen the port switches to `DISC2.BIN` itself, with no player action. That took the replay past the change to s13a and on to 97,879.
+- **s14e linked in → 101,236:**
+  - 30 of s14e's objects exist only as assembly in the decomp. The port now builds them from one port-only file, `asm_objects.c`, that includes their translated code. A same-named .c would have clashed with the matching build.
+  - A new script, `tools/port/symlits.py`, replaces data words that hold raw PS1 addresses with symbols.
+  - The stage table now uses the named entries, except the fog entry, whose code is assembly in this stage.
+  - s14e's commander had the same removed-soldier NULL read and write as s11e's, fixed the same way.
+- **s15a split → 101,734:** `stage_split.py` now reads disc 2 when a stage isn't on disc 1.
+
+**Open desync at 101,734 (0:54:00.52, s15a):** a bullet hits two loops later in the port. I dumped every bullet on both sides. From at least loop 101,693, each bullet starts about 20 units away from the PS1's and points slightly differently, while the random numbers match. So the actor firing them (`s15a_800CB2F8`) moves or aims differently in the port from before 101,690. The next step is to dump that actor's state on both sides and go back to the first loop where it differs.
+
+The only TLB miss left is the s11h cutscene shadow reading a freed parent, which only affects drawing.
+
+## User
+
+Continue until 8 pm
+
+## Claude
+
+Continuing until 8:00. First, finding which s15a actor is the shooter.
+
+- tool `Bash`: Shooter caller and stage table
+
+- tool `Bash`: Raven Act address; load end loop
+
+## Claude
+
+Raven's Act is `s15a_800C99F0`. Logging Raven's position and rotation (its CONTROL at Work +0x20) every loop from 101,313 on both sides.
+
+- tool `Bash`: Raven position timelines compared
+
+## Claude
+
+Here the port's loop T matches the PS1's loop T (no +1 offset). Comparing with equal loops.
+
+- tool `Bash`: First Raven state difference
+
+- tool `Bash`: Raven Work 0x20–0xA0 compared
+
+## Claude
+
+The `turn.vy` target (Work +0x72) is set differently in loop 101,484: PS1 350, port 377. Finding what writes it.
+
+- tool `Bash`: Writers of turn.vy
+
+- tool `Bash`: Read s15a_800CC8DC (draws GV_RandS x2)
+
+- tool `Bash`: Aim inputs on both sides
+
+- tool `Bash`: HAL ratan2
+
+- tool `Bash`: Target writers and aim caller
+
+- tool `Bash`: Read target update function
+
+- tool `Bash`: All uses of target offsets
+
+- tool `Bash`: Where the target is copied
+
+- tool `Bash`: Actor list tools and Raven's level
+
+- tool `Bash`: Snake's actor level
+
+- tool `Bash`: Actor lists on the PS1
+
+- tool `Bash`: Trace lines around 101,484 both sides
+
+- tool `Bash`: Draw counts and port callers 101,483–101,487
+
+- tool `Bash`: Camera helper with the draw
+
+- tool `Bash`: Context of the camera's rand draw
+
+- tool `Bash`: Sources of 255 noise
+
+- tool `Bash`: Blast noise logic
+
+## Claude
+
+A blast (the Nikita explosion) sets the 255 noise. Logging `GM_NoisePower` per loop on both sides.
+
+- tool `Bash`: Noise variable address and resets
+
+- tool `Bash`: PS1 noise power per frame
+
+- tool `Bash`: GV_RandS formula
+
+- tool `Bash`: First rand values from the shared seed
+
+- tool `Bash`: Gas effect rand use
+
+## Claude
+
+gas_efct draws nothing. Another candidate is Raven himself: in the port, his `s15a_800CD9A4` (GV_RandU) runs at 101,487, possibly 3 loops after the PS1's. Looking at what triggers it.
+
+- tool `Bash`: Caller and condition of 800CD9A4
+
+## Claude
+
+That caller reads the mts tick (`Port_GameTick`), the same kind of tick timing as Wolf's burns. Reading it.
+
+- tool `Bash`: Tick use in Raven's update
+
+- tool `Bash`: 800CD9A4 tick logic
+
+- tool `Bash`: Raven timer on both sides
+
+- tool `Bash`: Port Raven timer changes
+
+- tool `Bash`: Add Raven's tick; replay
+
+- tool `Bash`: Full replay from start
+
+- tool `Bash`: Document and commit
+
+## Claude
+
+Hourly summary (7 pm) before the next desync:
+
+- tool `PushNotification`: 
+
+- tool `Bash`: Draw counts and callers near 101,983
+
+- tool `Bash`: PS1 trigger ticks vs table
+
+- tool `Bash`: Default tick −1; full replay
+
+## Claude
+
+No regressions, but the same desync, so it's not the read time. Comparing Raven's timer fields again over 101,480–101,990.
+
+- tool `Bash`: Raven timer 101,480–101,990
+
+## Claude
+
+The PS1's stored ticks are sometimes the table − 1 and sometimes − 2. Testing a different model: the tick at the loop's *start* (previous line's sample) + 1.
+
+- tool `Bash`: Fit Raven's read tick to loop start/end
+
+- tool `Bash`: Tick = loop start + 1; full replay
+
+- tool `Bash`: Commit; look at the pad desync
+
+## Claude
+
+At 105,450 the PS1 starts a cutscene or codec event (status 0x10CA0000, pads masked) and the port doesn't. There's no randomness involved (the seeds match). Checking what the port logs around there.
+
+- tool `Bash`: Port log after the s16b load
+
+## Claude
+
+The port is still in the codec at 105,450, where the PS1 has left it and started the next scene. Measuring how late the port's codec exit is.
+
+- tool `Bash`: When each side leaves the codec
+
+- tool `Bash`: Port log after the codec
+
+- tool `Bash`: Port log around the last codec exit
+
+## Claude
+
+The callback ran in the port too, so the demo is probably started after a wait. Checking delay.c, the GCL delay actor.
+
+- tool `Bash`: GCL delay actor
+
+- tool `Bash`: GCL command dispatch
+
+- tool `Bash`: Read GCL_Command
+
+- tool `Bash`: GCL commands the port runs 105,425–105,470
+

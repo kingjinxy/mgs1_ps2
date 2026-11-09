@@ -189,7 +189,12 @@ static void Act(Work *work)
                 {
                     *iter = NULL;
 
+#ifdef MGS_PORT
+                    { static const SVECTOR ps1_ram0 = { 3, 0, 0, 0 }; /* *iter is NULL: the PS1 reads its RAM at 0 (prim.c) */
+                      scratch->vec = ps1_ram0; }
+#else
                     scratch->vec = *(SVECTOR *)0x00000000;
+#endif
                     scratch->vec.vx -= scratch->mat.t[0];
                     scratch->vec.vy -= scratch->mat.t[1];
                     scratch->vec.vz -= scratch->mat.t[2];
@@ -204,6 +209,9 @@ static void Act(Work *work)
                         (scratch->vec.vz < work->flr_obj[0].f34.vz / 2) &&
                         (scratch->vec.vy < 150))
                     {
+#ifdef MGS_PORT
+                        if (*iter) /* the PS1 writes its RAM at 6, the read above's unused pad */
+#endif
                         (*iter)->mov.pad = 1;
                     }
 

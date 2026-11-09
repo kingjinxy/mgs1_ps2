@@ -1298,4 +1298,16 @@ loop's end seed covers. Also tried: setting the PS1's
 seed from before the loop in `Port_TasScenario`, before the stage's actors are made. It didn't matter (the port's seed
 already matched there), so it was dropped.
 
-In sync from the start to 122,661 (1:04:45.75, s15c): the rand seed.
+122,661 was s15c (Vulcan Raven) not linked in: 26 `INCLUDE_ASM` in `valcan.c` and `dyncon.c`, translated with
+`mips2c.py s15c 0x800C3208` (the stage overlays' base). The run then reached 132,057 and stopped at `run_port.py`'s default
+900 seconds; long runs now need `--seconds 2400`.
+
+## Step 58: dummy_fl.c's NULL vector (Nov 9)
+
+New TLB misses after s15c (`dummy_fl.c` `Act`, pc 0x7896f8): with grenades thrown (`tenage_ctrls_count_800BDD70`) the
+decomp sets each entry NULL, then reads an SVECTOR at address 0 and may write `(*iter)->mov.pad`. GCC compiled the read
+as `ld v0,0(zero)`. The PS1 reads its RAM at 0, which holds 3, 0, 0, 0 (`prim.c`'s chaff tiles), and writes RAM at 6,
+the vector's unused pad. The port reads a static copy and skips the write. Matching builds 80 and 2 OK; only the s11h
+shadow's TLB miss remains (0x66a394).
+
+In sync from the start to 137,806 (1:12:58.96, s16d): the rand seed.

@@ -1269,3 +1269,16 @@ fire in the port. Snake's position matches through 105,449. Demos on disc 2 do p
 them and starts the demo 18 loops later is what differs. Next: find what runs the demo script on the PS1 (BizHawk:
 the s16b actors at 105,449, `actor_list.lua`).
 
+
+## Step 56: a tap between two pad updates (Nov 9)
+
+105,450's missing demo is s16b's trap bind 22 (`tools/port/tas/bind_log.lua`, new: `GM_PlayerStatus`, `GV_PadData[0]`
+and the binds per loop). Its flags 7 ask for Snake facing west, a plain player status and a Circle press. A temporary
+printf in `HZD_ExecEvent` showed the port reaching the bind at 105,449 with the same position, direction and status,
+but no press. The PS1 updated the pads twice in 105,450: the first update saw a one-frame Circle tap and fired the
+trap, whose pad mask then cleared the second. The trace samples once per loop, so the tap was in neither table; only
+the second update's release (0x8020 against a last status of 0x8000) shows it. `Port_TasPads` now adds the record's
+release bits that the last status didn't have to the raw buttons. In a single-update loop the release is always within
+the last status, so nothing changes there.
+
+In sync from the start to 109,469 (0:58:03.31, s16a): the rand seed.

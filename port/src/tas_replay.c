@@ -684,7 +684,11 @@ void Port_TasPads(void)
         s_RawHeld = 1;
         for (port = 0; port < 2; port++)
         {
-            unsigned int   buttons = r[(2 + port) * 16] | r[(2 + port) * 16 + 1] << 8;
+            const unsigned char* g = GV_PadData + (2 + port) * 16; /* the last update's, before this one */
+            /* plus the record's release bits the last status didn't have: a loop with two updates whose first
+               saw a tap (s16b's trap, Circle at 105,450); a single update's release is always in that status */
+            unsigned int   buttons = (r[(2 + port) * 16] | r[(2 + port) * 16 + 1] << 8)
+                                   | ((r[(2 + port) * 16 + 4] | r[(2 + port) * 16 + 5] << 8) & ~(g[0] | g[1] << 8));
             short          analog  = (short)(r[port * 16 + 10] | r[port * 16 + 11] << 8);
             unsigned char* p       = pad_800C14E0 + port * 8;
             if (analog > 0)

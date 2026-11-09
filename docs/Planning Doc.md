@@ -275,10 +275,22 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 105,450 (0:56:00.79; was 12,101, 0:06:42.1,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 109,469 (0:58:03.31; was 12,101, 0:06:42.1,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair,
       `lit_mdl.c`'s dropped model initializer,
       chafgrnd.c's NULL `RECT` (`prim.c`).
+
+## Later: undub (Japanese voices, English text)
+
+- [ ] Not started (noted 2026-11-09). Prior work: DoktorDeSparkle's `mgs1-scripts` (GitHub), which injects
+      English text into the Japanese discs' `RADIO.DAT`, `DEMO.DAT`, `VOX.DAT` and zmovies. Being data-only, it
+      has to live with the original binaries' limits: it recomputes call lengths (65,535-byte cap) and patches
+      offsets into `STAGE.DIR`/`RADIO.DAT` (`voxOffsetAdjuster`, `demoOffsetAdjuster`) whenever a size changes.
+      With the source, don't copy that approach exactly. Change the game code instead (behind `MGS_PORT`) to
+      tolerate data of different sizes and offsets, e.g. locate demo/vox/call data by scanning or by an index
+      built at load time instead of fixed `STAGE.DIR` offsets, and lift the 16-bit call length. Not necessarily
+      easy, but easier than keeping the rebuilt data byte-compatible. His extractors, the kanji/font work and his
+      round-trip tests are still worth reusing for the text side.
 
 ## Open questions
 

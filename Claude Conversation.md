@@ -20931,6 +20931,487 @@ The entries will probably clear when this session ends or restarts. If they don'
 
 ## User
 
+I’ve copied two Metal Gear Solid 2 CHDs to the VM’s shared folder. Create a new folder in Documents called “MGS2-testing” and move (cut, not copy) the CHD files there. After that, tell me how much free space the VM’s drive has.
+
+## Claude
+
+Need to find the shared folder.
+
+- tool `Bash`: Locate shared folder and CHD files
+
+- tool `Bash`: Move MGS2 CHDs to new folder and check free space
+
+## Claude
+
+I created `~/Documents/MGS2-testing` and moved both CHDs into it. They're no longer in the shared folder:
+
+- `Metal Gear Solid 2 - Sons of Liberty (Japan).chd` (3.44 GB)
+- `Metal Gear Solid 2 - Sons of Liberty (USA).chd` (3.42 GB)
+
+The moved files are exactly the same size as the originals.
+
+The VM's drive (`/dev/sda2`, 78 GB) has **5.5 GB free**. It's 93% full, with 69 GB used. That's not much room left, so another disc image or a few large PCSX2 runs could fill it.
+
+## User
+
+Are there any files we can clean up?
+
+- tool `Bash`: Survey disk usage for cleanup candidates
+
+## Claude
+
+Yes. I haven't deleted anything yet. These are the candidates, safest first:
+
+**Safe to clear (about 5.5 GB)**
+| What | Size | How |
+|---|---|---|
+| apt package cache (`/var/cache/apt`) | 2.4 GB | `sudo apt clean`. It only holds downloaded `.deb` files. |
+| `~/.cache` | 1.9 GB | App caches. They get rebuilt when needed. |
+| Trash (`~/.local/share/Trash`) | 0.9 GB | Empty it. Check first that nothing in it is wanted. |
+| `/tmp` | 1.2 GB | Leftover files from old runs. I'd keep anything the running DuckStation is using. |
+
+**Build outputs that can be rebuilt (about 8 GB)**
+- **The Twilight Princess project:** `tp-wii-qol/build` (5.1 GB) and `build_opt` (1.7 GB). This includes three `.iso` files of 1.1 to 1.5 GB each, which come from rebuilding.
+- **Silent Hill 1 port:** `build/port/variants/v0–v3.iso` (4 × 0.6 GB = 2.4 GB). These look like test variants, separate from the main `sh1_ps2.iso`.
+
+**Probably duplicates (about 1.4 GB)**
+- `~/emu/mgs-integral/disc1.bin` and `disc2.bin` (0.7 GB each). They look like copies of `obj_ps2/ps1/DISC1.BIN`/`DISC2.BIN`. I can compare checksums to confirm.
+
+**Your call**
+- `~/Downloads/Silent Hill 2 (USA).chd` (1.8 GB), if you don't need it on the VM.
+- `.antigravity-ide` (1.4 GB) and `.wine-openmsx` (1.4 GB), if you no longer use those tools.
+
+I'd leave the MGS1 originals in `ps1-original` and `obj_ps2` alone. The port's builds and TAS testing use them.
+
+The first group alone would bring free space from 5.5 GB to about 11 GB. Want me to clear that group, and confirm whether the `~/emu` disc images are duplicates?
+
+## User
+
+Let’s delete the files in the Twilight Princess build folder and the Silent Hill 2 CHD in Downloads. Then, confirm whether then ~/emu disc images are duplicates or not
+
+- tool `Bash`: Inspect Twilight Princess build folder
+
+## Claude
+
+Nothing in `build/` is tracked by git, and the original game is kept separately as `orig/…rvz`, so everything in this folder can be rebuilt. Deleting now:
+
+- tool `Bash`: Delete files, compare disc image checksums, check space
+
+- tool `Bash`: Check what else is in emu folder and what references it
+
+## Claude
+
+I deleted both:
+- Everything in `tp-wii-qol/build`: the three `.iso` files, the extracted `GZ2E01/` tree, and the downloaded compilers, binutils and tools. All of it can be rebuilt; the original game is still in `orig/`. The empty `build/` folder is still there, and so is `build_opt`, since you didn't mention it.
+- `~/Downloads/Silent Hill 2 (USA).chd`
+
+Free space went from 5.5 GB to **13 GB** (the drive is now 84% full).
+
+**The `~/emu` disc images are duplicates.** `~/emu/mgs-integral/disc1.bin` and `disc2.bin` have the same size and SHA-1 checksums as `obj_ps2/ps1/DISC1.BIN` and `DISC2.BIN`.
+
+I wouldn't delete them yet. Three MGS1 port scripts use the `~/emu/mgs-integral` path:
+- `tools/port/stage_split.py`
+- `tools/port/tas/run_port.py`
+- `tools/port/tas/run_bizhawk.sh`
+
+The TAS runs (the BizHawk and PCSX2 game-replay comparisons) probably load the discs through `disc1.cue` and `disc2.cue` in that folder. One option would recover about 1.4 GB without breaking those scripts: replace the two `.bin` files with symlinks to the `obj_ps2` copies. The catch is that `~/emu` would then break whenever `obj_ps2` is cleaned. Want me to do that?
+
+## User
+
+No, I will have to expand the VM’s disk space later. For now, extract the CHD files in the MGS2 folder and give me the SHA-1 hashes for each extracted ISO. Keep in mind that these are PS2 DVDs compressed to CHD, and they need to be uncompressed in the same way.
+
+- tool `Bash`: Check chdman and CHD type/size
+
+## Claude
+
+Both are DVD-type CHDs, so I'll use `chdman extractdvd`. They'll take about 9.3 GB of the 13 GB free.
+
+- tool `Bash`: Extract DVD CHDs to ISO and hash them
+
+## Claude
+
+I extracted both CHDs to `.iso` files in `~/Documents/MGS2-testing`, using `chdman extractdvd` (the DVD mode that matches how PS2 discs are compressed to CHD). Both CHDs were stored as DVDs, and each ISO is exactly the size its CHD recorded for the original image.
+
+| ISO | Size | SHA-1 |
+|---|---|---|
+| Metal Gear Solid 2 - Sons of Liberty (Japan).iso | 4,648,140,800 bytes | `7cc691c06076032fb1fafc5cfd52c663c8376d27` |
+| Metal Gear Solid 2 - Sons of Liberty (USA).iso | 4,620,910,592 bytes | `f5ea9c94b0b1429e3608bffead48193c206f778c` |
+
+I haven't checked these hashes against a known-good list such as Redump, since that would mean using a site outside GitHub.
+
+The drive now has **3.9 GB free** (95% full). Deleting the two CHDs would free about 6.9 GB, and they could be recreated from the ISOs with `chdman createdvd`. I've left them in place.
+
+## User
+
+The USA one matches a known good SHA-1. Delete its corresponding CHD. The Japan one does not. Delete the Japan .iso and then try extracting it again from the CHD using “createcd” instead. Hash the resulting .bin file.
+
+- tool `Bash`: Delete files, try CD-mode extraction of Japan CHD
+
+## Claude
+
+CD mode crashed with no output, which is expected for a DVD-type CHD. I'll check whether the CHD itself is intact:
+
+- tool `Bash`: Verify Japan CHD integrity
+
+## Claude
+
+I couldn't make a `.bin` for the Japan disc, so there's no hash for one. I did find why the Japan hash doesn't match.
+
+**Deleted:** the USA `.chd` and the Japan `.iso`. The USA `.iso` and the Japan `.chd` remain, and the drive has 12 GB free.
+
+**CD mode can't be used:** `chdman createcd` only compresses an image into a CHD, so I ran the matching extraction command, `chdman extractcd`. It crashed straight away without writing anything. This CHD is stored as a DVD (that's the type tag inside it), and `extractcd` only reads CD-type CHDs. `extractdvd` is the only way to unpack it.
+
+**The CHD gave back exactly what was put in:** I checked the Japan CHD with `chdman verify`, and it passed. A CHD stores the SHA-1 of the image it was made from, and that stored hash matches the ISO I extracted earlier (`7cc691c06076032fb1fafc5cfd52c663c8376d27`). So the extraction was correct. The disc image was already different from the known-good one before it was compressed.
+
+That leaves two likely explanations:
+- **It's a different dump or release of the Japan disc.** Japanese MGS2 has more than one edition and reprint, so check that your known-good hash is for the same version.
+- **The dump is bad or was modified** before it was compressed. Getting a clean copy would fix that.
+
+The Japan CHD is still in `~/Documents/MGS2-testing` if you want to keep it while you check.
+
+## User
+
+Okay, I found a different good hash for the Japan disc. It does in fact match a different disc print. The extraction functioned correctly. Delete the Japan CHD
+
+## Claude
+
+Before I delete it: the Japan `.iso` was deleted in the last step, before the CD-mode attempt. So the CHD is now the only copy of the Japan disc on the VM:
+
+```
+~/Documents/MGS2-testing/
+  Metal Gear Solid 2 - Sons of Liberty (Japan).chd   ← only Japan copy
+  Metal Gear Solid 2 - Sons of Liberty (USA).iso
+```
+
+Deleting it now would remove the Japan disc from the VM entirely. You can do either of these:
+
+1. **Extract the ISO again first, then delete the CHD.** This gives the same image back (SHA-1 `7cc691c0…`) and leaves about 7.6 GB free.
+2. **Delete the CHD anyway,** if you still have the Japan disc on your host or somewhere else.
+
+Which one should I do?
+
+## User
+
+Extract the ISO again and then delete the CHD. There should be 2 ISO files left in the MGS2 folder now
+
+- tool `Bash`: Re-extract Japan ISO, verify hash, delete CHD
+
+## Claude
+
+I extracted the Japan ISO again and deleted the CHD. Before deleting, I checked that the new ISO's SHA-1 matched the earlier extraction. `~/Documents/MGS2-testing` now has just the two ISOs:
+
+| ISO | SHA-1 |
+|---|---|
+| Metal Gear Solid 2 - Sons of Liberty (Japan).iso | `7cc691c06076032fb1fafc5cfd52c663c8376d27` |
+| Metal Gear Solid 2 - Sons of Liberty (USA).iso | `f5ea9c94b0b1429e3608bffead48193c206f778c` |
+
+The drive has **11 GB free**. That's more than the 7.6 GB I estimated, because I hadn't counted the space freed by deleting the CHD.
+
+## User
+
+Ok, what I want to do in this conversation is explore the possibility of “undubbing” Metal Gear Solid 2. Preliminary work has been done by DoktorDeSparkle here for MGS1: https://github.com/DoktorDeSparkle/mgs1-scripts. I also have some work done on MGS3 HD here: https://github.com/kingjinxy/Metal-Gear-Solid-3-HD-Undub-PS3. 
+I don’t expect file formats to be exactly the same between games, but I think the idea is the same. Cutscenes have multiple data formats streamed, much like a video, but with a little more flexibility. Radio/codec calls are much the same but perhaps less complex. I’d like you to analyze both of these repositories and give me your takeaways.
+
+## Claude
+
+Cloning both repos (GitHub, so no need to ask first) into the scratchpad to read them.
+
+- tool `Bash`: Clone both repos and list their files
+
+- tool `Bash`: Read MGS3 undub repo
+
+## Claude
+
+The MGS3 tool is small and readable. Its stream-ID table already lists PS2 MGS2 formats (`.pss`, `.ipu`), which is a good sign. Now the MGS1 repo:
+
+- tool `Bash`: Read MGS1 scripts README and history
+
+## Claude
+
+Note the opposite direction: MGS1 puts English text into the Japanese game, while MGS3 puts Japanese audio into the US game. A look at how MGS1 handles the demo and vox containers:
+
+- tool `Bash`: Read MGS1 demo/vox container code
+
+## Claude
+
+I read both repos; they're cloned at `/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/118c3d70-ad03-44b6-97b4-1a3e97474d07/scratchpad/repos`. They take opposite approaches, and MGS2 almost certainly suits your MGS3 approach better.
+
+## The two strategies
+
+| | MGS1 (DoktorDeSparkle) | MGS3 HD (yours) |
+|---|---|---|
+| Base game | **Japanese**, with English text injected | **US**, with Japanese audio injected |
+| Hard part | Text: the font, the kanji table, re-encoding, call lengths, file offsets | Audio: swapping the streams while keeping the structure intact |
+| Size of the work | Large: about 20 tools, still unfinished after more than a year | Small: about 250 lines |
+
+**MGS1 has to go the hard way.** The Japanese and US MGS1 discs are separate builds, and in the Japanese build most text is drawn from glyph tables it ships with. So the repo is almost all text work: a font tool, a table of kanji identified by OCR, a decoder and encoder for line-break rules, and a recompiler for `RADIO.DAT`. Making text longer shifts data, so it also has to recalculate lengths (calls are capped at 65,535 bytes) and fix offsets in `STAGE.DIR` (`voxOffsetAdjuster`, `demoOffsetAdjuster`). Most of the effort goes into dealing with the knock-on effects of changing data sizes.
+
+**MGS3 can go the easy way** because each SDT file is self-describing. The format is a series of 16-byte chunk headers: `0x10` registers a stream ID, a data chunk carries its size, and `0xF0` ends the file. `smart_stitch` groups the chunks into runs and swaps the US audio runs for the Japanese ones, one run at a time. Nothing external points into the file, so its size can change freely, and the Japanese `.sdx` files can be copied straight across.
+
+## Why this matters for MGS2
+
+- **MGS3's container comes from MGS2.** Your `extmap` (taken from bnnm and AnonRunzes's demuxer) lists `0x0e: .pss` and `0x0f: .ipu`, labelled "PS2 version of MGS2". The per-language subtitle IDs `0x00010004`–`0x00070004` also say "in the executable of those Metal Gear Solid PS2 games". So PS2 MGS2 very likely uses the same chunked stream container. I haven't checked that against the discs yet.
+- **If it does, start from your MGS3 approach**: US game as the base, Japanese audio swapped in. The US release already has English subtitles and a font that can show them. This removes MGS1's whole text problem.
+- **Expect MGS3's problems to come back**, and plan for them at the start:
+  1. **Matching audio runs by position is fragile.** The *n*th Japanese run replaces the *n*th US run, and that only works if both files have the same number of runs. Spare Japanese runs get added at the end, and spare US runs are dropped silently. Matching on stream ID plus timestamp or block index would be safer.
+  2. **Codec calls going out of sync.** In MGS3, Japanese audio has a different length from English, but the subtitle timing and lip-sync (`.dmx`/`.bpx`) still followed the US lines. MGS2 will have this problem too, especially in codec calls. The fix your README suggests, copying the Japanese `.bpx`, applies here as well. Subtitle timing will need a real parser, and that's the one place where MGS1's caption-timing work (start frame and duration per line) is directly useful.
+  3. **The demuxer drops padding chunks** (index field `0xC` = 0), but the stitcher copies them as they are. That's fine as long as Japanese and US padding follow the same pattern.
+- **Probably useful from MGS1:** its testing approach. Its round-trip tests (`testing/demoDialogueRoundTrip.*`) unpack and rebuild a file to check it comes back byte-identical. Its workflow keeps an untouched copy of the source files apart from the build. Also, "don't load savestates across builds" is good advice for PCSX2 too.
+- **Smaller problems in your MGS3 code:**
+  - `main.py` builds paths with `\\`, so it only runs on Windows. That needs fixing to run here.
+  - `japanese_files.index(file)` throws an error rather than returning -1, so the "not found" check never triggers.
+  - Matching only on the base filename can pick the wrong file when two folders contain files with the same name.
+
+## Open question for MGS2
+
+The questions are whether the PS2 Japanese and US builds put cutscene and codec audio in the same kind of files, and whether a table of contents or a file of offsets points into them. If one does, size changes would need MGS1-style offset fixing. The next step would be to list the files on both ISOs, run your `sdt_demux.py` on a matching cutscene file from each, and compare the chunk sequences. Want me to do that?
+
+## User
+
+For MGS1, since we have the source code, I don’t see any reason to follow DoktorDeSparkle’s approach exactly. We can simply change game code to make it tolerant of different data sizes and offsets. It won’t necessarily be easy, but at least easier. Make a note in the MGS1 docs regarding this.
+
+- tool `Bash`: List docs and Planning Doc headings
+
+- tool `Bash`: Read Planning Doc strategy and side-tools sections
+
+## Claude
+
+I'm adding it to the Planning Doc as a later item, after the side tools:
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/docs/Planning Doc.md
+
+## Claude
+
+I added the note to [docs/Planning Doc.md](docs/Planning%20Doc.md), in a new **"Later: undub (Japanese voices, English text)"** section after the side tools. It says:
+
+- **Prior work:** DoktorDeSparkle's scripts put English text into the Japanese discs without touching the game code. That means recalculating call lengths (capped at 65,535 bytes) and patching offsets in `STAGE.DIR` and `RADIO.DAT` every time a size changes.
+- **Our approach:** since we have the source, we change the game code (behind `MGS_PORT`) so it copes with data of different sizes and positions. For example, it could find cutscene, voice and codec data by scanning or with an index built at load time, instead of using fixed offsets, and the 16-bit call length limit could be lifted.
+- **Worth reusing from his work:** his extractors, the kanji and font work, and his round-trip tests.
+
+It's an unchecked "not started" item, so it doesn't change the current plan. I haven't committed it. I can commit it next time we commit, along with the walkthrough and conversation-log updates the project rules ask for.
+
+## User
+
+Now, for MGS2. Let’s compare the files in each .iso. Are any files on the disc exactly the same?
+
+- tool `Bash`: Check for ISO-reading tools
+
+## Claude
+
+I'll hash each file directly from the ISO images rather than extracting them, since there are only 11 GB free.
+
+- tool `Write`: /tmp/claude-1000/-home-alex-Documents-mgs1-ps2/118c3d70-ad03-44b6-97b4-1a3e97474d07/scratchpad/isohash.py
+
+- tool `Bash`: Hash every file on both ISOs
+
+- tool `Bash`: Hash every file on both ISOs
+
+- tool `Bash`: Show file lists and identical hashes
+
+## Claude
+
+Only two files on the discs are identical, and both are small IOP system modules:
+
+- `/MODULES/IOPRP23.IMG` (230 KB)
+- `/MODULES/PLD.IRX` (1.7 KB)
+
+Both discs have the same 11 files. Every game data file differs, as does the executable (`SLPM_650.77` on the Japanese disc, `SLUS_201.44` on the USA one):
+
+| File | Japan | USA | Difference |
+|---|---|---|---|
+| `MGS2/DEMO.DAT` (cutscenes) | 1,792.9 MB | 1,798.5 MB | +5.6 MB |
+| `MGS2/VOX.DAT` (voice) | 1,174.5 MB | 1,226.4 MB | +51.9 MB |
+| `MGS2/MOVIE.DAT` (videos) | 961.5 MB | 913.8 MB | −47.7 MB |
+| `MGS2/STAGE.DAT` (levels) | 640.4 MB | 624.9 MB | −15.5 MB |
+| `MGS2/CODEC.DAT` | 44.6 MB | 24.2 MB | **−20.4 MB** |
+| `MGS2/FACE.DAT` (codec portraits) | 31.1 MB | 31.0 MB | −0.1 MB |
+| `MODULE.IPK`, `SYSTEM.CNF` | small | small | differ |
+
+What this suggests:
+- **Almost all of the game is in six big archives.** That's different from MGS3 HD's thousands of separate files, so swapping whole files won't work. We'll have to look inside the archives to compare. Each archive presumably has a table of contents giving the position of each piece; it could be at the start of the archive or in the executable, which would bring back MGS1's offset problem.
+- **The files are in a different order on each disc.** On the USA disc `DEMO.DAT` comes first, and on the Japanese disc `MOVIE.DAT` does. If the executable finds archives by their position on the disc, a modified disc must keep the USA layout or the executable must be updated to match.
+- **`CODEC.DAT` is almost twice as big on the Japanese disc.** The cause may be the Japanese text's 2-byte characters plus its own font images, or the Japanese disc may hold more codec data. That's a guess until we look inside.
+- **Even `FACE.DAT` (the codec portraits) differs**, so the portraits or their lip-sync data probably differ between the two releases.
+
+The files probably differ by more than just the audio. Next I can open `DEMO.DAT` and `VOX.DAT` and check for MGS3's 16-byte chunk headers (`0x10` registers a stream, `0xF0` ends one). That would show whether the US and Japanese pieces match up one-to-one with only the audio chunks differing.
+
+The list of files on each disc with their hashes is in `/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/118c3d70-ad03-44b6-97b4-1a3e97474d07/scratchpad/jp.tsv` and `/tmp/claude-1000/-home-alex-Documents-mgs1-ps2/118c3d70-ad03-44b6-97b4-1a3e97474d07/scratchpad/us.tsv`.
+
+## User
+
+In the MGS2 folder, keep a running log of this conversation and a doc with your findings.
+
+## Claude
+
+I'll save the hashing script there as well, since the scratchpad is temporary.
+
+- tool `Bash`: Save hash script and file lists to MGS2 folder
+
+- tool `Write`: /home/alex/Documents/MGS2-testing/Findings.md
+
+- tool `Write`: /home/alex/Documents/MGS2-testing/Conversation Log.md
+
+- tool `Write`: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/memory/mgs2-undub-docs.md
+
+- tool `Bash`: Add memory index entry
+
+## Claude
+
+I've added a running conversation log and a findings doc to `~/Documents/MGS2-testing`, plus the script and file lists from the disc comparison:
+
+```
+MGS2-testing/
+  Conversation Log.md   ← dated log: each request, what was done, what failed
+  Findings.md           ← disc hashes, file comparison, takeaways from MGS1/MGS3, open questions
+  tools/isohash.py      ← lists and hashes the files inside an ISO without extracting it
+  data/files-jp.tsv     ← SHA-1, size, starting sector and path of every file on each disc
+  data/files-us.tsv
+  (the two ISOs)
+```
+
+The log covers everything since you copied the CHDs over, including the cleanup and the failed CD-mode extraction. `Findings.md` ends with the four open questions; first is whether `DEMO.DAT` and `VOX.DAT` use MGS3's chunk format.
+
+I've saved a memory note to update both files after each MGS2 step, so it carries over to future sessions.
+
+## User
+
+Analyze all the .dat files and attempt to determine their structure, as well as the files within. Compare the USA and Japanese releases.
+
+## Claude
+
+I'll read each archive in place in the ISOs, starting with the first bytes of every `.dat` on both discs.
+
+- tool `Bash`: Hexdump the start of each DAT file
+
+## Claude
+
+I'll write a small helper that locates a file inside either ISO, and use it for all the analysis:
+
+- tool `Write`: /home/alex/Documents/MGS2-testing/tools/isofile.py
+
+- tool `Bash`: Hexdump the start of each DAT file
+
+- tool `Bash`: Dump the first DEMO.DAT entry
+
+- tool `Write`: /home/alex/Documents/MGS2-testing/tools/sdtwalk.py
+
+- tool `Bash`: Walk the first entries of the three stream archives
+
+## Claude
+
+`-I` drops the script's own folder from the import path. These are my own scripts reading disc data, so I'll run them without it:
+
+- tool `Bash`: Walk the first entries of the three stream archives
+
+## Claude
+
+The walker works. I'll run it over all three archives on both discs and save the results:
+
+- tool `Bash`: Walk all entries of DEMO, MOVIE, VOX on both discs
+
+- tool `Bash`: Check the walks reached the end of each file
+
+- tool `Bash`: Add per-stream hashing and compare US and JP entries
+
+## Claude
+
+Pairing by position is only a first pass, so I'll check whether the entries really line up, using chunk counts of the non-audio streams:
+
+- tool `Bash`: Find where US and JP entry pairing breaks
+
+## Claude
+
+Pairing by position holds for `DEMO`: the scene-control stream (type 2) has the same chunk count in every pair. Stream 4 is about ten times larger on the Japanese disc, so I'll look at its contents:
+
+- tool `Bash`: Dump DEMO stream 4 chunks for entry 0
+
+- tool `Bash`: Dump DEMO audio chunk headers in both releases
+
+- tool `Bash`: Summarize DEMO audio and control-stream differences
+
+- tool `Write`: /home/alex/Documents/MGS2-testing/tools/sdtcompare.py
+
+- tool `Bash`: Pair entries by structure and compare all three archives
+
+## Claude
+
+The new script wasn't written, so that run reused the old one. I'll write it and run again:
+
+- tool `Bash`: Remove old compare script
+
+- tool `Write`: /home/alex/Documents/MGS2-testing/tools/sdtcompare.py
+
+- tool `Bash`: Pair entries by structure and compare all three archives
+
+- tool `Bash`: Find DEMO's extra entry; pair MOVIE by video hash
+
+- tool `Bash`: Survey VOX entry types and dump one entry's streams
+
+- tool `Bash`: Re-pair VOX on stream types and check audio length ratios
+
+- tool `Bash`: Compare VOX line IDs between paired entries
+
+- tool `Bash`: Check timestamps, entropy and FACE header
+
+- tool `Bash`: Read FACE.DAT name table and entry starts
+
+- tool `Bash`: Compare FACE.DAT groups and files
+
+- tool `Bash`: Dump CODEC.DAT header and look for known markers
+
+- tool `Bash`: Locate the per-block timestamps in CODEC.DAT
+
+## Claude
+
+That's enough to map the overall structure. I'll check the size of the saved data and then write everything up:
+
+- tool `Bash`: Check saved data size and disk space
+
+## Claude
+
+Now updating `Findings.md` and the log:
+
+- tool `Edit`: /home/alex/Documents/MGS2-testing/Findings.md
+
+- tool `Edit`: /home/alex/Documents/MGS2-testing/Findings.md
+
+- tool `Edit`: /home/alex/Documents/MGS2-testing/Conversation Log.md
+
+## Claude
+
+I worked out the structure of all six `.DAT` archives, and the cutscenes look like the easiest place to start an undub. Their audio is the same format in both releases, and most Japanese cutscene audio is the same length as the English.
+
+| Archive | Format | US vs Japan |
+|---|---|---|
+| `DEMO.DAT` (cutscenes) | MGS3's chunk-stream format | 146 cutscenes pair up; Japan has one extra. Video and most scene data are identical; only audio and subtitles differ |
+| `MOVIE.DAT` (videos) | same format | 108 movies have byte-identical video. Japan has 26 extra silent clips and a few other extras |
+| `VOX.DAT` (voice) | same format | Same kinds of entries in both (3,407 US / 3,410 JP); lines can't yet be matched up with certainty |
+| `CODEC.DAT` | codec call scripts and text | US text is plain ASCII; Japanese is 2-byte characters plus kanji images, hence 20 MB larger |
+| `FACE.DAT` (codec portraits) | archive of 21 named groups | Same groups and file counts; about 60% of files identical |
+| `STAGE.DAT` (levels) | encrypted or compressed throughout | Can't be read yet |
+
+**`DEMO`, `MOVIE` and `VOX` use the same format as MGS3 HD's `.sdt` files**, so the stream-swapping idea from your MGS3 project carries over. They have no table of contents inside the file: the entries sit one after another, and the walk ends exactly at the end of all six files. Something else must hold the offsets the game uses to find them, probably the executable or the encrypted `STAGE.DAT`. If Japanese audio makes an entry longer, those offsets would need updating.
+
+**How the subtitles are stored:** in their own stream, with a start and end frame for each line. The US release stores them as ASCII. The Japanese release uses 2-byte character codes with kanji drawn as small bitmaps alongside, the same scheme as MGS1. With the US disc as the base, the English subtitles can stay as they are and only their timing would need adjusting.
+
+**Cutscenes:**
+- 78 of the 133 cutscenes with audio have Japanese audio exactly the same length as the English, and 8 more are within 1%. That makes sense, since the animation is fixed and both casts recorded to it.
+- Swapping in the Japanese audio should stay in sync for most of them, with small subtitle shifts at most.
+- About 47 differ more and need checking one at a time; entry 5's Japanese audio is twice as long, for example.
+
+**Codec calls will be harder, as in MGS3:**
+- Japanese voice lines run anywhere from about 0.4× to 2.2× the length of the English ones.
+- The voice entries for codec calls carry no subtitles; the text is in `CODEC.DAT`. So the timing for when each line of text appears must live there too, and I haven't found it yet.
+- Matching each Japanese line to its English counterpart is still unconfirmed. The only ID in the records has 26 distinct values, so it identifies a speaker or stage, not a line. The reliable match probably comes from the table that points into `VOX.DAT`.
+
+**Three files share a header field:** `CODEC`, `FACE` and `STAGE` all start with a Unix timestamp that looks like a build date. The US ones date from September 2001 and the Japanese ones from October.
+
+I'd suggest testing a cutscene audio swap next. That would mean copying the Japanese audio into one cutscene whose length matches (entry 0), then checking it in PCSX2 with the subtitles timed correctly. If the game still finds and plays the entry, it suggests the game locates entries more flexibly than by exact offset. The other open item is finding the code that decrypts `STAGE.DAT` in the US executable.
+
+Everything is written up in `Findings.md`, under "Inside the archives", with the new open questions at the end. The steps, including what went wrong, are in `Conversation Log.md`. I also saved seven small Python tools in `tools/` and the comparison tables in `data/` (2.7 MB). The ISOs were read in place and nothing was extracted, so the drive still has 11 GB free.
+
+## User
+
 <command-name>/clear</command-name>
             <command-message>clear</command-message>
             <command-args></command-args>
@@ -22284,4 +22765,829 @@ The callback ran in the port too, so the demo is probably started after a wait. 
 - tool `Bash`: Read GCL_Command
 
 - tool `Bash`: GCL commands the port runs 105,425–105,470
+
+- tool `Bash`: Document open desync, archive, commit
+
+## Claude
+
+30 minutes left; one quick check. Is 0x64C0, the command the callback runs, the `delay` command?
+
+- tool `Bash`: What GCL command 0x64C0 is
+
+- tool `Bash`: Note the eval finding; commit
+
+- tool `PushNotification`: 
+
+## Claude
+
+The replay is now in sync to **loop 105,450 (0:56:00.79, s16b)**, up from 101,734 at 6 pm. Everything is committed and the walkthrough (Steps 54–55 plus notes on the open desync), the Planning Doc and `Claude Conversation.md` are updated. The two fixes are in the replay's tick table only, so the matching builds aren't affected; full replays from the start reach the same loop each time.
+
+**What changed:**
+1. **Raven's timer tick:** the bullets' aim came from Vulcan Raven, and his facing came from a random draw that one extra draw on the PS1 had shifted. That draw was his own timer firing a loop earlier. When he's created at the load end, the PS1 stores tick 192,415 and the port 192,418. I fixed it with a fifth hand-found `TICK_AT` entry.
+2. **Tick model (systemic):** Raven's 10 timer ticks from the PS1 are all exactly *the loop's start tick + 1*. The replay used the loop's end sample, which was 1–2 blanks late. The tick table now defaults to start + 1, with `TICK_AT` kept only for reads late in long load-end loops. This took the run from 101,983 straight to 105,450. It probably removes most of the need to record ticks in trace.lua, which I'd suggested earlier.
+
+**Open desync at 105,450 (0:56:00.79, s16b):** both sides close a codec call at 105,432. 18 loops later the PS1 starts a cutscene and the port doesn't. The codec's exit callback only sets script variables (`eval`), and those match in the port. So what differs is whatever watches those variables and starts the scene; it never fires in the port. The next step is to compare the PS1's s16b actors at 105,449 with the port's to find it.
+
+The only TLB miss left is still the s11h cutscene shadow reading a freed parent, which only affects drawing.
+
+## User
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+<system-reminder>
+<tools-used-before-summary>Bash, PushNotification, TaskStop, ToolSearch</tools-used-before-summary>
+</system-reminder>
+Summary:
+1. Primary Request and Intent:
+   - Fix TAS desync issues autonomously, following the Ponytail philosophy (least new code, fix root causes).
+   - Commit and update docs after each meaningful change: `docs/Running Walkthrough.md` steps, `docs/Planning Doc.md` sync line and checkboxes, and `Claude Conversation.md` via `archive_conversation.py` with all session jsonl files.
+   - Notify the user hourly with a short progress summary, and also write the hourly summary in the chat (so it gets archived).
+   - Notify the user when something needs a serious change, then wait for guidance.
+   - If in the middle of a task at a check-in time, finish it first.
+   - Step back and look for systemic issues when progress is slow.
+   - Work periods: until 4:30 pm (check-in), then "Continue as before until 6:30 PM", then "Continue until 8 pm".
+   - Disc swap decision (user): "For now, let's do automatic switching. Later the need for disc swapping will be negated by the fact that all files will be on one DVD".
+   - CLAUDE.md rules still apply:
+     - Never access tcrf.net.
+     - Web access is GitHub only without asking.
+     - No `pkill -f` with a pattern in the calling command.
+     - Use the null renderer for `run_port.py`; never the hardware renderer.
+     - Run the matching build after every port change.
+     - Give the TAS movie time alongside loop numbers.
+     - Never dismiss "TLB Miss" lines; fix each unique PC.
+     - Never push or open PRs upstream (to mgs_reversing).
+
+2. Key Technical Concepts:
+   - **TAS replay comparison:** `run_port.py` replays the TAS in PCSX2 and compares each loop with BizHawk's trace. Useful options: `--rand-log`, `--ignore`, `--from`, `--last`, `--no-link`.
+   - **mips2c translation:** turns the decomp's asm into exact-behaviour C (`recomp/*.inc`).
+   - **stage_split:** builds unsplit stages from the disc in the PS1's layout.
+   - **Overlay link survey:** `build/overlays_ps2.py` links an overlay only if it has no INCLUDE_ASM stubs and no literal addresses.
+   - **Mid-loop tick:** `Port_GameTick` reads `ticks.bin`.
+   - **TICK_AT:** hand-found tick values for reads late in a long load-end loop.
+   - **Frame holds:** `DG_HikituriFlag`.
+   - **Stream states:** strctrl.c states 1, 2 and 3; `GM_StreamStatus` returns state − 1.
+   - **libgte SquareRoot0 of an overflowed sum:** reads before the `SQRT` table, into the end of `rsin_tbl`.
+   - **Overlay .bss as runs of ints:** in the port these become common symbols that the linker reorders.
+   - **NULL watcher entries:** removed soldiers leave NULL entries in the commanders; the PS1 reads its RAM at 0xC2C (0) and writes 0xBFC.
+   - **Disc swap:** handled at the change screen.
+   - **BizHawk Lua logging:**
+     - Find a Work by its Act pointer at actor +8.
+     - Use 4 KB `readbyterange` chunks.
+     - Frame-end samples can be a loop off.
+
+3. Files and Code Sections:
+   - `tools/port/mips2c.py`
+     - Deleted the broad `lui` fallback scan. It paired any `addiu rX,rX,imm` (|imm| ≥ 0x1000) with any `lui` in the function.
+     - Added: a `j` carries the live `lui` values to its target:
+       `if o == 2: pending.setdefault(int(ctrl[6:-1], 16), {}).update(hi)`
+   - `psx-to-ps2-HAL` (commit 2944fbc)
+     - `src/libgte_tables.c`: `const s16 SQRT_NEG[192]`, the 192 halfwords from PS1 RAM at SQRT−640.
+     - `src/libgte_port.c`: `return t >= 64 ? SQRT[t - 64] : SQRT_NEG[t + 256];`
+   - `source/libdg/dgd.c`
+     - Under MGS_PORT, in replays `DG_HikituriFlag = Port_TasHold()`.
+   - `port/src/tas_replay.c`
+     - Added `Port_TasHold()`, which compares the clocks of records T and T+1.
+     - Removed the after-the-fact clock flip.
+   - `source/game/strctrl.c` (case 1, replays)
+     - `if (may != 1 && (FS_StreamTaskState() < 0 || (may == 0 && !work->field_22_sub_state))) return;`
+   - `source/animal/zako11f/action.c`, `source/overlays/s11e/overlay2.c`, s14e data files
+     - Literal addresses replaced by symbols.
+   - Ordered `.bss` sections (`#define SECTION(x) __attribute__((section(".bss.<ovl>_<file>")))` under MGS_PORT) in 9 overlay files:
+     - camera, d18a, rank, s05a, s08b, s11e/overlay4, s11i/overlay4, s19b overlay3 and overlay6.
+   - `source/animal/zako11e/zk11ecom.c` and `source/animal/zako14/zako14com.c`
+     - NULL watcher guards, as in s03d's zakocom.c.
+   - `tools/port/tas/trace_to_pads.py`
+     - `ticks.bin` is now indexed by loop.
+     - The default tick is the previous loop's end sample + 1.
+     - Current values:
+       ```
+       TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376, 94052: 177855, 101313: 192415}
+       end_tick = {int(f[1]): int(n[14]) for f, n in zip(rows, rows[1:])}
+       tick_at = {t: TICK_AT.get(t, end_tick[t - 1] + 1 if t - 1 in end_tick else end_tick[t]) for t in end_tick}
+       ```
+   - `port/src/cdbios_ps2.c` and `source/onoda/change/change.c`
+     - `MgsCd_Swap()` toggles `s_DiscNo` between DISC1.BIN and DISC2.BIN.
+     - change.c case 2 calls it under MGS_PORT and sets `CdlStatShellOpen`.
+   - s14e
+     - New port-only `source/overlays/s14e/asm_objects.c` (all under MGS_PORT) includes the recomp `.inc` of the 30 asm-only objects.
+     - `build/overlays_ps2.py` maps a missing source to that file and dedupes the source list.
+     - Literals symbolized with new `tools/port/symlits.py`.
+     - `source/stage/s14e.c` uses the CHARA/DEMO macros; the fog entry is `(NEWCHARA *)s14e_800D8604`.
+   - `tools/port/stage_split.py`
+     - Tries disc1 then disc2 (DISCS list).
+     - Split and translated s11h and s15a with it.
+
+4. Errors and fixes:
+   - **Speculative TICK_AT for s11h (84548):** had no effect; reverted.
+   - **First SQRT_NEG had only 64 entries:** too narrow; widened to 192.
+   - **BizHawk `readbyterange` over 1.4 MB returned nothing:** switched to 4 KB chunks. A shell-escaped newline also broke a Lua script; fixed.
+   - **symlits declarations:** went after a recomp include and used the wrong type (strings are `const char`). Moved them after `game/game.h` and made them `const`.
+   - **CHARA_FOG:** gave an undefined `NewFog` in the matching link; used the asm symbol instead.
+   - **"End sample − 1" tick model:** no regressions but didn't fix 101,983; replaced by the start + 1 model.
+   - **Stale-target theory for Raven:** wrong. The real cause was an extra draw from Raven's timer.
+
+5. Problem Solving:
+   - Sync went from 79,264 to 105,450, in order:
+     1. s11i linked in.
+     2. s11h split and translated.
+     3. mips2c constant fix (the Hinds).
+     4. Stream state-1 wait.
+     5. HAL SQRT_NEG (Hind missile).
+     6. s11e linked in, ordered `.bss`, NULL soldiers.
+     7. Ticks by loop; Wolf's TICK_AT entries.
+     8. Disc swap.
+     9. s14e linked in.
+     10. s15a split.
+     11. Raven's tick at the load end.
+     12. Tick = loop start + 1, which took the run to 105,450.
+   - Still open:
+     - The s11h DEMO_SHADOW reads a freed parent (2 TLB misses at pc ~0x66a3bc). It only affects drawing.
+     - Desync at 105,450 (0:56:00.79, s16b), described in Current Work.
+
+6. All user messages:
+   - "Continue fixing desync issues until 4:30 pm, when I will do a check in. Report on your progress then and update docs and commit as necessary. If you're in the middle of a task, complete it first. Always keep in mind the Ponytail philosophy, and keep in mind that slowly circling an issue is sometimes inevitable, but if you're making very little progress, it may make sense to step back and think about whether a systemic issue is at play that requires rethinking the solution. If you come across something that requires a serious change, notify me and I can provide guidance. Otherwise, continue to commit and update docs after each meaningful change, but keep working autonomously. Notify me with a short progress summary each hour, starting at 1:30 pm. If you're in the middle of a task, finish it first."
+   - "Could you write the hourly summary in this chat as well, archiving it alongside the rest of the conversation?"
+   - "For now, let's do automatic switching. Later the need for disc swapping will be negated by the fact that all files will be on one DVD"
+   - "Continue as before until 6:30 PM"
+   - "Continue until 8 pm"
+
+7. Pending Tasks:
+   - Was continuing desync fixing until 8 pm; the session stopped at about 19:30 with everything committed.
+   - Final report to the user is not yet written in chat; a push notification was sent.
+   - Open items to mention:
+     - The 105,450 desync.
+     - The s11h shadow TLB miss.
+
+8. Current Work:
+   - Investigating the desync at 105,450 (0:56:00.79, s16b):
+     - The PS1 closes a codec call at 105,432 (both sides), then starts a demo 18 loops later (status 0x10CA0000, pads masked). The port doesn't.
+     - A temporary printf in `GCL_Command` showed the port runs only command 0x64C0 (`eval`, the codec exit callback, proc B9E5) at 105,431, and nothing at 105,449.
+     - linkvarbuf matches, so whatever polls those variables and starts the demo differs.
+   - Documented in the walkthrough. Last commits:
+     - 3c0bdd3fa "Docs: s16b's missing demo at 105,450 (findings); Claude Conversation.md"
+     - e13b994b2 "Docs: 105,450's codec callback is eval"
+   - Push sent: "Done for tonight: TAS sync 105,450 (0:56:00), was 101,734. Tick model fixed (loop start + 1). Open: s16b demo after a codec. All committed."
+
+9. Optional Next Step:
+   - Give the user a final text report for the session: progress 101,734 → 105,450, the fixes, and the open 105,450 desync and the s11h TLB miss.
+   - Any further desync work only on the user's go-ahead. If continuing: find what runs the s16b demo script on the PS1, per the walkthrough note "Next: find what runs the demo script on the PS1 (BizHawk: the s16b actors at 105,449, `actor_list.lua`)."
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/alex/.claude/projects/-home-alex-Documents-mgs1-ps2/eb67dc3c-89db-4f8b-82c6-7a5630d6c89b.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+The messages after this summary are the most recent messages from before compaction, kept verbatim. The summary was written without seeing them, so something it says has not happened yet may already have happened in them.
+
+## User
+
+<command-name>/compact</command-name>
+            <command-message>compact</command-message>
+            <command-args></command-args>
+
+## User
+
+<local-command-stdout>Compacted </local-command-stdout>
+
+## User
+
+Continue fixing desync issues until 5 pm, or we reach the end of the TAS, whichever comes first. Report on your progress every hour, with the first report at 11 am, and update docs and commit as necessary. If you’re in the middle of a task, complete it first. 
+Always keep in mind the Ponytail philosophy, and keep in mind that slowly circling an issue is sometimes inevitable, but if you’re making very little progress, it may make sense to step back and think about whether a systemic issue is at play that requires rethinking the solution. If you come across something that requires a serious change, notify me and I can provide guidance. Otherwise, continue to commit and update docs after each meaningful change, but keep working autonomously.
+
+- tool `Bash`: Check time, uncommitted diff, and open desync notes
+
+- tool `Bash`: Read open desync notes and tools
+
+- tool `Bash`: Locate s16b sources and data
+
+- tool `Bash`: View s16b stage chara table and tools
+
+- tool `Bash`: Look for GCL tools and command dispatch
+
+## Claude
+
+Looking into the s16b demo desync at loop 105,450 (0:56:00.79). Next I'll find which script runs the demo on the PS1.
+
+- tool `Bash`: Check actor_list tool and past demo-trigger notes
+
+- tool `Bash`: Show run_port options
+
+## Claude
+
+Running the PS1 actor list at 105,431, 105,440 and 105,449 in BizHawk.
+
+- tool `Bash`: List PS1 actors around the missing demo
+
+- tool `Bash`: Find trap handling code
+
+- tool `Bash`: Find trap/bind dispatch
+
+- tool `Bash`: Survey trap binding logic in script.c
+
+- tool `Bash`: Find where trap binds fire procs
+
+- tool `Bash`: Read stream-end callback and gamed proc call
+
+## Claude
+
+Still on the s16b demo: no stream or delay actor before 105,450 on the PS1, so I'm checking the codec (menu) code for a proc it runs after closing.
+
+- tool `Bash`: Find menu/radio proc calls and trap checks
+
+- tool `Bash`: Find proc execution in hzd binds
+
+- tool `Bash`: Read bind.c dispatch logic
+
+- tool `Bash`: Read rest of bind/trap event logic
+
+- tool `Bash`: Read rest of HZD_ExecEvent
+
+## Claude
+
+Adding a temporary printf in `HZD_ExecEvent` for loops 105,440–105,452 to see which s16b trap the port skips.
+
+- tool `Bash`: Add temporary bind debug printf
+
+- tool `Bash`: Confirm edit and view run_port flow
+
+- tool `Bash`: Matching build, then replay port to 105,452
+
+## Claude
+
+The replay to 105,452 is running in the background (about 30 min). Meanwhile I'll prepare a BizHawk script that logs `GM_PlayerStatus` and the pads on the PS1 side.
+
+- tool `Bash`: Find PS1 symbol addresses
+
+- tool `Bash`: Search symbol files for addresses
+
+- tool `Bash`: Look up PS1 addresses in map files
+
+- tool `Bash`: Read HZD_BND and GV_PAD layouts
+
+- tool `Bash`: Read struct layouts
+
+- tool `Bash`: Log PS1 trap binds and player status
+
+- tool `Bash`: Show bind changes per loop
+
+## Claude
+
+The PS1 trap that fires at 105,450 is bind 22: it needs Snake facing a set direction while pressing a button (press 0x20). Waiting on the port's printf to see which condition fails there.
+
+- tool `Bash`: Read GV_PAD layout
+
+- tool `Bash`: Check port replay progress
+
+## Claude
+
+The port replay is still running. I'll pick up when it finishes.
+
+- tool `ToolSearch`: 
+
+- tool `Bash`: Wait for the port replay to finish
+
+- tool `ToolSearch`: 
+
+- tool `TaskStop`: 
+
+## Claude
+
+I stopped a waiter I'd started by mistake. The port replay to 105,452 (0:56:00.82) is still running and will notify me when it finishes.
+
+**So far:** on the PS1, the s16b trap at 105,450 (0:56:00.79) is bind 22. It needs Snake facing a set direction, the right player status, and a button press (0x20). It then starts the demo and creates two delay actors. When the run finishes, my temporary printf will show which of those checks fails in the port.
+
+- tool `Bash`: Show replay result and bind debug output
+
+- tool `Bash`: Read replay pad-source design notes
+
+- tool `Bash`: Dump recorded pad tables near 105,450
+
+- tool `Bash`: Find reference trace path
+
+- tool `Bash`: Compare PS1 and port traces at 105,448–105,451
+
+- tool `Bash`: Find movie file and raw pad sampling in trace.lua
+
+- tool `Bash`: Read Port_TasPads implementation
+
+- tool `Bash`: Read Port_TasPads body
+
+- tool `Edit`: /home/alex/Documents/mgs1_ps2/port/src/tas_replay.c
+
+- tool `Bash`: Check GV_PadData declaration; drop debug printf
+
+- tool `Bash`: Check GV_PadData type in tas_replay.c
+
+## Claude
+
+Debug printf reverted. Running the matching build, then a full replay.
+
+- tool `Bash`: Matching build check and full replay
+
+## Claude
+
+I made the fix in `Port_TasPads`. The matching build and a full replay are running in the background (about 30–40 min); I'll pick up when they finish.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+Sync moved from 105,450 (0:56:00.79) to **109,469 (0:58:03.31, s16a)**. Checking the matching build for failures, then committing.
+
+- tool `Bash`: Check matching build for failures
+
+## Claude
+
+Now the docs: a walkthrough step, the Planning Doc sync line, and the conversation archive.
+
+- tool `Bash`: Find last step number and sync line
+
+- tool `Bash`: Update docs and commit the fix
+
+## Claude
+
+Next desync: rand seed at 109,469 (0:58:03.31, s16a). Checking how earlier rand desyncs were traced on the PS1 side.
+
+- tool `Bash`: Find rand-log workflow notes
+
+- tool `Bash`: Log port rand draws before the seed desync
+
+## Claude
+
+The rand log run for 109,466–109,469 (0:58:03) is in the background. I'll read it when it finishes.
+
+- tool `Bash`: Read rand log output
+
+## Claude
+
+The port draws 77 at 109,467 (0:58:03.28) and none after. The PS1 draws more in 109,469. Counting how many PS1 draws that is from the seeds.
+
+- tool `Bash`: Count rand steps between seeds
+
+## Claude
+
+The PS1 makes one draw in 109,469 that the port doesn't. The seed is set at the load end (109,468). Comparing trace fields across both sides.
+
+- tool `Bash`: Compare trace lines at the load end
+
+- tool `Bash`: Count PS1 draws per loop after the load
+
+## Claude
+
+One draw per loop on the PS1 from 109,469 on, none in the port: probably an s16a actor the port lacks. Listing the PS1's actors at 109,470.
+
+- tool `Bash`: s16a chara table and PS1 actor list
+
+- tool `Bash`: Find per-loop rand users among s16a actors
+
+- tool `Bash`: Survey rand calls in guncame and evntmous
+
+- tool `Bash`: Check whether s16a overlay is linked in the port
+
+- tool `Bash`: Read overlay link survey script
+
+- tool `Bash`: Check link log for s16a status
+
+## Claude
+
+s16a's overlay is linked, so the extra draw has to come from logic in one of its actors (gun camera or event mouse are the likely ones). Reading the gun camera's Act.
+
+- tool `Bash`: Read state bits and guncame logic
+
+- tool `Bash`: Find actor list structures
+
+- tool `Bash`: Read actor list layout and iteration
+
+## Claude
+
+Adding a temporary actor dump at 109,470 (0:58:03.32) in `GV_ExecActorSystem` to compare the port's actors with the PS1's.
+
+- tool `Bash`: Add temporary actor list printf
+
+- tool `Bash`: Replay to 109,471 and dump port actors
+
+## Claude
+
+The replay with the actor dump is running. My first hourly report is due at 11 am, so I'll send it when the run finishes.
+
+- tool `Bash`: Summarize port actors at 109,470
+
+- tool `Bash`: Show port actor dump lines
+
+## Claude
+
+Same actors on both sides except `item.c`: the port has 9, the PS1 7. Sending the 11 am report first.
+
+- tool `PushNotification`: 
+
+- tool `Bash`: Check rand use in item.c
+
+- tool `Bash`: Read event mouse logic
+
+- tool `Bash`: Read mouse visibility check and f1CC use
+
+- tool `Bash`: Read f1CC transitions and init
+
+## Claude
+
+Rather than guess, I'll dump the event mouse's Work on the PS1 with `work_dump.lua` and compare it with the port's.
+
+- tool `Bash`: Check work_dump usage
+
+- tool `Bash`: Add temporary event mouse Work dump
+
+- tool `Bash`: Dump the event mouse Work on PS1 and port
+
+## Claude
+
+Both dumps of the event mouse's Work (PS1 via BizHawk, port via printf) are running in parallel.
+
+- tool `Bash`: Inspect dump formats
+
+- tool `Bash`: Find seed-forcing logic
+
+- tool `Bash`: Read load-seed code
+
+- tool `Bash`: Read Port_TasScenario
+
+- tool `Bash`: Set PS1 seed at scenario start
+
+- tool `Bash`: Matching build and full replay with seed fix
+
+## Claude
+
+The fix is in place. `Port_TasScenario` now sets the PS1's seed from before the scenario loop, so actors created at a load end draw from it. A full replay is running to check for regressions at earlier loads.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+No regressions, but the desync didn't move. Checking the replay's log around this load end.
+
+- tool `Bash`: Read replay log lines near the load end
+
+- tool `Bash`: Count port draws from the PS1 seed
+
+## Claude
+
+With the PS1's seed applied, the port still makes 77 draws in that loop and the PS1 makes 121, so 44 draws are missing. Checking whether the Redux tooling can log the PS1's rand callers.
+
+- tool `Bash`: Check Redux replay tool capabilities
+
+- tool `Bash`: Read key_item rand use
+
+- tool `Bash`: Read KeyItemRun draw loop
+
+- tool `Bash`: Read tick table near load end
+
+- tool `Bash`: Add TICK_AT entry for s16a key items
+
+- tool `Bash`: Find trace_to_pads usage
+
+- tool `Bash`: Regenerate tables and run full replay
+
+## Claude
+
+I regenerated the tables with the new tick entry and started a full replay.
+
+Open question: should the seed fix in `Port_TasScenario` stay? With the tick entry also in place, it may be what makes the counts match. If the run passes 109,469, I'll keep it: it's correct regardless, since a stage's actors draw from the seed when they're created.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+Now in sync to **109,510 (0:58:04.71)**. Checking whether the `Port_TasScenario` seed change is actually needed.
+
+- tool `Bash`: Check seed diffs around load ends
+
+- tool `Bash`: Start a run without the scenario seed, then restore it
+
+## Claude
+
+You've hit your 5-hour limit · resets 1:20pm (America/Chicago)
+
+## User
+
+Continue
+
+- tool `Bash`: Check the no-scenario run had linked
+
+- tool `Bash`: Check the background run's output
+
+## Claude
+
+The run failed because `--dir` hard-links and the scratchpad is on another filesystem. Running it sequentially in `obj_ps2` instead.
+
+- tool `Bash`: Replay without the scenario seed, then restore it
+
+## Claude
+
+While that runs, here are the PS1's draws per loop around 109,510 (0:58:04.71):
+
+- tool `Bash`: PS1 draw counts around 109,510
+
+## Claude
+
+The PS1 draws one per loop straight through 109,510, so the port's count must differ there. I'll log the port's draws once the current run finishes.
+
+- tool `Bash`: Read result of run without seed change
+
+- tool `Bash`: Drop the seed change; document and commit TICK_AT
+
+- tool `PushNotification`: 
+
+- tool `Bash`: Log port draws at 109,507–109,510
+
+## Claude
+
+The rand-log run for 109,507–109,510 (0:58:04.6) is going, and it's timed so I can see whether replays are still slow.
+
+- tool `Bash`: Read rand-log result
+
+## Claude
+
+The port's mouse skips its draw in 109,509, so its area check differs there. Dumping the mouse's Work on both sides for 109,500–109,510 to see where they first differ.
+
+- tool `Bash`: Dump mouse Work on both sides 109,468–109,510
+
+## Claude
+
+Both dumps are running (about 14 min).
+
+- tool `Bash`: Diff mouse Work by loop
+
+- tool `Bash`: Read GV_RandU and rand implementations
+
+- tool `Bash`: Find PS1 draw positions matching the mouse's f1D0
+
+- tool `Bash`: Find port's f1D0 position
+
+- tool `Bash`: Retry with tick 207,946 and full replay
+
+## Claude
+
+Replay running with tick 207,946.
+
+- tool `Bash`: Read replay result
+
+## Claude
+
+Big jump: in sync to **122,661 (1:04:45.75, s15c)**. Committing.
+
+- tool `Bash`: Document and commit the corrected tick
+
+- tool `Bash`: PS1 draws and port log near 122,661
+
+## Claude
+
+A load ends at 122,660 (1:04:45.7): 40 draws there, then 13 at 122,661. Checking the port's side.
+
+- tool `Bash`: Port log tail and s15c chara table
+
+- tool `Bash`: Port log near the load end; s15c link status
+
+## Claude
+
+s15c isn't linked: 26 `INCLUDE_ASM` stubs. Checking whether this log is current, since it also lists s11e, s11i and s14e, which were linked in earlier.
+
+- tool `Bash`: Check which link log is current
+
+## Claude
+
+That log is stale (Nov 2). Checking s15c's sources directly.
+
+- tool `Bash`: Survey s15c's link status
+
+- tool `Bash`: List s15c files with INCLUDE_ASM and past recomp approach
+
+## Claude
+
+s15c is Vulcan Raven's fight, and 26 functions in `valcan.c` and `dyncon.c` are still assembly. Checking how I translated s11i's.
+
+- tool `Bash`: Find s11i link-in step
+
+- tool `Bash`: Read mips2c recipe
+
+- tool `Bash`: Translate s15c's asm with mips2c
+
+- tool `Bash`: Find mips2c args and s15c base
+
+## Claude
+
+All stage overlays load at 0x800C3208 (s11b used the same base), so I'll run it with that.
+
+- tool `Bash`: Translate s15c and re-survey
+
+## Claude
+
+The 26 functions translated and s15c now passes the survey. Running the matching build, then a full replay.
+
+- tool `Bash`: Matching builds, full replay, TLB miss check
+
+## Claude
+
+It's running. The 3 pm report is due soon, and I'll include the result.
+
+- tool `Bash`: Read result
+
+## Claude
+
+s15c is linked in, and the replay now stays in sync to **132,057**, where PCSX2 ended. There are also new TLB misses at pc 0x7896dc/0x7896f8 (NULL reads). Committing, then checking both.
+
+- tool `Bash`: Commit s15c; check run end and TLB PCs
+
+## Claude
+
+PCSX2 didn't crash: the run hit `--seconds 900`, its default limit. The new TLB misses are in `dummy_fl.c`'s Act (NULL reads). Fixing those, then rerunning with a longer limit.
+
+- tool `Bash`: Locate dummy_fl.c and disassemble the faulting code
+
+## Claude
+
+The compiler emitted `ld v0,0(zero)`: a load from address 0 (undefined behaviour in the source). Looking at the C.
+
+- tool `Bash`: Read dummy_fl.c Act around DG_SetPos
+
+- tool `Bash`: Find prior NULL-RAM handling
+
+- tool `Bash`: Guard dummy_fl.c's NULL read and write
+
+- tool `Bash`: Check CONTROL layout and iter type
+
+## Claude
+
+The offset checks out: `mov` is first in CONTROL, so the write lands at 6. Matching build, then a full replay with a longer time limit.
+
+- tool `Bash`: Matching build and long full replay
+
+- tool `PushNotification`: 
+
+## Claude
+
+**3 pm report.** The replay now stays in sync to **132,057 or later**, up from 109,510 at 1:40 pm.
+
+- **The key-item tick, corrected:** 207,946, not 207,947. A dump of the event mouse's Work showed where its draws fall among the PS1's. That took the run from 109,510 to 122,661 (1:04:45.75).
+- **s15c (Vulcan Raven) linked in:** `mips2c.py` translated its 26 assembly functions. Both matching builds pass (80 and 2 OK).
+- **The run then hit the replay's 900-second time limit at 132,057**, still in sync. I'm rerunning with a longer limit.
+- **New TLB misses in `dummy_fl.c`:** the decomp reads an SVECTOR from address 0 and writes through a pointer it has just set to NULL. The port now uses the PS1's low-RAM values (3, 0, 0, 0) and skips the write.
+
+- tool `Bash`: Read result
+
+## Claude
+
+In sync to **137,806 (1:12:58.96, s16d)**. The `dummy_fl.c` TLB misses are gone, and the only one left is the known s11h shadow. Committing with docs.
+
+- tool `Bash`: Document and commit dummy_fl fix
+
+- tool `Bash`: PS1 draws near 137,806 and s16d status
+
+## Claude
+
+The port draws in 137,805 (1:12:58.9), where the PS1 doesn't draw at all. Logging the port's draws there.
+
+- tool `Bash`: Rand log at 137,800–137,806
+
+## Claude
+
+The rand log for 137,800–137,806 is running.
+
+- tool `Bash`: Read rand log
+
+- tool `Bash`: Read Snake helper's rand condition
+
+- tool `Bash`: Find GV_RandS in the helper
+
+- tool `Bash`: Read candidate rand sites
+
+- tool `Bash`: Identify enclosing functions
+
+## Claude
+
+Tracking the port's extra draw at 137,805 (1:12:58.9) to Snake's code: invincibility-frame camera shake or a hit in first person. Comparing the traces field by field there.
+
+- tool `Bash`: Field diffs between traces near 137,806
+
+## Claude
+
+Every other trace field matches. The PS1 makes its one draw a loop later (in 137,806). So something in Snake's code runs one loop early in the port. Finding the function the rand log named.
+
+- tool `Bash`: Find the logged function's definition
+
+## Claude
+
+That name is a nearest-symbol guess: the function is defined in `delay.c`. Finding the actual `GV_RandS` call sites after that symbol in the ELF.
+
+- tool `Bash`: Locate GV_RandS calls after that symbol
+
+- tool `Bash`: Read delay.c's helper
+
+- tool `Bash`: Read jimctrl helper and prior notes
+
+- tool `Bash`: Read port hooks in jimctrl.c
+
+- tool `Bash`: Locate jimctrl source and timeline hooks
+
+- tool `Bash`: Read Port_TasStrCounter and jimctrl Act
+
+- tool `Bash`: Dump timeline and tick records near 137,805
+
+- tool `Bash`: Find mouth-data consumers and jimctrl level
+
+- tool `Bash`: Find chara_work address and PAKU layout
+
+## Claude
+
+Comparing the voice mouth data (`chara_work`) per loop on both sides to see which loop first differs.
+
+- tool `Bash`: Create a generic PS1 memory logger
+
+- tool `Bash`: Log chara_work on both sides 137,798–137,807
+
+## Claude
+
+Both sides are logging `chara_work` for 137,798–137,807 (about 20 min).
+
+- tool `Bash`: Read chara_work logs
+
+## Claude
+
+Snake's mouth value goes from 1 to 2 a loop early in the port: by 137,805 instead of 137,806. Both sides start at 137,803. Reading how jimctrl derives the mouth value from the counter.
+
+- tool `Bash`: Read jimctrl mouth logic
+
+- tool `Bash`: Read the paku update function
+
+- tool `Bash`: Read timeline recording and conversion
+
+## Claude
+
+The timeline gives the same `field_30` on both sides, yet the mouth changes at different loops. I'll compare jimctrl's whole Work per loop (`field_30`, `field_38`, `field_40`) on both sides.
+
+- tool `Bash`: Read jimctrl Work layout
+
+- tool `Bash`: Compare jimctrl Work per loop on both sides
+
+## Claude
+
+Both sides are dumping jimctrl's Work for 137,798–137,807.
+
+- tool `Bash`: Read jimctrl dumps
+
+- tool `Bash`: Check sample-timing indicator in trace
+
+## Claude
+
+The loops are a steady 2 blanks each, so this isn't a sampling shift. I'll log what `Port_TasStrCounter` actually returns in those loops.
+
+- tool `Bash`: Log port stream counter in/out
+
+## Claude
+
+Logging the port's stream counter (in and out) for 137,800–137,806.
+
+- tool `Bash`: Read counter log
+
+- tool `Bash`: Experiment: counter from record(GV_Time), full replay
+
+## Claude
+
+Experiment running: the full replay with jimctrl's counter read from record(GV_Time).
+
+- tool `Bash`: Read experiment result
+
+- tool `Bash`: Narrow rule for a stream's first loop, full replay
+
+## Claude
+
+I inverted the condition (the first loop would still get +1). Stopping the run and fixing it.
+
+- tool `TaskStop`: 
+
+- tool `Bash`: Check for leftover emulator processes
+
+- tool `Bash`: Fix condition and rerun full replay
+
+## Claude
+
+The corrected rule is running in a full replay.
+
+- tool `Bash`: Read result
+
+## Claude
+
+Regression at 45,142 (0:24:01.34, s10a), so not every stream's first loop works this way. One refinement: use line t's record only if it actually has a value (≥ 0), else line t+1's as before.
+
+- tool `Bash`: Refined first-loop rule, full replay
+
+## Claude
+
+The refined rule is running in a full replay.
+
+- tool `Bash`: Read result
+
+- tool `Bash`: Revert experiment, document findings, commit
+
+## Claude
+
+Now archiving the conversation.
+
+- tool `Bash`: Rebuild the conversation archive and check diff
 

@@ -1282,3 +1282,16 @@ release bits that the last status didn't have to the raw buttons. In a single-up
 the last status, so nothing changes there.
 
 In sync from the start to 109,469 (0:58:03.31, s16a): the rand seed.
+
+## Step 57: s16a's key items (Nov 9)
+
+109,469 (0:58:03.31, s16a): the PS1 drew one `rand()` a loop from there (the event mouse's `GV_RandU(2)` while out of
+its area), the port none. Both sides had the same actors (a temporary actor printf at 109,470 against
+`actor_list.lua`; the port has two more `item.c`, still open), but a dump of the mouse's Work showed it in another
+place: `EventMouseGetResources` picks its start point with `GV_RandU`, made in the load-end loop. The PS1 drew 121
+there, the port 77: `key_item.c` burns `tick % 256` draws, and the PS1's tick at that read was 44 later than the table's
+(207,947: the load-end loop ran to 207,948). A fifth `TICK_AT` entry, `109467: 207947`. Also tried: setting the PS1's
+seed from before the loop in `Port_TasScenario`, before the stage's actors are made. It didn't matter (the port's seed
+already matched there), so it was dropped.
+
+In sync from the start to 109,510 (0:58:04.71, s16a): the rand seed.

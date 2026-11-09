@@ -110,7 +110,7 @@ for i, f in enumerate(rows):
 # 176,376: the load-end loop's total, 2,701; s12a again at 94,052, 177,856 and 177,855; s15a's Raven stores the
 # tick when made at 101,313: 192,415, the table 192,418, a PS1 RAM log). All so far are made in a load-end loop, 1-3
 # blanks before the next line. Add a loop when a tick-dependent burn desyncs; record the tick in trace.lua if they become common.
-TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376, 94052: 177855, 101313: 192415}
+TICK_AT = {47488: 90359, 57275: 107405, 93335: 176376, 94052: 177855, 101313: 192415, 109467: 207947}
 # By loop (Port_GameTick reads it by GV_Time), as time.bin: a loop without a line has the next line's. Written by line
 # until loop 93,335 (s12a: Wolf's burn read the tick 7 lines late), harmless before the first loop without a line.
 # The default is a blank after the loop's start (the previous loop's end sample): s15a's Raven reads it early in the

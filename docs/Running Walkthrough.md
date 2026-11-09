@@ -1290,8 +1290,12 @@ its area), the port none. Both sides had the same actors (a temporary actor prin
 `actor_list.lua`; the port has two more `item.c`, still open), but a dump of the mouse's Work showed it in another
 place: `EventMouseGetResources` picks its start point with `GV_RandU`, made in the load-end loop. The PS1 drew 121
 there, the port 77: `key_item.c` burns `tick % 256` draws, and the PS1's tick at that read was 44 later than the table's
-(207,947: the load-end loop ran to 207,948). A fifth `TICK_AT` entry, `109467: 207947`. Also tried: setting the PS1's
+(207,947: the load-end loop ran to 207,948). A fifth `TICK_AT` entry, `109467: 207947`, took the run to 109,510, but
+the mouse was still elsewhere (a Work dump over 109,468 to 109,510 on both sides): of the PS1's 121 draws, its `f1D0`
+(`GV_RandU(32) + 16` = 22) fits draw 115, the port's came at 116. The key items' burn is 74, tick 207,946; the other
+draw is the mouse's first out-of-area roll, in the creation loop in the port and the next loop on the PS1, which the
+loop's end seed covers. Also tried: setting the PS1's
 seed from before the loop in `Port_TasScenario`, before the stage's actors are made. It didn't matter (the port's seed
 already matched there), so it was dropped.
 
-In sync from the start to 109,510 (0:58:04.71, s16a): the rand seed.
+In sync from the start to 122,661 (1:04:45.75, s15c): the rand seed.

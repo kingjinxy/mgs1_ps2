@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "libgv/libgv.h"
 #include "libdg/libdg.h"
@@ -53,7 +56,11 @@ void s15c_dyncon_800D3EBC(OBJECT_NO_ROTS *obj, int model, int flag)
     obj->map_name = GM_CurrentMap;
     obj->objs = Takabe_MakePreshade(model, GM_GetMap(GM_CurrentMap)->lit);
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D3F24.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D3F24.s")
+#endif
 void s15c_dyncon_800D5090(DynCon *work, int i)
 {
     HZD_HDL *hzd = GM_GetMap(work->map)->hzd;
@@ -218,7 +225,11 @@ void s15c_dyncon_800D567C(DynCon *work, int s1, int s2, int code)
     s15c_dyncon_800D3F24(&work->segs[s1][s2][0], &work->floors[s1][s2][0],
                          &mtx, &a, &b);
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D5910.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D5910.s")
+#endif
 void s15c_dyncon_800D59C0(SVECTOR *vec, int code)
 {
     switch (code)
@@ -245,8 +256,16 @@ void s15c_dyncon_800D59C0(SVECTOR *vec, int code)
         break;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D5A3C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D5A3C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D5C38.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D5C38.s")
+#endif
 void s15c_dyncon_800D5DC0(SVECTOR *vec, SVECTOR *target, int len)
 {
     vec->vx = (vec->vx * (len - 1) + target->vx) / len;
@@ -353,7 +372,11 @@ void s15c_dyncon_800D6128(DynCon *work, SVECTOR *pos, int range)
         out[i] = work->field_3F30[i];
     }
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D61E0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D61E0.s")
+#endif
 extern void *NewItemPut(SVECTOR *pos, SVECTOR *step, ITEM_INFO *info);
 extern const char s15c_aNikitamissile_800E2D80[];
 extern const char s15c_aC_800E2D94[];
@@ -393,9 +416,21 @@ void *s15c_dyncon_800D6434(DynCon *work, SVECTOR *pos, SVECTOR *step, int item_t
     item.time = -1;
     return NewItemPut(pos, step, &item);
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D6528.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D6528.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D7A84.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7A84.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D7AB4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7AB4.s")
+#endif
 int s15c_dyncon_800D7D44(DynCon *work)
 {
     int i, j;
@@ -427,12 +462,36 @@ int s15c_dyncon_800D7D44(DynCon *work)
 
     return 1;
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D7E30.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7E30.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D7EF4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7EF4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D7F88.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7F88.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D82FC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D82FC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D8510.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D8510.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D88C8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D88C8.s")
+#endif
 extern void s15c_dyncon_800D82FC(void *work);
 extern void s15c_dyncon_800D88C8(void *work);
 
@@ -460,7 +519,11 @@ void s15c_dyncon_800D8A34(char *opt, short *out, int count)
         out++;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_dyncon_800D8A9C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D8A9C.s")
+#endif
 extern void s15c_dyncon_800D6528(void *work);
 extern int  s15c_dyncon_800D8A9C(DynCon *work, int arg);
 extern const char s15c_dword_800E2E30[];

@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "mts/mts.h"
 #include "libgv/libgv.h"
@@ -213,7 +216,11 @@ void ValcanGetInts_800D8E88(unsigned char *opt, int *out)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_valcan_800D8ECC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_valcan_800D8ECC.s")
+#endif
 void s15c_valcan_800D8ECC(Work *work);
 
 // Identical to item_init_prim_buffer_800336A4
@@ -847,7 +854,11 @@ void Valcan_800DA21C(Work *work) // it possibly returns a BulletWork*
     NewBulletEx(BULLET_BLAST, &rotmat, 2, 0, 0, 30, 90, 30000, 100);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DA2A8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DA2A8.s")
+#endif
 
 int Valcan_800DA558(Work *work, int arg1)
 {
@@ -991,7 +1002,11 @@ void Valcan_800DA8E4(Work *work)
     DG_SetTmpLight(svecs, 500, 500);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DA990.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DA990.s")
+#endif
 
 void Valcan_800DACCC(Work *work)
 {
@@ -1042,11 +1057,23 @@ int Valcan_800DAE38()
     return GV_RandU(4096) % 3 + 1;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DAE7C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DAE7C.s")
+#endif
 int s15c_crow_800DAE7C(Work *work);
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DAFCC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DAFCC.s")
+#endif
 int s15c_crow_800DAFCC(Work *work);
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DB200.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DB200.s")
+#endif
 int s15c_crow_800DB200(Work *work);
 
 int Valcan_800DB2E4(Work *work)
@@ -1315,8 +1342,16 @@ void Valcan_800DB868(Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DB9F0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DB9F0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DBCB4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DBCB4.s")
+#endif
 
 void Valcan_800DBF74(Work *work)
 {
@@ -1426,9 +1461,17 @@ void Valcan_800DC2EC(Work *work, int action)
     GM_ConfigObjectAction(&work->field_A0, action, 0, 4);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DC318.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DC318.s")
+#endif
 void s15c_crow_800DC318(Work *work);
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DC7A0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DC7A0.s")
+#endif
 void s15c_crow_800DC7A0(Work *work);
 
 #define ABS(x) (((x) >= 0) ? (x) : -(x))
@@ -1572,7 +1615,11 @@ void Valcan_800DCF8C(Work *work)
     s15c_crow_800DC318(work);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s15c/recomp/s15c_crow_800DD03C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_crow_800DD03C.s")
+#endif
 void s15c_crow_800DD03C(Work *work);
 
 void Valcan_800DD578(Work *work)

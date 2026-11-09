@@ -1311,3 +1311,14 @@ the vector's unused pad. The port reads a static copy and skips the write. Match
 shadow's TLB miss remains (0x66a394).
 
 In sync from the start to 137,806 (1:12:58.96, s16d): the rand seed.
+
+**137,806 (1:12:58.96, s16d), open.** The port draws one `GV_RandS` a loop early: `delay.c`'s
+`sna_act_helper2_helper2_80033054`, Snake's lip sync (the rand log named it; the ELF showed the call). Snake's mouth value
+in `chara_work` (new `tools/port/tas/mem_log.lua`: any PS1 bytes per loop) goes 1 to 2 a loop early, and jimctrl's
+`field_30` (its Work dumped on both sides) is one step ahead from a stream's first loop, 137,803: PS1 1, 2, 3, 4; port
+2, 3, 4, 5. There `Port_TasStrCounter` takes the timeline's line t + 1 (2), but the PS1's value is line t's (1); the
+loops are a steady 2 blanks, so it isn't a late sample. Tried, all reverted: line t everywhere (12,855 desyncs), line t on
+a stream's first loop (45,142), and only when line t has a move (63,705). So which line a stream's first loop matches
+can't be told from the timeline alone. Next: record jimctrl's `field_30` at its own Act (where it reads the counter) in
+`timeline.lua`, instead of when `GV_Time` changes, or find what differs between 137,803's first loop and 45,142's and
+63,705's.

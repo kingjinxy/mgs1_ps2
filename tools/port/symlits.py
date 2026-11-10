@@ -21,6 +21,7 @@ for path in sys.argv[2:]:
             return m.group(0)
         n = names[a]
         if not re.search(r'\b%s\b' % n, t): need.add(n)
+        else: n = '&' + n  # the file's own data (d18a's overlay2.c: tables of pointers to its ints)
         return m.group(1) + ('(int)%s' % n if m.group(1).endswith('= ') or m.group(1).endswith('{ ') or m.group(1).strip() == '' else n)
     new = re.sub(r'(= |\(NEWCHARA \*\)|^\s*)0x(8[0-9a-fA-F]{7})\b', rep, t, flags=re.M)
     if need:

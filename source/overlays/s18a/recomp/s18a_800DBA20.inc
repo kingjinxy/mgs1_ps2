@@ -1,0 +1,80 @@
+int G_s18a_800DBA20(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800DBA20");
+int G_s18a_800DBA20(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[2] = *(short *)((u)r[4] + 2306);
+    r[6] = *(short *)((u)r[4] + 108);
+    r[3] = *(int *)((u)r[4] + 2212);
+    r[7] = (u)r[2] + -120;
+    r[8] = (u)r[2] + 120;
+    r[2] = (int)r[7] < -1023;
+    r[5] = *(unsigned short *)((u)r[3] + 0);
+    c = ((r[2] == 0)); r[2] = (int)r[8] < 1024; if (c) goto L800dba48;
+    r[7] = (u)0 + -1023;
+    L800dba48:;
+    c = ((r[2] != 0)); r[2] = r[5] & 4096; if (c) goto L800dba54;
+    r[8] = (u)0 + 1023;
+    L800dba54:;
+    c = ((r[2] == 0)); r[2] = r[5] & 16384; if (c) goto L800dbad4;
+    r[2] = *(int *)((u)r[4] + 2020);
+    r[2] = r[2] & 16384;
+    c = ((r[2] == 0)); r[2] = (u)0 + 80; if (c) goto L800dba7c;
+    r[3] = *(unsigned char *)((u)r[3] + 15);
+    r[5] = (u)r[2] - (u)r[3]; goto L800dba80;
+    L800dba7c:;
+    r[5] = (u)0 + 1;
+    L800dba80:;
+    r[2] = *(int *)((u)r[4] + 2020);
+    r[2] = r[2] & 16384;
+    c = ((r[2] == 0)); r[3] = (u)0 + 1; if (c) goto L800dba98;
+    r[3] = (u)0 + 80;
+    L800dba98:;
+    r[2] = r[5] & 255;
+    r[2] = (u)r[2] << 1;
+    if (r[3]) { lo_ = (int)r[2] / (int)r[3]; hi_ = (int)r[2] % (int)r[3]; }
+    c = ((r[3] != 0));  if (c) goto L800dbab0;
+    L800dbab0:;
+    r[1] = (u)0 + -1;
+    c = ((r[3] != r[1])); r[1] = 0; if (c) goto L800dbac8;
+    c = ((r[2] != r[1]));  if (c) goto L800dbac8;
+    L800dbac8:;
+    r[2] = lo_;
+    r[6] = (u)r[6] - (u)r[2]; goto L800dbb50;
+    L800dbad4:;
+    c = ((r[2] == 0)); r[2] = (int)r[6] < (int)r[7]; if (c) goto L800dbb54;
+    r[2] = *(int *)((u)r[4] + 2020);
+    r[2] = r[2] & 16384;
+    c = ((r[2] == 0)); r[5] = (u)0 + 1; if (c) goto L800dbafc;
+    r[2] = *(unsigned char *)((u)r[3] + 15);
+    r[5] = (u)r[2] + 80;
+    L800dbafc:;
+    r[2] = *(int *)((u)r[4] + 2020);
+    r[2] = r[2] & 16384;
+    c = ((r[2] == 0)); r[3] = (u)0 + 1; if (c) goto L800dbb14;
+    r[3] = (u)0 + 79;
+    L800dbb14:;
+    r[2] = r[5] & 255;
+    r[2] = (u)r[2] << 1;
+    if (r[3]) { lo_ = (int)r[2] / (int)r[3]; hi_ = (int)r[2] % (int)r[3]; }
+    c = ((r[3] != 0));  if (c) goto L800dbb2c;
+    L800dbb2c:;
+    r[1] = (u)0 + -1;
+    c = ((r[3] != r[1])); r[1] = 0; if (c) goto L800dbb44;
+    c = ((r[2] != r[1]));  if (c) goto L800dbb44;
+    L800dbb44:;
+    r[2] = lo_;
+    r[6] = (u)r[6] + (u)r[2];
+    L800dbb50:;
+    r[2] = (int)r[6] < (int)r[7];
+    L800dbb54:;
+    c = ((r[2] == 0)); r[2] = (int)r[8] < (int)r[6]; if (c) goto L800dbb64;
+    r[6] = (u)r[7] + (u)0;
+    r[2] = (int)r[8] < (int)r[6];
+    L800dbb64:;
+    c = ((r[2] == 0));  if (c) goto L800dbb70;
+    r[6] = (u)r[8] + (u)0;
+    L800dbb70:;
+    *(short *)((u)r[4] + 108) = r[6]; goto out;
+out:
+    RECOMP_RETURN;
+}

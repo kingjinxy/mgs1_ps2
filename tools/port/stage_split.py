@@ -108,6 +108,10 @@ last = max(BASE + 4 * i for i, w in enumerate(W) if w >> 16 == 0x27BD and w & 0x
 after = [a for a in built(tstart, tend) if last < a < tend]
 if after:
     tend = min(tend, (min(after) // 4) * 4)
+while True:  # functions before the first called one, reached only by address (s18a: an actor's act and die)
+    low = [a for a in built(tstart, tend) if BASE <= a < tstart and not a & 3 and is_prologue(a)]
+    if not low: break
+    tstart = min(low)
 code = range((tstart - BASE) // 4, (tend - BASE) // 4)
 
 # jump tables: a table address built (lui + addiu, as mips2c.py reads it) shortly before a jr through a register;

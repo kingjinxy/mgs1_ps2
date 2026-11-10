@@ -1,0 +1,67 @@
+extern char R_DG_PutVector[] __asm__("DG_PutVector");
+extern char R_HZD_GetLevelHeight[] __asm__("HZD_GetLevelHeight");
+extern char R_HZD_LevelHazardCheck[] __asm__("HZD_LevelHazardCheck");
+int G_s18a_800D5798(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800D5798");
+int G_s18a_800D5798(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(48)
+    r[29] = (u)r[29] + -48;
+    *(int *)((u)r[29] + 36) = r[17];
+    r[17] = (u)r[4] + 32;
+    *(int *)((u)r[29] + 44) = r[31];
+    *(int *)((u)r[29] + 40) = r[18];
+    *(int *)((u)r[29] + 32) = r[16];
+    r[2] = *(short *)((u)r[17] + 122);
+    r[3] = *(short *)((u)r[17] + 2);
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (int)r[2] < 1500;
+    c = ((r[2] != 0)); r[2] = (u)0 + 1; if (c) goto L800d5890;
+    r[16] = (u)r[29] + 24;
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)r[16] + (u)0;
+    r[6] = (u)0 + 1;
+    r[2] = (u)0 + 200;
+    *(short *)((u)r[29] + 26) = 0;
+    *(short *)((u)r[29] + 24) = 0;
+    *(short *)((u)r[29] + 28) = r[2]; CALL(R_DG_PutVector);
+    r[18] = (u)0 + 32767;
+    *(int *)((u)r[29] + 16) = 0;
+    *(int *)((u)r[29] + 20) = r[18];
+    r[2] = *(int *)((u)r[17] + 44);
+    r[5] = (u)r[16] + (u)0;
+    r[4] = *(int *)((u)r[2] + 8);
+    r[6] = (u)0 + 3; CALL(R_HZD_LevelHazardCheck);
+    r[4] = (u)r[29] + 16; CALL(R_HZD_GetLevelHeight);
+    r[3] = *(short *)((u)r[29] + 26);
+    r[2] = *(int *)((u)r[29] + 20);
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (int)r[2] < 1500;
+    c = ((r[2] != 0)); r[4] = (u)r[16] + (u)0; if (c) goto L800d588c;
+    r[5] = (u)r[16] + (u)0;
+    r[6] = (u)0 + 1;
+    r[2] = (u)0 + -1000;
+    *(short *)((u)r[29] + 26) = 0;
+    *(short *)((u)r[29] + 24) = 0;
+    *(short *)((u)r[29] + 28) = r[2]; CALL(R_DG_PutVector);
+    *(int *)((u)r[29] + 16) = 0;
+    *(int *)((u)r[29] + 20) = r[18];
+    r[2] = *(int *)((u)r[17] + 44);
+    r[5] = (u)r[16] + (u)0;
+    r[4] = *(int *)((u)r[2] + 8);
+    r[6] = (u)0 + 3; CALL(R_HZD_LevelHazardCheck);
+    r[4] = (u)r[29] + 16; CALL(R_HZD_GetLevelHeight);
+    r[3] = *(short *)((u)r[29] + 26);
+    r[2] = *(int *)((u)r[29] + 20);
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (int)r[2] < 1500; goto L800d5890;
+    L800d588c:;
+    r[2] = (u)0 + 1;
+    L800d5890:;
+    r[31] = *(int *)((u)r[29] + 44);
+    r[18] = *(int *)((u)r[29] + 40);
+    r[17] = *(int *)((u)r[29] + 36);
+    r[16] = *(int *)((u)r[29] + 32);
+    r[29] = (u)r[29] + 48; goto out;
+out:
+    RECOMP_RETURN;
+}

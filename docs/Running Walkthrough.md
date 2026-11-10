@@ -1365,3 +1365,40 @@ binaries CB93 and 4B9B (s18a) not linked in. Only the s11h shadow's TLB miss rem
 Seen on the way, open: `link_ps2.py` stubs `_overlay_bss_obj` and `_overlay_bss_objend` as functions, and s07b's and
 s14e's translated code uses them as data (s07b writes 6 bytes into the stub); `s10a_800C5EF4` is stubbed for a caller
 too.
+
+## Step 61: d18a and s18a linked in; code reached only by address; NULL rewrites in translated code (Nov 9–10)
+
+The desync at 141,623 (1:14:58.84) was `DG_UnDrawFrameCount` in s18a: the stage binaries CB93 (d18a, the demo before
+Liquid's fight) and 4B9B (s18a) weren't linked in.
+
+**d18a** is split by the decomp, with `snake18.c` still `INCLUDE_ASM` and 114 literal addresses in `overlay2.c`.
+`symlits.py` turned the literals into symbols; the matching build then failed ("initializer element is not constant")
+on tables that point at the file's own ints, so `symlits.py` now writes `&name` for data the file defines itself. One
+address, 0x800D3024, lies inside the stub `d18a_snake18_800D2FBC` with no symbol: `mips2c.py` now also cuts functions
+at addresses that only the overlay's C sources name (`0x80xxxxxx` literals and `OVL_rc_<addr>` names), and
+`overlay2.c` uses `d18a_rc_800D3024` (a `#define` of the literal in the matching build). Regenerating every committed
+overlay gave no diffs. 59 functions, 14 extra entry points.
+
+**s18a** isn't split: `stage_split.py` and `mips2c.py` as for s17a. The first replay stopped just after s18a's load
+(about loop 141,400, 1:14:51): `TLB Miss, pc=0x8c25c addr=0x0`, 48 stores at `pc=0x8c2b8`, then "Jump to unaligned
+address" and a stall. PCSX2 masks kseg0, so this looked like a jump to a raw PS1 address (0x8008C25C). Found with two
+temporary checks (since removed): a `printf` of each translated function entered, and a range check of every `CALL`
+target and every actor function in `GV_ExecActorSystem`. The check named an actor whose `act` was the data symbol
+`s18a_dat_800C3D98`. The overlay's first three functions (0x800C3D1C, 0x800C3D98, 0x800C3E10: an actor's act and
+die) are never called, only stored by address with `lui` + `addiu`, and `stage_split.py` started the code at the first
+*called* function, leaving them as data bytes that the actor system then ran as PS1 code. `stage_split.py` now moves
+the start down to any frame setup below it whose address the code builds, until none is left. s18a: 559 functions
+(was 556), 25 extra entry points; s10a, s11b, s11h, s15a and s17a regenerate unchanged.
+
+**Two NULL dereferences in s18a**, both real on the PS1 (`mem_log.lua`):
+- `s18a_800D5738` (16 misses, addr 0) reads a flag byte through `s18a_dat_800E4354`, which stays NULL from 143,500 to
+  144,000 on the PS1 too; the PS1 reads its RAM at 0, the byte 3.
+- `s18a_800D78B8` (addr 0x24, a load and a store) sets bit 0x100 at `work + 0x874`'s `+0x24` during init, before
+  `s18a_800DEFFC` sets that pointer. The PS1 really writes its RAM at 0x24: 0 at loop 142,790, `00010000` at 142,810.
+
+Translated files are regenerated, so the fixes are in `mips2c.py`: `NULLS`, a table of text rewrites per function
+(read 3 when the pointer is NULL; skip the store), each asserted to match exactly once.
+
+Matching builds 80 and 2 OK. In sync from the start to 145,000 (1:16:44.83, s19a): `GM_GameStatus`, port 0x10000000,
+PS1 0x10000040. Only the s11h shadow's TLB miss remains. Not started, at the user's request (pause after this desync).
+Parked for s19b: `mips2c.py s19b` fails with a `KeyError` (the jump target 0x800C8C14 has no symbol in its map).

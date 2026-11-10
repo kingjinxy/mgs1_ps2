@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "chara/snake/shadow.h"
 #include "game/game.h"
@@ -231,8 +234,16 @@ int d18a_snake18_800CAC68(int arg0, int arg1)
     return 2;
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CACD0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CACD0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CAD90.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CAD90.s")
+#endif
 int d18a_snake18_800CAEC0(Snake18Work *work, int state)
 {
     int base;
@@ -734,8 +745,16 @@ int d18a_snake18_800CBA64(Snake18Work *work, PUNCH *arg1)
     }
     return 1;
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CBB34.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CBB34.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CBBC8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CBBC8.s")
+#endif
 
 void d18a_snake18_800CBD34( Snake18Work *work )
 {
@@ -861,8 +880,16 @@ void d18a_snake18_800CC008(void)
     /* do nothing */
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CC010.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CC010.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CC174.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CC174.s")
+#endif
 extern int printf(/* const char *format, ... */);
 extern const char d18a_aClimbarea_800DA5A8[];
 extern const char d18a_aClimbarea_800DA5B8[];
@@ -927,7 +954,11 @@ int d18a_snake18_800CC288(SVECTOR *pos, short *out)
         return 5;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CC3C8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CC3C8.s")
+#endif
 extern SVECTOR d18a_dword_800C3868;
 
 int d18a_snake18_800CC410(Snake18Work *work)
@@ -956,8 +987,16 @@ int d18a_snake18_800CC410(Snake18Work *work)
     }
     return 1;
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CC490.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CC490.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CC6CC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CC6CC.s")
+#endif
 void d18a_snake18_800CC7F4(Snake18Work *work)
 {
     if (GM_PlayerStatus & 4)
@@ -1004,7 +1043,11 @@ void d18a_snake18_800CC8E0(Snake18Work *arg0)
     *p = v | 0x9E;
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CC90C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CC90C.s")
+#endif
 
 void d18a_snake18_800CCB0C(TARGET *target)
 {
@@ -1014,7 +1057,11 @@ void d18a_snake18_800CCB0C(TARGET *target)
     target->force = DG_ZeroVector;
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CCB50.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CCB50.s")
+#endif
 
 extern Snake18Type    d18a_dword_800C36C8[];
 
@@ -1058,9 +1105,21 @@ void d18a_snake18_800CCF30(Snake18Work *work)
 
     work->f8A8 = &d18a_dword_800C36C8[GM_Weapon];
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CD040.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CD040.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CD2C4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CD2C4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CD4C0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CD4C0.s")
+#endif
 extern void d18a_snake18_800CDD4C(Snake18Work *work);
 extern void d18a_snake18_800D1424(void);
 
@@ -1205,17 +1264,61 @@ void d18a_snake18_800CD930(Snake18Work *work, int arg1)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CD9A8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CD9A8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CDB04.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CDB04.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CDC3C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CDC3C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CDD4C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CDD4C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CDE8C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CDE8C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CDFC8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CDFC8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CE09C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CE09C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CE210.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CE210.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CE38C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CE38C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CE4E4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CE4E4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CE6B0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CE6B0.s")
+#endif
 
 void d18a_snake18_800CE7BC(void)
 {
@@ -1424,8 +1527,16 @@ void d18a_snake18_800CEB78(Snake18Work *work, int arg1)
         d18a_snake18_800CB7BC(work, (int)d18a_snake18_800D2A80);
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CEC68.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CEC68.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CECE0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CECE0.s")
+#endif
 extern void d18a_snake18_800CD64C(Snake18Work *work, int arg1);
 
 void d18a_snake18_800CED2C(Snake18Work *work, int arg1)
@@ -1565,10 +1676,26 @@ void d18a_snake18_800CEF44(Snake18Work *work, int arg1)
         GM_PlayerStatus &= ~PLAYER_DAMAGED;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF03C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF03C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF198.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF198.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF39C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF39C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF574.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF574.s")
+#endif
 
 void d18a_snake18_800CF718(int arg0, int arg1)
 {
@@ -1579,11 +1706,31 @@ void d18a_snake18_800CF718(int arg0, int arg1)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF744.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF744.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF850.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF850.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CF990.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CF990.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CFB04.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CFB04.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800CFD18.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800CFD18.s")
+#endif
 
 void d18a_snake18_800CFEE8(Snake18Work *work, int arg1)
 {
@@ -1707,7 +1854,11 @@ void d18a_snake18_800D00E0(Snake18Work *work, int arg1)
         GM_PlayerStatus &= ~0x100;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D01D8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D01D8.s")
+#endif
 
 void d18a_snake18_800D0974( Snake18Work *work )
 {
@@ -1847,8 +1998,16 @@ void d18a_snake18_800D0B84(Snake18Work *work)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D0BF4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D0BF4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D0E3C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D0E3C.s")
+#endif
 void d18a_snake18_800D1064(Snake18Work *work)
 {
     unsigned short  status = work->pad->status;
@@ -1895,7 +2054,11 @@ void d18a_snake18_800D1064(Snake18Work *work)
 
     work->control.turn.vy = turn;
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D11A8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D11A8.s")
+#endif
 void d18a_snake18_800D1300(Snake18Work *work)
 {
     GV_PAD         *pad = work->pad;
@@ -1946,8 +2109,16 @@ void d18a_snake18_800D1300(Snake18Work *work)
 
     work->control.turn.vy = turn;
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D1424.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D1424.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D1598.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D1598.s")
+#endif
 extern void d18a_snake18_800D0E3C(Snake18Work *work);
 extern void d18a_snake18_800D1064(Snake18Work *work);
 
@@ -2138,11 +2309,31 @@ void d18a_snake18_800D1B3C(Snake18Work *work, int arg1)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D1BAC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D1BAC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D1CE8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D1CE8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D1F90.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D1F90.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D200C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D200C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D20EC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D20EC.s")
+#endif
 void d18a_snake18_800D22C8(Snake18Work *work, int a1)
 {
     int s1 = work->f8FE;
@@ -2179,8 +2370,16 @@ void d18a_snake18_800D22C8(Snake18Work *work, int a1)
         work->f7E4 &= ~0x100;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D23F0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D23F0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D24CC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D24CC.s")
+#endif
 void d18a_snake18_800D2660(Snake18Work *work, int arg1)
 {
     if (arg1 == 2 && d18a_dword_800DAEF0 >= 0)
@@ -2207,7 +2406,11 @@ void d18a_snake18_800D2660(Snake18Work *work, int arg1)
     work->control.turn.vx = 0;
     GM_PlayerStatus &= ~0x10;
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D26E4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D26E4.s")
+#endif
 void d18a_snake18_800D281C(Snake18Work *work)
 {
     int yaw;
@@ -2232,10 +2435,26 @@ void d18a_snake18_800D281C(Snake18Work *work)
         work->control.turn.vy = yaw;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D28CC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D28CC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D2A80.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D2A80.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D2D88.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D2D88.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D2FBC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D2FBC.s")
+#endif
 void d18a_snake18_800D4084(void)
 {
     int s = GM_PlayerStatus & 0x10054;
@@ -2252,8 +2471,16 @@ void d18a_snake18_800D4084(void)
         GM_SeSet(&GM_PlayerPosition, 0xA8);
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D40F0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D40F0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D4388.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D4388.s")
+#endif
 void d18a_snake18_800D46CC(Snake18Work *work)
 {
     GV_DestroyOtherActor(work->shadow);
@@ -2275,10 +2502,22 @@ void d18a_snake18_800D46CC(Snake18Work *work)
         GM_PlayerBody = 0;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D4784.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D4784.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D48FC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D48FC.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/d18a/recomp/d18a_snake18_800D49FC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/d18a/d18a_snake18_800D49FC.s")
+#endif
 int d18a_snake18_800D49FC( Snake18Work *work );
 
 int d18a_snake18_800D4B84( Snake18Work *work )

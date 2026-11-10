@@ -1,0 +1,65 @@
+extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
+extern char R_s18a_dat_800E4348[] __asm__("s18a_dat_800E4348");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GV_DiffDirS[] __asm__("GV_DiffDirS");
+extern char R_GV_NearPhase[] __asm__("GV_NearPhase");
+extern char R_GV_NearSpeed[] __asm__("GV_NearSpeed");
+int G_s18a_800D5E84(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800D5E84");
+int G_s18a_800D5E84(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (u)r[4] + (u)0;
+    r[2] = 0;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 20) = r[17];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[17] = *(short *)((u)r[18] + 110);
+    r[5] = *(int *)((u)r[2] + (int)R_s18a_dat_800E4348);
+    r[4] = (u)r[17] + (u)0; CALL(R_GV_DiffDirS);
+    c = ((r[2] != 0)); r[4] = 0; if (c) goto L800d5ef8;
+    r[5] = (u)0 + -17;
+    r[3] = *(int *)((u)r[18] + 2216);
+    r[2] = *(int *)((u)r[4] + (int)R_GM_PlayerStatus);
+    r[3] = *(int *)((u)r[3] + 0);
+    r[2] = r[2] & r[5];
+    *(int *)((u)r[4] + (int)R_GM_PlayerStatus) = r[2];
+    r[2] = *(short *)((u)r[18] + 170);
+    r[5] = *(unsigned char *)((u)r[3] + 1);
+    c = ((r[2] == r[5])); r[4] = (u)r[18] + 156; if (c) goto L800d5f70;
+    r[6] = (u)0 + (u)0;
+    r[7] = (u)0 + 4; CALL(R_GM_ConfigObjectAction);
+     goto L800d5f70;
+    L800d5ef8:;
+    c = (((int)r[2] >= 0));  if (c) goto L800d5f1c;
+    r[2] = *(int *)((u)r[18] + 2216);
+    r[2] = *(int *)((u)r[2] + 4);
+    r[5] = *(unsigned char *)((u)r[2] + 10);
+     goto L800d5f30;
+    L800d5f1c:;
+    r[2] = *(int *)((u)r[18] + 2216);
+    r[2] = *(int *)((u)r[2] + 4);
+    r[5] = *(unsigned char *)((u)r[2] + 11);
+    L800d5f30:;
+    r[2] = *(short *)((u)r[18] + 170);
+    c = ((r[2] == r[5])); r[4] = (u)r[18] + 156; if (c) goto L800d5f4c;
+    r[6] = (u)0 + (u)0;
+    r[7] = (u)0 + 4; CALL(R_GM_ConfigObjectAction);
+    L800d5f4c:;
+    r[16] = 0;
+    r[5] = *(int *)((u)r[16] + (int)R_s18a_dat_800E4348);
+    r[4] = (u)r[17] + (u)0; CALL(R_GV_NearPhase);
+    r[4] = (u)r[2] + (u)0;
+    r[5] = *(int *)((u)r[16] + (int)R_s18a_dat_800E4348);
+    r[6] = (u)0 + 64; CALL(R_GV_NearSpeed);
+    *(short *)((u)r[18] + 110) = r[2];
+    L800d5f70:;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

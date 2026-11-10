@@ -1,0 +1,60 @@
+extern char R_s18a_800C82A4[] __asm__("s18a_800C82A4");
+extern char R_s18a_dat_800C3318[] __asm__("s18a_dat_800C3318");
+extern char R_s18a_dat_800C3356[] __asm__("s18a_dat_800C3356");
+extern char R_GM_ConfigObjectAction[] __asm__("GM_ConfigObjectAction");
+extern char R_GM_ConfigObjectOverride[] __asm__("GM_ConfigObjectOverride");
+extern char R_GM_SeSet[] __asm__("GM_SeSet");
+extern char R_s18a_800C736C[] __asm__("s18a_800C736C");
+extern char R_s18a_800C7684[] __asm__("s18a_800C7684");
+int G_s18a_800CB56C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800CB56C");
+int G_s18a_800CB56C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 28) = r[17];
+    r[17] = (u)r[16] + 32;
+    c = ((r[5] != 0)); *(int *)((u)r[29] + 32) = r[31]; if (c) goto L800cb5b4;
+    r[4] = (u)r[16] + 156;
+    r[6] = (u)0 + (u)0;
+    r[2] = (u)0 + 31;
+    *(int *)((u)r[16] + 2364) = r[2];
+    r[2] = 0;
+    r[5] = *(short *)((u)r[2] + (int)R_s18a_dat_800C3356);
+    r[7] = (u)0 + 1; CALL(R_GM_ConfigObjectAction);
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)0 + 57; CALL(R_GM_SeSet);
+    L800cb5b4:;
+    r[2] = (u)0 + -1000;
+    *(int *)((u)r[16] + 2316) = r[2];
+    r[4] = (u)r[16] + (u)0; CALL(R_s18a_800C7684);
+    c = ((r[2] != 0)); r[2] = (u)0 + 9; if (c) goto L800cb62c;
+    r[3] = *(int *)((u)r[16] + 2384);
+    c = ((r[3] == r[2])); r[2] = (u)0 + 1; if (c) goto L800cb62c;
+    *(int *)((u)r[16] + 2368) = r[2];
+    r[4] = (u)r[16] + (u)0; CALL(R_s18a_800C736C);
+    c = ((r[2] == 0)); r[4] = (u)r[16] + 156; if (c) goto L800cb614;
+    r[6] = (u)0 + (u)0;
+    r[2] = 0;
+    r[5] = *(short *)((u)r[2] + (int)R_s18a_dat_800C3318);
+    r[7] = (u)0 + 4;
+    *(int *)((u)r[29] + 16) = 0; CALL(R_GM_ConfigObjectOverride);
+    *(int *)((u)r[16] + 2352) = 0;
+    *(int *)((u)r[16] + 2360) = 0; goto L800cb624;
+    L800cb614:;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s18a_800C82A4;
+    *(int *)((u)r[16] + 2348) = r[2];
+    *(int *)((u)r[16] + 2356) = 0;
+    L800cb624:;
+    *(short *)((u)r[16] + 112) = 0;
+    *(short *)((u)r[16] + 108) = 0;
+    L800cb62c:;
+    r[31] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

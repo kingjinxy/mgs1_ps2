@@ -260,9 +260,12 @@ out:
 made = []
 parts = {}
 taken = set()  # code addresses the stubs take (callbacks): each one an entry point
-for f in os.listdir(ad):
-    for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', open(os.path.join(ad, f), errors='ignore').read()) if f.endswith('.s') else []:
-        pass
+# and the ones only the overlay's data points to (d18a's weapon table: 800D3024, inside a stub with no frame of its
+# own), as a literal or, once named there, OVL_rc_<address>
+for root, _, fs in os.walk('source/overlays/' + ovl):
+    for f in fs:
+        if f.endswith('.c'):
+            taken.update(int(x, 16) for x in re.findall(r'\b(?:0x|%s_rc_)(80[0-9A-Fa-f]{6})\b' % ovl, open(os.path.join(root, f), errors='ignore').read()))
 for f in os.listdir(ad):
     if not f.endswith('.s'): continue
     w = [int(x, 16) for x in re.findall(r'dw 0x([0-9A-Fa-f]{8})', open(os.path.join(ad, f), errors='ignore').read())]
@@ -282,6 +285,15 @@ for f in sorted(os.listdir(ad)):
         if a not in names: names[a] = '%s_rc_%X' % (ovl, a)
 keys[:] = sorted(names)
 print(sum(len(v) - 2 for v in parts.values()), 'extra entry points')
+# The PS1 goes through a NULL pointer here (BizHawk dumps): its RAM at 0 holds 03 00 00 00, a store there is lost. A
+# real PS2 faults (PCSX2: "TLB Miss").
+NULLS = {
+    's18a_800D5738': [('    r[2] = *(unsigned char *)((u)r[2] + 0);\n',  # *s18a_dat_800E4354, NULL all through s18a
+                       '    r[2] = r[2] ? *(unsigned char *)((u)r[2] + 0) : 3; /* mips2c.py NULLS */\n')],
+    's18a_800D78B8': [('    r[3] = *(int *)((u)r[16] + 2164);\n    r[2] = *(int *)((u)r[3] + 36);\n    r[2] = r[2] | 256;\n'
+                       '    *(int *)((u)r[3] + 36) = r[2];\n',  # work + 0x874 is set later (s18a_800DEFFC)
+                       '    r[3] = *(int *)((u)r[16] + 2164);\n    if (r[3]) *(int *)((u)r[3] + 36) |= 256; /* mips2c.py NULLS */\n')],
+}
 for f in sorted(os.listdir(ad)):
     if not f.endswith('.s'): continue
     t = open(os.path.join(ad, f), errors='ignore').read()
@@ -292,6 +304,9 @@ for f in sorted(os.listdir(ad)):
     # with 0x20000000 (libhzd.h's HZD_IS_WALL)
     txt = re.sub(r'(CALL\(R_HZD_GetOnlineHazard\);\n\s*c = )\(\(\(int\)r\[2\] (>= 0|< 0)\)\)',
                  lambda m: m.group(1) + ('((r[2] & 0x20000000) != 0)' if m.group(2) == '>= 0' else '(!(r[2] & 0x20000000))'), txt)
+    for a, b in NULLS.get(f[:-2], []):
+        assert txt.count(a) == 1, (f, a)
+        txt = txt.replace(a, b)
     open(os.path.join(out, f[:-2] + '.inc'), 'w').write(txt)
     made.append(f)
 print(len(made), 'functions')

@@ -1,0 +1,61 @@
+extern char R_GM_Camera[] __asm__("GM_Camera");
+extern char R_s18a_dat_800E3ED8[] __asm__("s18a_dat_800E3ED8");
+extern char R_s18a_800C5170[] __asm__("s18a_800C5170");
+extern char R_s18a_800C51F0[] __asm__("s18a_800C51F0");
+int G_s18a_800C526C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800C526C");
+int G_s18a_800C526C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(80)
+    r[29] = (u)r[29] + -80;
+    r[4] = (u)r[29] + 24;
+    r[5] = (u)0 + 2446;
+    r[6] = (u)0 + 13168;
+    r[7] = (u)0 + -2366;
+    *(int *)((u)r[29] + 56) = r[16];
+    r[16] = 0;
+    r[16] = (u)r[16] + (int)R_GM_Camera;
+    *(int *)((u)r[29] + 72) = r[31];
+    *(int *)((u)r[29] + 68) = r[19];
+    *(int *)((u)r[29] + 64) = r[18];
+    *(int *)((u)r[29] + 60) = r[17];
+    *(short *)((u)r[16] + 40) = 0; CALL(R_s18a_800C51F0);
+    r[17] = (u)r[29] + 40;
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)0 + 2542;
+    r[6] = (u)0 + 12664;
+    r[7] = (u)0 + -3446; CALL(R_s18a_800C51F0);
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)r[29] + 24;
+    r[6] = (u)r[17] + (u)0;
+    r[17] = 0;
+    r[2] = *(int *)((u)r[17] + (int)R_s18a_dat_800E3ED8);
+    r[7] = (u)0 + 200;
+    *(int *)((u)r[29] + 16) = r[2]; CALL(R_s18a_800C5170);
+    r[19] = (u)r[29] + 32;
+    r[4] = (u)r[19] + (u)0;
+    r[5] = (u)0 + 2453;
+    r[6] = (u)0 + 13126;
+    r[7] = (u)0 + -2455; CALL(R_s18a_800C51F0);
+    r[18] = (u)r[29] + 48;
+    r[4] = (u)r[18] + (u)0;
+    r[5] = (u)0 + 2549;
+    r[6] = (u)0 + 12622;
+    r[7] = (u)0 + -3535; CALL(R_s18a_800C51F0);
+    r[4] = (u)r[16] + 8;
+    r[5] = (u)r[19] + (u)0;
+    r[6] = (u)r[18] + (u)0;
+    r[2] = *(int *)((u)r[17] + (int)R_s18a_dat_800E3ED8);
+    r[7] = (u)0 + 200;
+    *(int *)((u)r[29] + 16) = r[2]; CALL(R_s18a_800C5170);
+    r[2] = *(int *)((u)r[17] + (int)R_s18a_dat_800E3ED8);
+    r[31] = *(int *)((u)r[29] + 72);
+    r[19] = *(int *)((u)r[29] + 68);
+    r[18] = *(int *)((u)r[29] + 64);
+    r[16] = *(int *)((u)r[29] + 56);
+    r[2] = (u)r[2] + 1;
+    *(int *)((u)r[17] + (int)R_s18a_dat_800E3ED8) = r[2];
+    r[17] = *(int *)((u)r[29] + 60);
+    r[29] = (u)r[29] + 80; goto out;
+out:
+    RECOMP_RETURN;
+}

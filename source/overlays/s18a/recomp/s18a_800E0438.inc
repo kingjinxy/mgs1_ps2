@@ -1,0 +1,64 @@
+extern char R_s18a_dat_800C3CA0[] __asm__("s18a_dat_800C3CA0");
+extern char R_GV_RandS[] __asm__("GV_RandS");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+extern char R_NewAnime[] __asm__("NewAnime");
+int G_s18a_800E0438(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800E0438");
+int G_s18a_800E0438(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(56)
+    r[29] = (u)r[29] + -56;
+    *(int *)((u)r[29] + 40) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 48) = r[18];
+    r[18] = (u)r[5] + (u)0;
+    r[4] = (u)0 + 32;
+    *(int *)((u)r[29] + 52) = r[31];
+    *(int *)((u)r[29] + 44) = r[17]; CALL(R_GV_RandS);
+    r[3] = *(unsigned short *)((u)r[16] + 0);
+    r[4] = (u)0 + 32;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[29] + 16) = r[3]; CALL(R_GV_RandS);
+    r[4] = (u)0 + 32;
+    r[3] = *(unsigned short *)((u)r[16] + 2);
+    r[17] = (u)r[29] + 16;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[17] + 2) = r[3]; CALL(R_GV_RandS);
+    r[3] = *(unsigned short *)((u)r[16] + 4);
+    r[4] = (u)0 + 1024;
+    r[3] = (u)r[3] + (u)r[2];
+    *(short *)((u)r[17] + 4) = r[3];
+    r[7] = LWL(((u)r[18] + 3), r[7]);
+    r[7] = LWR(((u)r[18] + 0), r[7]);
+    r[8] = LWL(((u)r[18] + 7), r[8]);
+    r[8] = LWR(((u)r[18] + 4), r[8]);
+    SWL(((u)r[29] + 27), r[7]);
+    SWR(((u)r[29] + 24), r[7]);
+    SWL(((u)r[29] + 31), r[8]);
+    SWR(((u)r[29] + 28), r[8]);
+    *(short *)((u)r[29] + 32) = 0; CALL(R_GV_RandU);
+    r[3] = 0x88880000;
+    r[3] = r[3] | 34953;
+    mul = (long long)(int)r[2] * (int)r[3]; hi_ = mul >> 32; lo_ = mul;
+    r[4] = (u)0 + (u)0;
+    r[6] = 0;
+    r[6] = (u)r[6] + (int)R_s18a_dat_800C3CA0;
+    r[3] = (int)r[2] >> 31;
+    *(int *)((u)r[6] + 20) = r[17];
+    r[7] = hi_;
+    r[5] = (u)r[7] + (u)r[2];
+    r[5] = (int)r[5] >> 4;
+    r[5] = (u)r[5] - (u)r[3];
+    r[3] = (u)r[5] << 4;
+    r[3] = (u)r[3] - (u)r[5];
+    r[3] = (u)r[3] << 1;
+    r[2] = (u)r[2] - (u)r[3];
+    r[5] = (u)r[4] + (u)0;
+    *(short *)((u)r[29] + 34) = r[2]; CALL(R_NewAnime);
+    r[31] = *(int *)((u)r[29] + 52);
+    r[18] = *(int *)((u)r[29] + 48);
+    r[17] = *(int *)((u)r[29] + 44);
+    r[16] = *(int *)((u)r[29] + 40);
+    r[29] = (u)r[29] + 56; goto out;
+out:
+    RECOMP_RETURN;
+}

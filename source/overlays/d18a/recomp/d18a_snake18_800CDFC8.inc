@@ -1,0 +1,61 @@
+extern char R_GM_PlayerStatus[] __asm__("GM_PlayerStatus");
+extern char R_d18a_dword_800DAEF0[] __asm__("d18a_dword_800DAEF0");
+extern char R_d18a_dword_800DAF0C[] __asm__("d18a_dword_800DAF0C");
+extern char R_d18a_snake18_800CD930[] __asm__("d18a_snake18_800CD930");
+extern char R_d18a_snake18_800CDC3C[] __asm__("d18a_snake18_800CDC3C");
+extern char R_d18a_snake18_800CE8E0[] __asm__("d18a_snake18_800CE8E0");
+extern char R_d18a_snake18_800CAF20[] __asm__("d18a_snake18_800CAF20");
+int G_d18a_snake18_800CDFC8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("d18a_snake18_800CDFC8");
+int G_d18a_snake18_800CDFC8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 2212);
+    r[2] = *(unsigned short *)((u)r[2] + 2);
+    r[2] = r[2] & 64;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800ce018;
+     CALL(R_d18a_snake18_800CAF20);
+    c = ((r[2] != 0)); r[2] = (u)0 + 450; if (c) goto L800ce014;
+    *(short *)((u)r[16] + 2304) = r[2];
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_d18a_snake18_800CE8E0; goto L800ce040;
+    L800ce014:;
+    r[2] = 0;
+    L800ce018:;
+    r[2] = *(int *)((u)r[2] + (int)R_d18a_dword_800DAEF0);
+    c = (((int)r[2] < 0)); r[2] = 0; if (c) goto L800ce08c;
+    r[3] = *(int *)((u)r[2] + (int)R_d18a_dword_800DAF0C);
+    r[2] = (u)0 + 1;
+    c = ((r[3] != r[2])); r[2] = 0; if (c) goto L800ce070;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_d18a_snake18_800CDC3C;
+    L800ce040:;
+    r[4] = 0;
+    *(int *)((u)r[16] + 2220) = r[2];
+    r[2] = *(int *)((u)r[4] + (int)R_GM_PlayerStatus);
+    r[3] = (u)0 + -65;
+    *(int *)((u)r[16] + 2224) = 0;
+    *(short *)((u)r[16] + 2322) = 0;
+    *(short *)((u)r[16] + 2320) = 0;
+    *(short *)((u)r[16] + 112) = 0;
+    *(short *)((u)r[16] + 108) = 0;
+    r[2] = r[2] & r[3];
+    *(int *)((u)r[4] + (int)R_GM_PlayerStatus) = r[2]; goto L800ce08c;
+    L800ce070:;
+    r[2] = (u)r[2] + (int)R_d18a_snake18_800CD930;
+    *(int *)((u)r[16] + 2220) = r[2];
+    *(int *)((u)r[16] + 2224) = 0;
+    *(short *)((u)r[16] + 2322) = 0;
+    *(short *)((u)r[16] + 2320) = 0;
+    *(short *)((u)r[16] + 112) = 0;
+    *(short *)((u)r[16] + 108) = 0;
+    L800ce08c:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

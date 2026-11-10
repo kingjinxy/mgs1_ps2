@@ -1,0 +1,68 @@
+int G_s18a_800C6A60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s18a_800C6A60");
+int G_s18a_800C6A60(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[8] = *(int *)((u)r[4] + 0);
+    r[10] = *(int *)((u)r[29] + 16);
+    r[2] = (u)r[8] + 40;
+    *(int *)((u)r[4] + 0) = r[2];
+    r[9] = *(unsigned char *)((u)r[10] + 8);
+    r[3] = *(unsigned char *)((u)r[10] + 10);
+    r[2] = *(unsigned char *)((u)r[10] + 9);
+    r[11] = *(unsigned char *)((u)r[10] + 11);
+    r[3] = (u)r[9] + (u)r[3];
+    *(char *)((u)r[8] + 13) = r[2];
+    *(char *)((u)r[8] + 21) = r[2];
+    r[2] = (u)r[2] + (u)r[11];
+    *(char *)((u)r[8] + 12) = r[9];
+    *(char *)((u)r[8] + 20) = r[3];
+    *(char *)((u)r[8] + 28) = r[9];
+    *(char *)((u)r[8] + 29) = r[2];
+    *(char *)((u)r[8] + 36) = r[3];
+    *(char *)((u)r[8] + 37) = r[2];
+    r[2] = *(unsigned short *)((u)r[10] + 4);
+    *(short *)((u)r[8] + 22) = r[2];
+    r[2] = *(unsigned short *)((u)r[10] + 6);
+    *(char *)((u)r[8] + 4) = r[7];
+    *(char *)((u)r[8] + 5) = r[7];
+    *(char *)((u)r[8] + 6) = r[7];
+    *(short *)((u)r[8] + 8) = r[5];
+    *(short *)((u)r[8] + 10) = r[6];
+    *(short *)((u)r[8] + 14) = r[2];
+    r[2] = *(unsigned char *)((u)r[10] + 10);
+    *(short *)((u)r[8] + 18) = r[6];
+    *(short *)((u)r[8] + 24) = r[5];
+    r[2] = (u)r[2] + (u)r[5];
+    *(short *)((u)r[8] + 16) = r[2];
+    r[2] = *(unsigned char *)((u)r[10] + 11);
+    r[7] = 0xff0000;
+    r[2] = (u)r[2] + (u)r[6];
+    *(short *)((u)r[8] + 26) = r[2];
+    r[2] = *(unsigned char *)((u)r[10] + 10);
+    r[7] = r[7] | 65535;
+    r[2] = (u)r[2] + (u)r[5];
+    *(short *)((u)r[8] + 32) = r[2];
+    r[2] = *(unsigned char *)((u)r[10] + 11);
+    r[5] = 0xff000000;
+    r[2] = (u)r[2] + (u)r[6];
+    *(short *)((u)r[8] + 34) = r[2];
+    r[2] = (u)0 + 9;
+    *(char *)((u)r[8] + 3) = r[2];
+    r[2] = (u)0 + 46;
+    *(char *)((u)r[8] + 7) = r[2];
+    r[2] = *(int *)((u)r[4] + 4);
+    r[3] = *(int *)((u)r[8] + 0);
+    r[2] = *(int *)((u)r[2] + 0);
+    r[3] = r[3] & r[5];
+    r[2] = r[2] & r[7];
+    r[3] = r[3] | r[2];
+    *(int *)((u)r[8] + 0) = r[3];
+    r[3] = *(int *)((u)r[4] + 4);
+    r[2] = *(int *)((u)r[3] + 0);
+    r[8] = r[8] & r[7];
+    r[2] = r[2] & r[5];
+    r[2] = r[2] | r[8];
+    *(int *)((u)r[3] + 0) = r[2]; goto out;
+out:
+    RECOMP_RETURN;
+}

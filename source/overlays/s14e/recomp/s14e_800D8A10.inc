@@ -9,7 +9,7 @@ int G_s14e_800D8A10(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[7] = (u)0 + 256;
     r[9] = 0xc000000;
     r[8] = 0xff0000;
-    r[2] = 0x1f800000;
+    r[2] = (int)PSX_ADDR(0x1f800000);
     r[3] = 0;
     r[4] = 0;
     r[5] = 0;

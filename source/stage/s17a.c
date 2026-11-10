@@ -1,6 +1,9 @@
 #define DECLARE_NEWCHARA_PROTOS
 #include "charalst.h"
 
+#ifdef MGS_PORT
+#include "overlays/s17a/stage_table.inc"
+#else
 CHARA _StageCharacterEntries[] = {
     { 0x92bc, (NEWCHARA *)0x800c7a9c }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
     { 0x4754, (NEWCHARA *)0x800d7b38 }, //  CHARA_MGREX,
@@ -46,3 +49,4 @@ CHARA _StageCharacterEntries[] = {
 
     CHARA_END
 };
+#endif

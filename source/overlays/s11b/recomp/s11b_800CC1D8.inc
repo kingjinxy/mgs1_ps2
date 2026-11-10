@@ -10,19 +10,19 @@ int G_s11b_800CC1D8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     RECOMP_ENTRY(40)
     r[29] = (u)r[29] + -40;
     *(int *)((u)r[29] + 20) = r[17];
-    r[17] = 0x1f800000;
+    r[17] = (int)PSX_ADDR(0x1f800000);
     r[17] = r[17] | 40;
     *(int *)((u)r[29] + 28) = r[19];
-    r[19] = 0x1f800000;
+    r[19] = (int)PSX_ADDR(0x1f800000);
     r[19] = r[19] | 32;
     *(int *)((u)r[29] + 24) = r[18];
-    r[18] = 0x1f800000;
+    r[18] = (int)PSX_ADDR(0x1f800000);
     r[18] = r[18] | 48;
     *(int *)((u)r[29] + 16) = r[16];
     r[16] = (u)r[4] + -1;
     r[2] = 0;
     *(int *)((u)r[29] + 32) = r[20];
-    r[20] = 0x1f800000;
+    r[20] = (int)PSX_ADDR(0x1f800000);
     *(int *)((u)r[29] + 36) = r[31];
     r[9] = (u)r[2] + (int)R_DG_ZeroVector;
     r[3] = LWL(((u)r[9] + 3), r[3]);

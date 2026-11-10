@@ -11,7 +11,7 @@ int G_s14e_800D8AA8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[23] = (u)r[6] + (u)0;
     *(int *)((u)r[29] + 40) = r[22];
     *(int *)((u)r[29] + 28) = r[19];
-    r[19] = 0x1f800000;
+    r[19] = (int)PSX_ADDR(0x1f800000);
     *(int *)((u)r[29] + 48) = r[31];
     *(int *)((u)r[29] + 36) = r[21];
     *(int *)((u)r[29] + 32) = r[20];
@@ -84,7 +84,7 @@ int G_s14e_rc_800D8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     *(int *)((u)r[29] + 32) = r[20];
     r[20] = (u)r[5] + (u)0;
     *(int *)((u)r[29] + 16) = r[16];
-    r[16] = 0x1f800000;
+    r[16] = (int)PSX_ADDR(0x1f800000);
     r[2] = 0;
     r[2] = (u)r[2] + (int)R_DG_DivideBuffer;
     *(int *)((u)r[29] + 40) = r[31];
@@ -108,7 +108,7 @@ int G_s14e_rc_800D8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     Gte_CtrlWrite(21, r[8]);
     Gte_CtrlWrite(22, r[9]);
     Gte_CtrlWrite(23, r[10]);
-    r[3] = 0x1f800000;
+    r[3] = (int)PSX_ADDR(0x1f800000);
     r[2] = 0;
     r[2] = *(int *)((u)r[2] + (int)R_s14e_dword_800DDE3C);
     r[3] = r[3] | 32;
@@ -138,7 +138,7 @@ int G_s14e_rc_800D8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[2] = (u)r[20] << 2;
     r[3] = *(short *)((u)r[6] + 46);
     r[2] = (u)r[6] + (u)r[2];
-    r[1] = 0x1f800000;
+    r[1] = (int)PSX_ADDR(0x1f800000);
     *(int *)((u)r[1] + 8) = r[3];
     r[4] = *(int *)((u)r[2] + 64);
     r[2] = (u)r[5] << 2;
@@ -151,7 +151,7 @@ int G_s14e_rc_800D8BB4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[16] = (u)r[16] + -1;
     c = (((int)r[16] > 0));  if (c) goto L800d8c7c;
     L800d8cf8:;
-    r[8] = 0x1f800000;
+    r[8] = (int)PSX_ADDR(0x1f800000);
     r[8] = *(int *)((u)r[8] + 24);
     *(int *)((u)r[8] + 4) = Gte_DataRead(22);
 out:

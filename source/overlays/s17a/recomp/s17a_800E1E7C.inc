@@ -1,0 +1,64 @@
+extern char R_GV_Clock[] __asm__("GV_Clock");
+int G_s17a_800E1E7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800E1E7C");
+int G_s17a_800E1E7C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[2] = 0;
+    r[2] = *(int *)((u)r[2] + (int)R_GV_Clock);
+    r[3] = *(int *)((u)r[4] + 312);
+    r[2] = (u)r[2] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[7] = *(int *)((u)r[3] + 64);
+    c = ((r[5] == 0)); r[6] = (u)r[4] + 324; if (c) goto L800e1f00;
+    r[2] = *(int *)((u)r[4] + 320);
+    r[2] = (u)r[2] << 3;
+    r[2] = (u)r[4] + (u)r[2];
+    r[8] = LWL(((u)r[4] + 223), r[8]);
+    r[8] = LWR(((u)r[4] + 220), r[8]);
+    r[9] = LWL(((u)r[4] + 227), r[9]);
+    r[9] = LWR(((u)r[4] + 224), r[9]);
+    SWL(((u)r[2] + 359), r[8]);
+    SWR(((u)r[2] + 356), r[8]);
+    SWL(((u)r[2] + 363), r[9]);
+    SWR(((u)r[2] + 360), r[9]);
+    r[2] = *(int *)((u)r[4] + 320);
+    r[3] = (u)0 + 8;
+    r[2] = (u)r[2] << 2;
+    r[2] = (u)r[4] + (u)r[2];
+    *(int *)((u)r[2] + 324) = r[3];
+    r[2] = *(int *)((u)r[4] + 320);
+    r[2] = (u)r[2] + 1;
+    *(int *)((u)r[4] + 320) = r[2];
+    r[2] = (int)r[2] < (int)r[3];
+    c = ((r[2] != 0)); r[5] = (u)0 + 8; if (c) goto L800e1f04;
+    *(int *)((u)r[4] + 320) = 0;
+    L800e1f00:;
+    r[5] = (u)0 + 8;
+    L800e1f04:;
+    r[4] = (u)r[7] + 6;
+    L800e1f08:;
+    r[3] = *(int *)((u)r[6] + 0);
+    c = ((r[3] == 0)); r[2] = (u)r[3] << 8; if (c) goto L800e1f4c;
+    r[2] = (u)r[2] - (u)r[3];
+    c = (((int)r[2] >= 0));  if (c) goto L800e1f28;
+    r[2] = (u)r[2] + 7;
+    L800e1f28:;
+    r[2] = (int)r[2] >> 3;
+    *(char *)((u)r[4] + -2) = r[2];
+    *(char *)((u)r[4] + -1) = r[2];
+    *(char *)((u)r[4] + 0) = r[2];
+    r[2] = *(int *)((u)r[6] + 0);
+    r[2] = (u)r[2] + -1;
+    *(int *)((u)r[6] + 0) = r[2]; goto L800e1f58;
+    L800e1f4c:;
+    *(char *)((u)r[4] + -2) = 0;
+    *(char *)((u)r[4] + -1) = 0;
+    *(char *)((u)r[4] + 0) = 0;
+    L800e1f58:;
+    r[6] = (u)r[6] + 4;
+    r[5] = (u)r[5] + -1;
+    c = (((int)r[5] > 0)); r[4] = (u)r[4] + 40; if (c) goto L800e1f08;
+     goto out;
+out:
+    RECOMP_RETURN;
+}

@@ -1336,3 +1336,32 @@ early. Both stayed in sync through every earlier loop and reached 138,603. The h
 
 In sync from the start to 138,603 (1:13:21.28, s17a): `GM_PlayerPosition`, the stage binary not linked in.
 
+## Step 60: s17a (Metal Gear REX) linked in; room below 16 MB; the scratchpad in translated code (Nov 9)
+
+**138,603 (1:13:21.28, s17a).** `GM_PlayerPosition`: the stage binary (4B7B) wasn't linked in. `stage_split.py s17a`
+(356 functions) and `mips2c.py s17a 0x800C3208`. One wall/floor test after `HZD_GetOnlineHazard` tested bit 31;
+`mips2c.py` now rewrites that test to the port's floor tag (`0x20000000`, libhzd.h's `HZD_IS_WALL`).
+
+**The link failed: game data past 16 MB.** Only 349 KB were left under `port/linkfile`'s assert (the ordering tables'
+24-bit links). The HAL's big buffers that no ordering table links (`gpu_gs.o`'s VRAM and readback, `movie_ps2.o`,
+`strdec.o`, `psx_card.o`: 3.5 MB) now go into `.bss_high`, after `_end_bss` and before `_end`, so crt0 still zeroes them
+and the heap starts after them. 3.3 MB of room again. (User: fine for now.)
+
+**A hang at 138,880, in `ReadRotMatrix`** (stores to 0x1F800038): translated code builds scratchpad addresses with
+`lui 0x1f80`, and `mips2c.py` passed the constant through. The earlier overlays with it (s10a, s11b, s11h, s14e) had not
+run those paths. Now the lui gives `PSX_ADDR(0x1f800000)`. First try: `recomp.h` didn't include `psx_mem.h`, so
+`PSX_ADDR` became an undefined function, which `link_ps2.py` stubbed to return 0: 50 TLB misses at small addresses in
+s11h (682 s) and a rand desync at 139,093. With the include, and since an `ori` follows the lui, `port/linkfile` puts
+`psx_mem.o`'s `.bss` at a multiple of 0x400 and asserts `g_PsxScratch`'s alignment.
+
+**48 TLB misses in `s17a_800CEFFC`** (addr 0x12): it reads `control->msg->message_len` and `message[0]` without
+checking `n_msg`, and `msg` is NULL until a control's first message. The PS1 reads its RAM at 0 (`03000000 500c5a27
+08004003`, then zeros: `mem_log.lua` at 138,560). `GM_InitControl` now points `msg` at a static copy of those bytes;
+nothing tests `msg` against NULL.
+
+Matching builds 80 and 2 OK. In sync from the start to 141,623 (1:14:58.84, s18a): `DG_UnDrawFrameCount`, the stage
+binaries CB93 and 4B9B (s18a) not linked in. Only the s11h shadow's TLB miss remains.
+
+Seen on the way, open: `link_ps2.py` stubs `_overlay_bss_obj` and `_overlay_bss_objend` as functions, and s07b's and
+s14e's translated code uses them as data (s07b writes 6 bytes into the stub); `s10a_800C5EF4` is stubbed for a caller
+too.

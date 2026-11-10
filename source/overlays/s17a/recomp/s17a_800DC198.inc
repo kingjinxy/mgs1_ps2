@@ -1,0 +1,63 @@
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_DG_RotVector[] __asm__("DG_RotVector");
+extern char R_DG_SetPos[] __asm__("DG_SetPos");
+extern char R_GV_RandS[] __asm__("GV_RandS");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+extern char R_RotMatrixYXZ_gte[] __asm__("RotMatrixYXZ_gte");
+int G_s17a_800DC198(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800DC198");
+int G_s17a_800DC198(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (int)PSX_ADDR(0x1f800000);
+    r[17] = r[17] | 40;
+    *(int *)((u)r[29] + 28) = r[19];
+    r[19] = (int)PSX_ADDR(0x1f800000);
+    r[19] = r[19] | 32;
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (int)PSX_ADDR(0x1f800000);
+    r[18] = r[18] | 48;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + -1;
+    r[2] = 0;
+    *(int *)((u)r[29] + 32) = r[20];
+    r[20] = (int)PSX_ADDR(0x1f800000);
+    *(int *)((u)r[29] + 36) = r[31];
+    r[9] = (u)r[2] + (int)R_DG_ZeroVector;
+    r[3] = LWL(((u)r[9] + 3), r[3]);
+    r[3] = LWR(((u)r[9] + 0), r[3]);
+    r[7] = LWL(((u)r[9] + 7), r[7]);
+    r[7] = LWR(((u)r[9] + 4), r[7]);
+    SWL(((u)r[19] + 3), r[3]);
+    SWR(((u)r[19] + 0), r[3]);
+    SWL(((u)r[19] + 7), r[7]);
+    SWR(((u)r[19] + 4), r[7]);
+    c = (((int)r[16] < 0)); *(short *)((u)r[17] + 4) = 0; if (c) goto L800dc25c;
+    L800dc204:;
+    r[4] = (u)0 + 256; CALL(R_GV_RandS);
+    r[4] = (u)0 + 256;
+    *(short *)((u)r[17] + 0) = r[2]; CALL(R_GV_RandS);
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)r[20] + (u)0;
+    *(short *)((u)r[17] + 2) = r[2]; CALL(R_RotMatrixYXZ_gte);
+    r[4] = (u)r[20] + (u)0; CALL(R_DG_SetPos);
+    r[4] = (u)0 + 512; CALL(R_GV_RandU);
+    r[4] = (u)r[19] + (u)0;
+    r[5] = (u)r[18] + (u)0;
+    r[2] = (u)r[2] + 64;
+    r[6] = (u)0 + 1;
+    *(short *)((u)r[19] + 4) = r[2]; CALL(R_DG_RotVector);
+    r[16] = (u)r[16] + -1;
+    c = (((int)r[16] >= 0)); r[18] = (u)r[18] + 8; if (c) goto L800dc204;
+    L800dc25c:;
+    r[31] = *(int *)((u)r[29] + 36);
+    r[20] = *(int *)((u)r[29] + 32);
+    r[19] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

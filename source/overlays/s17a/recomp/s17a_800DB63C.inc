@@ -1,0 +1,60 @@
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_GM_SeSetMode[] __asm__("GM_SeSetMode");
+extern char R_GM_SeSetPan[] __asm__("GM_SeSetPan");
+extern char R_s17a_800DEBB4[] __asm__("s17a_800DEBB4");
+int G_s17a_800DB63C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800DB63C");
+int G_s17a_800DB63C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 28) = r[31];
+    r[2] = *(int *)((u)r[16] + 6500);
+    r[2] = (int)r[2] < 301;
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800db68c;
+    r[10] = (u)r[2] + (int)R_GM_PlayerPosition;
+    r[7] = LWL(((u)r[10] + 3), r[7]);
+    r[7] = LWR(((u)r[10] + 0), r[7]);
+    r[8] = LWL(((u)r[10] + 7), r[8]);
+    r[8] = LWR(((u)r[10] + 4), r[8]);
+    SWL(((u)r[16] + 6703), r[7]);
+    SWR(((u)r[16] + 6700), r[7]);
+    SWL(((u)r[16] + 6707), r[8]);
+    SWR(((u)r[16] + 6704), r[8]);
+    r[2] = (u)0 + 1;
+    *(int *)((u)r[16] + 6508) = r[2];
+    L800db68c:;
+    r[3] = *(int *)((u)r[16] + 6500);
+    r[2] = (u)0 + 180;
+    c = ((r[3] != r[2])); r[2] = (u)0 + 270; if (c) goto L800db6b4;
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)0 + (u)0;
+    r[6] = (u)r[5] + (u)0; CALL(R_s17a_800DEBB4);
+     goto L800db6fc;
+    L800db6b4:;
+    c = ((r[3] != r[2])); r[4] = (u)r[29] + 16; if (c) goto L800db6fc;
+    r[2] = *(int *)((u)r[16] + 156);
+    r[2] = *(unsigned short *)((u)r[2] + 368);
+    *(short *)((u)r[29] + 16) = r[2];
+    r[2] = *(int *)((u)r[16] + 156);
+    r[2] = *(unsigned short *)((u)r[2] + 372);
+    *(short *)((u)r[29] + 18) = r[2];
+    r[2] = *(int *)((u)r[16] + 156);
+    r[5] = (u)0 + 177;
+    r[2] = *(unsigned short *)((u)r[2] + 376);
+    r[6] = (u)0 + 63;
+    *(short *)((u)r[29] + 20) = r[2]; CALL(R_GM_SeSetPan);
+    L800db6fc:;
+    r[3] = *(int *)((u)r[16] + 6500);
+    r[2] = (u)0 + 120;
+    c = ((r[3] != r[2])); r[4] = (u)r[16] + 32; if (c) goto L800db718;
+    r[5] = (u)0 + 179;
+    r[6] = (u)0 + 1; CALL(R_GM_SeSetMode);
+    L800db718:;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

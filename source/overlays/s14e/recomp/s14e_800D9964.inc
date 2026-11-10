@@ -3,7 +3,7 @@ int G_s14e_800D9964(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 {
     RECOMP_ENTRY(0)
     r[2] = (u)r[4] + (u)0;
-    r[11] = 0x1f800000;
+    r[11] = (int)PSX_ADDR(0x1f800000);
     r[9] = (u)r[11] + (u)0;
     r[10] = *(int *)((u)r[2] + 0);
     r[8] = *(int *)((u)r[2] + 4);

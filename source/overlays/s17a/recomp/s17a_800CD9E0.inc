@@ -1,0 +1,67 @@
+extern char R_s17a_800CD574[] __asm__("s17a_800CD574");
+extern char R_s17a_dat_800E5974[] __asm__("s17a_dat_800E5974");
+extern char R_s17a_rc_800CD92C[] __asm__("s17a_rc_800CD92C");
+extern char R_GV_NewActor[] __asm__("GV_NewActor");
+extern char R_GV_SetNamedActor[] __asm__("GV_SetNamedActor");
+extern char R_s17a_800CD934[] __asm__("s17a_800CD934");
+int G_s17a_800CD9E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800CD9E0");
+int G_s17a_800CD9E0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(80)
+    r[29] = (u)r[29] + -80;
+    *(int *)((u)r[29] + 44) = r[17];
+    r[17] = *(unsigned char *)((u)r[29] + 104);
+    *(int *)((u)r[29] + 56) = r[20];
+    r[20] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 60) = r[21];
+    r[21] = (u)r[5] + (u)0;
+    *(int *)((u)r[29] + 64) = r[22];
+    r[22] = (u)r[6] + (u)0;
+    *(int *)((u)r[29] + 68) = r[23];
+    r[23] = (u)r[7] + (u)0;
+    *(int *)((u)r[29] + 48) = r[18];
+    r[18] = *(unsigned char *)((u)r[29] + 108);
+    r[4] = (u)0 + 4;
+    *(int *)((u)r[29] + 52) = r[19];
+    r[19] = *(unsigned char *)((u)r[29] + 112);
+    r[5] = (u)0 + 84;
+    *(int *)((u)r[29] + 72) = r[31];
+    *(int *)((u)r[29] + 40) = r[16]; CALL(R_GV_NewActor);
+    r[16] = (u)r[2] + (u)0;
+    c = ((r[16] == 0)); r[4] = (u)r[16] + (u)0; if (c) goto L800cda98;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s17a_800CD574;
+    r[6] = 0;
+    r[6] = (u)r[6] + (int)R_s17a_rc_800CD92C;
+    r[7] = 0;
+    r[7] = (u)r[7] + ((int)R_s17a_dat_800E5974 + 48); CALL(R_GV_SetNamedActor);
+    r[4] = (u)r[16] + (u)0;
+    r[5] = (u)r[20] + (u)0;
+    r[2] = *(int *)((u)r[29] + 96);
+    r[6] = (u)r[21] + (u)0;
+    *(int *)((u)r[29] + 20) = r[2];
+    r[2] = *(int *)((u)r[29] + 100);
+    r[7] = (u)r[22] + (u)0;
+    *(int *)((u)r[29] + 16) = r[23];
+    *(int *)((u)r[29] + 24) = r[2];
+    r[2] = r[17] & 255;
+    *(int *)((u)r[29] + 28) = r[2];
+    r[2] = r[18] & 255;
+    *(int *)((u)r[29] + 32) = r[2];
+    r[2] = r[19] & 255;
+    *(int *)((u)r[29] + 36) = r[2]; CALL(R_s17a_800CD934);
+    L800cda98:;
+    r[2] = (u)r[16] + (u)0;
+    r[31] = *(int *)((u)r[29] + 72);
+    r[23] = *(int *)((u)r[29] + 68);
+    r[22] = *(int *)((u)r[29] + 64);
+    r[21] = *(int *)((u)r[29] + 60);
+    r[20] = *(int *)((u)r[29] + 56);
+    r[19] = *(int *)((u)r[29] + 52);
+    r[18] = *(int *)((u)r[29] + 48);
+    r[17] = *(int *)((u)r[29] + 44);
+    r[16] = *(int *)((u)r[29] + 40);
+    r[29] = (u)r[29] + 80; goto out;
+out:
+    RECOMP_RETURN;
+}

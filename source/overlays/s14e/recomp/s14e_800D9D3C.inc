@@ -15,7 +15,7 @@ int G_s14e_800D9D3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[18] = *(int *)((u)r[5] + 84);
     c = ((r[16] == 0));  if (c) goto L800da0b4;
     L800d9d68:;
-    r[2] = 0x1f800000;
+    r[2] = (int)PSX_ADDR(0x1f800000);
     r[2] = *(unsigned short *)((u)r[2] + 510);
     r[17] = *(int *)((u)r[16] + 64);
     r[2] = r[2] & 1;
@@ -31,11 +31,11 @@ int G_s14e_800D9D3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[8] = (u)r[4] + 24;
     r[11] = (u)r[2] + -3;
     Gte_Command(0x280030);
-    r[10] = 0x1f800000;
+    r[10] = (int)PSX_ADDR(0x1f800000);
     r[10] = r[10] | 12;
-    r[12] = 0x1f800000;
+    r[12] = (int)PSX_ADDR(0x1f800000);
     r[12] = r[12] | 524;
-    r[13] = 0x1f800000;
+    r[13] = (int)PSX_ADDR(0x1f800000);
     r[9] = *(int *)((u)r[4] + 24);
     r[6] = *(int *)((u)r[8] + 4);
     r[5] = *(int *)((u)r[8] + 8);
@@ -44,13 +44,13 @@ int G_s14e_800D9D3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[13] + 0) = Gte_DataRead(12);
     *(int *)((u)r[13] + 4) = Gte_DataRead(13);
     *(int *)((u)r[13] + 8) = Gte_DataRead(14);
-    r[13] = 0x1f800000;
+    r[13] = (int)PSX_ADDR(0x1f800000);
     r[13] = r[13] | 512;
     *(int *)((u)r[13] + 0) = Gte_DataRead(17);
     *(int *)((u)r[13] + 4) = Gte_DataRead(18);
     *(int *)((u)r[13] + 8) = Gte_DataRead(19);
     c = (((int)r[11] <= 0)); r[4] = (u)r[4] + 40; if (c) goto L800d9f68;
-    r[7] = 0x1f800000;
+    r[7] = (int)PSX_ADDR(0x1f800000);
     r[7] = r[7] | 523;
     L800d9e04:;
     Gte_DataWrite(0, r[9]);
@@ -194,7 +194,7 @@ int G_s14e_800D9D3C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = (u)r[2] >> 10;
     r[2] = r[2] ^ 1;
     r[2] = r[2] & 1;
-    r[1] = 0x1f800000;
+    r[1] = (int)PSX_ADDR(0x1f800000);
     *(short *)((u)r[1] + 508) = r[2];
     r[4] = *(int *)((u)r[17] + 60);
     r[6] = *(short *)((u)r[16] + 82);
@@ -234,7 +234,7 @@ int G_s14e_rc_800DA0CC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
     r[4] = (u)r[16] + 92; CALL(R_DG_Clip);
     r[22] = *(short *)((u)r[16] + 86);
     r[23] = *(int *)((u)r[16] + 88);
-    c = (((int)r[22] <= 0)); r[21] = 0x1f800000; if (c) goto L800da274;
+    c = (((int)r[22] <= 0)); r[21] = (int)PSX_ADDR(0x1f800000); if (c) goto L800da274;
     L800da11c:;
     r[17] = *(int *)((u)r[23] + 0);
     r[2] = *(short *)((u)r[17] + 50);

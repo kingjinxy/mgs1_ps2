@@ -1,0 +1,60 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_s17a_dat_800C5430[] __asm__("s17a_dat_800C5430");
+extern char R_s17a_dat_800E5D00[] __asm__("s17a_dat_800E5D00");
+extern char R_ApplyMatrixSV[] __asm__("ApplyMatrixSV");
+extern char R_GM_ConfigObjectLight[] __asm__("GM_ConfigObjectLight");
+extern char R_GM_InitObjectNoRots[] __asm__("GM_InitObjectNoRots");
+extern char R_GV_RandS[] __asm__("GV_RandS");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+extern char R_GV_StrCode[] __asm__("GV_StrCode");
+extern char R_s17a_800CE0F4[] __asm__("s17a_800CE0F4");
+int G_s17a_800E2E0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800E2E0C");
+int G_s17a_800E2E0C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (u)r[5] + (u)0;
+    r[4] = 0;
+    r[4] = (u)r[4] + (int)R_s17a_dat_800E5D00;
+    *(int *)((u)r[29] + 20) = r[17];
+    *(int *)((u)r[29] + 28) = r[31];
+    r[17] = (u)r[16] + 36; CALL(R_GV_StrCode);
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)r[2] + (u)0;
+    r[6] = (u)0 + 109;
+    r[7] = (u)0 + (u)0; CALL(R_GM_InitObjectNoRots);
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)r[16] + 72; CALL(R_GM_ConfigObjectLight);
+    r[4] = (u)r[18] + (u)0;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s17a_dat_800C5430;
+    r[6] = (u)r[16] + 192; CALL(R_ApplyMatrixSV);
+    r[2] = *(unsigned short *)((u)r[18] + 20);
+    *(short *)((u)r[16] + 176) = r[2];
+    r[2] = *(unsigned short *)((u)r[18] + 24);
+    *(short *)((u)r[16] + 178) = r[2];
+    r[2] = *(unsigned short *)((u)r[18] + 28);
+    r[4] = (u)0 + 256;
+    *(short *)((u)r[16] + 180) = r[2]; CALL(R_GV_RandU);
+    r[4] = (u)0 + 256;
+    *(short *)((u)r[16] + 168) = r[2]; CALL(R_GV_RandS);
+    r[4] = (u)0 + 256;
+    *(short *)((u)r[16] + 170) = r[2]; CALL(R_GV_RandS);
+    r[3] = 0;
+    r[3] = *(int *)((u)r[3] + (int)R_GM_CurrentMap);
+    r[4] = (u)r[18] + (u)0;
+    *(short *)((u)r[16] + 172) = r[2];
+    *(int *)((u)r[16] + 200) = 0;
+    *(int *)((u)r[16] + 32) = r[3]; CALL(R_s17a_800CE0F4);
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[2] = (u)0 + (u)0;
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

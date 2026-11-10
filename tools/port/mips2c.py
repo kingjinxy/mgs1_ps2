@@ -105,7 +105,8 @@ def translate(path, seg=None):
             return '*(int *)(%s) = Gte_DataRead(%d);' % (base, rt)
         if o == 15:
             if isaddr(imm): hi[rt] = imm; return wr(rt, '0;')[:-1]
-            hi.pop(rt, None); return wr(rt, '0x%x' % (imm << 16))
+            # the PS1's scratchpad: the port's (psx_mem.h); an ori or a load's offset follows (port/linkfile aligns it for the ori)
+            hi.pop(rt, None); return wr(rt, '(int)PSX_ADDR(0x1f800000)' if imm == 0x1f80 else '0x%x' % (imm << 16))
         if o == 0:
             d = rd
             if fn == 33 or fn == 32:
@@ -287,6 +288,10 @@ for f in sorted(os.listdir(ad)):
     if 'dw 0x' not in t or 'xdef' not in t: continue
     pp = parts[f]
     txt = translate(os.path.join(ad, f)) if len(pp) == 2 else ''.join(translate(os.path.join(ad, f), (pp[k], pp[k + 1], k == len(pp) - 2)) for k in range(len(pp) - 1))
+    # HZD_GetOnlineHazard's result: the PS1 tests bit 31 (set: a wall; a floor has it cleared), the port tags floors
+    # with 0x20000000 (libhzd.h's HZD_IS_WALL)
+    txt = re.sub(r'(CALL\(R_HZD_GetOnlineHazard\);\n\s*c = )\(\(\(int\)r\[2\] (>= 0|< 0)\)\)',
+                 lambda m: m.group(1) + ('((r[2] & 0x20000000) != 0)' if m.group(2) == '>= 0' else '(!(r[2] & 0x20000000))'), txt)
     open(os.path.join(out, f[:-2] + '.inc'), 'w').write(txt)
     made.append(f)
 print(len(made), 'functions')

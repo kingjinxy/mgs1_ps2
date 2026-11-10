@@ -179,7 +179,8 @@ one; never dismiss them.
 1. `python3 tools/port/stage_split.py OVL`, then `python3 tools/port/mips2c.py OVL 0x800C3208`.
 2. Read `mips2c.py`'s warnings ("word symbol + offset") and make the named statics `STATIC`.
 3. Check the ABI rules: struct-by-value calls both ways (add to the rename table or `ABI_WRAP`), and tests of bit 31 on
-   pointers.
+   pointers. `mips2c.py` handles two cases itself: the wall/floor test right after `HZD_GetOnlineHazard` (the port's
+   `0x20000000` floor tag), and `lui 0x1f80` (the port's scratchpad through `PSX_ADDR`).
 4. Build both matching variants, run the TAS replay through the stage, and collect TLB-miss PCs.
 5. Regenerating must reproduce the committed files: re-run both tools and check that `git diff source/overlays/OVL`
    is empty.

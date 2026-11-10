@@ -1,0 +1,65 @@
+extern char R_DG_ZeroVector[] __asm__("DG_ZeroVector");
+extern char R_GM_AllocTarget[] __asm__("GM_AllocTarget");
+extern char R_GM_MoveTarget[] __asm__("GM_MoveTarget");
+extern char R_GM_SetPowerTarget[] __asm__("GM_SetPowerTarget");
+extern char R_GM_SetTarget[] __asm__("GM_SetTarget");
+int G_s17a_800CF204(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800CF204");
+int G_s17a_800CF204(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 32) = r[31];
+    *(int *)((u)r[29] + 28) = r[17]; CALL(R_GM_AllocTarget);
+    r[4] = *(short *)((u)r[16] + 528);
+    r[3] = *(short *)((u)r[16] + 520);
+    r[17] = (u)r[2] + (u)0;
+    r[5] = (u)r[4] - (u)r[3];
+    c = (((int)r[5] >= 0)); *(int *)((u)r[16] + 460) = r[2]; if (c) goto L800cf238;
+    r[5] = (u)r[5] + 3;
+    L800cf238:;
+    r[4] = *(short *)((u)r[16] + 530);
+    r[3] = *(short *)((u)r[16] + 522);
+    r[2] = (int)r[5] >> 2;
+    *(short *)((u)r[16] + 452) = r[2];
+    r[2] = (u)r[4] - (u)r[3];
+    c = (((int)r[2] >= 0));  if (c) goto L800cf258;
+    r[2] = (u)r[2] + 3;
+    L800cf258:;
+    r[4] = *(short *)((u)r[16] + 532);
+    r[3] = *(short *)((u)r[16] + 524);
+    r[2] = (int)r[2] >> 2;
+    *(short *)((u)r[16] + 454) = r[2];
+    r[2] = (u)r[4] - (u)r[3];
+    c = (((int)r[2] >= 0)); r[4] = (u)r[17] + (u)0; if (c) goto L800cf278;
+    r[2] = (u)r[2] + 3;
+    L800cf278:;
+    r[5] = (u)0 + 28;
+    r[6] = (u)0 + (u)0;
+    r[7] = (u)r[16] + 452;
+    r[2] = (int)r[2] >> 2;
+    *(short *)((u)r[16] + 456) = r[2]; CALL(R_GM_SetTarget);
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)0 + 1;
+    r[6] = (u)0 + -1;
+    r[7] = (u)0 + 20;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_DG_ZeroVector;
+    *(int *)((u)r[29] + 16) = 0;
+    *(int *)((u)r[29] + 20) = r[2]; CALL(R_GM_SetPowerTarget);
+    r[4] = (u)r[17] + (u)0;
+    r[5] = (u)r[16] + 36;
+    r[2] = *(unsigned short *)((u)r[16] + 38);
+    r[3] = *(unsigned short *)((u)r[16] + 522);
+    r[6] = *(short *)((u)r[16] + 38);
+    r[2] = (u)r[2] - (u)r[3];
+    *(int *)((u)r[16] + 512) = r[6];
+    *(short *)((u)r[16] + 38) = r[2]; CALL(R_GM_MoveTarget);
+    r[31] = *(int *)((u)r[29] + 32);
+    r[17] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

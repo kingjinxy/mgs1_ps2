@@ -1,0 +1,113 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_DG_SetPos2[] __asm__("DG_SetPos2");
+extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+extern char R_ReadRotMatrix[] __asm__("ReadRotMatrix");
+extern char R_s17a_800CBFB4[] __asm__("s17a_800CBFB4");
+extern char R_s17a_800CC070[] __asm__("s17a_800CC070");
+extern char R_s17a_800CC12C[] __asm__("s17a_800CC12C");
+extern char R_s17a_800CE0F4[] __asm__("s17a_800CE0F4");
+int G_s17a_800CB3F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800CB3F0");
+int G_s17a_800CB3F0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(72)
+    r[29] = (u)r[29] + -72;
+    *(int *)((u)r[29] + 60) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 64) = r[18];
+    r[18] = (u)0 + 96;
+    *(int *)((u)r[29] + 56) = r[16];
+    r[16] = (u)r[17] + (u)0;
+    *(int *)((u)r[29] + 68) = r[31];
+    r[3] = *(int *)((u)r[17] + 32);
+    r[2] = 0;
+    *(int *)((u)r[2] + (int)R_GM_CurrentMap) = r[3];
+    L800cb41c:;
+    r[3] = *(unsigned short *)((u)r[16] + 96);
+    r[4] = *(unsigned short *)((u)r[16] + 64);
+    r[2] = *(unsigned short *)((u)r[16] + 66);
+    r[3] = (u)r[3] + (u)r[4];
+    r[4] = *(unsigned short *)((u)r[16] + 98);
+    r[2] = (u)r[2] + -15;
+    *(short *)((u)r[16] + 66) = r[2];
+    r[2] = *(unsigned short *)((u)r[16] + 100);
+    *(short *)((u)r[16] + 96) = r[3];
+    r[3] = *(unsigned short *)((u)r[16] + 68);
+    r[5] = *(unsigned short *)((u)r[16] + 66);
+    r[2] = (u)r[2] + (u)r[3];
+    r[4] = (u)r[4] + (u)r[5];
+    *(short *)((u)r[16] + 100) = r[2];
+    *(short *)((u)r[16] + 98) = r[4];
+    r[3] = *(int *)((u)r[17] + 48);
+    r[2] = (u)0 + 1;
+    c = ((r[3] == r[2])); r[2] = (int)r[3] < 2; if (c) goto L800cb4a0;
+    c = ((r[2] == 0)); r[2] = (u)0 + 2; if (c) goto L800cb480;
+    c = ((r[3] == 0));  if (c) goto L800cb490;
+     goto L800cb4c8;
+    L800cb480:;
+    c = ((r[3] == r[2]));  if (c) goto L800cb4b4;
+     goto L800cb4c8;
+    L800cb490:;
+    r[4] = (u)r[17] + (u)r[18]; CALL(R_s17a_800CBFB4);
+     goto L800cb4c8;
+    L800cb4a0:;
+    r[5] = *(int *)((u)r[17] + 44);
+    r[4] = (u)r[17] + (u)r[18]; CALL(R_s17a_800CC070);
+     goto L800cb4c8;
+    L800cb4b4:;
+    r[5] = *(unsigned char *)((u)r[17] + 256);
+    r[6] = *(unsigned char *)((u)r[17] + 257);
+    r[7] = *(unsigned char *)((u)r[17] + 258);
+    r[4] = (u)r[17] + (u)r[18]; CALL(R_s17a_800CC12C);
+    L800cb4c8:;
+    r[3] = *(int *)((u)r[17] + 52);
+    r[2] = (int)r[3] < 4;
+    c = ((r[2] == 0)); r[2] = (int)r[3] < 2; if (c) goto L800cb53c;
+    c = ((r[2] != 0));  if (c) goto L800cb53c;
+    r[4] = (u)0 + 16; CALL(R_GV_RandU);
+    c = ((r[2] == 0));  if (c) goto L800cb504;
+    r[2] = *(int *)((u)r[17] + 56);
+    c = ((r[2] != 0));  if (c) goto L800cb53c;
+    L800cb504:;
+    r[4] = (u)0 + 2048; CALL(R_GV_RandU);
+    r[4] = (u)0 + 4096;
+    *(short *)((u)r[29] + 48) = r[2]; CALL(R_GV_RandU);
+    r[4] = (u)r[17] + (u)r[18];
+    r[5] = (u)r[29] + 48;
+    *(short *)((u)r[29] + 50) = r[2];
+    *(short *)((u)r[29] + 52) = 0; CALL(R_DG_SetPos2);
+    r[4] = (u)r[29] + 16; CALL(R_ReadRotMatrix);
+    r[4] = (u)r[29] + 16; CALL(R_s17a_800CE0F4);
+    L800cb53c:;
+    r[16] = (u)r[16] + 8;
+    r[2] = (u)r[17] + 32;
+    r[2] = (int)r[16] < (int)r[2];
+    c = ((r[2] != 0)); r[18] = (u)r[18] + 8; if (c) goto L800cb41c;
+    r[2] = *(int *)((u)r[17] + 56);
+    r[2] = (u)r[2] + -1;
+    c = (((int)r[2] >= 0)); *(int *)((u)r[17] + 56) = r[2]; if (c) goto L800cb56c;
+    r[4] = (u)r[17] + (u)0; CALL(R_GV_DestroyActor);
+    L800cb56c:;
+    r[2] = *(int *)((u)r[17] + 56);
+    r[2] = r[2] & 1;
+    c = ((r[2] != 0));  if (c) goto L800cb590;
+    r[2] = *(int *)((u)r[17] + 60);
+    r[2] = (u)r[2] + 1;
+    *(int *)((u)r[17] + 60) = r[2];
+    L800cb590:;
+    r[31] = *(int *)((u)r[29] + 68);
+    r[18] = *(int *)((u)r[29] + 64);
+    r[17] = *(int *)((u)r[29] + 60);
+    r[16] = *(int *)((u)r[29] + 56);
+    r[29] = (u)r[29] + 72; goto out;
+out:
+    RECOMP_RETURN;
+}
+int G_s17a_rc_800CB5A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_rc_800CB5A8");
+int G_s17a_rc_800CB5A8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+     goto out;
+out:
+    RECOMP_RETURN;
+}

@@ -2,6 +2,7 @@
 #ifndef RECOMP_H
 #define RECOMP_H
 typedef unsigned int u;
+#include "psx_mem.h" /* PSX_ADDR: the scratchpad, for a lui 0x1f80 */
 /* the GTE, for translated cop2 instructions (the HAL's software GTE, port/gte.h) */
 void Gte_DataWrite(unsigned int reg, unsigned int value);
 unsigned int Gte_DataRead(unsigned int reg);

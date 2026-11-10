@@ -1,0 +1,63 @@
+extern char R_s17a_dat_800C3388[] __asm__("s17a_dat_800C3388");
+extern char R_s17a_dat_800C33C0[] __asm__("s17a_dat_800C33C0");
+extern char R_NewAnime[] __asm__("NewAnime");
+extern char R_memset[] __asm__("memset");
+int G_s17a_800C61E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800C61E8");
+int G_s17a_800C61E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(64)
+    r[29] = (u)r[29] + -64;
+    *(int *)((u)r[29] + 44) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 48) = r[18];
+    r[18] = (u)r[5] + (u)0;
+    *(int *)((u)r[29] + 52) = r[19];
+    r[19] = (u)r[6] + (u)0;
+    *(int *)((u)r[29] + 40) = r[16];
+    r[16] = (u)r[7] + (u)0;
+    r[4] = (u)r[29] + 16;
+    r[5] = (u)0 + (u)0;
+    *(int *)((u)r[29] + 56) = r[31];
+    r[6] = (u)0 + 20; CALL(R_memset);
+    r[6] = (u)0 + (u)0;
+    r[3] = LWL(((u)r[17] + 3), r[3]);
+    r[3] = LWR(((u)r[17] + 0), r[3]);
+    r[8] = LWL(((u)r[17] + 7), r[8]);
+    r[8] = LWR(((u)r[17] + 4), r[8]);
+    SWL(((u)r[29] + 19), r[3]);
+    SWR(((u)r[29] + 16), r[3]);
+    SWL(((u)r[29] + 23), r[8]);
+    SWR(((u)r[29] + 20), r[8]);
+    r[3] = LWL(((u)r[18] + 3), r[3]);
+    r[3] = LWR(((u)r[18] + 0), r[3]);
+    r[8] = LWL(((u)r[18] + 7), r[8]);
+    r[8] = LWR(((u)r[18] + 4), r[8]);
+    SWL(((u)r[29] + 27), r[3]);
+    SWR(((u)r[29] + 24), r[3]);
+    SWL(((u)r[29] + 31), r[8]);
+    SWR(((u)r[29] + 28), r[8]);
+    c = ((r[19] == 0)); *(short *)((u)r[29] + 32) = r[16]; if (c) goto L800c6280;
+    r[2] = (u)0 + 1;
+    c = ((r[19] == r[2])); r[2] = (u)r[29] + 16; if (c) goto L800c628c;
+    r[4] = (u)0 + (u)0; goto L800c629c;
+    L800c6280:;
+    r[2] = 0;
+    r[6] = (u)r[2] + ((int)R_s17a_dat_800C3388 + 28); goto L800c6294;
+    L800c628c:;
+    r[2] = 0;
+    r[6] = (u)r[2] + (int)R_s17a_dat_800C33C0;
+    L800c6294:;
+    r[2] = (u)r[29] + 16;
+    r[4] = (u)0 + (u)0;
+    L800c629c:;
+    r[5] = (u)r[4] + (u)0;
+    *(int *)((u)r[6] + 20) = r[2]; CALL(R_NewAnime);
+    r[31] = *(int *)((u)r[29] + 56);
+    r[19] = *(int *)((u)r[29] + 52);
+    r[18] = *(int *)((u)r[29] + 48);
+    r[17] = *(int *)((u)r[29] + 44);
+    r[16] = *(int *)((u)r[29] + 40);
+    r[29] = (u)r[29] + 64; goto out;
+out:
+    RECOMP_RETURN;
+}

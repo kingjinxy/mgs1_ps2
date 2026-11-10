@@ -8,7 +8,7 @@ int G_s14e_800DA2A4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[7] = *(int *)((u)r[5] + 84);
     c = ((r[7] == 0)); r[2] = 0; if (c) goto L800da3ac;
     r[10] = *(int *)((u)r[2] + ((int)R__overlay_bss_objend + 4));
-    c = ((r[4] == 0)); r[5] = 0x1f800000; if (c) goto L800da3a8;
+    c = ((r[4] == 0)); r[5] = (int)PSX_ADDR(0x1f800000); if (c) goto L800da3a8;
     L800da2c8:;
     r[8] = *(int *)((u)r[4] + 68);
     c = ((r[8] == 0));  if (c) goto L800da398;

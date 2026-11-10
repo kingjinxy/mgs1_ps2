@@ -13,7 +13,7 @@ int G_s11b_800CDE48(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[29] + 48) = r[30];
     r[30] = (u)r[5] + (u)0;
     *(int *)((u)r[29] + 36) = r[21];
-    r[21] = 0x1f800000;
+    r[21] = (int)PSX_ADDR(0x1f800000);
     *(int *)((u)r[29] + 32) = r[20];
     r[20] = (u)0 + (u)0;
     *(int *)((u)r[29] + 20) = r[17];

@@ -157,8 +157,8 @@ int G_s14e_800DA720(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     L800da9ac:;
     r[2] = *(short *)((u)r[17] + 76);
     c = ((r[2] == 0)); r[4] = (u)r[17] + (u)0; if (c) goto L800da9d8;
-    r[5] = 0x1f800000; CALL(R_MulRotMatrix0);
-    r[4] = 0x1f800000; CALL(R_SetLightMatrix);
+    r[5] = (int)PSX_ADDR(0x1f800000); CALL(R_MulRotMatrix0);
+    r[4] = (int)PSX_ADDR(0x1f800000); CALL(R_SetLightMatrix);
     r[4] = (u)r[17] + (u)0;
     r[5] = (u)r[23] + (u)0; CALL(R_s14e_800DA674);
     L800da9d8:;
@@ -192,7 +192,7 @@ int G_s14e_800DA720(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[3] = *(short *)((u)r[16] + 0);
     r[2] = *(unsigned short *)((u)r[16] + 0);
     c = ((r[3] == 0)); r[2] = r[2] & 4; if (c) goto L800daabc;
-    c = ((r[2] != 0)); r[9] = 0x1f800000; if (c) goto L800daa84;
+    c = ((r[2] != 0)); r[9] = (int)PSX_ADDR(0x1f800000); if (c) goto L800daa84;
     r[2] = r[3] & r[20];
     c = ((r[2] != 0)); r[4] = (u)r[17] + (u)0; if (c) goto L800daabc;
     r[5] = (u)r[23] + (u)0; CALL(R_DG_WriteObjPacketRGB);

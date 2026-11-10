@@ -5,7 +5,7 @@ int G_s14e_800DA460(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[10] = (u)r[4] + (u)0;
     r[6] = (u)r[6] + -1;
     c = (((int)r[6] < 0)); r[9] = (u)r[5] + (u)0; if (c) goto L800da504;
-    r[8] = 0x1f800000;
+    r[8] = (int)PSX_ADDR(0x1f800000);
     r[8] = r[8] | 32;
     r[7] = (u)r[5] + 40;
     L800da47c:;

@@ -102,6 +102,14 @@ int GM_InitControl(CONTROL *ctrl, int name, int map)
     GM_CurrentMap = map;
 
     GV_ZeroMemory(ctrl, sizeof(CONTROL));
+#ifdef MGS_PORT
+    {
+        /* Before its first message a control's msg is NULL, and stage code reads it unchecked (s17a_800CEFFC:
+           message_len and message[0]): the PS1 reads its RAM at 0, a real PS2 faults. The PS1's bytes there. */
+        static GV_MSG ps1_ram0 = { 3, 0, { 0x0c50, 0x275a, 8, 0x0340 } };
+        ctrl->msg = &ps1_ram0;
+    }
+#endif
 
     ctrl_map = GM_GetMap(map);
     ctrl->map = ctrl_map;

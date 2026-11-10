@@ -13,7 +13,7 @@ int G_s14e_800D9AFC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[29] + 36) = r[31];
     *(int *)((u)r[29] + 28) = r[19];
     c = (((int)r[17] < 0)); *(int *)((u)r[29] + 16) = r[16]; if (c) goto L800d9d18;
-    r[19] = 0x1f800000;
+    r[19] = (int)PSX_ADDR(0x1f800000);
     r[16] = (u)r[5] + 4;
     L800d9b30:;
     r[6] = *(int *)((u)r[20] + 0);
@@ -87,7 +87,7 @@ int G_s14e_800D9AFC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[16] + 28) = r[10];
     L800d9c64:;
     c = (((int)r[3] > 0)); r[2] = (u)r[3] << 8; if (c) goto L800d9cac;
-    r[2] = 0x1f800000;
+    r[2] = (int)PSX_ADDR(0x1f800000);
     r[2] = *(unsigned short *)((u)r[2] + 508);
     c = ((r[2] != 0));  if (c) goto L800d9c88;
     c = ((r[3] != 0)); r[2] = 0x10000; if (c) goto L800d9c90;
@@ -105,7 +105,7 @@ int G_s14e_800D9AFC(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = r[2] & r[3];
     r[9] = r[9] | r[2];
     L800d9cb8:;
-    r[2] = 0x1f800000;
+    r[2] = (int)PSX_ADDR(0x1f800000);
     r[2] = *(unsigned short *)((u)r[2] + 510);
     r[2] = r[2] & 2;
     c = ((r[2] == 0)); r[4] = (u)r[6] >> 8; if (c) goto L800d9d00;

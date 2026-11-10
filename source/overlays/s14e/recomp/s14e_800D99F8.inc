@@ -2,7 +2,7 @@ int G_s14e_800D99F8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
 int G_s14e_800D99F8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
     RECOMP_ENTRY(0)
-    r[12] = 0x1f800000;
+    r[12] = (int)PSX_ADDR(0x1f800000);
     r[11] = *(int *)((u)r[12] + 1016);
     c = ((r[11] == 0)); r[9] = (u)0 + (u)0; if (c) goto L800d9ac0;
     r[13] = *(int *)((u)r[12] + 1020);

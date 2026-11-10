@@ -1,0 +1,60 @@
+int G_s17a_800E4BA8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s17a_800E4BA8");
+int G_s17a_800E4BA8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(0)
+    r[8] = *(unsigned short *)((u)r[4] + 0);
+    r[9] = *(int *)((u)r[4] + 4);
+    r[10] = *(int *)((u)r[4] + 12);
+    r[1] = 0xffff0000;
+    r[9] = r[9] & r[1];
+    r[8] = r[8] | r[9];
+    Gte_DataWrite(0, r[8]);
+    Gte_DataWrite(1, r[10]);
+    Gte_Command(0x486012);
+    r[8] = *(unsigned short *)((u)r[4] + 2);
+    r[9] = *(int *)((u)r[4] + 8);
+    r[10] = *(short *)((u)r[4] + 14);
+    r[9] = (u)r[9] << 16;
+    r[8] = r[8] | r[9];
+    r[11] = Gte_DataRead(9);
+    r[12] = Gte_DataRead(10);
+    r[13] = Gte_DataRead(11);
+    Gte_DataWrite(0, r[8]);
+    Gte_DataWrite(1, r[10]);
+    Gte_Command(0x486012);
+    r[8] = *(unsigned short *)((u)r[4] + 4);
+    r[9] = *(int *)((u)r[4] + 8);
+    r[10] = *(int *)((u)r[4] + 16);
+    r[1] = 0xffff0000;
+    r[9] = r[9] & r[1];
+    r[8] = r[8] | r[9];
+    r[14] = Gte_DataRead(9);
+    r[15] = Gte_DataRead(10);
+    r[24] = Gte_DataRead(11);
+    Gte_DataWrite(0, r[8]);
+    Gte_DataWrite(1, r[10]);
+    Gte_Command(0x486012);
+    r[11] = r[11] & 65535;
+    r[14] = (u)r[14] << 16;
+    r[14] = r[14] | r[11];
+    *(int *)((u)r[5] + 0) = r[14];
+    r[13] = r[13] & 65535;
+    r[24] = (u)r[24] << 16;
+    r[24] = r[24] | r[13];
+    *(int *)((u)r[5] + 12) = r[24];
+    r[8] = Gte_DataRead(9);
+    r[9] = Gte_DataRead(10);
+    r[8] = r[8] & 65535;
+    r[12] = (u)r[12] << 16;
+    r[8] = r[8] | r[12];
+    *(int *)((u)r[5] + 4) = r[8];
+    r[15] = r[15] & 65535;
+    r[9] = (u)r[9] << 16;
+    r[9] = r[9] | r[15];
+    *(int *)((u)r[5] + 8) = r[9];
+    *(int *)((u)r[5] + 16) = Gte_DataRead(11);
+    r[2] = (u)r[5] + (u)0;
+     goto out;
+out:
+    RECOMP_RETURN;
+}

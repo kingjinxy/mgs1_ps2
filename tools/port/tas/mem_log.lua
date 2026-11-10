@@ -1,4 +1,5 @@
 -- Logs TAS_SIZE bytes at TAS_ADDR (hex) at the game loops in TAS_LOOPS, from the nearest checkpoint.
+-- TAS_FRAMES=1: every emulated frame from the first loop to the last instead (what a loop's first frame hides).
 
 -- Run: TAS_ADDR=800B933C TAS_SIZE=64 TAS_LOOPS=137804,137805 tools/port/tas/run_bizhawk.sh tools/port/tas/mem_log.lua
 local OUT  = "Z:\\home\\alex\\emu\\tas\\mem_log.log"
@@ -21,9 +22,12 @@ out:write("# seek " .. seek(first) .. "\n"); out:flush()
 local prev = -1
 while true do
   local t = u32(0x800AB330)
+  if os.getenv("TAS_FRAMES") and t >= first and t <= LAST then
+    out:write(string.format("%d f%d %s\n", t, emu.framecount(), hex(tonumber(os.getenv("TAS_ADDR"), 16), tonumber(os.getenv("TAS_SIZE") or "64"))))
+  end
   if t ~= prev then
     prev = t
-    if LOOPS[t] then
+    if LOOPS[t] and not os.getenv("TAS_FRAMES") then
       out:write(string.format("%d %s\n", t, hex(tonumber(os.getenv("TAS_ADDR"), 16), tonumber(os.getenv("TAS_SIZE") or "64"))))
       out:flush()
     end

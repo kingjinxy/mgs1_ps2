@@ -367,19 +367,6 @@ int Port_TasStreamMayEnd(void)
 #endif
 }
 
-/** stream.c's StartRead, a stream's first read: held while the PS1's stream heap had no data yet (time.bin's
- * bottom 0). The PS1's can take seconds to come (the codec's voice at loop 5,827: at 5,950), the port's is in at
- * once, and the call runs differently meanwhile (its rand() at loop 5,846). */
-int Port_TasStreamHold(void)
-{
-#ifdef MGS_TAS
-    const unsigned char* r = time_record();
-    return r && read_u32(r + 24) == 0;
-#else
-    return 0;
-#endif
-}
-
 /** FS_StreamGetData: how far into the stream heap the PS1's data had come at this loop's start (time.bin's bottom),
  * or -1. Packets past it wait: the voice's mouth data (jimctrl.c) a loop early drew Snake's lip sync's rand at 12,835. */
 int Port_TasStreamBottom(void)

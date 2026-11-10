@@ -239,6 +239,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
       Also from here: a stream's first read is held while the PS1's stream heap is empty (time.bin's bottom 0;
       `Port_TasStreamHold`): the PS1's codec voice at 5,827 had no data until 5,950. The held read looks like one in
       progress (`fs_stream_read` set, task state -1), and `FS_StreamSync` starts it.
+      (Removed 2026-11-09, with `MgsCd_Head`: the per-sector pacing below does the same without making the port's
+      data late; Walkthrough Step 59.)
 - [x] `GM_GameStatus` 0x1000 and `DG_UnDrawFrameCount` at loop 6,663 (0:03:52.10, `s01a`), a cutscene's demo
       stream: its packet is in a loop early. Stream sectors now reach the game only as far as the PS1's had by the
       loop (time.bin's file read bytes left; `Port_TasStreamAhead`), and the bytes match the PS1's at each loop's

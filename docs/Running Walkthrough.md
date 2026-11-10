@@ -1312,13 +1312,27 @@ shadow's TLB miss remains (0x66a394).
 
 In sync from the start to 137,806 (1:12:58.96, s16d): the rand seed.
 
-**137,806 (1:12:58.96, s16d), open.** The port draws one `GV_RandS` a loop early: `delay.c`'s
-`sna_act_helper2_helper2_80033054`, Snake's lip sync (the rand log named it; the ELF showed the call). Snake's mouth value
-in `chara_work` (new `tools/port/tas/mem_log.lua`: any PS1 bytes per loop) goes 1 to 2 a loop early, and jimctrl's
-`field_30` (its Work dumped on both sides) is one step ahead from a stream's first loop, 137,803: PS1 1, 2, 3, 4; port
-2, 3, 4, 5. There `Port_TasStrCounter` takes the timeline's line t + 1 (2), but the PS1's value is line t's (1); the
-loops are a steady 2 blanks, so it isn't a late sample. Tried, all reverted: line t everywhere (12,855 desyncs), line t on
-a stream's first loop (45,142), and only when line t has a move (63,705). So which line a stream's first loop matches
-can't be told from the timeline alone. Next: record jimctrl's `field_30` at its own Act (where it reads the counter) in
-`timeline.lua`, instead of when `GV_Time` changes, or find what differs between 137,803's first loop and 45,142's and
-63,705's.
+## Step 59: the stream read hold removed (Nov 9)
+
+**137,806 (1:12:58.96, s16d).** The port drew one `GV_RandS` a loop early: `delay.c`'s
+`sna_act_helper2_helper2_80033054`, Snake's lip sync. A first reading blamed jimctrl's `field_30` (PS1 1, 2, 3, 4 from
+137,803; port 2, 3, 4, 5) and three timeline-index rules were tried and reverted (they desynced at 12,855, 45,142 and
+63,705). That reading was a sampling mistake: the PS1's values were a loop's first frame (before jimctrl's Act), the
+port's after the Act. `mem_log.lua` got `TAS_FRAMES=1` (every emulated frame, not only a loop's first), and with both
+sides sampled after the Act `field_30` is the same. No new timeline recording was needed.
+
+The real difference, from temporary printfs in `strctrl.c`, `jimctrl.c` and `delay.c` against per-frame dumps of the
+PS1's `StrctrlWork`, `jimaku_work` and `chara_work`: the port's stream data came three loops late. The PS1 had its first
+packets in loop 137,797, took the sound header in 137,798 and made jimctrl in 137,801 (Snake's mouth 1 in 137,802); the
+port saw data in 137,800, took the headers in 137,801 and 137,802, and jimctrl first acted in 137,803. The mouth opened a
+loop late, so `vec->vx` reached 64 by another path and the rand fell in 137,805 instead of 137,806.
+
+Cause: `Port_TasStreamHold` (Step 21's era) held a stream's first read until the PS1's heap had data, and the port's
+read then needed a few loops of its own (cdbios's task polls once a vertical blank). Since then `Port_TasStreamAhead`
+delivers each sector only when the PS1 had it and `Port_TasStreamBottom` hides packets past the PS1's, so the hold only
+made the port late. Two variants ran side by side (`--dir obj_ps2/runA`, `runB`): no hold, and a hold released 8 loops
+early. Both stayed in sync through every earlier loop and reached 138,603. The hold is deleted (`Port_TasStreamHold`,
+`fs_stream_held`, `MgsCd_Head`: 54 lines). Matching builds 80 and 2 OK.
+
+In sync from the start to 138,603 (1:13:21.28, s17a): `GM_PlayerPosition`, the stage binary not linked in.
+

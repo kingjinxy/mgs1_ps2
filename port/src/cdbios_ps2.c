@@ -50,16 +50,6 @@ static int          s_NextSector; /* where it ends */
 #endif
 static unsigned char s_Bounce[BOUNCE_SECTORS * DVD_SECTOR] __attribute__((aligned(64)));
 
-/** A read that the TAS replay holds (stream.c StartRead): the PS1's drive went there all the same. */
-void MgsCd_Head(int sector)
-{
-#ifdef MGS_TAS
-    s_NextSector = sector;
-#else
-    (void)sector;
-#endif
-}
-
 /** Finds the disc file; 1 when it's ready. */
 int MgsCd_Init(void)
 {

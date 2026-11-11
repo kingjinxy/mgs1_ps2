@@ -1402,3 +1402,77 @@ Translated files are regenerated, so the fixes are in `mips2c.py`: `NULLS`, a ta
 Matching builds 80 and 2 OK. In sync from the start to 145,000 (1:16:44.83, s19a): `GM_GameStatus`, port 0x10000000,
 PS1 0x10000040. Only the s11h shadow's TLB miss remains. Not started, at the user's request (pause after this desync).
 Parked for s19b: `mips2c.py s19b` fails with a `KeyError` (the jump target 0x800C8C14 has no symbol in its map).
+
+## Step 62: s19a and s19b linked in; held loops; the credits; in sync through the whole movie; the movie player (Nov 10)
+
+**s19a** (145,000, 1:16:44.83: `GM_GameStatus`) wasn't linked in and isn't split by the decomp. `stage_split.py`
+needed three fixes for it: a called leaf function below the first function with a frame (0x800C3958) now moves the
+code's start down; the file ends in stale code after the bss's zeros, whose frame setups and returns had set the
+code's end among the strings (now only frame setups that something calls or names, then back to the last return);
+and `jal`-like words in that stale tail cut two functions in the middle (from the code's bounds on, only the code's
+own calls count). 524 functions, 15 extra entry points; s10a, s11b, s11h, s15a, s17a and s18a regenerate unchanged.
+
+**s19b** (146,287, 1:17:25.39) is split by the decomp with 50 `INCLUDE_ASM` stubs. The `KeyError` parked in Step 61
+was 0x800C3C14, `countdwn.c`'s `static exec_countdown_proc` (now `STATIC`, so the map names it). `symlits.py` turned
+14 literal addresses in `overlay2.c` into symbols. Two new link stubs: `RotTransSV` (added to the HAL's libgte from
+s19b's own copy) and `_overlay_text_obj`: `mips2c.py` took the linker's section mark for the name of the function at
+the same address; it now prefers real symbols, which also changed six committed files of s07b, s11d and s14e
+(stores into what the link had stubbed as functions: Step 60's open item). s14e's code uses the word after
+`s14e_dword_800DDE40`, so that is an array of 2 in the port.
+
+Two NULL reads at s19b's start, both real on the PS1 (`mem_log.lua`: `Takabe_JeepSystem` is all zero through loop
+146,286): `s19b_jeep_gls_800CE400` reads `+16` of a model `GV_GetCache` didn't find (a `NULLS` rewrite: 0, the PS1's
+word at 0x10), and `jeep_sne.c`'s `GetResources` copies `Takabe_JeepSystem.control->mov` before the control exists
+(the PS1's bytes at 0: 3, 0, 0x0c50, 0x275a).
+
+**146,758 (1:17:41.14), `GM_PlayerPosition`.** Not the NULL reads, as first tried (a replay with both fixed stopped
+at the same loop). The PS1 holds two loops in a row there (a loop of 4 vertical blanks, then 2, 1, 1), and:
+- `compare_trace.py`'s `fix_clock` took the three equal `GV_Clock` lines for a mid-loop sample and flipped the middle
+  one. It now leaves lines under `STATE_NOSLOW` alone; three time-table records changed (77,953, 146,757, 146,785).
+  That alone changed nothing at 146,758.
+- A held loop has no vertical blank wait, so BizHawk's sample comes after its pad update: the loop's pads are on its
+  own line, not the next one. `trace_to_pads.py` now takes them from there (and gives the unsampled loop before it
+  the same buttons with nothing pressed or released). Five records changed (59,443/4, 146,756 to 146,758, 147,409/10).
+  Snake's stick release had reached the port a loop early.
+
+**147,390 (1:18:02.21), `GM_GameStatus`** (the port keeps `STATE_VOX_STREAM`). The PS1's stream ended in a held loop,
+whose late sample already shows the next stream's actor, and `Port_TasStreamMayEnd` counted an end only on a line
+showing the destroy. The only such case in the movie (204 others); any exit from the Act2 state now counts.
+
+**153,497 (1:21:20.09): the credits.** The port stalled: `takabe/ending2.c` has its own movie player, on a task, and
+waited for ever on the stubbed `CdRead2`. In replays the movie isn't played and only its states are kept (as
+`movie.c`'s skip): first frame 49 blanks after the start, the end 4 blanks a frame later. The first replay ended the
+movie 11 loops late (163,779, 1:27:02.43, `DG_UnDrawFrameCount`): the PS1's task (`mem_log.lua` on the movie's work
+at 0x800C326C) ends in loop 163,734, 20,371 blanks after its first frame, 22 fewer than 5,099 frames of 4. That lead
+is a measured constant (`MOVIE_LEAD`).
+
+**In sync through the whole movie**: 163,838 reference loops, to 1:27:04; `compare_trace.py`: "identical in every
+compared loop". `run_port.py` now stops at the reference's last loop (it ran on to loop 236,000). TLB misses: only
+the s11h shadow's, twice a run.
+
+**The movie player** (asked for by the user: borrow Silent Hill's). MGS's movies are laid out as SH1's: video in
+file 0 (chunks with a 32-byte STR header; MGS also has font and subtitle chunks, types 1 and 2, before the frames),
+XA audio in file 1 channel 1, 10 sectors a frame. So the HAL's reader on the IOP (`sh1spu`'s `xa.c`) plays the audio
+and forwards the other sectors to the EE; it read 2336-byte sectors (SH1's HILL. file) and now also whole 2352-byte
+ones (bit 16 of `OP_XA`'s third word; MGS's disc images). On top, in `port/src/cdbios_ps2.c`: `CdControl` keeps
+`CdlSetloc`'s sector and stops the stream at `CdlPause`; `CdRead2` starts the reader; `StGetNext` puts a frame's
+sectors together and hands it out no sooner than its time (4 blanks a frame), because the game shows a frame as soon
+as it has it; `StFreeRing`, `StUnSetRing`. The game's own code then decodes with the HAL's libpress into the PS1's
+VRAM, unchanged. SH1's `movie_ps2.c` itself isn't used (it decodes to a 32-bit display buffer). TAS replays keep
+skipping playback (`Port_TasSkipMovies`), since playback runs at the host's pace; `run_port.py --movies` plays them.
+
+Testing it. `movie.c`'s four movies in the TAS are skipped by the TAS's own cross press after two frames, so the
+credits were the test (`--movies --shot LOOP`). Stream prints showed frames handed out at exactly 15 a second and
+the sound decoding, but the dumps at loops 153,800 and 154,150 were black, and so was every decoded strip. That was
+right: the HAL's host decoder (`tools/mdec_test/check_mdec` on the movie's sectors) also gives black, and the frame
+sizes show the credits movie is black for its first 1,375 frames (92 s). The dump at loop 156,500 (1:23:00) shows
+the glacier behind the scrolling names, and VRAM holds the three decoded 320x160 pictures. The run stayed in sync
+with the PS1 to that loop with the movie playing. Not yet run on the console.
+
+**The last TLB miss: s11h's shadow (2 a run, `addr=0x48`, loop 84,538, 0:44:29).** Temporary prints in the translated
+actor showed its colour pointer was 0x48: `demoexec.c` creates `DEMOID_SHADOW` (the stage's copy of `NewDemoKage`)
+with an `SVECTOR` by value, which the EE passes in one register and the translated code takes in two. That is the s10a
+case of Step 38, and its fix turned out not to work: the link makes an overlay's functions local, so the wrapper in
+`hal_game.c` called a link stub ("HAL stub: s10a_800C5EF4" in the log) and s10a's shadow was never made.
+`stage_split.py` now writes the wrapper into the overlay's own C file, for whichever function the stage table has at
+0x000f (s10a, s11b, s11h, s15a, s17a). No TLB miss and no such stub in the next run.

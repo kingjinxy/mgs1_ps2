@@ -309,14 +309,18 @@ static void Act(Work *work)
 
 #ifdef MGS_PORT
     {
-        /* shortcut: movies are skipped, until the HAL's movie_ps2.c is hooked up (Planning Doc) */
-        extern int Port_TasMovieMayEnd( void ); /* port/src/tas_replay.c: in TAS replays, the PS1's loop */
-        if ( Port_TasMovieMayEnd() )
+        /* TAS replays: the movie isn't played, and ends in the PS1's loop (port/src/tas_replay.c) */
+        extern int Port_TasSkipMovies( void );
+        extern int Port_TasMovieMayEnd( void );
+        if ( Port_TasSkipMovies() )
         {
-            DG_UnDrawFrameCount = 2;
-            GV_DestroyActor( &work->actor );
+            if ( Port_TasMovieMayEnd() )
+            {
+                DG_UnDrawFrameCount = 2;
+                GV_DestroyActor( &work->actor );
+            }
+            return;
         }
-        return;
     }
 #endif
 

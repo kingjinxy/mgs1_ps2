@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <kernel.h>
 #include <libcdvd.h>
+#include <string.h>
 
 #define PS1_RAW_SECTOR 2352
 #define PS1_PREGAP     150 /* the game's sector numbers count from MSF 00:00:00 */
@@ -178,6 +179,133 @@ int SafetyCheck(int minute, int second, int sector)
     return 0;
 }
 
+/* Movies (game/movie.c, takabe/ending2.c: StSetRing, CdRead2, StGetNext, StFreeRing), as the HAL's movie_ps2.c does
+ * Silent Hill's: one reader, the IOP's (sh1spu's xa.c), plays the movie's XA audio (file 1, channel 1) at the
+ * drive's pace and forwards its other sectors (file 0: video frames and the font and subtitle chunks before them,
+ * each with a 32-byte STR header) into a ring here. StGetNext puts a frame's sectors together and hands it to the
+ * game, a video frame no sooner than its time (4 vertical blanks a frame: 10 sectors a frame at the drive's 150 a
+ * second), since the game shows each frame as soon as it has it. The game decodes with libpress into the PS1's
+ * VRAM as on the PS1. */
+#define STR_RING    64 /* forwarded sectors, 2048 bytes each */
+#define STR_PAYLOAD 2016
+#define STR_CHUNKS  16 /* sectors a frame: at most 11 on the discs */
+extern void Port_XaStart(unsigned int lsn, unsigned int index, unsigned int file, unsigned int chan); /* the HAL's spu_ps2.c */
+extern void Port_XaStop(void);
+extern void Port_XaForward(void* ring, unsigned int sectors, void* count);
+extern void Port_XaAck(unsigned int used);
+extern int  Port_VBlanks(unsigned int* cycles); /* the HAL's libetc_ps2.c */
+
+static unsigned char s_StrRing[STR_RING][DVD_SECTOR] __attribute__((aligned(64)));
+static unsigned int  s_StrCount[16] __attribute__((aligned(64))); /* [0]: sectors sent (the IOP's DMA) */
+static unsigned char s_StrFrame[STR_CHUNKS * STR_PAYLOAD] __attribute__((aligned(64)));
+static unsigned char s_StrHeader[32] __attribute__((aligned(4)));
+static int           s_Loc;       /* CdlSetloc's sector */
+static int           s_StrOpen, s_StrUsed, s_StrAcked, s_StrGot;
+static int           s_StrHave;   /* a whole frame waits in s_StrFrame */
+static int           s_StrT0 = -1; /* the vertical blank of video frame 1 */
+
+static int str_blanks(void)
+{
+    unsigned int c;
+    return Port_VBlanks(&c);
+}
+
+void StSetRing(unsigned long* ring, int sectors)
+{
+    (void)ring; /* the game's 32 sectors aren't used: frames are put together in s_StrFrame */
+    (void)sectors;
+}
+
+void StSetStream(int mode, int start, int end, void* f1, void* f2)
+{
+    (void)mode, (void)start, (void)end, (void)f1, (void)f2;
+}
+
+int CdRead2(int mode)
+{
+    (void)mode;
+    if (!s_Ready || s_Loc < PS1_PREGAP)
+    {
+        return 0;
+    }
+    *(volatile unsigned int*)((unsigned int)s_StrCount | 0x20000000) = 0;
+    s_StrUsed = s_StrAcked = s_StrGot = s_StrHave = 0;
+    s_StrT0   = -1;
+    s_StrOpen = 1;
+    Port_XaForward(s_StrRing, STR_RING, s_StrCount);
+    Port_XaStart(s_Disc.lsn, (unsigned int)(s_Loc - PS1_PREGAP), 1, 1 | 0x100 /* whole 2352-byte sectors */);
+    printf("movie: stream from PS1 sector %d\n", s_Loc);
+    return 1;
+}
+
+/** 0 and the next frame's data and header (as a sector's: type, sectors, frame number, size) when one is due, else 1. */
+int StGetNext(unsigned long** addr, unsigned long** header)
+{
+    if (!s_StrOpen)
+    {
+        return 1;
+    }
+    /* through the uncached mirror: the IOP's DMA wrote behind the data cache */
+    while (!s_StrHave && s_StrUsed < (int)*(volatile unsigned int*)((unsigned int)s_StrCount | 0x20000000))
+    {
+        const unsigned char* d = (const unsigned char*)((unsigned int)s_StrRing[s_StrUsed++ % STR_RING] | 0x20000000);
+        int                  chunk = d[4] | d[5] << 8, chunks = d[6] | d[7] << 8;
+        if (d[0] != 0x60 || d[1] != 0x01 || chunk >= STR_CHUNKS || chunks > STR_CHUNKS)
+        {
+            continue;
+        }
+        if (chunk == 0)
+        {
+            s_StrGot = 0;
+        }
+        memcpy(s_StrFrame + chunk * STR_PAYLOAD, d + 32, STR_PAYLOAD);
+        if (++s_StrGot == chunks && chunk == chunks - 1)
+        {
+            memcpy(s_StrHeader, d, 32);
+            s_StrHave = 1;
+        }
+    }
+    if (s_StrUsed - s_StrAcked >= 8)
+    {
+        Port_XaAck((unsigned int)(s_StrAcked = s_StrUsed));
+    }
+    if (!s_StrHave)
+    {
+        return 1;
+    }
+    if ((s_StrHeader[2] | s_StrHeader[3] << 8) == 0x8001)
+    {
+        int due = ((s_StrHeader[8] | s_StrHeader[9] << 8) - 1) * 4;
+        if (s_StrT0 < 0)
+        {
+            s_StrT0 = str_blanks() - due;
+        }
+        if (str_blanks() - s_StrT0 < due)
+        {
+            return 1;
+        }
+    }
+    *addr   = (unsigned long*)s_StrFrame;
+    *header = (unsigned long*)s_StrHeader;
+    return 0;
+}
+
+int StFreeRing(unsigned long* addr)
+{
+    (void)addr;
+    s_StrHave = 0;
+    return 0;
+}
+
+void StUnSetRing(void)
+{
+    if (s_StrOpen)
+    {
+        Port_XaStop();
+        s_StrOpen = 0;
+    }
+}
+
 /* Drive commands the game sends outside cdbios (safety.c, the disc change screens): done at once, with a
  * status of "motor on, shell closed" (CdlStatStandby). */
 /* PSY-Q CdlLOC: minute, second, sector (BCD), track. */
@@ -193,8 +321,15 @@ unsigned char* CdIntToPos(int i, unsigned char* p)
 
 int CdControl(unsigned char com, unsigned char* param, unsigned char* result)
 {
-    (void)com;
-    (void)param;
+    if (com == 0x02 && param) /* CdlSetloc: where a movie's CdRead2 starts (game/movie.c, takabe/ending2.c) */
+    {
+        s_Loc = ((param[0] >> 4) * 10 + (param[0] & 15)) * 4500 + ((param[1] >> 4) * 10 + (param[1] & 15)) * 75
+              + (param[2] >> 4) * 10 + (param[2] & 15);
+    }
+    if (com == 0x09) /* CdlPause: a movie's end */
+    {
+        StUnSetRing();
+    }
     if (result)
     {
         result[0] = 0x02;

@@ -62,6 +62,7 @@ static unsigned char* mgs_tas_timeline; /* host:tas_timeline.bin: the PS1's stre
 static unsigned int   size_mgs_tas_timeline;
 static unsigned char* mgs_tas_ticks; /* host:tas_ticks.bin: the PS1's mts tick per loop (trace_to_pads.py) */
 static unsigned int   size_mgs_tas_ticks;
+static int            s_Movies; /* host:tas_movies.txt: movies play (Port_TasSkipMovies) */
 
 extern int          GV_Time, GV_Clock, GV_PassageTime, GM_GameStatus, GM_AlertMode, GM_LoadRequest;
 extern int          DG_UnDrawFrameCount, GM_LoadComplete;
@@ -536,6 +537,18 @@ void Port_TasScenario(void)
 #endif
 }
 
+/** game/movie.c, takabe/ending2.c: 1 in TAS replays, where a movie isn't played, only its timing kept (the PS1's
+ * loops; the port's playback runs at the host's pace); 0 in normal play and with host:tas_movies.txt
+ * (run_port.py --movies: to see a movie play, out of sync from there). */
+int Port_TasSkipMovies(void)
+{
+#ifdef MGS_TAS
+    return mgs_tas_time && !s_Movies;
+#else
+    return 0;
+#endif
+}
+
 /** movie.c: STATE_DEMO goes in Die, the loop after the destroy; the record's status is its next line's. */
 int Port_TasMovieMayEnd(void)
 {
@@ -761,6 +774,11 @@ void Port_TasInit(void)
         {
             Hal_RandHook = rand_log;
         }
+        fclose(f);
+    }
+    if ((f = fopen("host:tas_movies.txt", "r")) != 0) /* run_port.py --movies */
+    {
+        s_Movies = 1;
         fclose(f);
     }
     if ((f = fopen("host:tas_ramdump.txt", "r")) != 0)

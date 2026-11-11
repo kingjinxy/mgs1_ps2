@@ -400,6 +400,8 @@ MGS_TAS_TIME=~/emu/tas/time.bin python3 build/link_ps2.py`; run in PCSX2; then
 - [ ] Report per segment: passed, or the first diverging game frame and field. Keep a list of known divergences
       (with the bug they come from) so the report shows only new ones.
 - [ ] Rerun the whole movie with no state injection now and then, to catch bugs that carry between stages.
+- [x] 2026-11-10: the whole movie replays in sync, start to end (163,838 loops), in one run of about 12 minutes with
+      the null renderer. Movies (`movie.c`, `ending2.c`) aren't played in replays; `--movies` plays them.
 
 ## Phase 5: grow the test with the port
 

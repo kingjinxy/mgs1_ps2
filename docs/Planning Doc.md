@@ -268,6 +268,9 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
 
 - [ ] Run the `sd_*` driver against the HAL's SPU-on-SPU2 layer
 - [ ] XA (codec voice) and STR/MDEC movies via the SH1 implementations
+  - [x] STR movies (2026-11-10; seen playing in PCSX2 in the credits, untested on the console): `game/movie.c` and `takabe/ending2.c` run as on the PS1 on
+        `StGetNext`/`CdRead2` in `port/src/cdbios_ps2.c`, fed by the SH1 reader on the IOP (`sh1spu`'s `xa.c`, now
+        also for whole 2352-byte sectors), which plays the XA audio. TAS replays skip playback and keep the timing
 
 ## Side tools (optional)
 
@@ -275,7 +278,7 @@ About 100k instructions of `INCLUDE_ASM` remain in 12 overlays (largest: `brf` 2
       fixed addresses) natively, separate from PS2 hardware issues. Not on the critical path
 
 - [ ] TAS regression test: replay the all-bosses TAS (TASVideos submission #5139) by game frame and compare
-      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. In sync to loop 145,000 (1:16:44.83; was 12,101, 0:06:42.1,
+      the game state to BizHawk's replay. Plan: `docs/TAS Testing Plan.md`. **In sync through the whole movie** (163,838 reference loops, 1:27:04; 2026-11-10; was 12,101, 0:06:42.1,
       2026-10-31); port bugs found by it so far: `camera.c` `GM_CameraList[-1]`, `sna_line_check`'s stack pair,
       `lit_mdl.c`'s dropped model initializer,
       chafgrnd.c's NULL `RECT` (`prim.c`).

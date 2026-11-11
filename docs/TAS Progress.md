@@ -3,7 +3,7 @@
 TASVideos #5139 replayed in the port. The movie is about 313,200 frames, 1:27:05 at 59.94 frames a second. Percentages
 are by movie frame. Each row is the point reached once that fix was in. Update this at each new milestone.
 
-Current: loop 145,000 (1:16:44.83), 88.13%.
+Current: the whole movie, loop 163,845 (1:27:04.6), 100% (Nov 10).
 
 | In sync to loop | Movie time | % | What fixed it | Commit (2026) |
 |---|---:|---:|---|---|
@@ -54,6 +54,13 @@ Current: loop 145,000 (1:16:44.83), 88.13%.
 | 77,164 | 0:40:37.08 | 46.64% | s11b translated (`stage_split.py` + `mips2c.py`; the table declares resident constructors) | Nov 4 |
 | 77,671 | 0:40:53.30 | 46.95% | s11g's 8 stubs translated; jump-table entries no longer count as literal addresses | Nov 4 |
 | 79,264 | 0:41:44.05 | 47.92% | s11d's 37 stubs translated; the port's own frame holds undone (its pace is the host's) | Nov 4 |
+| 145,000 | 1:16:44.83 | 88.13% | (rows from 79,264 to here: see the walkthrough, Steps 40 to 61) | Nov 10 |
+| 146,287 | 1:17:25.39 | 88.91% | s19a split and linked in (`stage_split.py`: a called leaf below the first frame, stale code after the bss) | Nov 10 |
+| 146,758 | 1:17:41.14 | 89.20% | s19b's 50 stubs translated and linked in; two NULL reads at its start | Nov 10 |
+| 147,390 | 1:18:02.21 | 89.61% | held loops' pads from their own trace line; two holds in a row no longer taken for a mid-loop sample | Nov 10 |
+| 153,497 | 1:21:20.09 | 93.39% | a stream end with no "being destroyed" line counts as an end | Nov 10 |
+| 163,779 | 1:27:02.43 | 99.95% | the credits' movie (`ending2.c`): its timing kept, no playback in replays | Nov 10 |
+| 163,845 | 1:27:04.6 | 100% | the credits movie's end at the PS1's measured time | Nov 10 |
 
 The 12,652 and 12,758 rows share one commit time; those stopping points come from run notes.
 

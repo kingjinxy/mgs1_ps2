@@ -41,6 +41,11 @@ How it decides what is what:
 
 - **Code end.** The code ends at the first referenced address past the last frame setup. Ending at the last `jr ra`
   failed in `s08b`, where a rodata word looked like `jr ra`.
+- **Code start.** The first called function with a frame, moved down to any frame setup below it whose address the
+  code builds (s18a: an actor's act and die, never called) and to any called leaf below it (s19a's 800C3958).
+- **Stale bytes after the bss** (s19a's file ends in old code): only frame setups that something calls or names set
+  the code's end, the end is pulled back to the last return (the first strings may have no reference), and from then
+  on only the code's own `jal`s count as calls.
 - **Functions** start at frame setups, after a `jr ra`, and at addresses the code or data takes.
 - **Data words** that point into the overlay or at resident code/data become symbols, so the data keeps working at
   the port's addresses. A word pointing into code counts as a function pointer if its target is a frame setup or
@@ -151,6 +156,13 @@ one; never dismiss them.
   - A port bug, as `s07b`'s Mantis shadow flag was: fix the cause.
   - A real PS1 NULL read: give the code what the PS1 read. The Ninja afterimage's light position is the BIOS bytes at
     0, (3, 0, 3152); `DummyPlayer` got a zeroed map.
+  - In translated code the fix is a text rewrite in `mips2c.py`'s `NULLS` table (per function, asserted to match once),
+    since the files are regenerated.
+- **A struct passed by value from C** (`demoexec.c`'s `DEMOID_SHADOW`, an `SVECTOR`): `stage_split.py` writes a C wrapper
+  into `OVL.c` (`Port_OVL_DemoKage`) and points the stage table at it. It has to be in the overlay: the link makes an
+  overlay's functions local, and a wrapper elsewhere gets a link stub.
+- **Map names.** `mips2c.py` prefers a real symbol over the linker's `_overlay_*` section marks at the same address
+  (s19b's `draw_image` came out as `_overlay_text_obj`, which the link then stubbed).
 - **Bit 31 of pointers.** PS1 pointers are `0x80xxxxxx`, and code uses the bit as a tag. The HZD wall/floor tag now goes
   through `HZD_IS_WALL`/`HZD_TAG_FLOOR`/`HZD_UNTAG_FLOOR` (`libhzd.h`; the port tags floors with the EE's uncached
   mirror, `| 0x20000000`). Grep a new overlay's translated code for `& 0x80000000`, `< 0` tests on pointers, and calls

@@ -227,7 +227,10 @@ with open('obj/asm_%s_lhs.map' % ovl, 'w') as f:
 
 # functions C calls with a struct by value (the PS1 passes it in two registers, the EE in one): the data points at a
 # C wrapper that calls the translated code with the PS1's registers (port/src/hal_game.c)
-ABI_WRAP = {'s10a_800C5EF4': 'Port_s10a_DemoKage'}  # DEMOID_SHADOW, NewDemoKage's copy: demoexec.c passes an SVECTOR
+# DEMOID_SHADOW (0x000f), the stage's copy of NewDemoKage: demoexec.c passes an SVECTOR. The wrapper is written into
+# OVL.c: the link makes an overlay's functions local (one in hal_game.c reached a link stub instead, s10a's)
+kage = re.search(r'\{ 0x000f, \(NEWCHARA \*\)0x([0-9a-f]{8}) \}', table)
+ABI_WRAP = {fname(int(kage.group(1), 16)): 'Port_%s_DemoKage' % ovl} if kage and BASE <= int(kage.group(1), 16) < END else {}
 
 # the data, in the PS1's layout
 def block(lo, hi_, sect):
@@ -255,7 +258,16 @@ for name, lo, hi_ in regions:
     src += block(lo, hi_, '.data')
 src += block(END, bss_end, '.bss')
 src += ['    ".text\\n");', '']
-src += ['#include "overlays/%s/recomp/%s.inc"' % (ovl, fname(a)) for a in funcs] + ['#endif']
+src += ['#include "overlays/%s/recomp/%s.inc"' % (ovl, fname(a)) for a in funcs]
+for f, w in ABI_WRAP.items():
+    src += ['', '/* demoexec.c calls DEMOID_SHADOW with an SVECTOR by value: the EE passes it in one register, the translated code',
+            '   takes the PS1\'s two (a1: vx, vy; a2: vz, pad), so every argument after it was one register off (its color as a',
+            '   pointer: a TLB miss at NULL+0x48) */',
+            'typedef struct { short vx, vy, vz, pad; } Ps1Svector;',
+            'void *%s(void *parent, Ps1Svector v, int *arg2, int *arg3, int r, int g, int b)' % w, '{',
+            '    return (void *)G_%s((int)parent, (unsigned short)v.vx | v.vy << 16, (unsigned short)v.vz | v.pad << 16,' % f,
+            '                   (int)arg2, (int)arg3, r, g, b, 0, 0, 0, 0);', '}']
+src += ['#endif']
 os.makedirs('source/overlays/%s' % ovl, exist_ok=True)
 open('source/overlays/%s/%s.c' % (ovl, ovl), 'w').write('\n'.join(src) + '\n')
 

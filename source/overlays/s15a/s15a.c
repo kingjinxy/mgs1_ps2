@@ -52,7 +52,7 @@ __asm__(
     ".byte 14,0,0,0\n"
     ".word s15a_800C3F68\n"
     ".byte 15,0,0,0\n"
-    ".word s15a_800C5600\n"
+    ".word Port_s15a_DemoKage\n"
     ".byte 33,0,0,0\n"
     ".word s15a_800D73D8\n"
     ".byte 37,0,0,0\n"
@@ -589,4 +589,14 @@ __asm__(
 #include "overlays/s15a/recomp/s15a_800D82D8.inc"
 #include "overlays/s15a/recomp/s15a_800D82F8.inc"
 #include "overlays/s15a/recomp/s15a_800D8458.inc"
+
+/* demoexec.c calls DEMOID_SHADOW with an SVECTOR by value: the EE passes it in one register, the translated code
+   takes the PS1's two (a1: vx, vy; a2: vz, pad), so every argument after it was one register off (its color as a
+   pointer: a TLB miss at NULL+0x48) */
+typedef struct { short vx, vy, vz, pad; } Ps1Svector;
+void *Port_s15a_DemoKage(void *parent, Ps1Svector v, int *arg2, int *arg3, int r, int g, int b)
+{
+    return (void *)G_s15a_800C5600((int)parent, (unsigned short)v.vx | v.vy << 16, (unsigned short)v.vz | v.pad << 16,
+                   (int)arg2, (int)arg3, r, g, b, 0, 0, 0, 0);
+}
 #endif

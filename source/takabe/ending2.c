@@ -97,6 +97,14 @@ RECT moviework_rects_800C3254[3] = {
 
 Work2 moviework_800C326C = {0};
 
+#ifdef MGS_PORT
+extern int Port_TasSkipMovies( void ); /* port/src/tas_replay.c: 1 in TAS replays, which keep only the movie's timing */
+#define MOVIE_SEEK   49 /* vertical blanks from the movie's start to its first frame */
+#define MOVIE_BLANKS 4  /* per movie frame (15 a second) */
+#define MOVIE_LEAD   22 /* the PS1's task ends 22 blanks before that count (measured in the TAS: loop 163,734,
+                           20,371 blanks for 5,100 frames; its drive's pace) */
+#endif
+
 int roll_dword_800C32B8 = 0x00000140;
 int roll_dword_800C32BC[1] = {0x00000267}; // unknown how large
 int roll_dword_800C32C0 = 0x00000633;
@@ -396,6 +404,19 @@ void Ending2Movie_800C6460(void)
         return;
     }
 
+#ifdef MGS_PORT
+    if (Port_TasSkipMovies())
+    {
+        /* TAS replays: no picture or sound, only the movie's timing (Ending2_800C677C) */
+        extern int Port_GameTick( void ); /* port/src/tas_replay.c: the PS1's tick */
+        printf("MOVIE skipped: %d frames\n", moviework_800C326C.file->frame);
+        moviework_800C326C.field_0 = 1;
+        moviework_800C326C.field_1C = 0;
+        moviework_800C326C.field_18 = 2;
+        moviework_800C326C.field_24 = Port_GameTick();
+        return;
+    }
+#endif
     start_xa_sd();
 
     GV_ResetPacketMemory();
@@ -427,6 +448,16 @@ void Ending2Movie_800C6460(void)
 
 void Ending2_800C65C4(Work *work)
 {
+#ifdef MGS_PORT
+    if (Port_TasSkipMovies())
+    {   /* no movie task or stream to stop (Ending2Movie_800C6460) */
+        GV_ResetPacketMemory();
+        DG_RestartMainChanlSystem();
+        moviework_800C326C.file = NULL;
+        DG_UnDrawFrameCount = 0x7FFF0000;
+        return;
+    }
+#endif
     while (mts_get_task_status(MTSID_CD_READ) != 0)
     {
         moviework_800C326C.field_20 = 1;
@@ -514,6 +545,29 @@ int Ending2_800C677C(Work *work)
             break;
         }
     }
+
+#ifdef MGS_PORT
+    else if (Port_TasSkipMovies())
+    {
+        /* the movie task's states by the tick (see Ending2Movie_800C6460): the first frame MOVIE_SEEK blanks after
+           the start (the PS1's seek: 49 in the TAS, loop 153,548), the end MOVIE_BLANKS blanks a frame later, less MOVIE_LEAD */
+        extern int Port_GameTick( void );
+        int ticks = Port_GameTick() - moviework_800C326C.field_24;
+        if (moviework_800C326C.field_0 == 1 && ticks >= MOVIE_SEEK)
+        {
+            moviework_800C326C.field_0 = 2;
+            moviework_800C326C.field_24 += ticks;
+        }
+        else if (moviework_800C326C.field_0 == 2 && !moviework_800C326C.field_1C)
+        {
+            moviework_800C326C.field_24 += ticks; /* the first frame held until the actor starts the play */
+        }
+        else if (moviework_800C326C.field_0 == 2 && ticks >= (moviework_800C326C.file->frame - 1) * MOVIE_BLANKS - MOVIE_LEAD)
+        {
+            moviework_800C326C.field_0 = -1;
+        }
+    }
+#endif
 
     return moviework_800C326C.field_0;
 }

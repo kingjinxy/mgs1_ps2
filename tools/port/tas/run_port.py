@@ -216,6 +216,7 @@ def main():
     ap.add_argument("--dir", help="run in this folder (its own trace, log and host: files; links to obj_ps2's "
                                    "ISO and ELF), so several runs can go at once")
     ap.add_argument("--sw", action="store_true", help="the software GS renderer (default: null, except with --shot)")
+    ap.add_argument("--movies", action="store_true", help="play the movies (out of sync from the first one)")
     ap.add_argument("--rand-log", default="", help="A-B: log every rand() draw in loops A to B")
     a = ap.parse_args()
     if a.show:
@@ -251,6 +252,11 @@ def main():
     elif os.path.exists(shot):
         os.remove(shot)
 
+    movies = os.path.join(WORK, "tas_movies.txt")  # read by the port at startup (tas_replay.c)
+    if a.movies:
+        open(movies, "w").write("1\n")
+    elif os.path.exists(movies):
+        os.remove(movies)
     randlog = os.path.join(WORK, "tas_randlog.txt")  # read by the port at startup (tas_replay.c)
     if a.rand_log:
         open(randlog, "w").write(a.rand_log.replace("-", " ") + "\n")
@@ -264,6 +270,7 @@ def main():
         if len(f) >= 14:
             ref[int(f[1])] = f
     fix_clock(ref)
+    a.last = a.last or max(ref)  # the end of the movie
     print("reference: %d loops; comparing from loop %d" % (len(ref), a.start), flush=True)
 
     if os.path.exists(TRACE):

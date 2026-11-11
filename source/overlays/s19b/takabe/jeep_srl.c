@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "strcode.h"
 #include "game/game.h"
 #include "libgcl/libgcl.h"
@@ -43,7 +46,11 @@ void *NewJeepGlass(int name, SVECTOR *pos, int side);
 void *NewJeepLamp(SVECTOR *root_pos, int tex_id, int unused);
 void *s19b_jeep2_800D6F24(int name, int map); // NewJeep2
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_srl_800CD638.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CD638.s")
+#endif
 extern int s19b_dword_800C354C;
 
 void s19b_jeep_srl_800CD790(Work *work)
@@ -53,15 +60,31 @@ void s19b_jeep_srl_800CD790(Work *work)
     work->field_C50 = p[1];
     work->field_C54 = p[6];
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_srl_800CD7B4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CD7B4.s")
+#endif
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_srl_800CDAA4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CDAA4.s")
+#endif
 void s19b_jeep_srl_800CDAA4(Work *work);
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_srl_800CDF48.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CDF48.s")
+#endif
 void s19b_jeep_srl_800CDF48(Work *work);
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_srl_800CE020.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CE020.s")
+#endif
 int s19b_jeep_srl_800CE020(Work *work, int name, int where);
 
 void *NewJeepScroll(int name, int where)
@@ -83,15 +106,27 @@ void *NewJeepScroll(int name, int where)
     return work;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CE400.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE400.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CE52C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE52C.s")
+#endif
 void s19b_jeep_gls_800CE5F8(DG_OBJS *objs)
 {
     DG_DequeueObjs(objs);
     objs->objs[0].rgbs = NULL;
     DG_FreeObjs(objs);
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CE628.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE628.s")
+#endif
 void s19b_jeep_gls_800CE83C(SVECTOR *src, SVECTOR *dst)
 {
     dst[0].vx  = src->vx;
@@ -111,10 +146,26 @@ void s19b_jeep_gls_800CE8B8(SVECTOR *src, SVECTOR *dst)
     dst->vy = src->vz;
     dst->vz = src->vy;
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CE8DC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE8DC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CEB2C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CEB2C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CEC24.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CEC24.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_gls_800CEDFC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CEDFC.s")
+#endif
 
 void s19b_jeep_gls_800CEE7C(Work *work, int arg1, SVECTOR *pos)
 {

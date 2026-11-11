@@ -1,0 +1,63 @@
+extern char R_GM_GetMap[] __asm__("GM_GetMap");
+extern char R_HZD_GetAddress[] __asm__("HZD_GetAddress");
+int G_s19a_800D50B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19a_800D50B0");
+int G_s19a_800D50B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[4] = *(int *)((u)r[16] + 3048);
+     CALL(R_GM_GetMap);
+    r[7] = (u)r[2] + (u)0;
+    r[2] = *(int *)((u)r[7] + 8);
+    r[3] = *(int *)((u)r[2] + 0);
+    r[2] = *(signed char *)((u)r[16] + 2937);
+    r[3] = *(int *)((u)r[3] + 24);
+    r[2] = (u)r[2] << 3;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(short *)((u)r[3] + 0);
+    c = (((int)r[2] > 0)); *(int *)((u)r[16] + 2536) = r[2]; if (c) goto L800d5104;
+    r[2] = (u)0 + -1; goto L800d5194;
+    L800d5104:;
+    r[6] = *(int *)((u)r[3] + 4);
+    c = (((int)r[2] <= 0)); r[5] = (u)0 + (u)0; if (c) goto L800d515c;
+    r[3] = (u)r[16] + (u)0;
+    r[4] = (u)r[6] + 6;
+    L800d5118:;
+    r[2] = *(unsigned short *)((u)r[6] + 0);
+    *(short *)((u)r[3] + 2540) = r[2];
+    r[2] = *(unsigned short *)((u)r[4] + -2);
+    r[6] = (u)r[6] + 8;
+    *(short *)((u)r[3] + 2542) = r[2];
+    r[2] = *(unsigned short *)((u)r[4] + -4);
+    r[5] = (u)r[5] + 1;
+    *(short *)((u)r[3] + 2544) = r[2];
+    r[2] = *(unsigned short *)((u)r[4] + 0);
+    r[4] = (u)r[4] + 8;
+    *(short *)((u)r[3] + 2546) = r[2];
+    r[2] = *(int *)((u)r[16] + 2536);
+    r[2] = (int)r[5] < (int)r[2];
+    c = ((r[2] != 0)); r[3] = (u)r[3] + 8; if (c) goto L800d5118;
+    L800d515c:;
+    r[5] = (u)r[16] + 3028;
+    r[8] = LWL(((u)r[16] + 2543), r[8]);
+    r[8] = LWR(((u)r[16] + 2540), r[8]);
+    r[9] = LWL(((u)r[16] + 2547), r[9]);
+    r[9] = LWR(((u)r[16] + 2544), r[9]);
+    SWL(((u)r[16] + 3031), r[8]);
+    SWR(((u)r[16] + 3028), r[8]);
+    SWL(((u)r[16] + 3035), r[9]);
+    SWR(((u)r[16] + 3032), r[9]);
+    r[4] = *(int *)((u)r[7] + 8);
+    r[6] = (u)0 + -1; CALL(R_HZD_GetAddress);
+    *(int *)((u)r[16] + 3044) = r[2];
+    r[2] = (u)0 + (u)0;
+    L800d5194:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

@@ -1,0 +1,68 @@
+extern char R_s19a_dat_800C36C4[] __asm__("s19a_dat_800C36C4");
+extern char R_s19a_dat_800C36CC[] __asm__("s19a_dat_800C36CC");
+extern char R_s19a_dat_800C36DC[] __asm__("s19a_dat_800C36DC");
+extern char R_GV_RandU[] __asm__("GV_RandU");
+int G_s19a_800D4438(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19a_800D4438");
+int G_s19a_800D4438(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 24) = r[18];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[18] = *(short *)((u)r[17] + 3042);
+    r[4] = (u)0 + 100;
+    r[2] = r[18] & 7168;
+    r[16] = (int)r[2] >> 10; CALL(R_GV_RandU);
+    r[4] = r[16] & 3;
+    r[3] = 0;
+    r[3] = (u)r[3] + (int)R_s19a_dat_800C36C4;
+    r[4] = (u)r[4] << 1;
+    r[4] = (u)r[4] + (u)r[3];
+    r[3] = *(unsigned short *)((u)r[4] + 0);
+    r[2] = (int)r[2] < (int)r[3];
+    c = ((r[2] == 0)); r[16] = r[16] & 4; if (c) goto L800d449c;
+    r[2] = *(short *)((u)r[17] + 2892);
+    r[3] = (u)0 + 1;
+    c = ((r[2] != r[3]));  if (c) goto L800d44b0;
+    L800d449c:;
+    r[2] = (u)0 + (u)0;
+    *(int *)((u)r[17] + 2884) = 0;
+    *(int *)((u)r[17] + 2880) = 0;
+    *(short *)((u)r[17] + 2892) = 0; goto L800d4518;
+    L800d44b0:;
+    c = ((r[16] == 0));  if (c) goto L800d44bc;
+    *(short *)((u)r[17] + 2892) = r[3];
+    L800d44bc:;
+    r[3] = r[18] & 224;
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s19a_dat_800C36CC;
+    r[3] = (u)r[3] >> 4;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(unsigned short *)((u)r[3] + 0);
+    r[3] = r[18] & 31;
+    r[3] = (u)r[3] << 2;
+    *(int *)((u)r[17] + 2884) = r[2];
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s19a_dat_800C36DC;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(int *)((u)r[3] + 0);
+    *(int *)((u)r[17] + 2880) = r[2];
+    r[2] = r[18] & 16;
+    c = ((r[2] != 0)); r[2] = r[18] & 768; if (c) goto L800d4514;
+    r[2] = (u)r[2] << 2;
+    *(short *)((u)r[17] + 2888) = r[2];
+    r[2] = (u)0 + 1; goto L800d4518;
+    L800d4514:;
+    r[2] = (u)0 + (u)0;
+    L800d4518:;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

@@ -1,0 +1,68 @@
+extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
+extern char R_GV_Clock[] __asm__("GV_Clock");
+extern char R_DG_PutPrim[] __asm__("DG_PutPrim");
+extern char R_DG_SetPos[] __asm__("DG_SetPos");
+extern char R_DG_SetTmpLight[] __asm__("DG_SetTmpLight");
+extern char R_GM_SeSet[] __asm__("GM_SeSet");
+extern char R_GV_DestroyActor[] __asm__("GV_DestroyActor");
+extern char R_s19a_800D798C[] __asm__("s19a_800D798C");
+extern char R_s19a_800D7AA8[] __asm__("s19a_800D7AA8");
+int G_s19a_800D7AE0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19a_800D7AE0");
+int G_s19a_800D7AE0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 28) = r[31];
+    *(int *)((u)r[29] + 24) = r[18];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[3] = *(int *)((u)r[17] + 32);
+    r[2] = 0;
+    *(int *)((u)r[2] + (int)R_GM_CurrentMap) = r[3];
+    r[3] = *(int *)((u)r[17] + 920);
+    r[2] = (u)0 + 32;
+    c = ((r[3] != r[2])); r[4] = (u)r[17] + 912; if (c) goto L800d7b1c;
+    r[5] = (u)0 + 59; CALL(R_GM_SeSet);
+    L800d7b1c:;
+    r[18] = *(int *)((u)r[17] + 920);
+    r[16] = (u)r[18] + -1;
+    c = (((int)r[16] > 0)); *(int *)((u)r[17] + 920) = r[16]; if (c) goto L800d7b40;
+    r[4] = (u)r[17] + (u)0; CALL(R_GV_DestroyActor);
+     goto L800d7bc0;
+    L800d7b40:;
+    r[4] = (u)r[17] + 72;
+    r[5] = (u)r[17] + 328;
+    r[6] = (u)0 + 32; CALL(R_s19a_800D798C);
+    r[2] = (u)r[16] << 4;
+    r[6] = (u)r[2] + 50;
+    r[16] = *(int *)((u)r[17] + 36);
+    r[2] = (int)r[6] < 256;
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800d7b6c;
+    r[6] = (u)0 + 255;
+    L800d7b6c:;
+    r[2] = *(int *)((u)r[2] + (int)R_GV_Clock);
+    r[2] = (u)r[2] << 2;
+    r[2] = (u)r[16] + (u)r[2];
+    r[4] = *(int *)((u)r[2] + 64);
+    r[5] = (u)0 + 32; CALL(R_s19a_800D7AA8);
+    r[2] = (u)r[18] + -29;
+    r[6] = (u)r[2] << 9;
+    c = (((int)r[6] <= 0)); r[5] = (u)r[6] + (u)0; if (c) goto L800d7ba4;
+    r[4] = (u)r[17] + 840;
+    r[6] = (u)0 + 1000; CALL(R_DG_SetTmpLight);
+    L800d7ba4:;
+    r[2] = *(int *)((u)r[17] + 64);
+    r[4] = (u)r[17] + 40;
+    r[2] = (u)r[2] + -16;
+    *(int *)((u)r[17] + 64) = r[2]; CALL(R_DG_SetPos);
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_PutPrim);
+    L800d7bc0:;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

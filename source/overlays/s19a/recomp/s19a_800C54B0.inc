@@ -1,0 +1,63 @@
+extern char R_GM_PlayerMap[] __asm__("GM_PlayerMap");
+extern char R_GM_PlayerPosition[] __asm__("GM_PlayerPosition");
+extern char R_GV_DiffDirAbs[] __asm__("GV_DiffDirAbs");
+extern char R_GV_DiffVec3[] __asm__("GV_DiffVec3");
+extern char R_HZD_OnlineHazardCheck[] __asm__("HZD_OnlineHazardCheck");
+extern char R_s19a_800C5424[] __asm__("s19a_800C5424");
+int G_s19a_800C54B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19a_800C54B0");
+int G_s19a_800C54B0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(56)
+    r[29] = (u)r[29] + -56;
+    *(int *)((u)r[29] + 32) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    r[3] = 0;
+    *(int *)((u)r[29] + 48) = r[31];
+    *(int *)((u)r[29] + 44) = r[19];
+    *(int *)((u)r[29] + 40) = r[18];
+    *(int *)((u)r[29] + 36) = r[17];
+    r[2] = *(int *)((u)r[16] + 76);
+    r[3] = *(int *)((u)r[3] + (int)R_GM_PlayerMap);
+    r[2] = *(int *)((u)r[2] + 0);
+    r[2] = r[2] & r[3];
+    c = ((r[2] == 0)); r[18] = (u)r[16] + 32; if (c) goto L800c5588;
+    r[4] = (u)r[18] + (u)0;
+    r[2] = 0;
+    r[19] = (u)r[2] + (int)R_GM_PlayerPosition;
+    r[5] = (u)r[19] + (u)0;
+    r[6] = (u)r[29] + 24; CALL(R_s19a_800C5424);
+    r[4] = *(short *)((u)r[29] + 26);
+    r[5] = *(short *)((u)r[16] + 42);
+     CALL(R_GV_DiffDirAbs);
+    r[4] = *(short *)((u)r[29] + 24);
+    r[5] = *(short *)((u)r[16] + 40);
+    r[17] = (u)r[2] + (u)0; CALL(R_GV_DiffDirAbs);
+    r[3] = *(unsigned short *)((u)r[16] + 844);
+    r[2] = (int)r[3] < (int)r[2];
+    c = ((r[2] != 0)); r[2] = (u)0 + (u)0; if (c) goto L800c558c;
+    r[2] = (int)r[3] < (int)r[17];
+    c = ((r[2] != 0)); r[2] = (u)0 + (u)0; if (c) goto L800c558c;
+    r[4] = (u)r[18] + (u)0;
+    r[5] = (u)r[19] + (u)0; CALL(R_GV_DiffVec3);
+    r[3] = *(unsigned short *)((u)r[16] + 842);
+    r[3] = (int)r[3] < (int)r[2];
+    c = ((r[3] != 0)); r[5] = (u)r[18] + (u)0; if (c) goto L800c5588;
+    r[6] = (u)r[19] + (u)0;
+    r[3] = *(int *)((u)r[16] + 76);
+    r[2] = (u)0 + 2;
+    *(int *)((u)r[29] + 16) = r[2];
+    r[4] = *(int *)((u)r[3] + 8);
+    r[7] = (u)0 + 15; CALL(R_HZD_OnlineHazardCheck);
+    r[2] = (u)r[2] < (u)1; goto L800c558c;
+    L800c5588:;
+    r[2] = (u)0 + (u)0;
+    L800c558c:;
+    r[31] = *(int *)((u)r[29] + 48);
+    r[19] = *(int *)((u)r[29] + 44);
+    r[18] = *(int *)((u)r[29] + 40);
+    r[17] = *(int *)((u)r[29] + 36);
+    r[16] = *(int *)((u)r[29] + 32);
+    r[29] = (u)r[29] + 56; goto out;
+out:
+    RECOMP_RETURN;
+}

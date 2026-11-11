@@ -1,0 +1,64 @@
+extern char R_Takabe_JeepSystem[] __asm__("Takabe_JeepSystem");
+extern char R_s19b_jeep_liq_800D7114[] __asm__("s19b_jeep_liq_800D7114");
+extern char R_s19b_jeep_liq_800D7200[] __asm__("s19b_jeep_liq_800D7200");
+extern char R_s19b_jeep_liq_800D7330[] __asm__("s19b_jeep_liq_800D7330");
+extern char R_s19b_jeep_liq_800D77F0[] __asm__("s19b_jeep_liq_800D77F0");
+extern char R_s19b_jeep_liq_800D7BB0[] __asm__("s19b_jeep_liq_800D7BB0");
+extern char R_s19b_jeep_liq_800D8044[] __asm__("s19b_jeep_liq_800D8044");
+extern char R_s19b_rc_800D7468[] __asm__("s19b_rc_800D7468");
+extern char R_s19b_jeep_liq_800D6FB8[] __asm__("s19b_jeep_liq_800D6FB8");
+extern char R_s19b_jeep_liq_800D76F8[] __asm__("s19b_jeep_liq_800D76F8");
+extern char R_s19b_jeep_liq_800D7B3C[] __asm__("s19b_jeep_liq_800D7B3C");
+extern char R_s19b_jeep_liq_800D8014[] __asm__("s19b_jeep_liq_800D8014");
+int G_s19b_jeep_liq_800D7114(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19b_jeep_liq_800D7114");
+int G_s19b_jeep_liq_800D7114(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(24)
+    r[29] = (u)r[29] + -24;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[31];
+    r[2] = *(int *)((u)r[16] + 988);
+    t = r[2];  CALL((int (*)())t);
+    r[2] = *(int *)((u)r[16] + 1000);
+    t = r[2]; r[4] = (u)r[16] + (u)0; CALL((int (*)())t);
+    r[2] = *(int *)((u)r[16] + 1016);
+    t = r[2]; r[4] = (u)r[16] + (u)0; CALL((int (*)())t);
+    r[4] = (u)r[16] + (u)0; CALL(R_s19b_jeep_liq_800D6FB8);
+    r[2] = 0;
+    r[3] = *(int *)((u)r[2] + ((int)R_Takabe_JeepSystem + 64));
+    c = ((r[3] == 0)); r[2] = (u)0 + 6; if (c) goto L800d71a8;
+    c = ((r[3] != r[2])); r[2] = 0; if (c) goto L800d7180;
+    r[2] = (u)r[2] + (int)R_s19b_jeep_liq_800D7200; goto L800d71a4;
+    L800d7180:;
+    r[2] = (u)0 + 7;
+    c = ((r[3] != r[2])); r[2] = 0; if (c) goto L800d7194;
+    r[2] = (u)r[2] + (int)R_s19b_jeep_liq_800D7330; goto L800d71a4;
+    L800d7194:;
+    r[2] = (u)0 + 8;
+    c = ((r[3] != r[2])); r[2] = 0; if (c) goto L800d71a8;
+    r[2] = (u)r[2] + (int)R_s19b_rc_800D7468;
+    L800d71a4:;
+    *(int *)((u)r[16] + 976) = r[2];
+    L800d71a8:;
+    r[3] = *(int *)((u)r[16] + 976);
+    r[2] = 0;
+    r[2] = (u)r[2] + (int)R_s19b_jeep_liq_800D7114;
+    c = ((r[3] == r[2])); r[4] = (u)r[16] + (u)0; if (c) goto L800d71f0;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s19b_jeep_liq_800D77F0;
+    *(int *)((u)r[16] + 1004) = 0; CALL(R_s19b_jeep_liq_800D76F8);
+    r[4] = (u)r[16] + (u)0;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s19b_jeep_liq_800D7BB0; CALL(R_s19b_jeep_liq_800D7B3C);
+    r[4] = (u)r[16] + (u)0;
+    r[5] = 0;
+    r[5] = (u)r[5] + (int)R_s19b_jeep_liq_800D8044; CALL(R_s19b_jeep_liq_800D8014);
+    *(int *)((u)r[16] + 972) = 0;
+    L800d71f0:;
+    r[31] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 24; goto out;
+out:
+    RECOMP_RETURN;
+}

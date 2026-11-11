@@ -1,0 +1,74 @@
+extern char R_s19a_dat_800E0230[] __asm__("s19a_dat_800E0230");
+extern char R_s19a_dat_800E0CC8[] __asm__("s19a_dat_800E0CC8");
+extern char R_s19a_800D3D6C[] __asm__("s19a_800D3D6C");
+extern char R_s19a_800D53C0[] __asm__("s19a_800D53C0");
+extern char R_s19a_800D57F4[] __asm__("s19a_800D57F4");
+extern char R_s19a_800D59B8[] __asm__("s19a_800D59B8");
+extern char R_s19a_800D5E58[] __asm__("s19a_800D5E58");
+extern char R_s19a_800D5F50[] __asm__("s19a_800D5F50");
+extern char R_s19a_800D607C[] __asm__("s19a_800D607C");
+int G_s19a_800D6388(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19a_800D6388");
+int G_s19a_800D6388(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 24) = r[31];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[2] = *(unsigned short *)((u)r[17] + 2850);
+    r[2] = (u)r[2] + -4;
+    r[2] = (u)r[2] << 16;
+    r[3] = (int)r[2] >> 16;
+    r[2] = (u)r[3] < (u)10;
+    c = ((r[2] == 0)); r[2] = 0; if (c) goto L800d6430;
+    r[2] = (u)r[2] + (int)R_s19a_dat_800E0230;
+    r[3] = (u)r[3] << 2;
+    r[3] = (u)r[3] + (u)r[2];
+    r[2] = *(int *)((u)r[3] + 0);
+    t = r[2];  switch ((u)t) { case 0x800d63d8: goto L800d63d8; case 0x800d63e8: goto L800d63e8; case 0x800d63f8: goto L800d63f8; case 0x800d6408: goto L800d6408; case 0x800d6418: goto L800d6418; case 0x800d6428: goto L800d6428; case 0x800d6430: goto L800d6430; default: goto out; }
+    L800d63d8:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D5E58);
+    r[2] = 0; goto L800d6434;
+    L800d63e8:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D5F50);
+    r[2] = 0; goto L800d6434;
+    L800d63f8:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D607C);
+    r[2] = 0; goto L800d6434;
+    L800d6408:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D57F4);
+    r[2] = 0; goto L800d6434;
+    L800d6418:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D53C0);
+    r[2] = 0; goto L800d6434;
+    L800d6428:;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D59B8);
+    L800d6430:;
+    r[2] = 0;
+    L800d6434:;
+    r[16] = (u)r[2] + (int)R_s19a_dat_800E0CC8;
+    r[3] = *(int *)((u)r[16] + 32);
+    r[2] = (u)0 + 1;
+    c = ((r[3] != r[2]));  if (c) goto L800d6450;
+    r[4] = (u)r[17] + (u)0; CALL(R_s19a_800D3D6C);
+    L800d6450:;
+    r[2] = *(int *)((u)r[16] + 32);
+    c = ((r[2] != 0));  if (c) goto L800d6488;
+    r[2] = *(int *)((u)r[16] + 272);
+    r[2] = r[2] | 1;
+    *(int *)((u)r[16] + 272) = r[2];
+    r[2] = (u)0 + 6;
+    *(short *)((u)r[17] + 2850) = r[2];
+    r[2] = (u)0 + 3;
+    *(short *)((u)r[17] + 2848) = 0;
+    *(short *)((u)r[17] + 2852) = r[2];
+    *(int *)((u)r[17] + 2856) = 0;
+    L800d6488:;
+    r[31] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

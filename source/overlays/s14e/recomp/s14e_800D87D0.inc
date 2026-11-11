@@ -1,9 +1,9 @@
-extern char R__overlay_bss_objend[] __asm__("_overlay_bss_objend");
 extern char R_s14e_dword_800DD828[] __asm__("s14e_dword_800DD828");
 extern char R_s14e_dword_800DD82C[] __asm__("s14e_dword_800DD82C");
 extern char R_s14e_dword_800DD830[] __asm__("s14e_dword_800DD830");
 extern char R_s14e_dword_800DD834[] __asm__("s14e_dword_800DD834");
 extern char R_s14e_dword_800DDE3C[] __asm__("s14e_dword_800DDE3C");
+extern char R_s14e_dword_800DDE40[] __asm__("s14e_dword_800DDE40");
 int G_s14e_800D87D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800D87D0");
 int G_s14e_800D87D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
@@ -36,7 +36,7 @@ int G_s14e_800D87D0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = *(int *)((u)r[2] + (int)R_s14e_dword_800DDE3C);
     r[3] = (u)r[5] << 1;
     r[2] = (u)r[2] - (u)r[3];
-    *(int *)((u)r[4] + ((int)R__overlay_bss_objend + 4)) = r[2]; goto out;
+    *(int *)((u)r[4] + ((int)R_s14e_dword_800DDE40 + 4)) = r[2]; goto out;
 out:
     RECOMP_RETURN;
 }

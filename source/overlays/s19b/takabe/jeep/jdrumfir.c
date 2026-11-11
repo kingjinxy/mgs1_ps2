@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "strcode.h"
 #include "game/game.h"
 #include "takabe/prim.h"
@@ -162,4 +165,8 @@ void s19b_jdrumfir_800CA4A0(Work *work)
     prim->raise = 500;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jdrumfir_800CA564.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jdrumfir_800CA564.s")
+#endif

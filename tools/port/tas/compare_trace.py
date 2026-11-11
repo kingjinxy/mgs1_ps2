@@ -22,9 +22,12 @@ CONTROL = [(0, 8, "mov"), (8, 8, "rot"), (48, 2, "name"), (50, 2, "height"), (52
 
 def fix_clock(loops):
     """BizHawk's frame can end between gvd.c's GV_Time++ and its GV_Clock flip: that line has the old clock, between
-    two lines of the same one (14,030 and 15,110; a real hold, dgd.c's, shifts the parity instead)."""
+    two lines of the same one (14,030 and 15,110; a real hold, dgd.c's, shifts the parity instead). Not under
+    STATE_NOSLOW, where the same three lines are two holds in a row (146,757: a loop of 4 vertical blanks, then loops of
+    2, 1 and 1)."""
     for t, f in loops.items():
-        if t - 1 in loops and t + 1 in loops and loops[t - 1][2] == f[2] == loops[t + 1][2]:
+        if (t - 1 in loops and t + 1 in loops and loops[t - 1][2] == f[2] == loops[t + 1][2]
+                and not int(f[4], 16) & 0x20000000):
             f[2] = "1" if f[2] == "0" else "0"
 
 

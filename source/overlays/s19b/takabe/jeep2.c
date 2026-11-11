@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include "game/game.h"
 
@@ -15,7 +18,11 @@ typedef struct _Jeep2Work
     /* +0x2F4 */ OBJECT_NO_ROTS hl;
 } Jeep2Work;
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep2_800D667C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep2_800D667C.s")
+#endif
 
 void s19b_jeep2_800D6A70(Jeep2Work *work)
 {
@@ -37,7 +44,11 @@ void s19b_jeep2_800D6AD8(Jeep2Work *work)
     work->target = target;
     GM_SetTarget(target, TARGET_PUSH, NO_SIDE, (SVECTOR *)&s19b_dword_800C3A94);
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep2_800D6B18.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep2_800D6B18.s")
+#endif
 
 extern void s19b_jeep2_800D667C(Jeep2Work *work);
 extern int  s19b_jeep2_800D6B18(Jeep2Work *work, int arg0, int arg1);

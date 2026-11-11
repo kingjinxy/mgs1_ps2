@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "ps1align.h"
 #include "game/game.h"
 #include "libgcl/libgcl.h"
@@ -44,7 +47,7 @@ STATIC void draw_image(MenuPrim *prim, int x, int y, char shade, DG_TEX *tex)
     addPrim(prim->ot, poly);
 }
 
-static void exec_countdown_proc(void)
+STATIC void exec_countdown_proc(void)
 {
     GCL_ARGS args;
     long     data;
@@ -61,7 +64,11 @@ static void exec_countdown_proc(void)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_countdwn_800C3C90.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_countdwn_800C3C90.s")
+#endif
 void s19b_countdwn_800C3C90(MenuWork *, u_long *);
 
 int GetCountdownTime(void)

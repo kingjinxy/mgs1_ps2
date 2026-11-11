@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "game/game.h"
 
 typedef struct _JEEP_SYSTEM
@@ -75,7 +78,11 @@ extern SVECTOR s19b_dword_800C39F8;
 #define BODY_FLAG   ( DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND )
 #define WEAPON_FLAG ( DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND | DG_FLAG_ONEPIECE )
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_sne_800D47F8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_sne_800D47F8.s")
+#endif
 void s19b_jeep_sne_800D47F8(Work *); // Act
 
 void InitTarget(Work *work)
@@ -137,6 +144,14 @@ static int GetResources(Work *work, int name)
     work->hp = GM_Vitality;
 
     Takabe_JeepSystem.snake_body = body;
+#ifdef MGS_PORT
+    if (!Takabe_JeepSystem.control)
+    {   /* not set yet at the stage's start: the PS1 reads its RAM at 0 (BizHawk, loop 146,286) */
+        static const SVECTOR ps1_ram0 = { 3, 0, 0x0c50, 0x275a };
+        work->pos = ps1_ram0;
+    }
+    else
+#endif
     work->pos = Takabe_JeepSystem.control->mov;
     return 0;
 }
@@ -222,7 +237,11 @@ int s19b_jlamp2_800D50F4(Work *work)
     return 0;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jlamp2_800D519C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp2_800D519C.s")
+#endif
 extern void *NewJeepBullet(MATRIX *world, int side, int mode, int mode2);
 extern void AN_FamasFlash(MATRIX *world);
 extern void s19b_jblood_800C8070(MATRIX *world);
@@ -476,7 +495,11 @@ void s19b_jlamp2_800D5894(Work *work)
         work->target->class = 1;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jlamp2_800D596C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp2_800D596C.s")
+#endif
 extern void s19b_jlamp2_800D596C(void *work);
 
 void s19b_jlamp2_800D613C(void *work)

@@ -1,5 +1,5 @@
-extern char R__overlay_bss_obj[] __asm__("_overlay_bss_obj");
 extern char R_s07b_dword_800E4BA0[] __asm__("s07b_dword_800E4BA0");
+extern char R_s07b_dword_800E5BA0[] __asm__("s07b_dword_800E5BA0");
 extern char R_GCL_GetOption[] __asm__("GCL_GetOption");
 extern char R_GCL_NextStr[] __asm__("GCL_NextStr");
 extern char R_GCL_StrToInt[] __asm__("GCL_StrToInt");
@@ -31,7 +31,7 @@ int G_s07b_800C76C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(int *)((u)r[16] + 2216) = r[3];
     r[3] = 0;
     r[10] = (u)r[4] + (int)R_s07b_dword_800E4BA0;
-    r[9] = (u)r[3] + (int)R__overlay_bss_obj;
+    r[9] = (u)r[3] + (int)R_s07b_dword_800E5BA0;
     r[7] = LWL(((u)r[10] + 3), r[7]);
     r[7] = LWR(((u)r[10] + 0), r[7]);
     r[8] = *(signed char *)((u)r[10] + 4);
@@ -40,7 +40,7 @@ int G_s07b_800C76C8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     *(char *)((u)r[9] + 4) = r[8];
     r[7] = *(signed char *)((u)r[10] + 5);
     *(char *)((u)r[9] + 5) = r[7];
-    r[3] = (u)r[3] + (int)R__overlay_bss_obj;
+    r[3] = (u)r[3] + (int)R_s07b_dword_800E5BA0;
     *(int *)((u)r[16] + 2204) = r[3];
     r[3] = (u)r[16] + 2204;
     r[4] = (u)0 + 95;

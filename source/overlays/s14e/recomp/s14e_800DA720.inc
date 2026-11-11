@@ -1,5 +1,5 @@
 extern char R_DG_Ambient[] __asm__("DG_Ambient");
-extern char R__overlay_bss_objend[] __asm__("_overlay_bss_objend");
+extern char R_s14e_dword_800DDE40[] __asm__("s14e_dword_800DDE40");
 extern char R_DG_WriteObjPacketRGB[] __asm__("DG_WriteObjPacketRGB");
 extern char R_MulRotMatrix0[] __asm__("MulRotMatrix0");
 extern char R_ScaleMatrix[] __asm__("ScaleMatrix");
@@ -45,7 +45,7 @@ int G_s14e_800DA720(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[16] = (int)r[2] >> 8;
     L800da7c0:;
     r[2] = 0;
-    r[3] = *(int *)((u)r[2] + ((int)R__overlay_bss_objend + 4));
+    r[3] = *(int *)((u)r[2] + ((int)R_s14e_dword_800DDE40 + 4));
     r[2] = (u)r[16] << 1;
     r[7] = *(int *)((u)r[19] + 52);
     r[2] = (u)r[2] + (u)r[3];

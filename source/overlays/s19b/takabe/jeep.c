@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "game/game.h"
 
 typedef struct _Work
@@ -54,7 +57,11 @@ void s19b_jeep_800D21DC(int ang, MATRIX *mat, SVECTOR *out)
     ApplyMatrixSV(mat, &vec, out);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_800D2258.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_800D2258.s")
+#endif
 void s19b_jeep_800D2258(Work *work);
 
 void s19b_jeep_800D2790(Work *work)
@@ -81,7 +88,11 @@ void s19b_jeep_800D2800(Work *work)
     GM_SetPowerTarget(trg, POWER_DECREASE | POWER_EXPLODE, 2, 8, 0, &DG_ZeroVector);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_800D2880.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_800D2880.s")
+#endif
 int s19b_jeep_800D2880(Work *work, int, int);
 
 extern const char s19b_aJeepc_800DDD8C[]; // = "jeep.c"

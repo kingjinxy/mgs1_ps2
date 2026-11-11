@@ -1,0 +1,63 @@
+extern char R_GV_NearExp4P[] __asm__("GV_NearExp4P");
+int G_s19b_spark2_m_800DA0B4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19b_spark2_m_800DA0B4");
+int G_s19b_spark2_m_800DA0B4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[3] = 0x37a20000;
+    r[3] = r[3] | 7789;
+    r[2] = (u)r[5] << 12;
+    mul = (long long)(int)r[2] * (int)r[3]; hi_ = mul >> 32; lo_ = mul;
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 24) = r[18];
+    r[18] = (u)r[6] + (u)0;
+    *(int *)((u)r[29] + 28) = r[19];
+    r[19] = (u)r[7] + (u)0;
+    r[2] = (int)r[2] >> 31;
+    *(int *)((u)r[29] + 32) = r[31];
+    *(int *)((u)r[29] + 16) = r[16];
+    r[3] = *(unsigned short *)((u)r[17] + 16);
+    r[8] = hi_;
+    r[4] = (int)r[8] >> 8;
+    r[4] = (u)r[4] - (u)r[2];
+    r[2] = *(unsigned short *)((u)r[17] + 8);
+    r[3] = (u)r[3] + (u)r[4];
+    *(short *)((u)r[17] + 16) = r[3];
+    r[3] = *(unsigned short *)((u)r[17] + 32);
+    r[2] = (u)r[2] + (u)r[4];
+    *(short *)((u)r[17] + 8) = r[2];
+    r[2] = *(unsigned short *)((u)r[17] + 24);
+    r[3] = (u)r[3] + (u)r[4];
+    *(short *)((u)r[17] + 32) = r[3];
+    r[2] = (u)r[2] + (u)r[4];
+    *(short *)((u)r[17] + 24) = r[2];
+    r[3] = *(short *)((u)r[18] + 2);
+    r[2] = *(short *)((u)r[19] + 2);
+    c = (((int)r[5] >= 0)); r[3] = (u)r[3] - (u)r[2]; if (c) goto L800da13c;
+    r[3] = (u)0 - (u)r[3];
+    L800da13c:;
+    r[16] = (u)r[3] << 2;
+    r[4] = *(short *)((u)r[17] + 26);
+    r[5] = (u)r[16] + (u)0; CALL(R_GV_NearExp4P);
+    r[4] = *(short *)((u)r[17] + 34);
+    r[5] = (u)r[16] + (u)0;
+    *(short *)((u)r[17] + 26) = r[2]; CALL(R_GV_NearExp4P);
+    *(short *)((u)r[17] + 34) = r[2];
+    r[9] = LWL(((u)r[18] + 3), r[9]);
+    r[9] = LWR(((u)r[18] + 0), r[9]);
+    r[10] = LWL(((u)r[18] + 7), r[10]);
+    r[10] = LWR(((u)r[18] + 4), r[10]);
+    SWL(((u)r[19] + 3), r[9]);
+    SWR(((u)r[19] + 0), r[9]);
+    SWL(((u)r[19] + 7), r[10]);
+    SWR(((u)r[19] + 4), r[10]);
+    r[31] = *(int *)((u)r[29] + 32);
+    r[19] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

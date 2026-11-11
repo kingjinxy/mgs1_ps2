@@ -1,6 +1,9 @@
 #define DECLARE_NEWCHARA_PROTOS
 #include "charalst.h"
 
+#ifdef MGS_PORT
+#include "overlays/s19a/stage_table.inc"
+#else
 CHARA _StageCharacterEntries[] = {
     { 0x0fad, (NEWCHARA *)0x800c429c }, //  CHARA_MOTIONSE,
     { 0xfed1, (NEWCHARA *)0x8005d508 }, //  CHARA_PADVIBRATE,   /* chara パッド振動 */
@@ -24,3 +27,4 @@ CHARA _StageCharacterEntries[] = {
 
     CHARA_END
 };
+#endif

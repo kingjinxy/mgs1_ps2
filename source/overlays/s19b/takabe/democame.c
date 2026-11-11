@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "game/game.h"
 
 typedef struct _DemocameUnk
@@ -213,7 +216,11 @@ void s19b_democame_800DB790(Work *work, DemocameUnk *unk)
     work->field_80 = s19b_dword_800C3B00[index];
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_democame_800DB968.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_democame_800DB968.s")
+#endif
 void s19b_democame_800DB968(Work *);
 
 void s19b_democame_800DBD38(void)

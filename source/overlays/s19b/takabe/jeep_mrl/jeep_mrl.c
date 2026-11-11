@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "mgstype.h"
 #include <libgte.h>
 #include <rand.h>
@@ -92,11 +95,31 @@ void s19b_jeep_mrl_800D2D3C(Work *work)
     work->field_3CC++;
     work->field_3D4 = GV_NearSpeed(work->field_3D4, 0x190, 0xa);
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D2E78.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D2E78.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D32B4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D32B4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D368C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D368C.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D36A4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D36A4.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D37D0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D37D0.s")
+#endif
 
 extern void s19b_jeep_mrl_800D2D3C(Work *work);
 
@@ -140,7 +163,11 @@ int s19b_jeep_mrl_800D39F0(void)
     return count;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D3A54.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D3A54.s")
+#endif
 extern SVECTOR s19b_dword_800C39D0[];
 extern int s19b_dword_800C399C;
 extern int s19b_dword_800C3994;
@@ -158,8 +185,16 @@ void s19b_jeep_mrl_800D3CA8(Work *work, int arg1)
     NewPadVibration((unsigned char *)&s19b_dword_800C399C, 1);
     NewPadVibration((unsigned char *)&s19b_dword_800C3994, 0);
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D3D30.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D3D30.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_mrl_800D3E98.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D3E98.s")
+#endif
 
 void s19b_jeep_mrl_800D4098(Work *work)
 {

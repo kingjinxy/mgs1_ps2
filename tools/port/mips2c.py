@@ -15,7 +15,8 @@ names = {}
 for l in open('obj/asm_%s_lhs.map' % ovl, errors='ignore'):
     p = l.split()
     if len(p) == 2 and re.match(r'^[0-9A-F]{8}$', p[0]):
-        names.setdefault(int(p[0], 16), p[1])
+        a = int(p[0], 16)  # the linker's section marks last (s19b: draw_image was _overlay_text_obj, a stub)
+        if a not in names or names[a].startswith('_overlay_'): names[a] = p[1]
 keys = sorted(names)
 bin_ = open('build/%s.matching.bin' % ovl, 'rb').read()
 BASE = int(sys.argv[2], 16)  # the overlay's load address
@@ -288,6 +289,10 @@ print(sum(len(v) - 2 for v in parts.values()), 'extra entry points')
 # The PS1 goes through a NULL pointer here (BizHawk dumps): its RAM at 0 holds 03 00 00 00, a store there is lost. A
 # real PS2 faults (PCSX2: "TLB Miss").
 NULLS = {
+    's19b_jeep_gls_800CE400': [('    *(int *)((u)r[17] + -8) = r[2];\n    r[2] = *(int *)((u)r[2] + 16);\n',  # one of the
+                                # 13 models has no 'h' file: GV_GetCache gives NULL, the PS1's word at 0x10 is 0
+                                '    *(int *)((u)r[17] + -8) = r[2];\n'
+                                '    r[2] = r[2] ? *(int *)((u)r[2] + 16) : 0; /* mips2c.py NULLS */\n')],
     's18a_800D5738': [('    r[2] = *(unsigned char *)((u)r[2] + 0);\n',  # *s18a_dat_800E4354, NULL all through s18a
                        '    r[2] = r[2] ? *(unsigned char *)((u)r[2] + 0) : 3; /* mips2c.py NULLS */\n')],
     's18a_800D78B8': [('    r[3] = *(int *)((u)r[16] + 2164);\n    r[2] = *(int *)((u)r[3] + 36);\n    r[2] = r[2] | 256;\n'

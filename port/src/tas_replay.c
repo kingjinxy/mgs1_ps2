@@ -340,11 +340,12 @@ int Port_TasStreamMayEnd(void)
     {
         /* the recorded loop: the PS1's Nth stream through Act2 ended (line t + 1 going from 2 to 3 when its Act2
            destroyed the actor in t) before the port's Nth may, chained or not: a late port doesn't wait for the
-           next one's (loop 12,952) */
+           next one's (loop 12,952). From 2 to anything: line 147,390, a held loop's, sampled late, already has the
+           next stream's actor (1) */
         static int scanned, ps1_ends, ends;
         for (; scanned <= GV_Time + 1; scanned++)
         {
-            ps1_ends += scanned > 0 && mgs_tas_timeline[scanned * 8] == 3 && mgs_tas_timeline[(scanned - 1) * 8] == 2;
+            ps1_ends += scanned > 0 && mgs_tas_timeline[scanned * 8] != 2 && mgs_tas_timeline[(scanned - 1) * 8] == 2;
         }
         if (ps1_ends > ends)
         {

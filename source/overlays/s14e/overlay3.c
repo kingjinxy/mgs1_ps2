@@ -439,4 +439,8 @@ int SECTION(".bss") s14e_dword_800DDE30;
 int SECTION(".bss") s14e_dword_800DDE34;
 int SECTION(".bss") s14e_dword_800DDE38;
 int SECTION(".bss") s14e_dword_800DDE3C;
+#ifdef MGS_PORT
+int SECTION(".bss") s14e_dword_800DDE40[2]; // the code also uses the word after it, past the PS1's bss
+#else
 int SECTION(".bss") s14e_dword_800DDE40;
+#endif

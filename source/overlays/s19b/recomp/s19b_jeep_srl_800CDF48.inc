@@ -1,0 +1,61 @@
+extern char R_GM_GameStatus[] __asm__("GM_GameStatus");
+extern char R_Takabe_JeepSystem[] __asm__("Takabe_JeepSystem");
+extern char R_DG_FreeObjs[] __asm__("DG_FreeObjs");
+extern char R_DG_FreePreshade[] __asm__("DG_FreePreshade");
+extern char R_GM_StreamPlayStop[] __asm__("GM_StreamPlayStop");
+extern char R_s19b_jeep_gls_800CE5F8[] __asm__("s19b_jeep_gls_800CE5F8");
+int G_s19b_jeep_srl_800CDF48(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19b_jeep_srl_800CDF48");
+int G_s19b_jeep_srl_800CDF48(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(40)
+    r[29] = (u)r[29] + -40;
+    *(int *)((u)r[29] + 28) = r[19];
+    r[19] = (u)r[4] + (u)0;
+    *(int *)((u)r[29] + 20) = r[17];
+    r[17] = (u)0 + (u)0;
+    *(int *)((u)r[29] + 16) = r[16];
+    r[16] = (u)r[19] + (u)0;
+    *(int *)((u)r[29] + 32) = r[31];
+    *(int *)((u)r[29] + 24) = r[18];
+    L800cdf6c:;
+    r[4] = *(int *)((u)r[16] + 1140);
+    r[16] = (u)r[16] + 4;
+    r[17] = (u)r[17] + 1; CALL(R_s19b_jeep_gls_800CE5F8);
+    r[2] = (int)r[17] < 16;
+    c = ((r[2] != 0));  if (c) goto L800cdf6c;
+    r[17] = (u)0 + (u)0;
+    r[16] = (u)r[19] + (u)0;
+    L800cdf90:;
+    r[4] = *(int *)((u)r[16] + 460);
+    r[16] = (u)r[16] + 44;
+    r[17] = (u)r[17] + 1; CALL(R_s19b_jeep_gls_800CE5F8);
+    r[2] = (int)r[17] < 16;
+    c = ((r[2] != 0)); r[18] = (u)r[19] + (u)0; if (c) goto L800cdf90;
+    r[17] = (u)0 + (u)0;
+    L800cdfb0:;
+    r[16] = *(int *)((u)r[18] + 88);
+    r[18] = (u)r[18] + 28;
+    r[17] = (u)r[17] + 1;
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_FreePreshade);
+    r[4] = (u)r[16] + (u)0; CALL(R_DG_FreeObjs);
+    r[2] = (int)r[17] < 13;
+    c = ((r[2] != 0)); r[2] = 0; if (c) goto L800cdfb0;
+    *(int *)((u)r[2] + ((int)R_Takabe_JeepSystem + 120)) = 0; CALL(R_GM_StreamPlayStop);
+    r[4] = 0xdfff0000;
+    r[3] = *(int *)((u)r[19] + 3140);
+    r[2] = *(int *)((u)r[19] + 3136);
+    r[4] = r[4] | 65535;
+    *(int *)((u)r[3] + 0) = r[2];
+    r[3] = 0;
+    r[2] = *(int *)((u)r[3] + (int)R_GM_GameStatus);
+    r[31] = *(int *)((u)r[29] + 32);
+    r[19] = *(int *)((u)r[29] + 28);
+    r[18] = *(int *)((u)r[29] + 24);
+    r[17] = *(int *)((u)r[29] + 20);
+    r[16] = *(int *)((u)r[29] + 16);
+    r[2] = r[2] & r[4];
+    *(int *)((u)r[3] + (int)R_GM_GameStatus) = r[2];
+    r[29] = (u)r[29] + 40; goto out;
+out:
+    RECOMP_RETURN;
+}

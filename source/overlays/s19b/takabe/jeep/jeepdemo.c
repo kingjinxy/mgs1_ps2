@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "game/game.h"
 #include "game/camera.h"
 #include "takabe/cinema.h"
@@ -154,9 +157,21 @@ void s19b_jlamp_800D09DC(void)
     GM_SetSound(0x01FFFF0B, 0);
     GM_SetSound(0xFF0000FE, 0);
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jlamp_800D0A20.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0A20.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jlamp_800D0ABC.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0ABC.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jlamp_800D0C44.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0C44.s")
+#endif
 void s19b_jlamp_800D0CE0(void)
 {
     JlampState *state;
@@ -173,7 +188,11 @@ void s19b_jlamp_800D0CE0(void)
     GM_SetCameraCallbackFunc(1, s19b_jlamp_800D0C44);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jlamp_800D0D40.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0D40.s")
+#endif
 
 void s19b_jlamp_800D0FE4(int arg0)
 {

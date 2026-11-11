@@ -1,4 +1,4 @@
-extern char R__overlay_bss_objend[] __asm__("_overlay_bss_objend");
+extern char R_s14e_dword_800DDE40[] __asm__("s14e_dword_800DDE40");
 int G_s14e_800DA2A4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800DA2A4");
 int G_s14e_800DA2A4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
@@ -7,7 +7,7 @@ int G_s14e_800DA2A4(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[5] = (u)r[4] + (u)r[5];
     r[7] = *(int *)((u)r[5] + 84);
     c = ((r[7] == 0)); r[2] = 0; if (c) goto L800da3ac;
-    r[10] = *(int *)((u)r[2] + ((int)R__overlay_bss_objend + 4));
+    r[10] = *(int *)((u)r[2] + ((int)R_s14e_dword_800DDE40 + 4));
     c = ((r[4] == 0)); r[5] = (int)PSX_ADDR(0x1f800000); if (c) goto L800da3a8;
     L800da2c8:;
     r[8] = *(int *)((u)r[4] + 68);

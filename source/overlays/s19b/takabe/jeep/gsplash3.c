@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include "game/game.h"
 #include "strcode.h"
 
@@ -65,7 +68,11 @@ void MovePacks(SVECTOR *speeds, SVECTOR *vertices, int count)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_gsplash3_800D00F4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_gsplash3_800D00F4.s")
+#endif
 void s19b_gsplash3_800D00F4(SVECTOR *, SVECTOR *, int);
 
 void InitPacks(POLY_FT4 *packs0, POLY_FT4 *packs1, int n_packs, DG_TEX *tex)

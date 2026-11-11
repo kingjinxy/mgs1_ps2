@@ -1,0 +1,67 @@
+extern char R_s19b_dword_800DE5B0[] __asm__("s19b_dword_800DE5B0");
+extern char R_GV_VecDir2[] __asm__("GV_VecDir2");
+extern char R_SquareRoot0[] __asm__("SquareRoot0");
+extern char R_ratan2[] __asm__("ratan2");
+int G_s19b_jeep_gls_800CEB2C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s19b_jeep_gls_800CEB2C");
+int G_s19b_jeep_gls_800CEB2C(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+    RECOMP_ENTRY(32)
+    r[2] = 0;
+    r[6] = *(int *)((u)r[2] + (int)R_s19b_dword_800DE5B0);
+    r[29] = (u)r[29] + -32;
+    *(int *)((u)r[29] + 24) = r[16];
+    r[16] = (u)r[5] + (u)0;
+    *(int *)((u)r[29] + 28) = r[31];
+    r[3] = *(int *)((u)r[6] + 3180);
+    r[5] = 0x10620000;
+    r[2] = (u)r[3] << 1;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (u)r[2] << 2;
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (u)r[2] << 2;
+    r[2] = (u)r[6] + (u)r[2];
+    r[2] = *(short *)((u)r[2] + 440);
+    r[5] = r[5] | 19923;
+    r[2] = (u)r[2] + -2000;
+    r[2] = (u)r[4] - (u)r[2];
+    mul = (long long)(int)r[2] * (int)r[5]; hi_ = mul >> 32; lo_ = mul;
+    r[2] = (int)r[2] >> 31;
+    r[11] = hi_;
+    r[5] = (int)r[11] >> 8;
+    r[2] = (u)r[5] - (u)r[2];
+    r[3] = (u)r[3] + (u)r[2];
+    r[3] = r[3] & 15;
+    r[2] = (u)r[3] << 1;
+    r[2] = (u)r[2] + (u)r[3];
+    r[2] = (u)r[2] << 2;
+    r[2] = (u)r[2] - (u)r[3];
+    r[2] = (u)r[2] << 2;
+    r[6] = (u)r[6] + (u)r[2];
+    r[7] = LWL(((u)r[6] + 447), r[7]);
+    r[7] = LWR(((u)r[6] + 444), r[7]);
+    r[8] = LWL(((u)r[6] + 451), r[8]);
+    r[8] = LWR(((u)r[6] + 448), r[8]);
+    SWL(((u)r[29] + 19), r[7]);
+    SWR(((u)r[29] + 16), r[7]);
+    SWL(((u)r[29] + 23), r[8]);
+    SWR(((u)r[29] + 20), r[8]);
+    r[4] = (u)r[29] + 16; CALL(R_GV_VecDir2);
+    *(short *)((u)r[16] + 2) = r[2];
+    r[2] = *(short *)((u)r[29] + 16);
+    mul = (long long)(int)r[2] * (int)r[2]; hi_ = mul >> 32; lo_ = mul;
+    r[3] = lo_;
+    r[2] = *(short *)((u)r[29] + 20);
+    mul = (long long)(int)r[2] * (int)r[2]; hi_ = mul >> 32; lo_ = mul;
+    r[6] = lo_;
+    r[4] = (u)r[3] + (u)r[6]; CALL(R_SquareRoot0);
+    r[4] = *(short *)((u)r[29] + 18);
+    r[5] = (u)r[2] + (u)0;
+    r[4] = (u)0 - (u)r[4]; CALL(R_ratan2);
+    *(short *)((u)r[16] + 0) = r[2];
+    *(short *)((u)r[16] + 4) = 0;
+    r[31] = *(int *)((u)r[29] + 28);
+    r[16] = *(int *)((u)r[29] + 24);
+    r[29] = (u)r[29] + 32; goto out;
+out:
+    RECOMP_RETURN;
+}

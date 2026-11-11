@@ -1,4 +1,3 @@
-extern char R__overlay_bss_objend[] __asm__("_overlay_bss_objend");
 extern char R_s14e_dword_800DD828[] __asm__("s14e_dword_800DD828");
 extern char R_s14e_dword_800DD82C[] __asm__("s14e_dword_800DD82C");
 extern char R_s14e_dword_800DD830[] __asm__("s14e_dword_800DD830");
@@ -6,6 +5,7 @@ extern char R_s14e_dword_800DD834[] __asm__("s14e_dword_800DD834");
 extern char R_s14e_dword_800DD838[] __asm__("s14e_dword_800DD838");
 extern char R_s14e_dword_800DDE38[] __asm__("s14e_dword_800DDE38");
 extern char R_s14e_dword_800DDE3C[] __asm__("s14e_dword_800DDE3C");
+extern char R_s14e_dword_800DDE40[] __asm__("s14e_dword_800DDE40");
 int G_s14e_800D8698(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11) __asm__("s14e_800D8698");
 int G_s14e_800D8698(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
 {
@@ -22,7 +22,7 @@ int G_s14e_800D8698(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[3] = 0;
     r[2] = (u)r[2] + 1024;
     r[8] = 0;
-    *(int *)((u)r[3] + (int)R__overlay_bss_objend) = r[2];
+    *(int *)((u)r[3] + (int)R_s14e_dword_800DDE40) = r[2];
     r[3] = 0;
     r[2] = 0;
     r[7] = 0;
@@ -70,7 +70,7 @@ int G_s14e_800D8698(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[4] = (u)r[4] + -1;
     c = (((int)r[4] > 0)); r[6] = (u)r[6] + 2; if (c) goto L800d8784;
     r[2] = 0;
-    r[6] = *(int *)((u)r[2] + (int)R__overlay_bss_objend);
+    r[6] = *(int *)((u)r[2] + (int)R_s14e_dword_800DDE40);
     r[4] = (u)0 + 256;
     r[2] = (u)0 + 4096;
     L800d87a4:;
@@ -82,7 +82,7 @@ int G_s14e_800D8698(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int 
     r[2] = *(int *)((u)r[2] + (int)R_s14e_dword_800DDE3C);
     r[3] = (u)r[9] << 1;
     r[2] = (u)r[2] - (u)r[3];
-    *(int *)((u)r[4] + ((int)R__overlay_bss_objend + 4)) = r[2]; goto out;
+    *(int *)((u)r[4] + ((int)R_s14e_dword_800DDE40 + 4)) = r[2]; goto out;
 out:
     RECOMP_RETURN;
 }

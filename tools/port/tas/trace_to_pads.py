@@ -56,11 +56,26 @@ for line in (lzma.open(src, "rt") if src.endswith(".xz") else open(src)):
                  % src)
     rows.append(f)
 fix_clock({int(f[1]): f for f in rows})  # BizHawk's mid-loop samples: tas_replay.c copies the clock's holds
+
+
+def is_held(i):
+    """Line i is a held loop's (dgd.c's DG_HikituriFlag under STATE_NOSLOW: GV_Clock as the line before)."""
+    return (0 < i < len(rows) and int(rows[i][1]) == int(rows[i - 1][1]) + 1 and rows[i][2] == rows[i - 1][2]
+            and int(rows[i][4], 16) & 0x20000000 != 0)
+
+
 out, prev, raw, prev_raw, time, ticks, starts = bytearray(), None, bytearray(), None, {}, 0, 0
 for i, f in enumerate(rows):
     t = int(f[1])
     n = rows[i + 1] if i + 1 < len(rows) else f
     pads = bytes.fromhex(n[7])                      # the pads loop t's actors used
+    if is_held(i):                                   # no wait before the update: line t has them already (146,757:
+        pads = bytes.fromhex(f[7])                  # the release was on line t, and the port slowed a loop early)
+    elif is_held(i + 1):                             # never sampled: as the loop before, nothing pressed or released
+        pads = bytearray(bytes.fromhex(f[7]))
+        for o in range(0, 64, 16):
+            pads[o + 2:o + 8] = bytes(6)
+        pads = bytes(pads)
     if int(n[4], 16) & STATE_PADRELEASE or int(n[12]) > 0:
         # zeroed (GV_UpdatePadSystem): [2]/[3].status hold the result, not the controller, which a second update
         # in the loop needs (script.c's PadCmd at loop 5,110: the held buttons' release); mts's raw pads have it,

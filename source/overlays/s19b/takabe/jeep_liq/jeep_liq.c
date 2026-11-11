@@ -1,3 +1,6 @@
+#ifdef MGS_PORT
+#include "recomp.h"
+#endif
 #include <rand.h>
 
 #include "psxdefs.h"
@@ -107,11 +110,31 @@ extern int   s19b_jeep_mrl_800D399C(void);
 extern int   s19b_jeep_liq_800D771C(int center, int from, int to);
 extern void  s19b_jeep_liq_800D6FB8(Work *work);
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D6FB8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D6FB8.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D7114.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D7114.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D7200.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D7200.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D7330.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D7330.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D769C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D769C.s")
+#endif
 void s19b_jeep_liq_800D76B0(Work *work)
 {
     ((void (*)(void))work->field_3DC)();
@@ -130,7 +153,11 @@ void s19b_jeep_liq_800D76F8(Work *work, int arg1)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D771C.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D771C.s")
+#endif
 void s19b_jeep_liq_800D77F0(Work *work)
 {
     int v = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
@@ -464,8 +491,16 @@ void s19b_jeep_liq_800D81A8(Work *work)
         work->field_3D0 = (int)s19b_jeep_liq_800D7114;
     }
 }
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D8250.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D8250.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_jeep_liq_800D8420.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D8420.s")
+#endif
 void s19b_spark2_m_800D8620(Work *work)
 {
     GM_FreeTarget(work->f8E4);
@@ -511,7 +546,11 @@ void s19b_spark2_m_800D8724(Work *work, int arg1, int arg2)
     NewJeepBlood(&m, arg2, &obj->world);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800D87A4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D87A4.s")
+#endif
 extern int s19b_spark2_m_800D87A4(Work *work);
 
 int s19b_spark2_m_800D88D8(Work *work)
@@ -853,7 +892,11 @@ void s19b_spark2_m_800D90A8(Work *work, int mode)
     }
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800D9148.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9148.s")
+#endif
 
 void s19b_spark2_m_800D91DC(Work *work, int mode)
 {
@@ -1046,7 +1089,11 @@ void s19b_spark2_m_800D964C(Work *work)
     s19b_spark2_m_800D9558(work);
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800D9680.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9680.s")
+#endif
 extern int s19b_spark2_m_800D9680(Work *work);
 
 void s19b_spark2_m_800D9704(Work *work)
@@ -1223,7 +1270,11 @@ void s19b_spark2_m_800D9A74(Work *work)
     work->f918 += 1;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800D9AA8.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9AA8.s")
+#endif
 extern void s19b_spark2_m_800D9AA8(Work *work);
 
 void s19b_spark2_m_800D9B38(Work *work)
@@ -1276,6 +1327,18 @@ void s19b_spark2_m_800D9C04(Work *work)
     work->f920 += 1;
 }
 
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800D9C90.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9C90.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800D9EC0.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9EC0.s")
+#endif
+#ifdef MGS_PORT
+#include "overlays/s19b/recomp/s19b_spark2_m_800DA0B4.inc"
+#else
 #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800DA0B4.s")
+#endif

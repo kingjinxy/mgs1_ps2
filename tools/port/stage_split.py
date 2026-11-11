@@ -104,15 +104,24 @@ def built(lo, hi_):  # addresses the code in [lo, hi_) builds with lui + addiu/o
     return out
 # the rodata begins at the first address past the last frame setup that the code refers to (a word there can
 # look like a jr ra: s08b)
-last = max(BASE + 4 * i for i, w in enumerate(W) if w >> 16 == 0x27BD and w & 0x8000)
+# (a frame setup that something calls or names: s19a's file ends in stale code, after its bss's zeros)
+last = max(a for a in seeds | calls | built(tstart, tend) if not a & 3 and is_prologue(a))
 after = [a for a in built(tstart, tend) if last < a < tend]
 if after:
     tend = min(tend, (min(after) // 4) * 4)
-while True:  # functions before the first called one, reached only by address (s18a: an actor's act and die)
+    # back to the last return: the first strings may have no reference (s19a's "countdwn.c")
+    tend = max(a for a in range(tstart, tend, 4) if at(a) == 0x03E00008) + 8
+while True:  # functions before the first called one with a frame: reached only by address (s18a: an actor's act
+    # and die), or a called leaf with no frame (s19a's 800C3958)
     low = [a for a in built(tstart, tend) if BASE <= a < tstart and not a & 3 and is_prologue(a)]
+    low += [a for a in calls if a < tstart and any(W[i] >> 26 == 3 and W[i] & 0x3FFFFFF == (a >> 2) & 0x3FFFFFF
+                                                   for i in range((tstart - BASE) // 4, (tend - BASE) // 4))]
     if not low: break
     tstart = min(low)
 code = range((tstart - BASE) // 4, (tend - BASE) // 4)
+# from here, only the code's own calls (s19a: jal-like words in the stale code cut two functions in the middle)
+calls = {a for a in ((((BASE + 4 * i) & 0xF0000000) | ((W[i] & 0x3FFFFFF) << 2)) for i in code if W[i] >> 26 == 3)
+         if BASE <= a < END}
 
 # jump tables: a table address built (lui + addiu, as mips2c.py reads it) shortly before a jr through a register;
 # its entries stay PS1 addresses (mips2c.py switches on them), every other data word into code is a function

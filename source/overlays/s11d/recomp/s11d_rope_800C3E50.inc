@@ -1,5 +1,5 @@
 extern char R_GM_CurrentMap[] __asm__("GM_CurrentMap");
-extern char R__overlay_bss_obj[] __asm__("_overlay_bss_obj");
+extern char R_s11d_dword_800D1F78[] __asm__("s11d_dword_800D1F78");
 extern char R_s11d_dword_800D1F7C[] __asm__("s11d_dword_800D1F7C");
 extern char R_s11d_dword_800D1F80[] __asm__("s11d_dword_800D1F80");
 extern char R_DG_SetPos2[] __asm__("DG_SetPos2");
@@ -66,7 +66,7 @@ int G_s11d_rope_800C3E50(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     r[2] = *(unsigned short *)((u)r[29] + 50);
     r[3] = *(unsigned short *)((u)r[29] + 58);
     r[16] = 0;
-    *(int *)((u)r[16] + (int)R__overlay_bss_obj) = 0;
+    *(int *)((u)r[16] + (int)R_s11d_dword_800D1F78) = 0;
     r[2] = (u)r[2] + 496;
     r[3] = (u)r[3] + -496;
     *(short *)((u)r[29] + 50) = r[2];
@@ -93,7 +93,7 @@ int G_s11d_rope_800C3E50(int a0, int a1, int a2, int a3, int a4, int a5, int a6,
     r[5] = (u)r[2] + (u)0; CALL(R_s11d_rope_800C3D50);
     r[5] = (u)r[2] + (u)0; goto L800c3fb4;
     L800c3fb0:;
-    *(int *)((u)r[16] + (int)R__overlay_bss_obj) = r[2];
+    *(int *)((u)r[16] + (int)R_s11d_dword_800D1F78) = r[2];
     L800c3fb4:;
     c = ((r[5] != 0)); r[4] = (u)r[18] + (u)0; if (c) goto L800c3fe4;
     r[5] = (u)r[29] + 48;
